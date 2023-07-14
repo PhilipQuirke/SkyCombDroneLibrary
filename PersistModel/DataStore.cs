@@ -440,7 +440,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public (ExcelWorksheet, int) EndRow(string dataTabName)
+        public (ExcelWorksheet?, int) EndRow(string dataTabName)
         {
             int lastDataRow = 0;
             var dataWs = ReferWorksheet(dataTabName);

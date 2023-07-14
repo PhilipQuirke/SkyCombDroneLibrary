@@ -167,13 +167,13 @@ namespace SkyCombDrone.DroneModel
                 throw ThrowException("VideoModel.DurationSecToString", ex);
             }
         }
-        public static string DurationMsToString(double durationMs, int ndp = 2)
+        public static string DurationMsToString(double durationMs, int ndp)
         {
             return DurationSecToString(durationMs / 1000.0, ndp);
         }
-        public string DurationMsToString()
+        public string DurationMsToString(int ndp)
         {
-            return DurationMsToString(DurationMs);
+            return DurationMsToString(DurationMs, ndp);
         }
 
 
@@ -216,7 +216,7 @@ namespace SkyCombDrone.DroneModel
                 ShortFileName() + ", " +
                 ImageWidth.ToString() + "x" +
                 ImageHeight + "pxs, " +
-                DurationMsToString() + "s, " +
+                DurationMsToString(MillisecondsNdp) + "s, " +
                 Fps.ToString("0.0").TrimEnd('0').TrimEnd('.') + "fps";
         }
 
