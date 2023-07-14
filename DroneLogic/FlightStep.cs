@@ -1,0 +1,951 @@
+﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+using SkyCombDrone.CommonSpace;
+using SkyCombDrone.DroneModel;
+using SkyCombGround.CommonSpace;
+using SkyCombGround.GroundSpace;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+
+// Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
+namespace SkyCombDrone.DroneLogic
+{
+
+    // FlightStep data is derived from FlightSection data. It contains additional data sources & calculated data.
+    public class FlightStep : FlightStepModel
+    {
+        // The corresponding FlightSection.
+        // There is a 1 to 1 relationship between Sections and Steps.
+        public FlightSection FlightSection { get; }
+
+        public FlightLeg FlightLeg { get; set; } = null;
+
+
+
+        public FlightStep(FlightSection flightSection, List<string> settings = null) : base(flightSection, settings)
+        {
+            FlightSection = flightSection;
+            FlightLeg = null;
+        }
+
+
+        // Smooth the Section data, based on a window of "NumSmoothSteps" Sections, to give Step data.
+        // Calculates FlightStep smoothed attributes AltitudeM 
+        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
+        // chapter on NumSmoothSteps for the rationale for this function.
+        public bool CalculateSettings_SmoothAltitude(int numSmoothSteps, FlightSections sections)
+        {
+            // If flight stepId duration is too great don't try to smooth it. This happens very rarely.
+            if (this.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
+                return false;
+
+
+            int halfSmoothSteps = numSmoothSteps / 2;
+            Assert(halfSmoothSteps >= 1, "CalculateSettings_SmoothAltitudeM: No smoothing");
+
+            int nearbyAltitudeCount = 0;
+            float nearbyAltitudeM = 0;
+
+            // Collect data from the previous and next Sections around thisStep.
+            var thisSectionId = FlightSection.SectionId;
+            for (int j = thisSectionId - halfSmoothSteps; j <= thisSectionId + halfSmoothSteps; j++)
+            {
+                if (sections.Sections.TryGetValue(j, out FlightSection nearbySection))
+                {
+                    // If a "large gap" stepId is nearby then don't smooth this step.
+                    // This "averaging" function assumes an even number of "sensible" neighbours before AND after this step
+                    if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
+                        return false;
+
+                    if (nearbySection.AltitudeM != UnknownValue)
+                    {
+                        nearbyAltitudeM += nearbySection.AltitudeM;
+                        nearbyAltitudeCount++;
+                    }
+                }
+            }
+
+            if (nearbyAltitudeCount > 0)
+                AltitudeM = nearbyAltitudeM / nearbyAltitudeCount;
+
+            return true;
+        }
+
+
+        // Smooth the Section data, based on a window of "NumSmoothSteps" Sections, to give Step data.
+        // Calculates FlightStep smoothed attributes LocationM, YawDegs, PitchDegs.
+        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
+        // chapter on NumSmoothSteps for the rationale for this function.
+        public bool CalculateSettings_SmoothLocationYawPitch(int numSmoothSteps, FlightSections sections)
+        {
+            // If flight stepId duration is too great don't try to smooth it. This happens very rarely.
+            if (this.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
+                return false;
+
+            int halfSmoothSteps = numSmoothSteps / 2;
+            Assert(halfSmoothSteps >= 1, "CalculateSettings_SmoothLocationYawPitch: No smoothing");
+
+            int nearbyLocationCount = 0;
+            float nearbyNorthingM = 0;
+            float nearbyEastingM = 0;
+
+            int nearbyPosYawCount = 0;
+            float nearbyPosYawDegs = 0;
+            int nearbyNegYawCount = 0;
+            float nearbyNegYawDegs = 0;
+
+            int nearbyPitchCount = 0;
+            float nearbyPitchDegs = 0;
+
+            // Collect data from the previous and next Sections around thisStep.
+            var thisSectionId = FlightSection.SectionId;
+            for (int j = thisSectionId - halfSmoothSteps; j <= thisSectionId + halfSmoothSteps; j++)
+            {
+                if (sections.Sections.TryGetValue(j, out FlightSection nearbySection))
+                {
+                    // If a "large gap" stepId is nearby then don't smooth this step.
+                    // This "averging" function assumes an even number of "sensible" neighbours before AND after this step
+                    if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
+                        return false;
+
+                    if (nearbySection.GlobalLocation.Specified && (nearbySection.LocationM != null))
+                    {
+                        nearbyNorthingM += nearbySection.LocationM.NorthingM;
+                        nearbyEastingM += nearbySection.LocationM.EastingM;
+                        nearbyLocationCount++;
+                    }
+
+                    var theYawDegs = nearbySection.YawDeg;
+                    if (theYawDegs != UnknownValue)
+                    {
+                        // Summing then averaging positive (-166) degrees with negative (+174) degree
+                        // yaws due to a jump between sections gives a bad (near zero) answer.
+                        if (theYawDegs > 0)
+                        {
+                            nearbyPosYawDegs += theYawDegs;
+                            nearbyPosYawCount++;
+                        }
+                        else
+                        {
+                            nearbyNegYawDegs += theYawDegs;
+                            nearbyNegYawCount++;
+                        }
+                    }
+
+                    var thePitchDegs = nearbySection.PitchDeg;
+                    if (thePitchDegs != UnknownValue)
+                    {
+                        // Mixing just positive and just negative rads here is fine
+                        nearbyPitchDegs += thePitchDegs;
+                        nearbyPitchCount++;
+                    }
+                }
+            }
+
+            if (nearbyLocationCount > 0)
+                LocationM = new(nearbyNorthingM / nearbyLocationCount, nearbyEastingM / nearbyLocationCount);
+
+            if ((nearbyPosYawCount > 0) && (nearbyNegYawCount > 0))
+            {
+                // Do not try to smooth the yaw
+                // PQR TODO Could do better when yaw transitions from +ve to -ve
+            }
+            else if (nearbyNegYawCount > 0)
+                YawDeg = nearbyNegYawDegs / nearbyNegYawCount;
+            else if (nearbyPosYawCount > 0)
+                YawDeg = nearbyPosYawDegs / nearbyPosYawCount;
+
+            if (nearbyPitchCount > 0)
+                PitchDeg = nearbyPitchDegs / nearbyPitchCount;
+
+            return true;
+        }
+
+
+        // Estimate the ground elevation (in metres) of this flight step
+        public void CalculateSettings_DemM(GroundData groundData)
+        {
+            if ((groundData != null) && (groundData.DemGrid != null))
+                DemM = groundData.DemGrid.GetElevation(LocationM);
+        }
+
+
+        // Estimate the surface elevation (in metres) of this flight step
+        public void CalculateSettings_DsmM(GroundData groundData)
+        {
+            if ((groundData != null) && (groundData.DsmGrid != null))
+                DsmM = groundData.DsmGrid.GetElevation(LocationM);
+        }
+
+
+        // Calculate StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
+        public void CalculateSettings_StepAndImageVelocityMps(FlightStep prevStep)
+        {
+            StepVelocityMps = new();
+            ImageVelocityMps = new();
+
+            if ((prevStep != null) &&
+               (prevStep.YawDeg != UnknownValue) &&
+               (YawDeg != UnknownValue))
+            {
+                var stepSpeed = SpeedMps();
+                // Yaw gives the drone's current direction of travel.
+                // If yaw = 0° and the camera is looking to the ground (i.e.nadir), then top of the image points to the north.
+                StepVelocityMps.Value.X = (float)(stepSpeed * Math.Sin(YawRad));
+                StepVelocityMps.Value.Y = (float)(stepSpeed * Math.Cos(YawRad));
+
+                // If drone forward velocity is very low, and yaw is significantly non-zero,
+                // then PoV vector should be horizontal.
+                if ((stepSpeed < 0.3) && // 30cm per second
+                   (DeltaYawDeg > 11)) // 11 degrees
+                    ImageVelocityMps = new VelocityF(stepSpeed, 0);
+
+                else if ((stepSpeed < 0.3) && // 30cm per second
+                        (DeltaYawDeg < -11)) // 11 degrees
+                    ImageVelocityMps = new VelocityF(-stepSpeed, 0); // PQR TODO is sign correct?
+
+                else
+                    // Assuming the camera is pointing "forward"
+                    // from PoV the movement is all "upwards",
+                    // as the video image "moves" downwards.
+                    ImageVelocityMps = new VelocityF(
+                        (float)(stepSpeed * Math.Sin(DeltaYawRad)),
+                        (float)(stepSpeed * Math.Cos(DeltaYawRad)));
+            }
+        }
+
+
+        // Use a weighted average of DroneToGroundAltStartSyncM and DroneToGroundAltEndSyncM
+        // to improve the AltitudeM accuracy.
+        public void CalculateSettings_AltitudeM_ApplyOnGroundAt(
+            float droneToGroundAltStartSyncM,
+            float droneToGroundAltEndSyncM,
+            float maxStepId)
+        {
+            AltitudeM +=
+                droneToGroundAltStartSyncM * ((maxStepId - StepId) / maxStepId) +
+                droneToGroundAltEndSyncM * (StepId / maxStepId);
+        }
+
+
+        // Vertical distance from drone to ground
+        public float DistanceDown()
+        {
+            return
+            AltitudeM
+            + (FlightLeg != null ? FlightLeg.FixAltitudeM : 0)
+            - DemM;
+        }
+
+
+        // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
+        // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
+        public void CalculateSettings_InputImageCenter(VideoModel videoData)
+        {
+            // Can only calculate this if we can compare the ground elevation & drone altitude.
+            if (DemM == UnknownValue)
+                InputImageCenter = new();
+            else
+            {
+                // Vertical distance from drone to ground
+                double downVertM = DistanceDown();
+
+                // Distance across ground to center of image area - in the direct of flight.
+                // Note that the drone camera gimbal automatically compensates for
+                // PitchDeg & RollDeg so we can ignore them.
+
+                // The actual camera area imaged depends on CameraDownDeg.
+                float degreesToVerticalForward = FlightSection.Drone.Config.CameraToVerticalForwardDeg;
+                double groundForwardM = downVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
+
+                // The unitForwardVelocity is the direction of flight - based on drone yaw
+                var unitForwardVelocity = StepVelocityMps.GetUnitVector();
+
+                // Working out the center of the image area
+                InputImageCenter = LocationM.Clone();
+
+                InputImageCenter.NorthingM += (float)(groundForwardM * unitForwardVelocity.Value.Y);
+                InputImageCenter.EastingM += (float)(groundForwardM * unitForwardVelocity.Value.X);
+
+                if (videoData != null)
+                {
+                    // InputImageSizeM
+                    double viewLength = Math.Sqrt(downVertM * downVertM + groundForwardM * groundForwardM);
+                    double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
+                    float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
+
+                    int videoHeight = videoData.ImageHeight;
+                    int videoWidth = videoData.ImageWidth;
+                    InputImageSizeM = new(imageXSizeM, imageXSizeM * videoHeight / videoWidth);
+                }
+            }
+        }
+
+
+        // Calculate InputImageArea corners
+        // Area covered by the step's video image (may be forward of drone's location).
+        public (RelativeLocation topLeft, RelativeLocation topRight, RelativeLocation bottomRight, RelativeLocation bottomLeft)
+            Calculate_InputImageArea_Corners()
+        {
+            // A drone yaw of 0 represents north
+            var unitVector = StepVelocityMps.GetUnitVector();
+            var cosYaw = unitVector.Value.X;
+            var sinYaw = unitVector.Value.Y;
+
+            var halfWidth = InputImageSizeM.Value.X / 2.0;
+            var halfHeight = InputImageSizeM.Value.Y / 2.0;
+
+            // Rotate the image area by the drone's yaw.
+            RelativeLocation inputImageTopLeft = new(
+                (float)(sinYaw * (-halfHeight) + cosYaw * (+halfWidth)),
+                (float)(cosYaw * (-halfHeight) - sinYaw * (+halfWidth)));
+            RelativeLocation inputImageTopRight = new(
+                (float)(sinYaw * (+halfHeight) + cosYaw * (+halfWidth)),
+                (float)(cosYaw * (+halfHeight) - sinYaw * (+halfWidth)));
+            RelativeLocation inputImageBottomRight = new(
+                (float)(sinYaw * (+halfHeight) + cosYaw * (-halfWidth)),
+                (float)(cosYaw * (+halfHeight) - sinYaw * (-halfWidth)));
+            RelativeLocation inputImageBottomLeft = new(
+                (float)(sinYaw * (-halfHeight) + cosYaw * (-halfWidth)),
+                (float)(cosYaw * (-halfHeight) - sinYaw * (-halfWidth)));
+
+            return (
+                inputImageTopLeft.Translate(InputImageCenter),
+                inputImageTopRight.Translate(InputImageCenter),
+                inputImageBottomRight.Translate(InputImageCenter),
+                inputImageBottomLeft.Translate(InputImageCenter)
+            );
+        }
+
+
+        // Calculate physical location of this feature based on:
+        // 1) the POSITION in the image of the feature (given by horizontalFraction, verticalFraction, say 0.4, 0.1)
+        // 2) the CENTER of the drone physical field of vision (given by FlightStep.InputImageCenter, say 240m Northing, 78m Easting )
+        // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
+        // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
+        // This is the key translation from IMAGE to PHYSICAL coordinate system. 
+        public RelativeLocation CalcImageFeatureLocationM(RelativeLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
+        {
+            if (InputImageSizeM == null)
+                return null;
+
+            if (initialCalc)
+            {
+                FailIf((horizontalFraction == 0) && (verticalFraction == 0), "CalcImageFeatureLocationM: Logic error 1");
+                FailIf((horizontalFraction < -0.02) || (verticalFraction < -0.02), "CalcImageFeatureLocationM: Logic error 2");
+                FailIf((horizontalFraction > 1.02) || (verticalFraction > 1.02), "CalcImageFeatureLocationM: Logic error 3");
+            }
+
+            // Physical offset of the object within the drone field of vision InputImageSizeM.
+            // This is NOT rotated to drone direction of flight.
+            // The horizontalFraction incorporates the Sine of the objects horizontal angle from the center of the image.
+            // The verticalFraction incorporates the Sine of the objects vertical angle from the center of the image.
+            PointF objectInImageLocnM = new(
+                (float)(InputImageSizeM.Value.X * (horizontalFraction - 0.5)),
+                (float)(InputImageSizeM.Value.Y * (verticalFraction - 0.5)));
+
+            // Physical offset of the object within the drone physical field of vision.
+            // Rotated to match the flight direction of the drone.
+            RelativeLocation objectLocationRotatedM =
+                new(RelativeLocation.RotatePoint(objectInImageLocnM, Math.PI - YawRad));
+
+            // With multiple blocks per step we translate by the block delta
+            var answer = InputImageCenter.Translate(deltaBlockLocnM);
+
+            // Add the rotated physical offset of object to the center of the drone physical field of vision
+            return answer.Translate(objectLocationRotatedM.Negate());
+        }
+
+
+        // After the location of this step has been refined, 
+        // recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
+        public void CalculateSettings_RefineLocationData(VideoModel videoData, FlightStep prevStep)
+        {
+            if (prevStep != null)
+            {
+                CalculateSettings_LinealM(prevStep);
+
+                // Calculates StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
+                CalculateSettings_StepAndImageVelocityMps(prevStep);
+
+                // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
+                // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps.
+                CalculateSettings_InputImageCenter(videoData);
+            }
+        }
+
+
+        public void AssertGood()
+        {
+            Assert(LocationM != null, "FlightStep.AssertGood: No LocationM");
+            Assert(StepVelocityMps != null, "FlightStep.AssertGood: No VelocityMps");
+            Assert(InputImageCenter != null, "FlightStep.AssertGood: No InputImageCenter");
+        }
+    };
+
+
+    public class FlightStepList : SortedList<int, FlightStep>
+    {
+
+        public FlightStepList GetLegSteps(int legId)
+        {
+            FlightStepList answer = new();
+
+            foreach (var theStep in this)
+                if (theStep.Value.LegId == legId)
+                    answer.Add(theStep.Value.StepId, theStep.Value);
+
+            return answer;
+        }
+
+
+        // The ground image area viewed by each step depends on FixAltitudeM
+        public void CalculateSettings_ApplyFixAltitudeM(VideoModel videoData)
+        {
+            foreach (var theStep in this)
+                theStep.Value.CalculateSettings_InputImageCenter(videoData);
+        }
+
+
+        // Summarise various attributes of the specified range of Steps
+        public void CalculateSettings_Summarise(FlightStepSummaryModel summary, int fromStepId, int toStepId)
+        {
+            summary.ResetSteps();
+
+            int numSteps = 0;
+            int numSpeedSteps = 0;
+            float sumSpeedMps = 0;
+            foreach (var thisStepPair in this)
+            {
+                var thisStep = thisStepPair.Value;
+
+                if (thisStep.StepId < fromStepId ||
+                    thisStep.StepId > toStepId)
+                    continue;
+                numSteps++;
+
+                summary.SummariseStep(thisStep);
+
+                var thisSpeedMps = thisStep.SpeedMps();
+                if (thisSpeedMps != Constants.UnknownValue)
+                {
+                    numSpeedSteps++;
+                    sumSpeedMps += thisSpeedMps;
+                }
+            }
+
+            if (numSpeedSteps > 0)
+                summary.AvgSpeedMps = sumSpeedMps / numSpeedSteps;
+        }
+
+
+        // Summarise various attributes of all Steps
+        public void CalculateSettings_Summarise(FlightStepsModel summary, FlightSections sections)
+        {
+            CalculateSettings_Summarise(summary, sections.MinTardisId, sections.MaxTardisId);
+
+            summary.AssertGoodRevision(sections);
+        }
+    }
+
+
+    // FlightSteps is a list of FlightStep and other summary data (based on the FlightInputList and ground data)
+    public class FlightSteps : FlightStepsModel
+    {
+        Drone Drone { get; }
+        FlightSections Sections { get; }
+
+        // The list of flight steps sorted in time order.
+        // The index is the number of SectionMinMs units since the flight started.
+        // The index sequence will be 1, 2, 3, etc. Occassional gaps do occur - but they are rare, and only if the drone flight log has time gaps.
+        public FlightStepList Steps = new();
+
+
+        public FlightSteps(Drone drone, List<string> settings = null)
+            : base(drone.FlightSections.FileName, drone.Config.SmoothSectionSize, settings)
+        {
+            Drone = drone;
+            Sections = drone.FlightSections;
+            FileName = drone.FlightSections.FileName;
+        }
+
+
+        // Return FlightStep.DemM minus FlightStep.AltitudeM
+        private float CalcDemLessInputAltitude(GroundData ground, int stepId)
+        {
+            var theCalc = Steps[stepId];
+            if ((theCalc != null) &&
+                (theCalc.AltitudeM != UnknownValue) &&
+                (theCalc.DemM != UnknownValue))
+            {
+                var droneToGroundDeltaM = theCalc.DemM - theCalc.AltitudeM;
+                if (Math.Abs(droneToGroundDeltaM) > ground.DemGrid.ElevationAccuracyM)
+                    return droneToGroundDeltaM;
+            }
+
+            return 0;
+        }
+
+
+        // Drone altitudes are often measured using barometic pressure, which is inaccurate.
+        // See if we can improve the accuracy of the input drone altitude data.          
+        public void CalculateSettings_OnGroundAt(GroundData ground)
+        {
+            try
+            {
+                OnGroundAtFixStartM = 0;
+                OnGroundAtFixEndM = 0;
+
+                // If the drone flight video record started &/or ended when the drone was on the ground
+                // then the ground DEM and drone Altitude should match (within the ground.ElevationAccuracyM error).
+                // If they don't we assume the ground DEM us more accurate, and correct the drone altitude.
+                switch (Drone.Config.OnGroundAt)
+                {
+                    case OnGroundAtEnum.Start:
+                        // Drone was on ground at start of the flight
+                        OnGroundAtFixStartM = CalcDemLessInputAltitude(ground, Sections.MinTardisId);
+                        OnGroundAtFixEndM = OnGroundAtFixStartM;
+                        break;
+
+                    case OnGroundAtEnum.End:
+                        // Drone was on ground at end of the flight
+                        OnGroundAtFixEndM = CalcDemLessInputAltitude(ground, Sections.MaxTardisId);
+                        OnGroundAtFixStartM = OnGroundAtFixEndM;
+                        break;
+
+                    case OnGroundAtEnum.Both:
+                        // Drone was on ground at the start and the end of the flight.   
+                        OnGroundAtFixStartM = CalcDemLessInputAltitude(ground, Sections.MinTardisId);
+                        OnGroundAtFixEndM = CalcDemLessInputAltitude(ground, Sections.MaxTardisId);
+                        break;
+
+                    case OnGroundAtEnum.Neither:
+                    case OnGroundAtEnum.Auto:
+                        // If the minimum drone altitude is below the minimum ground DEM then correct it.
+                        // This case has been seen for a drone flight from a sea beach where the drone MinAltitude was NEGATIVE 56 metres!
+                        if ((MinDemM != UnknownValue) && (Sections.MinAltitudeM < MinDemM))
+                        {
+                            OnGroundAtFixStartM = MinDemM - Sections.MinAltitudeM;
+                            OnGroundAtFixEndM = OnGroundAtFixStartM;
+                        }
+                        break;
+                }
+
+
+                // If OnGroundAt data gave altitude delats then apply them to all steps 
+                if (HasOnGroundAtFix)
+                    foreach (var thisStep in Steps)
+                        thisStep.Value.CalculateSettings_AltitudeM_ApplyOnGroundAt(
+                            OnGroundAtFixStartM,
+                            OnGroundAtFixEndM,
+                            Sections.MaxTardisId);
+            }
+            catch (Exception ex)
+            {
+                throw ThrowException("FlightSteps.CalculateSettings_OnGroundAt", ex);
+            }
+        }
+
+
+        // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM.
+        // Depends on AltitudeM, DemM & StepVelocityMps.
+        public void CalculateSettings_CameraDownDeg(VideoData videoData)
+        {
+            foreach (var thisStep in Steps)
+                thisStep.Value.CalculateSettings_InputImageCenter(videoData);
+        }
+
+
+        // Copy the raw data from FlightSection to FlightStep 
+        // This includes TardisId aka SectionId aka StepId
+        public void CopySectionToStepSettings()
+        {
+            foreach (var thisStep in Steps)
+                thisStep.Value.CopyTardis(thisStep.Value.FlightSection);
+        }
+
+
+        // Calculate Step.AltitudeM by smoothing raw Section.AltitudeM data 
+        public void CalculateSettings_SmoothAltitudeM()
+        {
+            foreach (var thisStep in Steps)
+            {
+                FlightStep theStep = thisStep.Value;
+
+                if ((NumSmoothSteps >= 2) && (Steps.Count > NumSmoothSteps + 1))
+                    theStep.CalculateSettings_SmoothAltitude(NumSmoothSteps, Sections);
+            }
+        }
+
+
+        // Calculate Step.LocationM, LinealM, SumLinealM, Yaw, DeltaYaw & Pitch by smoothing raw Section data 
+        public void CalculateSettings_SmoothLocationYawPitch()
+        {
+            FlightStep prevStep = null;
+            foreach (var thisStep in Steps)
+            {
+                FlightStep theStep = thisStep.Value;
+
+                // Smooth the data  
+                bool sensibleStep = true;
+                if ((NumSmoothSteps >= 2) && (Steps.Count > NumSmoothSteps + 1))
+                    sensibleStep = theStep.CalculateSettings_SmoothLocationYawPitch(NumSmoothSteps, Sections);
+
+                if (sensibleStep)
+                {
+                    theStep.CalculateSettings_LinealM(prevStep);
+                    theStep.CalculateSettings_DeltaYawDeg(prevStep);
+                }
+
+                // Smoothing should not generate values outside the original envelope
+                float epsilon = 0.1f;
+                Assert(theStep.LocationM.NorthingM <= Sections.MaxLocationM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
+                Assert(theStep.LocationM.EastingM <= Sections.MaxLocationM.EastingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.EastingM");
+                Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
+                Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
+                Assert(theStep.SpeedMps() <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStep.SpeedMps() + " > " + Sections.MaxSpeedMps);
+                Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: DeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
+                Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: PitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
+
+                prevStep = theStep;
+            }
+        }
+
+
+        // User has edited the drone settings including CameraDownDeg & OnGroundAt
+        public void CalculateSettings_ConfigHasChanged(GroundData groundData, VideoData videoData)
+        {
+            // Calculate Step.AltitudeM by smoothing Section.AltitudeM
+            CalculateSettings_SmoothAltitudeM();
+
+            // Modify Step.AltitudeM using OnGroundAt info
+            CalculateSettings_OnGroundAt(groundData);
+
+            // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM. Depends on AltitudeM, DemM & StepVelocityMps
+            CalculateSettings_CameraDownDeg(videoData);
+
+            // Update Altitude summary figures etc
+            Steps.CalculateSettings_Summarise(this, Sections);
+        }
+
+
+        // From the provided data, calculate this objects summary settings (without using leg information).
+        public void CalculateSettings(VideoData videoData, GroundData groundData)
+        {
+            try
+            {
+                // Add new Steps to match Sections one to one.
+                foreach (var thisSection in Sections.Sections)
+                    AddStep(new FlightStep(thisSection.Value));
+
+                // Copy raw Section settings to Steps
+                CopySectionToStepSettings();
+
+                // Calculate Location, LinealM, SumLinealM, Yaw, DeltaYaw, Pitch. May smooth (average) raw data 
+                CalculateSettings_SmoothLocationYawPitch();
+
+                // Calculate Step.AltitudeM by smoothing Section.AltitudeM
+                CalculateSettings_SmoothAltitudeM();
+
+                FlightStep prevStep = null;
+                foreach (var thisStep in Steps)
+                {
+                    FlightStep theStep = thisStep.Value;
+
+                    theStep.CalculateSettings_DemM(groundData);
+                    theStep.CalculateSettings_DsmM(groundData);
+
+                    // Calculates StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
+                    theStep.CalculateSettings_StepAndImageVelocityMps(prevStep);
+
+                    prevStep = theStep;
+                }
+
+                // Modify Step.AltitudeM using OnGroundAt info
+                CalculateSettings_OnGroundAt(groundData);
+
+                // Calculate InputImageCenter and InputImageSizeM.
+                // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
+                CalculateSettings_CameraDownDeg(videoData);
+
+                Steps.CalculateSettings_Summarise(this, Sections);
+            }
+            catch (Exception ex)
+            {
+                throw ThrowException("FlightSteps.CalculateSettings", ex);
+            }
+        }
+
+
+        // For the Steps in each leg, refine the location settings.
+        // A leg has ~ constant altitude, in a ~ constant direction for a significant duration 
+        // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant.         
+        // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
+        public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs)
+        {
+            if ((legs != null) && (legs.Legs.Count > 0))
+                foreach (var leg in legs.Legs)
+                {
+                    // A leg is has ~ constant altitude, in a ~ constant direction for a significant duration
+                    // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant. 
+                    // Time interval between Steps can also vary.
+
+                    // Calculate the summary of this leg's steps before smoothing them
+                    Steps.CalculateSettings_Summarise(this, leg.MinStepId, leg.MaxStepId);
+                    FlightStepSummaryModel rawSummary = new();
+                    rawSummary.CopySteps(this);
+
+                    // If the drone is travelling at a reasonable speed then it has reasonable inertia,
+                    // and the speed should be reasonably smooth, with avg and max speed being similar. 
+                    // Edge case, in DJI_0198 leg 5 is the drone slowing from 5.4mps to 0mps with avg of 1.3m/s
+                    if (rawSummary.AvgSpeedMps >= 1.5 && rawSummary.MaxSpeedMps < 2 * rawSummary.AvgSpeedMps)
+                    {
+                        // Use simple linear smoothing.
+                        var minStep = Steps[leg.MinStepId];
+                        var maxStep = Steps[leg.MaxStepId];
+                        var minLocn = minStep.LocationM;
+                        var maxLocn = maxStep.LocationM;
+                        var deltaLocn = new RelativeLocation(
+                            maxLocn.NorthingM - minLocn.NorthingM,
+                            maxLocn.EastingM - minLocn.EastingM);
+                        float deltaTime = maxStep.SumTimeMs - minStep.SumTimeMs;
+
+                        FlightStep prevStep = null;
+                        for (int theStepId = leg.MinStepId + 1; theStepId <= leg.MaxStepId - 1; theStepId++)
+                        {
+                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            if (theStep == null)
+                                continue;
+
+                            var fraction = (theStep.SumTimeMs - minStep.SumTimeMs) / deltaTime;
+                            Assert(fraction > 0, "CalculateSettings_RefineLocationData: Fraction logic 1");
+                            Assert(fraction < 1, "CalculateSettings_RefineLocationData: Fraction logic 2");
+
+                            theStep.LocationM = new(
+                                minLocn.NorthingM + deltaLocn.NorthingM * fraction,
+                                minLocn.EastingM + deltaLocn.EastingM * fraction);
+
+                            // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
+                            theStep.CalculateSettings_RefineLocationData(videoData, prevStep);
+
+                            prevStep = theStep;
+                        }
+                    }
+                    else
+                    {
+                        // Use cubic spline smoothing for more complex edge cases
+                        int arraySize = 0;
+                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
+                        {
+                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            if ((theStep != null) && (theStep.LocationM != null))
+                                arraySize++;
+                        }
+
+                        float[] timeRaw = new float[arraySize];
+                        float[] northingRaw = new float[arraySize];
+                        float[] eastingRaw = new float[arraySize];
+
+                        int arrayIndex = 0;
+                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
+                        {
+                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            if ((theStep != null) && (theStep.LocationM != null))
+                            {
+                                timeRaw[arrayIndex] = theStep.SumTimeMs;
+                                northingRaw[arrayIndex] = theStep.LocationM.NorthingM;
+                                eastingRaw[arrayIndex] = theStep.LocationM.EastingM;
+                                arrayIndex++;
+                            }
+                        }
+
+                        // Calculate a cubic spline smoothing of the Leg.
+                        // We maintain the time sequence, as we have frames at these time intervals.
+                        CubicSpline cubicSpline = new();
+                        var northingSmooth = cubicSpline.FitAndEval(timeRaw, northingRaw, timeRaw);
+                        var eastingSmooth = cubicSpline.FitAndEval(timeRaw, eastingRaw, timeRaw);
+
+
+                        // Recalculate the Steps Locations, Distance Traveled and Speed
+                        arrayIndex = 0;
+                        Steps.TryGetValue(leg.MinStepId - 1, out FlightStep prevStep);
+                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
+                        {
+                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            if ((theStep != null) && (theStep.LocationM != null))
+                            {
+                                theStep.LocationM.NorthingM = northingSmooth[arrayIndex];
+                                theStep.LocationM.EastingM = eastingSmooth[arrayIndex];
+
+                                // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
+                                theStep.CalculateSettings_RefineLocationData(videoData, prevStep);
+
+                                arrayIndex++;
+                                prevStep = theStep;
+                            }
+                        }
+
+                        // As last leg step may have moved, update (non-Location data) one step past the leg.
+                        Steps.TryGetValue(leg.MaxStepId + 1, out FlightStep nextStep);
+                        if ((nextStep != null) && (prevStep != null))
+                            // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
+                            nextStep.CalculateSettings_RefineLocationData(videoData, prevStep);
+                    }
+
+                    // Calculate the summary of this leg's steps after smoothing them
+                    Steps.CalculateSettings_Summarise(this, leg.MinStepId, leg.MaxStepId);
+                    // Check that this smoothing has not changed the data envelope 
+                    AssertGoodStepRevision(rawSummary);
+                }
+
+            // Calculate the summary of all (leg and non-leg) steps.
+            // Check that it is a reasonable revision of the sections.
+            Steps.CalculateSettings_Summarise(this, Sections);
+        }
+
+
+        // Maximum width of the image in meters
+        public float MaxImageWidthM()
+        {
+            float answer = 0;
+
+            foreach (var step in Steps.Values)
+                if (step.InputImageSizeM != null)
+                    answer = Math.Max(answer, step.InputImageSizeM.Value.X);
+
+            return answer;
+        }
+
+
+        public void AssertGood()
+        {
+            Assert(FileName != "", "FlightSteps.AssertGood: No FileName");
+            Assert(Steps.Count != 0, "FlightSteps.AssertGood: No Steps");
+        }
+
+
+        // Add a FlightStep linked to a FlightSection 
+        public void AddStep(FlightStep theSection)
+        {
+            Steps.Add(theSection.FlightSection.TardisId, theSection);
+        }
+
+
+        // The flight data sometimes has a gap or say 1.5s without video or flight data.
+        // So if asked for an "out of range" stepId, we return the closest stepId.
+        public FlightStep StepIdToNearestFlightStep(int stepID)
+        {
+            FlightStep answer;
+
+            if (Steps.TryGetValue(stepID, out answer))
+                return answer;
+
+            // If we didn't find a stepId at the exact time, find the closest stepId
+            for (int i = 1; i <= 8; i++)
+            {
+                if (Steps.TryGetValue(stepID + i, out answer))
+                    return answer;
+
+                if (Steps.TryGetValue(stepID - i, out answer))
+                    return answer;
+            }
+
+            // We have now tried -8 to +8 slots, or 17 * SectionMinMs milliseconds = span of 4.25 seconds. Give up.
+            return null;
+        }
+
+
+        // Return the FlightStep that is closest to the specified flightMs
+        public FlightStep MsToNearestFlightStep(int flightMs)
+        {
+            if (Steps.Count == 0)
+                return null;
+
+            if (flightMs <= Steps[0].SumTimeMs)
+                return Steps[0];
+
+            if (flightMs >= Steps[Sections.MaxTardisId].SumTimeMs)
+                return Steps[Sections.MaxTardisId];
+
+            FlightStep nearestStep = null;
+            int nearestDelta = int.MaxValue;
+
+            // PQR ToDo Increase speed of this loop by bisection of the sorted list of steps
+            for (int stepId = MinStepId; stepId <= MaxStepId; stepId++)
+            {
+                FlightStep thisStep;
+                if (Steps.TryGetValue(stepId, out thisStep))
+                {
+                    var thisDelta = Math.Abs(thisStep.SumTimeMs - flightMs);
+                    if (thisDelta < nearestDelta)
+                    {
+                        nearestStep = thisStep;
+                        nearestDelta = thisDelta;
+                    }
+                    else if (thisDelta > nearestDelta)
+                        break;
+                }
+            }
+
+            return nearestStep;
+        }
+
+
+        // Return the FlightStep with a SumTimeMs at or lower than flightMs
+        public FlightStep FlightStepAtOrBeforeFlightMs(FlightStep hintStep, int flightMs)
+        {
+            int hintId = hintStep.StepId;
+
+            FlightStep answer;
+            // We've seen flights with 1.8s gaps between steps.
+            for (int i = 8; i >= -8; i--)
+                if (Steps.TryGetValue(hintId + i, out answer))
+                    if (answer.SumTimeMs <= flightMs)
+                        return answer;
+
+            return null;
+        }
+
+
+        // Return the approximate FlightStep with the specified flightMs or a lower StartTime
+        // Try not to use this function.
+        public FlightStep RoughFlightStepBeforeFlightMs(int flightMs)
+        {
+            if (Steps.Count == 0)
+                return null;
+
+            if (flightMs < Steps[0].SumTimeMs)
+                return Steps[0];
+
+            var stepId = FlightSection.MsToRoughFlightSectionID(flightMs);
+
+            FlightStep answer;
+            for (int i = 0; i <= 4; i++)
+                if (Steps.TryGetValue(stepId - i, out answer))
+                {
+                    int answerMs = answer.SumTimeMs;
+                    if (answerMs <= flightMs)
+                        return answer;
+                }
+
+            return null;
+        }
+
+
+        // Returns percentage of FlightSteps where the drone AltitudeM is less than ground DemM.
+        // A good answer is 0. A bad OnGroundAt value can mean a value of say 45%
+        public float PercentAltitudeLessThanDem()
+        {
+            if (Steps.Count == 0)
+                return 0.0f;
+
+            int badSteps = 0;
+            foreach (var step in Steps)
+                if (step.Value.DemM - step.Value.AltitudeM > 1) // Allow 1m error in AltitudeM
+                    badSteps++;
+
+            return 100 * badSteps / Steps.Count;
+        }
+    }
+}

@@ -1,0 +1,197 @@
+﻿using SkyCombGround.CommonSpace;
+using SkyCombGround.GroundSpace;
+using System;
+using System.Collections.Generic;
+
+
+// Models are used in-memory and to persist/load data to/from the datastore
+namespace SkyCombDrone.DroneModel
+{
+    // Raw input data about a flight section
+    // Contains all useful attributes provided in drone flight data logs e.g. when and where it took place
+    public class FlightSectionModel : TardisModel
+    {
+        // SectionMinMs is the minimum time between two FlightSections. 
+        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
+        // and section "Drone Overall Accuracy".
+        // The application SAMPLES the flight log data every so often, rather than
+        // storing all flight log data. This setting controls this sampling.
+        // TardisID is based purely on the number of SectionMinMs from the start of the video.
+        // Frequently there will be a single gap in the TardisID sequence in the FlightSections list.
+        // In rare cases, there are multiple steps gap in the TardisID sequence. A gap of 7 sections has been seen.
+        public const int SectionMinMs = 250; // Quarter of a second
+
+        // Sometimes there is a gap in the flight log data & a Section has a duration of > 1900 Ms.
+        // If flight section/step duration is too great don't try to smooth it
+        public const int MaxSensibleSectionDurationMs = SectionMinMs * 2;
+
+
+        public int SectionId { get { return TardisId; } }
+
+
+        // Drone location in longitude and latitude
+        public GlobalLocation GlobalLocation { get; set; }
+
+
+        public FlightSectionModel(int sectionId) : base(sectionId)
+        {
+            GlobalLocation = new();
+        }
+
+        // One-based settings index values. Must align with GetSettings procedure below
+        public const int LongitudeSetting = FirstFreeSetting;
+        public const int LatitudeSetting = FirstFreeSetting + 1;
+
+
+
+        // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
+        public override DataPairList GetSettings()
+        {
+            var answer = base.GetSettings();
+            answer[0].Key = "Section";
+
+            answer.Add("Longitude", GlobalLocation.Longitude, Constants.LatLongNdp);
+            answer.Add("Latitude", GlobalLocation.Latitude, Constants.LatLongNdp);
+
+            return answer;
+        }
+
+
+        // Load this object's settings from strings (loaded from a datastore)
+        // This function must align to the above GetSettings function.
+        public override void LoadSettings(List<string> settings)
+        {
+            base.LoadSettings(settings);
+
+            GlobalLocation.Longitude = double.Parse(settings[14]);
+            GlobalLocation.Latitude = double.Parse(settings[15]);
+        }
+
+
+        // Calculate the zero-based SectionID based purely on the number of milliseconds from the start of the flight log
+        // For a drone video, this is a rough approximation. Try to avoid using this function.
+        public static int MsToRoughFlightSectionID(int milliseconds)
+        {
+            return (int)(milliseconds / SectionMinMs);
+        }
+    }
+
+
+
+    // Raw input data about a flight 
+    public class FlightSectionsModel : TardisSummaryModel
+    {
+        // The file name containing the flight data
+        public string FileName { get; set; }
+        // The vendor and drone type that the Flight/Video data is from.
+        public string FileType { get; set; } = UnknownString;
+
+        // Is this a thermal (aka IR) flight data (and thermal video)? Else an optical (aka visible-light) video.
+        public bool Thermal { get; set; } = false;
+
+
+        // Minimum local (not UTC) date/time from the flight data
+        public DateTime MinDateTime { get; set; }
+        // Maximum local (not UTC) date/time from the flight data
+        public DateTime MaxDateTime { get; set; }
+
+
+        // The Min/MaxGlobalLocation values represent a box encompassing the locations the drone flew over.
+        // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
+        // so the Min/MaxGlobalLocation box is commonly a larger area than the area the drone flew over.
+        public GlobalLocation MinGlobalLocation { get; set; }
+        public GlobalLocation MaxGlobalLocation { get; set; } // Value is always very similar to MinGlobalLocation
+
+
+        public FlightSectionsModel(List<string> settings = null) : base("Section")
+        {
+            ResetTardis();
+
+            if (settings != null)
+                LoadSettings(settings);
+        }
+
+
+        // Describe the drone min / max altitude (in meters above sealevel)
+        public string DescribeAltitude()
+        {
+            string minStr = MinAltitudeM.ToString("0");
+            string maxStr = MaxAltitudeM.ToString("0");
+
+            string answer = "Drone Altitude: " + minStr;
+
+            if (minStr != maxStr)
+                answer += "-" + maxStr;
+
+            answer += "m";
+
+            return answer;
+        }
+
+
+        public string ShortFileName()
+        {
+            if (FileName == "")
+                return "";
+
+            var answer = FileName.Substring(FileName.LastIndexOf('\\') + 1);
+
+            // Uppercase filename and lowercase suffix for consistency
+            return
+                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
+                answer.Substring(answer.LastIndexOf('.')).ToLower();
+        }
+
+
+        public string DescribePath()
+        {
+            return string.Format("Drone Path: {0} x {1}m",
+                NorthingRangeM().ToString("0"),
+                EastingRangeM().ToString("0"));
+        }
+
+
+        // Get the object's settings as datapairs (e.g. for saving to a datastore)
+        public override DataPairList GetSettings()
+        {
+            var answer = base.GetSettings();
+
+            answer.Add("File Name", ShortFileName());
+            answer.Add("File Type", FileType);
+            answer.Add("Thermal", Thermal);
+            answer.Add("Min Date Time", MinDateTime.ToString(DateFormat));
+            answer.Add("Max Date Time", MaxDateTime.ToString(DateFormat));
+            answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
+            answer.Add("Max Global Location", (MaxGlobalLocation != null ? MaxGlobalLocation.ToString() : ""));
+
+            if (MinGlobalLocation != null)
+            {
+                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MinGlobalLocation.Latitude, MinGlobalLocation.Longitude);
+                answer.Add("Min NZTM M", new RelativeLocation((float)northingM, (float)eastingM).ToString());
+            }
+            if (MaxGlobalLocation != null)
+            {
+                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MaxGlobalLocation.Latitude, MaxGlobalLocation.Longitude);
+                answer.Add("Max NZTM M", new RelativeLocation((float)northingM, (float)eastingM).ToString());
+            }
+
+            return answer;
+        }
+
+
+        // Load this object's settings from strings (loaded from a datastore)
+        // This function must align to the above GetSettings function.
+        public override void LoadSettings(List<string> settings)
+        {
+            base.LoadSettings(settings);
+
+            FileName = settings[23];
+            FileType = settings[24];
+            Thermal = (settings[25].ToLower() == "true");
+            MinDateTime = DateTime.Parse(settings[26]);
+            MaxDateTime = DateTime.Parse(settings[27]);
+            MinGlobalLocation = new GlobalLocation(settings[28]);
+            MaxGlobalLocation = new GlobalLocation(settings[29]);
+        }
+    }
+}
