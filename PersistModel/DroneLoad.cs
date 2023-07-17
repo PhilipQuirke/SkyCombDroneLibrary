@@ -131,7 +131,7 @@ namespace SkyCombDrone.PersistModel
                         var sectionId = ConfigBase.StringToNonNegInt(sectionIdString);
 
                         // Each step must have a corresponding section.
-                        FlightSection section = null;
+                        FlightSection? section = null;
                         flightSections.Sections.TryGetValue(sectionId, out section);
                         Assert(section != null, "DroneLoad.FlightSteps: Missing section for id=" + sectionId);
 

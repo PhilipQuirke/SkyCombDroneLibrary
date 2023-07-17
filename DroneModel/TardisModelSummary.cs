@@ -21,8 +21,8 @@ namespace SkyCombDrone.DroneModel
         // Northing/Easting is a symmetrical local coordinate system
         // That is 1 unit Northing is the same distance as 1 unit Easting.
         // Origin is bottom left of box 
-        public RelativeLocation MinLocationM { get; set; }
-        public RelativeLocation MaxLocationM { get; set; }
+        public RelativeLocation? MinLocationM { get; set; }
+        public RelativeLocation? MaxLocationM { get; set; }
 
 
         // The minimum / maximum TimeMS (aka duration) of any one flight step

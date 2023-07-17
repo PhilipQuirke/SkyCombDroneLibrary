@@ -232,10 +232,10 @@ namespace SkyCombDrone.DroneLogic
     public abstract class TwoVideos : Constants
     {
         // The primary input video to analyse. Prefer thermal to optical video.
-        public VideoData InputVideo { get; set; } = null;
+        public VideoData? InputVideo { get; set; } = null;
 
         // The secondary video data (if any) to display analysis results on. Prefer optical to thermal. 
-        public VideoData DisplayVideo { get; set; } = null;
+        public VideoData? DisplayVideo { get; set; } = null;
 
 
         public bool HasInputVideo { get { return InputVideo != null; } }

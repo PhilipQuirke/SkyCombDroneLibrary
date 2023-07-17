@@ -29,19 +29,19 @@ namespace SkyCombDrone.DroneModel
         // Center of the step's video IMAGE (not drone) location. May be meters forward of drone location.
         // Accuracy: Depends on drone height (poor) and ground elevation (good) accuracy.
         // Used in ModelCombFeature via FlightStep.CalcImageFeatureLocationM
-        public RelativeLocation InputImageCenter { get; set; }
+        public RelativeLocation? InputImageCenter { get; set; }
 
         // InputImageSizeM:  
         // The width & height (in metres) of the thermal image of the ground (aka drone thermal field of vision)
         // Depends on the drone's height above the ground, the camera FOV and camera down angle.
         // We need the image dimensions to calculate the NorthingM/EastingM "delta" of an significant object in the image. 
         // Accuracy: Depends on drone height (poor) and ground elevation (good) accuracy.
-        public AreaF InputImageSizeM { get; set; }
+        public AreaF? InputImageSizeM { get; set; }
 
 
         // Drone absolute velocity and direction as vector. Vector length is SpeedMps
         // The drone absolute (compass) direction of travel IS relevant.
-        public VelocityF StepVelocityMps { get; set; }
+        public VelocityF? StepVelocityMps { get; set; }
 
 
         // ImageVelocityMps: "Point of view" velocity and turn rate (in drone Mps).
@@ -51,10 +51,10 @@ namespace SkyCombDrone.DroneModel
         //  - The drone CHANGE in direction from previous step IS relevant.
         //  - The drone absolute direction of travel is NOT relevant.
         //  - The drone height above ground is NOT directly relevant (but is relevant if used to calculate GroundVelocityMps).
-        protected VelocityF ImageVelocityMps { get; set; }
+        protected VelocityF? ImageVelocityMps { get; set; }
 
 
-        public FlightStepModel(FlightSectionModel flightSection, List<string> settings = null) : base(flightSection.TardisId)
+        public FlightStepModel(FlightSectionModel flightSection, List<string>? settings = null) : base(flightSection.TardisId)
         {
             if (settings != null)
                 LoadSettings(settings);
@@ -162,7 +162,7 @@ namespace SkyCombDrone.DroneModel
         public bool HasOnGroundAtFix { get { return (OnGroundAtFixStartM != 0 || OnGroundAtFixEndM != 0); } }
 
 
-        public FlightStepsModel(string fileName, int numSmoothSteps, List<string> settings = null)
+        public FlightStepsModel(string fileName, int numSmoothSteps, List<string>? settings = null)
         {
             FileName = fileName;
             NumSmoothSteps = numSmoothSteps;

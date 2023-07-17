@@ -33,7 +33,7 @@ namespace SkyCombDrone.DroneModel
 
 
 
-        public FlightLegModel(List<string> settings = null) : base("Step")
+        public FlightLegModel(List<string>? settings = null) : base("Step")
         {
             if (settings != null)
                 LoadSettings(settings);

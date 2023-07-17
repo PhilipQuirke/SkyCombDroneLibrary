@@ -16,7 +16,7 @@ namespace SkyCombDrone.DroneLogic
     // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
     public class FlightLeg : FlightLegModel
     {
-        public FlightLeg(List<string> settings = null) : base(settings)
+        public FlightLeg(List<string>? settings = null) : base(settings)
         {
         }
 
@@ -119,9 +119,9 @@ namespace SkyCombDrone.DroneLogic
 
                 List<string> whyEnd = new();
 
-                FlightStep startStep = null;
-                FlightStep prevStep = null;
-                FlightStep endStep = null;
+                FlightStep? startStep = null;
+                FlightStep? prevStep = null;
+                FlightStep? endStep = null;
                 int startKey = UnknownValue;
                 int endKey = UnknownValue;
                 int legDurationMs = 0;
@@ -247,7 +247,7 @@ namespace SkyCombDrone.DroneLogic
 
                 Legs.Clear();
 
-                FlightLeg thisLeg = null;
+                FlightLeg? thisLeg = null;
                 foreach (var thisStep in steps.Steps)
                 {
                     if (thisStep.Value.LegId > 0)
@@ -292,7 +292,7 @@ namespace SkyCombDrone.DroneLogic
 
                     while (true)
                     {
-                        if (steps.Steps.TryGetValue(minStepIdNew, out FlightStep theStep))
+                        if (steps.Steps.TryGetValue(minStepIdNew, out FlightStep? theStep))
                         {
                             if (theStep.FlightSection.SumTimeMs >= minStepTimeNew)
                             {

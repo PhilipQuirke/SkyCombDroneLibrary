@@ -59,7 +59,7 @@ namespace SkyCombDrone.DroneLogic
         public SortedList<int, FlightSection> Sections { get; }
 
 
-        public FlightSections(List<string> settings = null) : base(settings)
+        public FlightSections(List<string>? settings = null) : base(settings)
         {
             Sections = new();
         }
@@ -97,7 +97,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate % overlap of two FlightDatas
         // Used to determine if the two FlightDatas relate to same physical flight (one optical and one thermal).
-        public static int PercentOverlap(FlightSections flight1, FlightSections flight2)
+        public static int PercentOverlap(FlightSections? flight1, FlightSections? flight2)
         {
             if (flight1 == null || flight2 == null)
                 return Constants.UnknownValue;

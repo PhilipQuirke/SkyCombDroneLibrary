@@ -316,7 +316,7 @@ namespace SkyCombDrone.DroneModel
 
         // Calculate % overlap of two VideoDatas, based on video DateEncodedUtc datetime and durationMs
         // Used to determine if the two VideoDatas relate to same physical flight (one optical and one thermal).
-        public static int PercentOverlap(VideoModel video1, VideoModel video2)
+        public static int PercentOverlap(VideoModel? video1, VideoModel? video2)
         {
             if (video1 == null || video2 == null)
                 return UnknownValue;

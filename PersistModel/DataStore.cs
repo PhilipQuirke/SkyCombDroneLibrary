@@ -177,6 +177,9 @@ namespace SkyCombDrone.PersistModel
             int row = 3;
             SetTitle(ref row, 1, "Index of tabs");
 
+            if (Worksheet == null)
+                return;
+
             Worksheet.Cells[row, 1].Value = "Tab";
             Worksheet.Cells[row, 2].Value = "Purpose";
             Worksheet.Cells[row, 3].Value = "Last updated";
@@ -413,7 +416,7 @@ namespace SkyCombDrone.PersistModel
 
         public void SetDataListColumn(ref int row, int col, DataPairList list, bool showUnknown = true, int extraColOffset = 0)
         {
-            if (list == null)
+            if((list == null) || (Worksheet == null))
                 return;
 
             foreach (var pair in list)
@@ -582,7 +585,7 @@ namespace SkyCombDrone.PersistModel
         // Highlight in red any cells in the current worksheet, where the column value exceeds the threshold. 
         public void AddConditionalRuleBad(int column /* one-based */, int maxRow, float threshold)
         {
-            if ((threshold > 0) && (maxRow > 0))
+            if ((threshold > 0) && (maxRow > 0) && (Worksheet != null))
             {
                 string columnChar = DataStore.ColumnIndexToChar(column).ToString();
                 string thresholdStr = threshold.ToString();
@@ -598,7 +601,7 @@ namespace SkyCombDrone.PersistModel
         // Highlight in green any cells in the current worksheet, where the column value in below the threshold. 
         public void AddConditionalRuleGood(int column /* one-based */, int maxRow, float threshold)
         {
-            if ((threshold > 0) && (maxRow > 0))
+            if ((threshold > 0) && (maxRow > 0) && (Worksheet != null))
             {
                 string columnChar = DataStore.ColumnIndexToChar(column).ToString();
                 string thresholdStr = threshold.ToString();

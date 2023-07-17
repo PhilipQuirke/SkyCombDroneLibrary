@@ -23,7 +23,7 @@ namespace SkyCombDrone.DroneLogic
 
 
 
-        public FlightStep(FlightSection flightSection, List<string> settings = null) : base(flightSection, settings)
+        public FlightStep(FlightSection flightSection, List<string>? settings = null) : base(flightSection, settings)
         {
             FlightSection = flightSection;
             FlightLeg = null;
@@ -51,7 +51,7 @@ namespace SkyCombDrone.DroneLogic
             var thisSectionId = FlightSection.SectionId;
             for (int j = thisSectionId - halfSmoothSteps; j <= thisSectionId + halfSmoothSteps; j++)
             {
-                if (sections.Sections.TryGetValue(j, out FlightSection nearbySection))
+                if (sections.Sections.TryGetValue(j, out FlightSection? nearbySection))
                 {
                     // If a "large gap" stepId is nearby then don't smooth this step.
                     // This "averaging" function assumes an even number of "sensible" neighbours before AND after this step
@@ -102,7 +102,7 @@ namespace SkyCombDrone.DroneLogic
             var thisSectionId = FlightSection.SectionId;
             for (int j = thisSectionId - halfSmoothSteps; j <= thisSectionId + halfSmoothSteps; j++)
             {
-                if (sections.Sections.TryGetValue(j, out FlightSection nearbySection))
+                if (sections.Sections.TryGetValue(j, out FlightSection? nearbySection))
                 {
                     // If a "large gap" stepId is nearby then don't smooth this step.
                     // This "averging" function assumes an even number of "sensible" neighbours before AND after this step
@@ -180,7 +180,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
-        public void CalculateSettings_StepAndImageVelocityMps(FlightStep prevStep)
+        public void CalculateSettings_StepAndImageVelocityMps(FlightStep? prevStep)
         {
             StepVelocityMps = new();
             ImageVelocityMps = new();
@@ -360,7 +360,7 @@ namespace SkyCombDrone.DroneLogic
 
         // After the location of this step has been refined, 
         // recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-        public void CalculateSettings_RefineLocationData(VideoModel videoData, FlightStep prevStep)
+        public void CalculateSettings_RefineLocationData(VideoModel videoData, FlightStep? prevStep)
         {
             if (prevStep != null)
             {
@@ -462,7 +462,7 @@ namespace SkyCombDrone.DroneLogic
         public FlightStepList Steps = new();
 
 
-        public FlightSteps(Drone drone, List<string> settings = null)
+        public FlightSteps(Drone drone, List<string>? settings = null)
             : base(drone.FlightSections.FileName, drone.Config.SmoothSectionSize, settings)
         {
             Drone = drone;
@@ -648,7 +648,7 @@ namespace SkyCombDrone.DroneLogic
                 // Calculate Step.AltitudeM by smoothing Section.AltitudeM
                 CalculateSettings_SmoothAltitudeM();
 
-                FlightStep prevStep = null;
+                FlightStep? prevStep = null;
                 foreach (var thisStep in Steps)
                 {
                     FlightStep theStep = thisStep.Value;
@@ -711,10 +711,10 @@ namespace SkyCombDrone.DroneLogic
                             maxLocn.EastingM - minLocn.EastingM);
                         float deltaTime = maxStep.SumTimeMs - minStep.SumTimeMs;
 
-                        FlightStep prevStep = null;
+                        FlightStep? prevStep = null;
                         for (int theStepId = leg.MinStepId + 1; theStepId <= leg.MaxStepId - 1; theStepId++)
                         {
-                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
                             if (theStep == null)
                                 continue;
 
@@ -738,7 +738,7 @@ namespace SkyCombDrone.DroneLogic
                         int arraySize = 0;
                         for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
                         {
-                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
                             if ((theStep != null) && (theStep.LocationM != null))
                                 arraySize++;
                         }
@@ -750,7 +750,7 @@ namespace SkyCombDrone.DroneLogic
                         int arrayIndex = 0;
                         for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
                         {
-                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
                             if ((theStep != null) && (theStep.LocationM != null))
                             {
                                 timeRaw[arrayIndex] = theStep.SumTimeMs;
@@ -769,10 +769,10 @@ namespace SkyCombDrone.DroneLogic
 
                         // Recalculate the Steps Locations, Distance Traveled and Speed
                         arrayIndex = 0;
-                        Steps.TryGetValue(leg.MinStepId - 1, out FlightStep prevStep);
+                        Steps.TryGetValue(leg.MinStepId - 1, out FlightStep? prevStep);
                         for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
                         {
-                            Steps.TryGetValue(theStepId, out FlightStep theStep);
+                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
                             if ((theStep != null) && (theStep.LocationM != null))
                             {
                                 theStep.LocationM.NorthingM = northingSmooth[arrayIndex];
@@ -787,7 +787,7 @@ namespace SkyCombDrone.DroneLogic
                         }
 
                         // As last leg step may have moved, update (non-Location data) one step past the leg.
-                        Steps.TryGetValue(leg.MaxStepId + 1, out FlightStep nextStep);
+                        Steps.TryGetValue(leg.MaxStepId + 1, out FlightStep? nextStep);
                         if ((nextStep != null) && (prevStep != null))
                             // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
                             nextStep.CalculateSettings_RefineLocationData(videoData, prevStep);
@@ -834,9 +834,9 @@ namespace SkyCombDrone.DroneLogic
 
         // The flight data sometimes has a gap or say 1.5s without video or flight data.
         // So if asked for an "out of range" stepId, we return the closest stepId.
-        public FlightStep StepIdToNearestFlightStep(int stepID)
+        public FlightStep? StepIdToNearestFlightStep(int stepID)
         {
-            FlightStep answer;
+            FlightStep? answer;
 
             if (Steps.TryGetValue(stepID, out answer))
                 return answer;
@@ -857,7 +857,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the FlightStep that is closest to the specified flightMs
-        public FlightStep MsToNearestFlightStep(int flightMs)
+        public FlightStep? MsToNearestFlightStep(int flightMs)
         {
             if (Steps.Count == 0)
                 return null;
@@ -868,13 +868,13 @@ namespace SkyCombDrone.DroneLogic
             if (flightMs >= Steps[Sections.MaxTardisId].SumTimeMs)
                 return Steps[Sections.MaxTardisId];
 
-            FlightStep nearestStep = null;
+            FlightStep? nearestStep = null;
             int nearestDelta = int.MaxValue;
 
             // PQR ToDo Increase speed of this loop by bisection of the sorted list of steps
             for (int stepId = MinStepId; stepId <= MaxStepId; stepId++)
             {
-                FlightStep thisStep;
+                FlightStep? thisStep;
                 if (Steps.TryGetValue(stepId, out thisStep))
                 {
                     var thisDelta = Math.Abs(thisStep.SumTimeMs - flightMs);
@@ -893,7 +893,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the FlightStep with a SumTimeMs at or lower than flightMs
-        public FlightStep FlightStepAtOrBeforeFlightMs(FlightStep hintStep, int flightMs)
+        public FlightStep? FlightStepAtOrBeforeFlightMs(FlightStep hintStep, int flightMs)
         {
             int hintId = hintStep.StepId;
 
@@ -910,7 +910,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Return the approximate FlightStep with the specified flightMs or a lower StartTime
         // Try not to use this function.
-        public FlightStep RoughFlightStepBeforeFlightMs(int flightMs)
+        public FlightStep? RoughFlightStepBeforeFlightMs(int flightMs)
         {
             if (Steps.Count == 0)
                 return null;
@@ -920,7 +920,7 @@ namespace SkyCombDrone.DroneLogic
 
             var stepId = FlightSection.MsToRoughFlightSectionID(flightMs);
 
-            FlightStep answer;
+            FlightStep? answer;
             for (int i = 0; i <= 4; i++)
                 if (Steps.TryGetValue(stepId - i, out answer))
                 {

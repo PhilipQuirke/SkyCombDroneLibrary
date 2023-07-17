@@ -42,7 +42,7 @@ namespace SkyCombDrone.DroneLogic
         public const int GroundBufferM = GroundData.GroundBufferM;
 
 
-        public DroneConfigModel Config = null;
+        public DroneConfigModel Config;
 
 
         // Time to load / calculate this object 
@@ -50,20 +50,20 @@ namespace SkyCombDrone.DroneLogic
 
 
         // The primary input flight data to process (if any). Includes drone location and altitude over time data.
-        public FlightSections FlightSections { get; set; }
+        public FlightSections? FlightSections { get; set; }
 
         // The calculated step data (if any) derived from the input flight data
-        public FlightSteps FlightSteps { get; set; }
+        public FlightSteps? FlightSteps { get; set; }
 
         // The calculated leg data (if any) derived from the input flight data
-        public FlightLegs FlightLegs { get; set; }
+        public FlightLegs? FlightLegs { get; set; }
 
         // The secondary display camera drone flight information (if any)
-        public FlightSections DisplaySections { get; set; }
+        public FlightSections? DisplaySections { get; set; }
 
         // Ground and surface elevation (if any), in meters above sea level.
         // Covers area corresponding to the drone flight log plus a 20m buffer.
-        public GroundData GroundData { get; set; }
+        public GroundData? GroundData { get; set; }
 
 
         public bool HasFlightSections { get { return (FlightSections != null) && FlightSections.Sections.Count > 0; } }
@@ -435,7 +435,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the FlightStep that is closest to the specified flightMs 
-        public FlightStep MsToNearestFlightStep(int flightMs)
+        public FlightStep? MsToNearestFlightStep(int flightMs)
         {
             const int smallMs = 100;
 

@@ -82,7 +82,7 @@ namespace SkyCombDrone.DroneModel
     public class FlightSectionsModel : TardisSummaryModel
     {
         // The file name containing the flight data
-        public string FileName { get; set; }
+        public string FileName { get; set; } = "";
         // The vendor and drone type that the Flight/Video data is from.
         public string FileType { get; set; } = UnknownString;
 
@@ -103,7 +103,7 @@ namespace SkyCombDrone.DroneModel
         public GlobalLocation MaxGlobalLocation { get; set; } // Value is always very similar to MinGlobalLocation
 
 
-        public FlightSectionsModel(List<string> settings = null) : base("Section")
+        public FlightSectionsModel(List<string>? settings = null) : base("Section")
         {
             ResetTardis();
 
