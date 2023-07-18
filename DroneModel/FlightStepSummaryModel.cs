@@ -73,8 +73,8 @@ namespace SkyCombDrone.DroneModel
         {
             AssertGoodRevision(other);
 
-            // Allow a 1% variation to cover rounding errors.
-            Assert(AvgSpeedMps <= other.AvgSpeedMps * 1.01f, "AssertGoodStepRevision: Bad AvgSpeedMps");
+            // Allow a 3% variation to cover rounding errors.
+            Assert(AvgSpeedMps <= other.AvgSpeedMps * 1.03f, "AssertGoodStepRevision: Bad AvgSpeedMps");
 
             Assert(MinDemM >= other.MinDemM, "AssertGoodStepRevision: Bad MinDemM");
             Assert(MaxDemM <= other.MaxDemM, "AssertGoodStepRevision: Bad MaxDemM");

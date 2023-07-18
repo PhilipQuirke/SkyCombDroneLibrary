@@ -108,7 +108,7 @@ namespace SkyCombDrone.DroneLogic
                 sections.Sections.Clear();
 
                 // See if there is an SRT file with the same name as the video file, just a different extension
-                sections.FileName = GenericDataStore.SwapExtension(video.FileName, ".SRT");
+                sections.FileName = GenericDataStore.SwapFileNameExtension(video.FileName, ".SRT");
                 if (!System.IO.File.Exists(sections.FileName))
                     return (false, cameraPitchYawRoll);
 

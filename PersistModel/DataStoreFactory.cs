@@ -18,10 +18,10 @@ namespace SkyCombDrone.PersistModel
         // Find name of video file that exists
         public static string FindVideo(string fileName)
         {
-            var answer = GenericDataStore.SwapExtension(fileName, ".mp4");
+            var answer = GenericDataStore.SwapFileNameExtension(fileName, ".mp4");
             if (!System.IO.File.Exists(answer))
             {
-                answer = GenericDataStore.SwapExtension(fileName, ".mov");
+                answer = GenericDataStore.SwapFileNameExtension(fileName, ".mov");
                 if (!System.IO.File.Exists(answer))
                 {
                     answer = "";
@@ -85,7 +85,7 @@ namespace SkyCombDrone.PersistModel
                     if (thermalVideoName != "")
                     {
                         // See if there is an SRT file with the same name as the video file, just a different extension
-                        thermalFlightName = GenericDataStore.SwapExtension(thermalVideoName, ".SRT");
+                        thermalFlightName = GenericDataStore.SwapFileNameExtension(thermalVideoName, ".SRT");
                         if (!System.IO.File.Exists(thermalFlightName))
                             thermalFlightName = "";
                     }
@@ -93,14 +93,17 @@ namespace SkyCombDrone.PersistModel
                     if (opticalVideoName != "")
                     {
                         // See if there is an SRT file with the same name as the video file, just a different extension
-                        opticalFlightName = GenericDataStore.SwapExtension(opticalVideoName, ".SRT");
+                        opticalFlightName = GenericDataStore.SwapFileNameExtension(opticalVideoName, ".SRT");
                         if (!System.IO.File.Exists(opticalFlightName))
                             opticalFlightName = "";
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                // Write the error message to the console
+                Console.WriteLine("DataStoreFactory.LocateInputFiles: " + ex.Message);
+
                 thermalVideoName = "";
                 opticalVideoName = "";
                 thermalFlightName = "";

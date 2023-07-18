@@ -263,7 +263,7 @@ namespace SkyCombDrone.DroneLogic
                             thisLeg.LegId = thisStep.Value.LegId;
                             thisLeg.MinTardisId = thisStep.Key;
                             thisLeg.MaxTardisId = thisStep.Key;
-                            thisLeg.WhyLegEnded = whyEnd[thisLegId - 1];
+                            thisLeg.WhyLegEnded = (whyEnd.Count > thisLegId - 1 ? whyEnd[thisLegId - 1] : "");
 
                             Legs.Add(thisLeg);
                         }
