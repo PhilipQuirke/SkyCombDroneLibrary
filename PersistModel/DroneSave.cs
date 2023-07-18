@@ -9,6 +9,7 @@ using SkyCombGround.PersistModel;
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace SkyCombDrone.PersistModel
@@ -100,7 +101,7 @@ namespace SkyCombDrone.PersistModel
         {
             try
             {
-                if (datums == null)
+                if ((datums == null) || (Data == null) || (Data.Worksheet == null))
                     return;
 
                 int lastRow = datums.Datums.Count + 1;
@@ -108,7 +109,7 @@ namespace SkyCombDrone.PersistModel
                     return;
 
                 // The 3D surface graph supports 5000 points,so we round our datums into buckets.
-                int roundFactor = (datums.Datums.Count < 5000 ? 1 : (datums.Datums.Count < 25000 ? 2 : 4));
+                int roundFactor = (datums.Datums.Count < 5000 ? 1 : (datums.Datums.Count < 25000 ? 2 : (datums.Datums.Count < 125000 ? 4 : 8)));
 
                 (var newTab, var ws) = Data.SelectOrAddWorksheet(tabName);
                 if (newTab)
@@ -178,50 +179,6 @@ namespace SkyCombDrone.PersistModel
                     if (!pivotChart.HasLegend)
                         pivotChart.Legend.Add();
                     pivotChart.Legend.Position = eLegendPosition.Left;
-
-                    /*
-                                        // Apply conditional formatting to the series
-                                        var series = pivotChart.Series[0];
-                                        var dataRange = ws.Cells[2, series.XSeries.Count + 1, ws.Dimension.End.Row, series.XSeries.Count + series.Values.Count];
-
-                                        var conditionalFormatting = rangeCells.ConditionalFormatting.AddExpression();
-                                        conditionalFormatting.Formula = "=CELL(\"color\", " + dataRange[1, 1].Address + ")";
-                                        conditionalFormatting.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                                        conditionalFormatting.Style.Fill.BackgroundColor.ColorType = eColorType.Color;
-                                        conditionalFormatting.Style.Fill.BackgroundColor.Color = Color.Blue;
-                    */
-
-                    /*
-                    // Apply conditional formatting to the series
-                    var series = chart3D.Series[0];
-                    series.Fill.ColorType = eColorType.ColorScale;
-                    series.Fill.ColorScale.Minimum = -100; // Minimum contour height
-                    series.Fill.ColorScale.Maximum = 100; // Maximum contour height
-                    series.Fill.ColorScale.Colors = new[] { Color.Blue, Color.Yellow, Color.Red }; // Define the color scale
-                    */
-
-
-                    /*
-                    // PQR TODO There is only 1 entry at this point.
-                    var entries = chart3D.Legend.Entries;
-                    if (entries != null)
-                    {
-                        int count = entries.Count;
-                        // Change the colors of the legend items
-                        for (int i = 0; i < count; i++)
-                        {
-                            var theColor = Colors.MixColors(lowColor, (1.0f * i) / count, highColor);
-
-                            var legendEntry = entries[i];
-                            if (legendEntry.Fill != null)
-                                legendEntry.Fill.Color = theColor;
-
-                            var series = chart3D.Series[i];
-                            if (series.Fill != null)
-                                series.Fill.Color = theColor;
-                        }
-                    }
-                    */
                 }
 
                 Data.SetLastUpdateDateTime(tabName);

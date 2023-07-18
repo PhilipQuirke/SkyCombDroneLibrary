@@ -87,24 +87,29 @@ namespace SkyCombDrone.DroneLogic
             DataStore dataStore, DroneConfigModel config, string groundDirectory, string inputFileName)
         {
             Drone answer;
+            string phase = "";
 
             try
             {
                 EffortMs();
 
-                showDroneSettings("Loading drone...");
+                phase = "Loading drone...";
+                showDroneSettings(phase);
                 answer = new Drone(config);
 
-                showDroneSettings("Loading drone video...");
+                phase = "Loading video...";
+                showDroneSettings(phase);
                 if (answer.LoadSettings_Videos(dataStore, readDateEncodedUtc))
                 {
                     answer.EffortDurations.LoadVideosMs = EffortMs();
 
-                    showDroneSettings("Loading drone flight log...");
+                    phase = "Loading flight log...";
+                    showDroneSettings(phase);
                     var loadedFlight = answer.LoadSettings_Flight(dataStore);
                     answer.EffortDurations.LoadFlightLogMs = EffortMs();
 
-                    showDroneSettings("Loading ground elevations...");
+                    phase = "Loading ground elevations...";
+                    showDroneSettings(phase);
                     var loadedGround = answer.LoadSettings_Ground(dataStore);
                     answer.EffortDurations.LoadGroundMs = EffortMs();
 
@@ -117,19 +122,23 @@ namespace SkyCombDrone.DroneLogic
                         if (answer.EffortDurations.LoadGroundMs < 5)
                             answer.EffortDurations.LoadGroundMs = 0;
 
-                        showDroneSettings("Calculating video data...");
+                        phase = "Calculating video data...";
+                        showDroneSettings(phase);
                         answer.CalculateSettings_Video();
                         answer.EffortDurations.CalcVideosMs = EffortMs();
 
-                        showDroneSettings("Calculating flight sections...");
+                        phase = "Calculating flight sections...";
+                        showDroneSettings(phase);
                         answer.CalculateSettings_FlightSections();
                         answer.EffortDurations.CalcSectionsMs = EffortMs();
 
-                        showDroneSettings("Calculating ground elevations...");
+                        phase = "Calculating ground elevations...";
+                        showDroneSettings(phase);
                         answer.CalculateSettings_Ground(groundDirectory);
                         answer.EffortDurations.CalcGroundMs = EffortMs();
 
-                        showDroneSettings("Calculating flight steps and legs...");
+                        phase = "Calculating flight steps and legs...";
+                        showDroneSettings(phase);
                         answer.CalculateSettings_StepsAndLegs();
                         if (!answer.CalculateSettings_OnGroundAt_IsValid())
                         {
@@ -138,20 +147,23 @@ namespace SkyCombDrone.DroneLogic
                         }
                         answer.EffortDurations.CalcStepsMs = EffortMs();
 
-                        showDroneSettings("Calculating area seen...");
+                        phase = "Calculating area seen...";
+                        showDroneSettings(phase);
                         answer.DefaultConfigRunFromTo();
                         answer.EffortDurations.CalcSeenMs = EffortMs();
 
-                        showDroneSettings("Updating datastore...");
+                        phase = "Saving datastore...";
+                        showDroneSettings(phase);
                         answer.SaveSettings(dataStore);
                     }
                 }
 
-                showDroneSettings("Drone and ground data ready.");
+                phase = "Drone and ground data ready.";
+                showDroneSettings(phase);
             }
             catch (Exception ex)
             {
-                throw Constants.ThrowException("DroneDataFactory.Create", ex);
+                throw Constants.ThrowException("DroneDataFactory.Create(Phase=" + phase +")", ex);
             }
 
             return answer;
