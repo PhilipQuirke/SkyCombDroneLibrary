@@ -99,8 +99,27 @@ namespace SkyCombDrone.DroneModel
         // The Min/MaxGlobalLocation values represent a box encompassing the locations the drone flew over.
         // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
         // so the Min/MaxGlobalLocation box is commonly a larger area than the area the drone flew over.
-        public GlobalLocation MinGlobalLocation { get; set; }
-        public GlobalLocation MaxGlobalLocation { get; set; } // Value is always very similar to MinGlobalLocation
+        public GlobalLocation? MinGlobalLocation { get; set; }
+        public GlobalLocation? MaxGlobalLocation { get; set; } // Value is always very similar to MinGlobalLocation
+
+
+        // The Min/MaxRelativeLocation values represent a box encompassing the locations the drone flew over.
+        // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
+        // so the Min/MaxRelativeLocation box is commonly a larger area than the area the drone flew over.
+        public RelativeLocation? MinRelativeLocation { get {
+                if (MinGlobalLocation == null)
+                    return null;
+                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MinGlobalLocation.Latitude, MinGlobalLocation.Longitude);
+                return new RelativeLocation((float)northingM, (float)eastingM);
+            }
+        }
+        public RelativeLocation? MaxRelativeLocation { get {
+                if (MaxGlobalLocation == null)
+                    return null;
+                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MaxGlobalLocation.Latitude, MaxGlobalLocation.Longitude);
+                return new RelativeLocation((float)northingM, (float)eastingM);
+            }
+        }
 
 
         public FlightSectionsModel(List<string>? settings = null) : base("Section")
@@ -164,16 +183,10 @@ namespace SkyCombDrone.DroneModel
             answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
             answer.Add("Max Global Location", (MaxGlobalLocation != null ? MaxGlobalLocation.ToString() : ""));
 
-            if (MinGlobalLocation != null)
-            {
-                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MinGlobalLocation.Latitude, MinGlobalLocation.Longitude);
-                answer.Add("Min NZTM M", new RelativeLocation((float)northingM, (float)eastingM).ToString());
-            }
-            if (MaxGlobalLocation != null)
-            {
-                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MaxGlobalLocation.Latitude, MaxGlobalLocation.Longitude);
-                answer.Add("Max NZTM M", new RelativeLocation((float)northingM, (float)eastingM).ToString());
-            }
+            if (MinRelativeLocation != null)
+                answer.Add("Min NZTM M", MinRelativeLocation.ToString());
+            if (MaxRelativeLocation != null)
+                answer.Add("Max NZTM M", MaxRelativeLocation.ToString());
 
             return answer;
         }

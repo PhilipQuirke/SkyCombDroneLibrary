@@ -183,7 +183,7 @@ namespace SkyCombDrone.DroneLogic
                         line = ReadLineNoSpaces();
                         if (line == null)
                             break;
-                        while (line.Trim().Length > 0)
+                        while ((line != null) && line.Trim().Length > 0)
                         {
                             // Find the fnum (if any) 
                             var token = "[fnum:";
