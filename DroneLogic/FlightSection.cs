@@ -100,7 +100,7 @@ namespace SkyCombDrone.DroneLogic
         public static int PercentOverlap(FlightSections? flight1, FlightSections? flight2)
         {
             if (flight1 == null || flight2 == null)
-                return Constants.UnknownValue;
+                return BaseConstants.UnknownValue;
 
             if (flight1.MinDateTime.Date != flight2.MinDateTime.Date)
                 return 0; // Different days

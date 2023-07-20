@@ -44,7 +44,7 @@ namespace SkyCombDrone.DrawSpace
             if (config.DrawRealFeatureColor == Color.White)
                 return;
 
-            Circle(ref image, point, Colors.ColorToBgr(config.DrawRealFeatureColor));
+            Circle(ref image, point, DroneColors.ColorToBgr(config.DrawRealFeatureColor));
         }
 
 
@@ -81,7 +81,7 @@ namespace SkyCombDrone.DrawSpace
 
         public static void NoDataText(ref Image<Bgr, byte> image, Point where)
         {
-            Text(ref image, "No data", where, 2, Colors.BlackBgr);
+            Text(ref image, "No data", where, 2, DroneColors.BlackBgr);
         }
 
 
@@ -104,7 +104,7 @@ namespace SkyCombDrone.DrawSpace
                 return;
 
             boundingRect.Inflate(config.AreaPadding, config.AreaPadding);
-            image.Draw(boundingRect, Colors.ColorToBgr(color), thickness);
+            image.Draw(boundingRect, DroneColors.ColorToBgr(color), thickness);
         }
 
 
@@ -124,7 +124,7 @@ namespace SkyCombDrone.DrawSpace
             if (config.DrawPixelColor == Color.White)
                 return;
 
-            var color = Colors.ColorToBgr(config.DrawPixelColor);
+            var color = DroneColors.ColorToBgr(config.DrawPixelColor);
 
             CvInvoke.DrawContours(image, contours, -1, color.MCvScalar);
         }

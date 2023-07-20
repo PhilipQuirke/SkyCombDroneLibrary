@@ -355,7 +355,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                throw Constants.ThrowException("Drone_DJI: Unable to load flight log from " + sections.FileName + ", Sections=" + sections.Sections.Count + ", " + ex.Message);
+                throw BaseConstants.ThrowException("Drone_DJI: Unable to load flight log from " + sections.FileName + ", Sections=" + sections.Sections.Count + ", " + ex.Message);
             }
             finally
             {

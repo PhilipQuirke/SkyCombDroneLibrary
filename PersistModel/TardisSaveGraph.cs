@@ -43,17 +43,17 @@ namespace SkyCombDrone.PersistModel
                 (float minAltitude, float maxAltitude) = summary.MinMaxVerticalAxisM();
 
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                DataStore.SetAxises(chart, "", "", "0", "0.0");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
+                Data.SetAxises(chart, "", "", "0", "0.0");
                 chart.Legend.Position = eLegendPosition.Left;
                 chart.YAxis.MinValue = minAltitude;
                 chart.YAxis.MaxValue = maxAltitude;
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "Altitude", TardisModel.AltitudeMSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor, 2);
-                Data.AddScatterSerie(chart, TardisTabName, "DSM", theDsmSetting, TardisModel.TardisIdSetting, Colors.SurfaceLineColor, 2);
-                Data.AddScatterSerie(chart, TardisTabName, "DEM", theDemSetting, TardisModel.TardisIdSetting, Colors.GroundLineColor, 2);
+                Data.AddScatterSerie(chart, TardisTabName, "Altitude", TardisModel.AltitudeMSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor, 2);
+                Data.AddScatterSerie(chart, TardisTabName, "DSM", theDsmSetting, TardisModel.TardisIdSetting, DroneColors.SurfaceLineColor, 2);
+                Data.AddScatterSerie(chart, TardisTabName, "DEM", theDemSetting, TardisModel.TardisIdSetting, DroneColors.GroundLineColor, 2);
 
                 Data.SetTitleAndDataListColumn("Metrics", 2 * StandardChartRows + 1, ChartWidth + 1, summary.GetSettings_Altitude(), true, 1);
             }
@@ -71,13 +71,13 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                DataStore.SetAxises(chart, "", "Distance", "0", "0.0");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
+                Data.SetAxises(chart, "", "Distance", "0", "0.0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "Distance", TardisModel.LinealMSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, TardisTabName, "Distance", TardisModel.LinealMSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor);
 
                 if (metrics != null)
                     Data.SetTitleAndDataListColumn("Metrics", chartRowOffset * StandardChartRows + 1, ChartWidth + 1, metrics, true, 1);
@@ -96,13 +96,13 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                DataStore.SetAxises(chart, "", "Speed", "0", "0.0");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
+                Data.SetAxises(chart, "", "Speed", "0", "0.0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "Mps", TardisModel.SpeedMpsSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, TardisTabName, "Mps", TardisModel.SpeedMpsSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor);
 
                 if (metrics != null)
                     Data.SetTitleAndDataListColumn("Metrics", chartRowOffset * StandardChartRows + 1, ChartWidth + 1, metrics, true, 1);
@@ -121,13 +121,13 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                DataStore.SetAxises(chart, "", "DYaw", "0", "0.00");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
+                Data.SetAxises(chart, "", "DYaw", "0", "0.00");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "DeltaYaw", TardisModel.DeltaYawDegSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, TardisTabName, "DeltaYaw", TardisModel.DeltaYawDegSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor);
 
                 if (metrics != null)
                     Data.SetTitleAndDataListColumn("Metrics", chartRowOffset * StandardChartRows + 1, ChartWidth + 1, metrics, true, 1);
@@ -146,13 +146,13 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                DataStore.SetAxises(chart, "", "Pitch", "0", "0.00");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
+                Data.SetAxises(chart, "", "Pitch", "0", "0.00");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "Pitch", TardisModel.PitchDegSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, TardisTabName, "Pitch", TardisModel.PitchDegSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor);
 
                 if (metrics != null)
                     Data.SetTitleAndDataListColumn("Metrics", chartRowOffset * StandardChartRows + 1, ChartWidth + 1, metrics, true, 1);
@@ -171,13 +171,13 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                DataStore.SetAxises(chart, "", "Roll", "0", "0.00");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
+                Data.SetAxises(chart, "", "Roll", "0", "0.00");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "Roll", TardisModel.RollDegSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, TardisTabName, "Roll", TardisModel.RollDegSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor);
 
                 if (metrics != null)
                     Data.SetTitleAndDataListColumn("Metrics", chartRowOffset * StandardChartRows + 1, ChartWidth + 1, metrics, true, 1);
@@ -196,15 +196,15 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows / 2, ChartWidth);
-                DataStore.SetAxises(chart, "", "Leg", "0", "0");
+                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows / 2, ChartWidth);
+                Data.SetAxises(chart, "", "Leg", "0", "0");
                 chart.Legend.Remove();
                 chart.YAxis.MinValue = 0;
                 chart.YAxis.MaxValue = 1;
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
 
-                Data.AddScatterSerie(chart, TardisTabName, "Leg", hasLegSetting, TardisModel.TardisIdSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, TardisTabName, "Leg", hasLegSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor);
             }
         }
     }

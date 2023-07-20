@@ -19,9 +19,9 @@ namespace SkyCombDrone.DrawSpace
         public int FlowHotPixels { get; set; } = 100;
 
 
-        public Color DrawPixelColor = Colors.PixelColor;
-        public Color DrawRealFeatureColor = Colors.RealFeatureColor;
-        public Color DrawUnrealFeatureColor = Colors.UnrealFeatureColor;
+        public Color DrawPixelColor = DroneColors.PixelColor;
+        public Color DrawRealFeatureColor = DroneColors.RealFeatureColor;
+        public Color DrawUnrealFeatureColor = DroneColors.UnrealFeatureColor;
 
 
 
@@ -51,7 +51,7 @@ namespace SkyCombDrone.DrawSpace
                 "twilight" => Emgu.CV.CvEnum.ColorMapType.Twilight,
                 "twilightshifted" => Emgu.CV.CvEnum.ColorMapType.TwilightShifted,
                 "turbo" => Emgu.CV.CvEnum.ColorMapType.Turbo,
-                _ => throw Constants.ThrowException("DrawConfig.ColorMapType: Bad value: " + Palette),
+                _ => throw BaseConstants.ThrowException("DrawConfig.ColorMapType: Bad value: " + Palette),
             };
         }
 

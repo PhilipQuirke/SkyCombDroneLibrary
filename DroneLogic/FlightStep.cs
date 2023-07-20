@@ -167,7 +167,7 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings_DemM(GroundData groundData)
         {
             if ((groundData != null) && (groundData.DemGrid != null))
-                DemM = groundData.DemGrid.GetElevation(LocationM);
+                DemM = groundData.DemGrid.GetElevationByDroneLocn(LocationM);
         }
 
 
@@ -175,7 +175,7 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings_DsmM(GroundData groundData)
         {
             if ((groundData != null) && (groundData.DsmGrid != null))
-                DsmM = groundData.DsmGrid.GetElevation(LocationM);
+                DsmM = groundData.DsmGrid.GetElevationByDroneLocn(LocationM);
         }
 
 
@@ -428,7 +428,7 @@ namespace SkyCombDrone.DroneLogic
                 summary.SummariseStep(thisStep);
 
                 var thisSpeedMps = thisStep.SpeedMps();
-                if (thisSpeedMps != Constants.UnknownValue)
+                if (thisSpeedMps != BaseConstants.UnknownValue)
                 {
                     numSpeedSteps++;
                     sumSpeedMps += thisSpeedMps;
@@ -600,11 +600,12 @@ namespace SkyCombDrone.DroneLogic
 
                 // Smoothing should not generate values outside the original envelope
                 float epsilon = 0.1f;
+                var theStepSpeed = theStep.SpeedMps();
                 Assert(theStep.LocationM.NorthingM <= Sections.MaxLocationM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
                 Assert(theStep.LocationM.EastingM <= Sections.MaxLocationM.EastingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.EastingM");
                 Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
-                Assert(theStep.SpeedMps() <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStep.SpeedMps() + " > " + Sections.MaxSpeedMps);
+                Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStep.SpeedMps() + " > " + Sections.MaxSpeedMps);
                 Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: DeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
                 Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: PitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
 

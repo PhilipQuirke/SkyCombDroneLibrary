@@ -84,15 +84,15 @@ namespace SkyCombDrone.PersistModel
             if ((lastRow > 0) && (Sections.Sections.Count > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, ChartTitle, 0, 1, LargeChartRows);
-                DataStore.SetAxises(chart, "Long", "Lat", "0.000000", "0.000000");
+                Data.SetChart(chart, ChartTitle, 0, 1, LargeChartRows);
+                Data.SetAxises(chart, "Long", "Lat", "0.000000", "0.000000");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = Sections.MinGlobalLocation.Longitude;
                 chart.XAxis.MaxValue = Sections.MaxGlobalLocation.Longitude;
                 chart.YAxis.MinValue = Sections.MinGlobalLocation.Latitude;
                 chart.YAxis.MaxValue = Sections.MaxGlobalLocation.Latitude;
 
-                Data.AddScatterSerie(chart, Sections1TabName, "Section", FlightSection.LatitudeSetting, FlightSection.LongitudeSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, Sections1TabName, "Section", FlightSection.LatitudeSetting, FlightSection.LongitudeSetting, DroneColors.InScopeDroneColor);
             }
         }
 
@@ -111,15 +111,15 @@ namespace SkyCombDrone.PersistModel
                     Sections.EastingRangeM()));
 
                 var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, ChartTitle, 0, 0, LargeChartRows);
-                DataStore.SetAxises(chart, "Easting", "Northing", "0.0", "0.0");
+                Data.SetChart(chart, ChartTitle, 0, 0, LargeChartRows);
+                Data.SetAxises(chart, "Easting", "Northing", "0.0", "0.0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = 0;
                 chart.XAxis.MaxValue = axisLength;
                 chart.YAxis.MinValue = 0;
                 chart.YAxis.MaxValue = axisLength;
 
-                Data.AddScatterSerie(chart, Sections1TabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, Sections1TabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, DroneColors.InScopeDroneColor);
             }
         }
 

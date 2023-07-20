@@ -7,7 +7,7 @@ using System.Drawing;
 namespace SkyCombDrone.DroneModel
 {
     // Some basic constant information about a video
-    public class VideoModel : Constants
+    public class VideoModel : BaseConstants
     {
         // THERMAL / OPTICAL CAMERA SETTINGS
 
@@ -234,8 +234,8 @@ namespace SkyCombDrone.DroneModel
                 { "Image Height", ImageHeight },
                 { "HFOV Deg", HFOVDeg },
                 { "VFOV Deg", VFOVDeg, 2 },
-                { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(Constants.DateFormat) },
-                { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(Constants.DateFormat) },
+                { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
+                { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(BaseConstants.DateFormat) },
                 { "Color Md", (ColorMd == "" ? UnknownString : ColorMd ) },
                 { "Thermal", Thermal },
             };

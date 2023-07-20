@@ -88,15 +88,15 @@ namespace SkyCombDrone.PersistModel
                     Steps.EastingRangeM()));
 
                 var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                DataStore.SetChart(chart, ChartTitle, 0, 0, LargeChartRows);
-                DataStore.SetAxises(chart, "Easting", "Northing", "0.0", "0.0");
+                Data.SetChart(chart, ChartTitle, 0, 0, LargeChartRows);
+                Data.SetAxises(chart, "Easting", "Northing", "0.0", "0.0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = 0;
                 chart.XAxis.MaxValue = axisLength;
                 chart.YAxis.MinValue = 0;
                 chart.YAxis.MaxValue = axisLength;
 
-                Data.AddScatterSerie(chart, Steps1TabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, Colors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, Steps1TabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, DroneColors.InScopeDroneColor);
             }
         }
 

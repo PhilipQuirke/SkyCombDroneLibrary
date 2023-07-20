@@ -4,8 +4,9 @@ using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
-using System;
+using SkyCombGround.PersistModel;
 using System.Diagnostics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -39,7 +40,7 @@ namespace SkyCombDrone.DroneLogic
     {
         // The drone video footage extends beyond the flight path locations, so we add a buffer.
         // The DJI_0094 test video has a MaxInputWidthM of 42 meters, so we add 20 meters to all sides.
-        public const int GroundBufferM = GroundData.GroundBufferM;
+        public const int GroundBufferM = GroundGrid.GroundBufferM;
 
 
         public DroneConfigModel Config;
@@ -227,38 +228,7 @@ namespace SkyCombDrone.DroneLogic
         // Load ground data (if any) from the DataStore 
         public bool LoadSettings_Ground(DataStore dataStore)
         {
-            try
-            {
-                if (dataStore.SelectWorksheet(DataStore.DroneTabName))
-                {
-                    DroneLoad dataReader = new(dataStore, this);
-
-                    // Load the summary (settings) data 
-                    GroundData = GroundDataFactory.Create(dataReader.GroundSettings());
-
-
-                    // Load ground (DEM) elevations (if any)
-                    if (dataStore.SelectWorksheet(DataConstants.DemTabName))
-                    {
-                        dataReader.DemData(GroundData.DemGrid);
-                        GroundData.DemGrid.AssertGood();
-                    }
-
-
-                    // Load surface (DSM) elevations (if any)
-                    if (dataStore.SelectWorksheet(DataConstants.DsmTabName))
-                    {
-                        dataReader.DsmData(GroundData.DsmGrid);
-                        GroundData.DsmGrid.AssertGood();
-                    }
-
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Suppressed Drone.LoadSettings_Ground failure: " + ex.ToString());
-            }
+            GroundData = GroundLoad.Load(dataStore);
 
             ClearData_Flight();
             return false;
@@ -360,45 +330,47 @@ namespace SkyCombDrone.DroneLogic
         // Update DemGrid.GroundDatum.Seen with area seen by the input video over specified steps
         public void CalculateSettings_AreaSeen(int minStepId, int maxStepId)
         {
-            try
-            {
-                if ((GroundData.DemGrid == null) ||
-                   (GroundData.DemGrid.MaxLocationM == null) ||
-                   (GroundData.DemGrid.MinLocationM == null))
-                    return;
+            /*
+                        try
+                        {
+                            if ((GroundData.DemGrid == null) ||
+                               (GroundData.DemGrid.MaxLocationM == null) ||
+                               (GroundData.DemGrid.MinLocationM == null))
+                                return;
 
-                if (HasInputVideo && HasFlightSections && HasGroundData)
-                {
-                    GroundSeen groundSeen = new(GroundData.DemGrid);
+                            if (HasInputVideo && HasFlightSections && HasGroundData)
+                            {
+                                GroundSeen groundSeen = new(GroundData.DemGrid);
 
-                    // For each flight step, calculate the part of the grid seen
-                    for (int stepId = minStepId; stepId <= maxStepId; stepId++)
-                    {
-                        FlightSteps.Steps.TryGetValue(stepId, out var step);
-                        if (step == null)
-                            continue;
+                                // For each flight step, calculate the part of the grid seen
+                                for (int stepId = minStepId; stepId <= maxStepId; stepId++)
+                                {
+                                    FlightSteps.Steps.TryGetValue(stepId, out var step);
+                                    if (step == null)
+                                        continue;
 
-                        // We only consider flight steps inside a leg, as Comb only applies to legs
-                        if ((step.LegId <= 0) || (step.InputImageSizeM == null))
-                            continue;
+                                    // We only consider flight steps inside a leg, as Comb only applies to legs
+                                    if ((step.LegId <= 0) || (step.InputImageSizeM == null))
+                                        continue;
 
-                        // Get corners of area covered by the step's video image (may be forward of drone's location).
-                        // This rectangle is commonly rotated relative to the X/Y axises.
-                        var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
-                            step.Calculate_InputImageArea_Corners();
+                                    // Get corners of area covered by the step's video image (may be forward of drone's location).
+                                    // This rectangle is commonly rotated relative to the X/Y axises.
+                                    var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
+                                        step.Calculate_InputImageArea_Corners();
 
-                        // Update the area as "seen"
-                        groundSeen.SetSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
-                    }
+                                    // Update the area as "seen"
+                                    groundSeen.SetSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
+                                }
 
-                    // Update all GroundDatum Seen values
-                    groundSeen.FinaliseSeen();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ThrowException("Drone.CalculateSettings_AreaSeen: " + ex.Message);
-            }
+                                // Update all GroundDatum Seen values
+                                groundSeen.FinaliseSeen();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw ThrowException("Drone.CalculateSettings_AreaSeen: " + ex.Message);
+                        }
+            */
         }
 
 
@@ -409,6 +381,9 @@ namespace SkyCombDrone.DroneLogic
             // Save the input data to the datastore. Will be used as a data cache for future runs.
             // Fails if OutputElseInputDirectory does not exist, or user is editing the datastore.
             dataStore.Open();
+
+            GroundSave.Save(dataStore, GroundData, true);
+
             DroneSave datawriter = new(dataStore, this);
             datawriter.SaveData_Summary();
             datawriter.SaveData_Detail(true, effort);
@@ -566,7 +541,7 @@ namespace SkyCombDrone.DroneLogic
         public int FlightStartOffsetMs()
         {
             if (PercentFlightOverlap <= 0)
-                return Constants.UnknownValue;
+                return BaseConstants.UnknownValue;
 
             return (int)FlightSections.MinDateTime.Subtract(DisplaySections.MinDateTime).TotalMilliseconds;
         }
@@ -627,6 +602,9 @@ namespace SkyCombDrone.DroneLogic
         {
             // We need to update the Drone datastore
             dataStore.Open();
+
+            GroundSave.Save(dataStore, GroundData, false);
+
             DroneSave datawriter = new(dataStore, this);
             datawriter.SaveData_Summary();
             datawriter.SaveData_Detail(false);

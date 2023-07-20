@@ -2,8 +2,8 @@
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
-using System;
-using System.Collections.Generic;
+using SkyCombGround.PersistModel;
+
 
 
 namespace SkyCombDrone.PersistModel
@@ -39,7 +39,7 @@ namespace SkyCombDrone.PersistModel
         // Load input leg config data from a XLS file 
         public void LegSettings(DroneConfigModel flightConfig)
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, LegTitle, Chapter3TitleRow, LhsColOffset);
+            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, LegTitle, Chapter2TitleRow, LhsColOffset);
             if (settings != null)
                 flightConfig.LoadLegSettings(settings);
         }
@@ -66,16 +66,9 @@ namespace SkyCombDrone.PersistModel
         // Load effort data from a XLS file 
         public void EffortSettings()
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, EffortTitle, Chapter4TitleRow, LhsColOffset);
+            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, EffortTitle, Chapter3TitleRow, LhsColOffset);
             if (settings != null)
                 Drone.EffortDurations.LoadSettings(settings);
-        }
-
-
-        // Load Ground elevation settings from a XLS file  
-        public List<string> GroundSettings()
-        {
-            return Data.GetColumnSettingsIfAvailable(DroneTabName, GroundInputTitle, Chapter2TitleRow, LhsColOffset);
         }
 
 
@@ -178,47 +171,6 @@ namespace SkyCombDrone.PersistModel
             }
         }
 
-
-        // Load all Ground (DEM) of Surface (DSM) data from a XLS file 
-        public void GroundDatums(GroundGrid Datums, string tabName)
-        {
-            int row = 2;
-            try
-            {
-                if (Data.SelectWorksheet(tabName))
-                {
-                    var cell = Data.Worksheet.Cells[row, 1];
-                    while (cell != null && cell.Value != null && cell.Value.ToString() != "")
-                    {
-                        // Load the non-blank cells in this row into a GroundDatum object
-                        var data = new GroundDatum(Data.GetRowSettings(row, 1));
-                        data.AssertGood();
-                        Datums.Datums.Add(data);
-
-                        row++;
-                        cell = Data.Worksheet.Cells[row, 1];
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ThrowException("DroneLoad.GroundDatums: Row=" + row, ex);
-            }
-        }
-
-
-        // Load all Ground (DEM) data from a XLS file 
-        public void DemData(GroundGrid Datums)
-        {
-            GroundDatums(Datums, DemTabName);
-        }
-
-
-        // Load all Surface (DSM) data from a XLS file 
-        public void DsmData(GroundGrid Datums)
-        {
-            GroundDatums(Datums, DsmTabName);
-        }
 
 
         public FlightSections LoadSettings(string videoName, VideoData video, string logName, int col)

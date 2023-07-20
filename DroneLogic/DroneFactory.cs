@@ -163,7 +163,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                throw Constants.ThrowException("DroneDataFactory.Create(Phase=" + phase +")", ex);
+                throw BaseConstants.ThrowException("DroneDataFactory.Create(Phase=" + phase +")", ex);
             }
 
             return answer;

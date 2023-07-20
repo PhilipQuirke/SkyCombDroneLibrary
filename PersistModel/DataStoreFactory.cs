@@ -159,7 +159,7 @@ namespace SkyCombDrone.PersistModel
                         }
                         else
                         {
-                            throw Constants.ThrowException("DataStoreFactory.Create: Failed to open existing DataStore " + dataStoreName);
+                            throw BaseConstants.ThrowException("DataStoreFactory.Create: Failed to open existing DataStore " + dataStoreName);
                         }
                     }
                     else

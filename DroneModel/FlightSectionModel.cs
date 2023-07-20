@@ -50,8 +50,8 @@ namespace SkyCombDrone.DroneModel
             var answer = base.GetSettings();
             answer[0].Key = "Section";
 
-            answer.Add("Longitude", GlobalLocation.Longitude, Constants.LatLongNdp);
-            answer.Add("Latitude", GlobalLocation.Latitude, Constants.LatLongNdp);
+            answer.Add("Longitude", GlobalLocation.Longitude, BaseConstants.LatLongNdp);
+            answer.Add("Latitude", GlobalLocation.Latitude, BaseConstants.LatLongNdp);
 
             return answer;
         }
