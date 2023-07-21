@@ -1,4 +1,5 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+using Microsoft.VisualBasic.Logging;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using System;
@@ -339,10 +340,18 @@ namespace SkyCombDrone.DroneLogic
         // Update the FlightStep pointers to FlightLeg
         public void Set_FlightStep_FlightLeg(FlightSteps steps)
         {
-            foreach (var leg in Legs)
-                foreach (var step in steps.Steps)
+            foreach (var step in steps.Steps)
+            {
+                if (step.Value.LegId <= 0)
+                    break;
+
+                foreach (var leg in Legs)
                     if (step.Value.LegId == leg.LegId)
+                    {
                         step.Value.FlightLeg = leg;
+                        break;
+                    }
+            }
         }
 
 

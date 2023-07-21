@@ -76,7 +76,7 @@ namespace SkyCombDrone.DroneLogic
         public bool HasDroneYaw { get { return HasFlightSteps && FlightSteps.MaxDeltaYawDeg != UnknownValue; } }
         public bool HasDroneRoll { get { return HasFlightSteps && FlightSteps.MaxRollDeg != UnknownValue; } }
         public bool HasDisplaySections { get { return DisplaySections != null; } }
-        public bool HasGroundData { get { return GroundData != null; } }
+        public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemGrid != null) && (GroundData.DemGrid.NumElevationsStored > 0); } }
 
 
         public Drone(DroneConfigModel config)
@@ -230,8 +230,7 @@ namespace SkyCombDrone.DroneLogic
         {
             GroundData = GroundLoad.Load(dataStore);
 
-            ClearData_Flight();
-            return false;
+            return HasGroundData;
         }
 
 
