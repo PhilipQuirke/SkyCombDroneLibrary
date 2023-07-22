@@ -33,7 +33,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-          // Save the Index tab
+        // Save the Index tab
         public void SaveIndex()
         {
             AddWorksheet(IndexTabName);
@@ -66,11 +66,7 @@ namespace SkyCombDrone.PersistModel
                 var cell = Worksheet.Cells[row, 1];
                 cell.Value = index.Key;
                 if (index.Key != "")
-                {
-                    cell.Hyperlink = new Uri("#'" + index.Key + "'!A1", UriKind.Relative);
-                    cell.Style.Font.UnderLine = true;
-                    cell.Style.Font.Color.SetColor(Color.Blue);
-                }
+                    SetInternalHyperLink(cell, index.Key);
 
                 Worksheet.Cells[row, 2].Value = index.Value;
 

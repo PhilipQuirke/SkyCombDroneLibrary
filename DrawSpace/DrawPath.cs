@@ -25,7 +25,7 @@ namespace SkyCombDrone.DrawSpace
         const int NumShades = 20;
 
 
-        public BaseDrawScope BaseDrawScope = null;
+        public DroneDrawScope BaseDrawScope = null;
 
         // Size to draw text on the image
         public int TextFontScale = 1;
@@ -37,13 +37,13 @@ namespace SkyCombDrone.DrawSpace
         private Transform TransformMToPixels;
 
 
-        public DrawPath(BaseDrawScope drawScope)
+        public DrawPath(DroneDrawScope drawScope)
         {
             Reset(drawScope);
         }
 
 
-        public void Reset(BaseDrawScope drawScope)
+        public void Reset(DroneDrawScope drawScope)
         {
             BaseDrawScope = drawScope;
 

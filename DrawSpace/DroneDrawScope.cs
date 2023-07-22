@@ -6,7 +6,7 @@ using SkyCombGround.CommonSpace;
 namespace SkyCombDrone.DrawSpace
 {
     // Code to draw images related to drone & process data in charts, graphs,etc.
-    public class BaseDrawScope : BaseConstants
+    public class DroneDrawScope : BaseConstants
     {
         // The drone data (if any) to draw
         public Drone? Drone = null;
@@ -42,7 +42,7 @@ namespace SkyCombDrone.DrawSpace
         public int MaxFeatureBlockIdToDraw = 999999;
 
 
-        public BaseDrawScope(Drone drone)
+        public DroneDrawScope(Drone drone)
         {
             Drone = drone;
         }
