@@ -608,14 +608,42 @@ namespace SkyCombDrone.DroneLogic
         // Get the drone settings needed to describe the flight in the SkyCombFLights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
+            string longitude = "";
+            string latitude = "";
+            string nztmX = "";
+            string nztmY = "";
+            string eastingM = "";
+            string northingM = "";
+
+            if(HasFlightSections && (FlightSections.MaxGlobalLocation != null))
+            {
+                longitude = FlightSections.MaxGlobalLocation.Longitude.ToString();
+                latitude = FlightSections.MaxGlobalLocation.Latitude.ToString();
+            }
+                    
+            if(HasFlightSections)
+            {
+                var max = FlightSections.MaxRelativeLocation;
+                var min = FlightSections.MinRelativeLocation;
+                if ((max != null) && (min != null))
+                {
+                    nztmX = max.EastingM.ToString();
+                    nztmY = max.NorthingM.ToString();
+                    eastingM = ((int)(max.EastingM - min.EastingM)).ToString();
+                    northingM = ((int)(max.NorthingM - min.NorthingM)).ToString(); 
+                }
+            }
+
             var settings = new DataPairList();
 
             settings.Add("DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(ShortDateFormat) : ""));
             settings.Add("Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : ""));
-            settings.Add("Longitude", (HasFlightSections && (FlightSections.MinGlobalLocation != null) ? FlightSections.MinGlobalLocation.Longitude.ToString() : ""));
-            settings.Add("Latitude", (HasFlightSections && (FlightSections.MinGlobalLocation != null) ? FlightSections.MinGlobalLocation.Latitude.ToString() : ""));
-            settings.Add("EastingM", (HasFlightSections && (FlightSections.MinRelativeLocation != null) ? FlightSections.MinRelativeLocation.EastingM.ToString() : ""));
-            settings.Add("NorthingM", (HasFlightSections && (FlightSections.MinRelativeLocation != null) ? FlightSections.MinRelativeLocation.NorthingM.ToString() : ""));
+            settings.Add("Longitude", longitude);
+            settings.Add("Latitude", latitude);
+            settings.Add("NZTM X", nztmX);
+            settings.Add("NZTM Y", nztmY);
+            settings.Add("East M", eastingM);
+            settings.Add("North M", northingM);
             settings.Add("DemPerc", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : ""));
             settings.Add("DsmPerc", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : ""));
 

@@ -26,6 +26,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         public DroneDrawScope BaseDrawScope = null;
+        public bool Simple = true;
 
         // Size to draw text on the image
         public int TextFontScale = 1;
@@ -37,8 +38,9 @@ namespace SkyCombDrone.DrawSpace
         private Transform TransformMToPixels;
 
 
-        public DrawPath(DroneDrawScope drawScope)
+        public DrawPath(DroneDrawScope drawScope, bool simple)
         {
+            Simple = simple;
             Reset(drawScope);
         }
 
@@ -213,17 +215,28 @@ namespace SkyCombDrone.DrawSpace
                     (thisStepId <= lastRunStepId);
                 var thisColor = DroneColors.ColorToBgr(highlight ? DroneColors.InScopeDroneColor : DroneColors.OutScopeDroneColor);
 
-                // If the step has a leg then dont draw this (short) line.
-                // Rely on the above code to draw a long line for the leg.
-                // Exception: For the first step of the leg we need to connect
-                // up the previous non-leg step.
-                if (((step.Value.LegId <= 0) || (prevLegId <= 0)) &&
-                    (thisStepId > 0) && (prevPoint.X != UnknownValue))
-                    Line(ref image, prevPoint, thisPoint, thisColor);
+                if (Simple)
+                {
+                    if (prevPoint.X != UnknownValue)
+                        Line(ref image, prevPoint, thisPoint, thisColor);
 
-                // Draw chevrons along the path to path every so often to show direction.
-                if ((!hasLegs) && (thisStepId % 50 == 0))
-                    FlightPath_Chevron(ref image, step.Value, thisColor);
+                    if (thisStepId % 1000 == 0)
+                        FlightPath_Chevron(ref image, step.Value, thisColor);
+                }
+                else
+                {
+                    // If the step has a leg then dont draw this (short) line.
+                    // Rely on the above code to draw a long line for the leg.
+                    // Exception: For the first step of the leg we need to connect
+                    // up the previous non-leg step.
+                    if (((step.Value.LegId <= 0) || (prevLegId <= 0)) &&
+                        (thisStepId > 0) && (prevPoint.X != UnknownValue))
+                        Line(ref image, prevPoint, thisPoint, thisColor);
+
+                    // Draw chevrons along the path to path every so often to show direction.
+                    if ((!hasLegs) && (thisStepId % 50 == 0))
+                        FlightPath_Chevron(ref image, step.Value, thisColor);
+                }
 
                 prevPoint = thisPoint;
                 prevLegId = step.Value.LegId;
@@ -434,8 +447,9 @@ namespace SkyCombDrone.DrawSpace
                             // Draw the ground or surface elevations as background of shades of brown or green
                             DrawGroundOrSurfaceElevations(ref image, backgroundType);
 
-                        // Draw all flight path legs (as straight lines)
-                        DrawFlightLegs(ref image);
+                        if(! Simple)
+                            // Draw all flight path legs (as straight lines)
+                            DrawFlightLegs(ref image);
 
                         // Draw the flight path sections
                         DrawFlightSteps(ref image);
