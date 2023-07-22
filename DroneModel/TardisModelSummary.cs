@@ -17,7 +17,7 @@ namespace SkyCombDrone.DroneModel
         public int MaxTardisId { get; set; }
 
 
-        // Encompassing box size in local coordinate system - NorthingM/EastingM
+        // Drone encompassing box size in local coordinate system - NorthingM/EastingM
         // Northing/Easting is a symmetrical local coordinate system
         // That is 1 unit Northing is the same distance as 1 unit Easting.
         // Origin is bottom left of box 
