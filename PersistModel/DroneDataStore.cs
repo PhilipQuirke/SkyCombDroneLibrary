@@ -15,7 +15,7 @@ namespace SkyCombDrone.PersistModel
 
     // The SkyComb app creates a datastore (spreadsheet) per set of (1 or 2) videos and (0 to 2) srt files.
     // The datastore stores all settings & findings acts like a database or "no-sql document store".
-    public class DataStore : GenericDataStore
+    public class DroneDataStore : BaseDataStore
     {
         // These are the physical files that are referenced in the DataStore
         public string ThermalVideoName { get; set; } = "";
@@ -26,7 +26,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Open an existing DataStore & load Files tab settings
-        public DataStore(ExcelPackage store, string fileName) : base(store, fileName)
+        public DroneDataStore(ExcelPackage store, string fileName) : base(store, fileName)
         {
             SelectWorksheet(FilesTabName);
             LoadSettings(GetColumnSettings(3, LhsColOffset, LhsColOffset + LabelToValueCellOffset));
@@ -119,7 +119,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Create a DataStore on disk & store the Files settings.
-        public DataStore(string selectedFileName, string thermalVideoName, string opticalVideoName, string thermalFlightName, string opticalFlightName, string outputVideoName) : base(selectedFileName)
+        public DroneDataStore(string selectedFileName, string thermalVideoName, string opticalVideoName, string thermalFlightName, string opticalFlightName, string outputVideoName) : base(selectedFileName)
         {
             ThermalVideoName = thermalVideoName;
             OpticalVideoName = opticalVideoName;
@@ -352,7 +352,7 @@ namespace SkyCombDrone.PersistModel
         {
             if ((threshold > 0) && (maxRow > 0) && (Worksheet != null))
             {
-                string columnChar = DataStore.ColumnIndexToChar(column).ToString();
+                string columnChar = DroneDataStore.ColumnIndexToChar(column).ToString();
                 string thresholdStr = threshold.ToString();
                 var rule = Worksheet.ConditionalFormatting.AddExpression(
                     Worksheet.Cells[2, column, maxRow, column]);
@@ -368,7 +368,7 @@ namespace SkyCombDrone.PersistModel
         {
             if ((threshold > 0) && (maxRow > 0) && (Worksheet != null))
             {
-                string columnChar = DataStore.ColumnIndexToChar(column).ToString();
+                string columnChar = DroneDataStore.ColumnIndexToChar(column).ToString();
                 string thresholdStr = threshold.ToString();
                 var rule = Worksheet.ConditionalFormatting.AddExpression(
                     Worksheet.Cells[2, column, maxRow, column]);
@@ -407,10 +407,10 @@ namespace SkyCombDrone.PersistModel
 
     public class DataStoreAccessor : DataConstants
     {
-        public DataStore Data { get; }
+        public DroneDataStore Data { get; }
 
 
-        public DataStoreAccessor(DataStore data)
+        public DataStoreAccessor(DroneDataStore data)
         {
             Data = data;
         }

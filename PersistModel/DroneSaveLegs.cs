@@ -8,7 +8,7 @@ namespace SkyCombDrone.PersistModel
     // Save meta-data about drone legs
     public class DroneSaveLegs : DataStoreAccessor
     {
-        public DroneSaveLegs(DataStore data)
+        public DroneSaveLegs(DroneDataStore data)
             : base(data)
         {
         }

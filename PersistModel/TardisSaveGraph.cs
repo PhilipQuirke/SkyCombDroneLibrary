@@ -20,7 +20,7 @@ namespace SkyCombDrone.PersistModel
         protected int MaxDatumId = 1;
 
 
-        public TardisSaveGraph(DataStore data, string tardisTabName, string graphTabName) : base(data)
+        public TardisSaveGraph(DroneDataStore data, string tardisTabName, string graphTabName) : base(data)
         {
             TardisTabName = tardisTabName;
             GraphTabName = graphTabName;

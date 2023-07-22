@@ -14,7 +14,7 @@ namespace SkyCombDrone.PersistModel
         Drone Drone { get; }
 
 
-        public DroneLoad(DataStore data, Drone drone) : base(data)
+        public DroneLoad(DroneDataStore data, Drone drone) : base(data)
         {
             Drone = drone;
         }

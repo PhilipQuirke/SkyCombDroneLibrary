@@ -14,7 +14,7 @@ namespace SkyCombDrone.PersistModel
         FlightSections Sections = null;
 
 
-        public DroneSaveSections(DataStore data, Drone drone)
+        public DroneSaveSections(DroneDataStore data, Drone drone)
             : base(data, Sections1TabName, Sections2TabName)
         {
             SetSections(drone);

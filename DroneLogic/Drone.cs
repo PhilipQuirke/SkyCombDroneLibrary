@@ -6,7 +6,6 @@ using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -100,12 +99,12 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Load video(s) objects
-        public bool LoadSettings_Videos(DataStore dataStore, Func<string, DateTime> readDateEncodedUtc)
+        public bool LoadSettings_Videos(DroneDataStore dataStore, Func<string, DateTime> readDateEncodedUtc)
         {
             try
             {
                 DroneLoad dataReader = new(dataStore, this);
-                dataStore.SelectWorksheet(DataStore.FilesTabName);
+                dataStore.SelectWorksheet(DroneDataStore.FilesTabName);
 
                 // Without at least one video we can't do anything
                 if (dataStore.ThermalVideoName != "")
@@ -134,12 +133,12 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Load existing drone flight (if any) from the DataStore 
-        public bool LoadSettings_Flight(DataStore dataStore)
+        public bool LoadSettings_Flight(DroneDataStore dataStore)
         {
             int phase = 0;
             try
             {
-                if (dataStore.SelectWorksheet(DataStore.DroneTabName))
+                if (dataStore.SelectWorksheet(DroneDataStore.DroneTabName))
                 {
                     DroneLoad dataReader = new(dataStore, this);
 
@@ -221,7 +220,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Load ground data (if any) from the DataStore 
-        public bool LoadSettings_Ground(DataStore dataStore)
+        public bool LoadSettings_Ground(DroneDataStore dataStore)
         {
             GroundData = GroundLoad.Load(dataStore);
 
@@ -368,7 +367,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void SaveSettings(DataStore dataStore)
+        public void SaveSettings(DroneDataStore dataStore)
         {
             var effort = Stopwatch.StartNew();
 
@@ -592,7 +591,7 @@ namespace SkyCombDrone.DroneLogic
 
         // After selecting/loading a file and its settings, user has edited the drone settings.
         // The new settings have been loaded into the config objects. Update our drone data accordingly.
-        public void WriteDataStore(DataStore dataStore)
+        public void WriteDataStore(DroneDataStore dataStore)
         {
             // We need to update the Drone datastore
             dataStore.Open();
@@ -603,6 +602,24 @@ namespace SkyCombDrone.DroneLogic
             datawriter.SaveData_Summary();
             datawriter.SaveData_Detail(false);
             dataStore.Close();
+        }
+
+
+        // Get the drone settings needed to describe the flight in the SkyCombFLights app
+        public DataPairList GetSettingsForSkyCombFlights()
+        {
+            var settings = new DataPairList();
+
+            settings.Add("DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(ShortDateFormat) : ""));
+            settings.Add("Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : ""));
+            settings.Add("Longitude", (HasFlightSections && (FlightSections.MinGlobalLocation != null) ? FlightSections.MinGlobalLocation.Longitude.ToString() : ""));
+            settings.Add("Latitude", (HasFlightSections && (FlightSections.MinGlobalLocation != null) ? FlightSections.MinGlobalLocation.Latitude.ToString() : ""));
+            settings.Add("EastingM", (HasFlightSections && (FlightSections.MinRelativeLocation != null) ? FlightSections.MinRelativeLocation.EastingM.ToString() : ""));
+            settings.Add("NorthingM", (HasFlightSections && (FlightSections.MinRelativeLocation != null) ? FlightSections.MinRelativeLocation.NorthingM.ToString() : ""));
+            settings.Add("DemPerc", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : ""));
+            settings.Add("DsmPerc", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : ""));
+
+            return settings;
         }
 
 

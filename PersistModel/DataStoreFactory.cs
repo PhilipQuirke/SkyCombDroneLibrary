@@ -18,10 +18,10 @@ namespace SkyCombDrone.PersistModel
         // Find name of video file that exists
         public static string FindVideo(string fileName)
         {
-            var answer = GenericDataStore.SwapFileNameExtension(fileName, ".mp4");
+            var answer = BaseDataStore.SwapFileNameExtension(fileName, ".mp4");
             if (!System.IO.File.Exists(answer))
             {
-                answer = GenericDataStore.SwapFileNameExtension(fileName, ".mov");
+                answer = BaseDataStore.SwapFileNameExtension(fileName, ".mov");
                 if (!System.IO.File.Exists(answer))
                 {
                     answer = "";
@@ -47,7 +47,7 @@ namespace SkyCombDrone.PersistModel
                     var firstVideoData = new VideoModel(firstVideoName, true, readDateEncodedUtc); // guess at thermal
 
                     // Do we have a second video (in a thermal/optical pair) that overlaps the first video timewise closely?
-                    var secondVideoName = FindVideo(DataStore.DeltaNumericString(firstVideoName, (firstVideoData.Thermal ? -1 : +1)));
+                    var secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, (firstVideoData.Thermal ? -1 : +1)));
                     VideoModel secondVideoData = null;
                     if (secondVideoName.Length > 0)
                     {
@@ -85,7 +85,7 @@ namespace SkyCombDrone.PersistModel
                     if (thermalVideoName != "")
                     {
                         // See if there is an SRT file with the same name as the video file, just a different extension
-                        thermalFlightName = GenericDataStore.SwapFileNameExtension(thermalVideoName, ".SRT");
+                        thermalFlightName = BaseDataStore.SwapFileNameExtension(thermalVideoName, ".SRT");
                         if (!System.IO.File.Exists(thermalFlightName))
                             thermalFlightName = "";
                     }
@@ -93,7 +93,7 @@ namespace SkyCombDrone.PersistModel
                     if (opticalVideoName != "")
                     {
                         // See if there is an SRT file with the same name as the video file, just a different extension
-                        opticalFlightName = GenericDataStore.SwapFileNameExtension(opticalVideoName, ".SRT");
+                        opticalFlightName = BaseDataStore.SwapFileNameExtension(opticalVideoName, ".SRT");
                         if (!System.IO.File.Exists(opticalFlightName))
                             opticalFlightName = "";
                     }
@@ -116,17 +116,17 @@ namespace SkyCombDrone.PersistModel
 
         public static string DataStoreName(string inputFileName, string outputElseInputDirectory)
         {
-            return GenericDataStore.AddFileNameSuffix(outputElseInputDirectory + "\\" + VideoModel.ShortFileName(inputFileName), DataStoreSuffix);
+            return BaseDataStore.AddFileNameSuffix(outputElseInputDirectory + "\\" + VideoModel.ShortFileName(inputFileName), DataStoreSuffix);
         }
 
 
         // From a video file name, locate all applicable input files, ensure that a DataStore exists. 
-        public static DataStore Create(
+        public static DroneDataStore Create(
             Func<string, DateTime> readDateEncodedUtc,
             string videoFileName, 
             string outputElseInputDirectory)
         {
-            DataStore answer = null;
+            DroneDataStore answer = null;
 
             try
             {
@@ -149,11 +149,11 @@ namespace SkyCombDrone.PersistModel
                         ExcelPackage store = new(dataStoreName);
                         if (store != null)
                         {
-                            var worksheet = store.Workbook.Worksheets[DataStore.FilesTabName];
+                            var worksheet = store.Workbook.Worksheets[DroneDataStore.FilesTabName];
                             if (worksheet != null)
                             {
                                 var cell = worksheet.Cells[1, 1];
-                                if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DataStore.Main1Title))
+                                if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.Main1Title))
                                     answer = new(store, dataStoreName);
                             }
                         }

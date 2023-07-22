@@ -15,7 +15,7 @@ namespace SkyCombDrone.PersistModel
         DroneSaveLegs Legs { get; }
 
 
-        public DroneSave(DataStore data, Drone drone) : base(data)
+        public DroneSave(DroneDataStore data, Drone drone) : base(data)
         {
             Drone = drone;
             Sections = new(data, drone);

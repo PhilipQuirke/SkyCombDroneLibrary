@@ -84,7 +84,7 @@ namespace SkyCombDrone.DroneLogic
         public static Drone Create(
             Action<string> showDroneSettings,
             Func<string, DateTime> readDateEncodedUtc,
-            DataStore dataStore, DroneConfigModel config, string groundDirectory, string inputFileName)
+            DroneDataStore dataStore, DroneConfigModel config, string groundDirectory, string inputFileName)
         {
             Drone answer;
             string phase = "";
@@ -152,7 +152,7 @@ namespace SkyCombDrone.DroneLogic
                         answer.DefaultConfigRunFromTo();
                         answer.EffortDurations.CalcSeenMs = EffortMs();
 
-                        phase = "Saving datastore...";
+                        phase = "Saving drone datastore...";
                         showDroneSettings(phase);
                         answer.SaveSettings(dataStore);
                     }

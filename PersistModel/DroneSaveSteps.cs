@@ -14,7 +14,7 @@ namespace SkyCombDrone.PersistModel
         FlightSteps? Steps = null;
 
 
-        public DroneSaveSteps(DataStore data, Drone drone)
+        public DroneSaveSteps(DroneDataStore data, Drone drone)
             : base(data, Steps1TabName, Steps2TabName)
         {
             SetSteps(drone);
