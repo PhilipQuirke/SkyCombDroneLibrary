@@ -38,11 +38,6 @@ namespace SkyCombDrone.DroneLogic
     //      DJI_0120.srt - a DJI-specific SRT file with basic data (location, orientation, etc)
     public class Drone : TwoVideos
     {
-        // The drone video footage extends beyond the flight path locations, so we add a buffer.
-        // The DJI_0094 test video has a MaxInputWidthM of 42 meters, so we add 20 meters to all sides.
-        public const int GroundBufferM = GroundGrid.GroundBufferM;
-
-
         public DroneConfigModel Config;
 
 
