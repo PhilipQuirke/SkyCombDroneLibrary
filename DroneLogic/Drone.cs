@@ -634,20 +634,19 @@ namespace SkyCombDrone.DroneLogic
                 }
             }
 
-            var settings = new DataPairList();
-
-            settings.Add("DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(ShortDateFormat) : ""));
-            settings.Add("Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : ""));
-            settings.Add("Longitude", longitude);
-            settings.Add("Latitude", latitude);
-            settings.Add("NZTM X", nztmX);
-            settings.Add("NZTM Y", nztmY);
-            settings.Add("East M", eastingM);
-            settings.Add("North M", northingM);
-            settings.Add("DemPerc", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : ""));
-            settings.Add("DsmPerc", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : ""));
-
-            return settings;
+            return new DataPairList
+            {
+                { "DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(ShortDateFormat) : "") },
+                { "Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : "") },
+                { "Latitude", latitude },
+                { "Longitude", longitude },
+                { "NZTM X", nztmX },
+                { "NZTM Y", nztmY },
+                { "East M", eastingM },
+                { "North M", northingM },
+                { "DemPerc", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : "") },
+                { "DsmPerc", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : "") }
+            };
         }
 
 

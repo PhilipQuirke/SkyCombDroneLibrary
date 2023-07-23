@@ -79,15 +79,11 @@ namespace SkyCombDrone.PersistModel
             SetTitle(ref row, 1, "Help resources");
             Worksheet.Cells[row, 1].Value = "Introduction and index";
             Worksheet.Cells[row, 2].Value = @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md";
-            Worksheet.Cells[row, 2].Hyperlink = new Uri(@"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md", UriKind.Absolute);
-            Worksheet.Cells[row, 2].Style.Font.UnderLine = true;
-            Worksheet.Cells[row, 2].Style.Font.Color.SetColor(Color.Blue);
+            SetExternalHyperLink( Worksheet.Cells[row, 2], @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md");
             row++;
             Worksheet.Cells[row, 1].Value = "DataStore-specific help";
             Worksheet.Cells[row, 2].Value = @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/DataStore.md";
-            Worksheet.Cells[row, 2].Hyperlink = new Uri(@"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/DataStore.md", UriKind.Absolute);
-            Worksheet.Cells[row, 2].Style.Font.UnderLine = true;
-            Worksheet.Cells[row, 2].Style.Font.Color.SetColor(Color.Blue);
+            SetExternalHyperLink(Worksheet.Cells[row, 2], @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/DataStore.md");
 
             // Copyright
             row += 3;
