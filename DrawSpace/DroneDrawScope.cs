@@ -41,30 +41,30 @@ namespace SkyCombDrone.DrawSpace
 
         public virtual float FloorMinSumLinealM { get { return Drone.FlightSteps.FloorMinSumLinealM; } }
         public virtual float CeilingMaxSumLinealM { get { return Drone.FlightSteps.CeilingMaxSumLinealM; } }
-        public virtual string DescribePath { get { return Drone.DescribeFlightPath; } }
+        public virtual string DescribePath { get { return ( Drone == null ? "" : Drone.DescribeFlightPath ); } }
         public virtual DataPairList GetSettings_FlightPath { get { return Drone.FlightSteps.GetSettings_FlightPath(); } }
 
 
         public virtual float FloorMinPitchDeg { get { return Drone.FlightSteps.FloorMinPitchDeg; } }
         public virtual float CeilingMaxPitchDeg { get { return Drone.FlightSteps.CeilingMaxPitchDeg; } }
-        public virtual string DescribePitch { get { return Drone.FlightSteps.DescribePitch(Drone.Config); } }
+        public virtual string DescribePitch { get { return (Drone == null ? "" : Drone.FlightSteps.DescribePitch(Drone.Config) ); } }
         public virtual DataPairList GetSettings_Pitch { get { return Drone.FlightSteps.GetSettings_Pitch(); } }
 
 
         public virtual float FloorMinDeltaYawDeg { get { return Drone.FlightSteps.FloorMinDeltaYawDeg; } }
         public virtual float CeilingMaxDeltaYawDeg { get { return Drone.FlightSteps.CeilingMaxDeltaYawDeg; } }
-        public virtual string DescribeDeltaYaw { get { return Drone.FlightSteps.DescribeDeltaYaw(Drone.Config); } }
+        public virtual string DescribeDeltaYaw { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeDeltaYaw(Drone.Config) ); } }
         public virtual DataPairList GetSettings_DeltaYaw { get { return Drone.FlightSteps.GetSettings_DeltaYaw(); } }
 
 
         public virtual float FloorMinRollDeg { get { return Drone.FlightSteps.FloorMinRollDeg; } }
         public virtual float CeilingMaxRollDeg { get { return Drone.FlightSteps.CeilingMaxRollDeg; } }
-        public virtual string DescribeRoll { get { return Drone.FlightSteps.DescribeRoll(Drone.Config); } }
+        public virtual string DescribeRoll { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeRoll(Drone.Config) ); } }
         public virtual DataPairList GetSettings_Roll { get { return Drone.FlightSteps.GetSettings_Roll(); } }
 
 
         public virtual (float, float) MinMaxVerticalAxisM { get { return Drone.FlightSteps.MinMaxVerticalAxisM; } }
-        public virtual string DescribeElevation { get { return Drone.FlightSteps.DescribeElevation; } }
+        public virtual string DescribeElevation { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeElevation ); } }
         public virtual DataPairList GetSettings_Altitude { get { return Drone.FlightSteps.GetSettings_Altitude(); } }
 
 

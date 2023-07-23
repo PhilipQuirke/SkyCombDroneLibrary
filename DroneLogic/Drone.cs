@@ -56,9 +56,10 @@ namespace SkyCombDrone.DroneLogic
         // The secondary display camera drone flight information (if any)
         public FlightSections? DisplaySections { get; set; }
 
-        // Ground and surface elevation (if any), in meters above sea level.
+        // Ground (aka DEM) and surface (aka DSM) elevation (if any), in meters above sea level.
         // Covers area corresponding to the drone flight log plus a 20m buffer.
         public GroundData? GroundData { get; set; }
+
 
 
         public bool HasFlightSections { get { return (FlightSections != null) && FlightSections.Sections.Count > 0; } }
@@ -73,6 +74,7 @@ namespace SkyCombDrone.DroneLogic
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemGrid != null) && (GroundData.DemGrid.NumElevationsStored > 0); } }
 
 
+        
         public Drone(DroneConfigModel config)
         {
             Config = config;
@@ -323,47 +325,40 @@ namespace SkyCombDrone.DroneLogic
         // Update DemGrid.GroundDatum.Seen with area seen by the input video over specified steps
         public void CalculateSettings_AreaSeen(int minStepId, int maxStepId)
         {
-            /*
-                        try
-                        {
-                            if ((GroundData.DemGrid == null) ||
-                               (GroundData.DemGrid.MaxLocationM == null) ||
-                               (GroundData.DemGrid.MinLocationM == null))
-                                return;
+            try
+            {
+                if ((GroundData.DemGrid == null) || ! GroundData.DemGrid.HasElevationData())
+                    return;
 
-                            if (HasInputVideo && HasFlightSections && HasGroundData)
-                            {
-                                GroundSeen groundSeen = new(GroundData.DemGrid);
+                if (HasInputVideo && HasFlightSections && HasGroundData)
+                {
+                    GroundData.SeenGrid = new(GroundData.DemGrid);
 
-                                // For each flight step, calculate the part of the grid seen
-                                for (int stepId = minStepId; stepId <= maxStepId; stepId++)
-                                {
-                                    FlightSteps.Steps.TryGetValue(stepId, out var step);
-                                    if (step == null)
-                                        continue;
+                    // For each flight step, calculate the part of the grid seen
+                    for (int stepId = minStepId; stepId <= maxStepId; stepId++)
+                    {
+                        FlightSteps.Steps.TryGetValue(stepId, out var step);
+                        if (step == null)
+                            continue;
 
-                                    // We only consider flight steps inside a leg, as Comb only applies to legs
-                                    if ((step.LegId <= 0) || (step.InputImageSizeM == null))
-                                        continue;
+                        // We only consider flight steps inside a leg, as Comb only applies to legs
+                        if ((step.LegId <= 0) || (step.InputImageSizeM == null))
+                            continue;
 
-                                    // Get corners of area covered by the step's video image (may be forward of drone's location).
-                                    // This rectangle is commonly rotated relative to the X/Y axises.
-                                    var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
-                                        step.Calculate_InputImageArea_Corners();
+                        // Get corners of area covered by the step's video image (may be forward of drone's location).
+                        // This rectangle is commonly rotated relative to the X/Y axises.
+                        var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
+                            step.Calculate_InputImageArea_Corners();
 
-                                    // Update the area as "seen"
-                                    groundSeen.SetSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
-                                }
-
-                                // Update all GroundDatum Seen values
-                                groundSeen.FinaliseSeen();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            throw ThrowException("Drone.CalculateSettings_AreaSeen: " + ex.Message);
-                        }
-            */
+                        // Update the area as "seen"
+                        GroundData.SeenGrid.SeenDroneRect(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ThrowException("Drone.CalculateSettings_AreaSeen: " + ex.Message);
+            }
         }
 
 
