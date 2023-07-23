@@ -85,8 +85,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // Calculate the Max/Min values to show on the vertical (altitude) axis.
-        public (float, float) MinMaxVerticalAxisM()
-        {
+        public (float, float) MinMaxVerticalAxisM { get {
             float minAltitudeM = (float)Math.Floor(
                 // Drone may start on a hillside, then flight horizontally, while land falls away.
                 // So MinDemM may be lower than the drone's MinVertRaw
@@ -96,7 +95,7 @@ namespace SkyCombDrone.DroneModel
                 Math.Max(MaxDemM, MaxAltitudeM));
 
             return (minAltitudeM, maxAltitudeM);
-        }
+        } }
 
 
         // Return a string like "Ground: 42-47m, Surface: 44-49m, Drone: 42-84m" 

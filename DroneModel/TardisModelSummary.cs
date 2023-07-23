@@ -64,21 +64,19 @@ namespace SkyCombDrone.DroneModel
 
 
         // The minimum / maximum delta yaw of the drone per step in degrees, rounded for use on vertical axises.
-        public float FloorMinDeltaYawDeg()
-        {
+        public float FloorMinDeltaYawDeg { get { 
             return
                 MinDeltaYawDeg == UnknownValue ? UnknownValue :
                     MinDeltaYawDeg > 0 ? 0 :
                         MinDeltaYawDeg > -0.18f ? -0.2f :
                             MinDeltaYawDeg > -0.4f ? -0.5f : (float)Math.Floor(MinDeltaYawDeg);
-        }
-        public float CeilingMaxDeltaYawDeg()
-        {
+        } }
+        public float CeilingMaxDeltaYawDeg { get {
             return
                 MaxDeltaYawDeg == UnknownValue ? UnknownValue :
                     MaxDeltaYawDeg < 0.18f ? 0.2f :
                         MaxDeltaYawDeg < 0.4f ? 0.5f : (float)Math.Max(1, Math.Ceiling(MaxDeltaYawDeg));
-        }
+        } }
 
 
         // The minimum pitch of the drone per step  

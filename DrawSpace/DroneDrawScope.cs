@@ -36,6 +36,39 @@ namespace SkyCombDrone.DrawSpace
 
 
         public virtual FlightStep CurrRunFlightStep { get { return null; } }
+        public virtual int CurrRunStepId { get { return 1; } }
+
+
+        public virtual float FloorMinSumLinealM { get { return Drone.FlightSteps.FloorMinSumLinealM; } }
+        public virtual float CeilingMaxSumLinealM { get { return Drone.FlightSteps.CeilingMaxSumLinealM; } }
+
+
+        public virtual float FloorMinPitchDeg { get { return Drone.FlightSteps.FloorMinPitchDeg; } }
+        public virtual float CeilingMaxPitchDeg { get { return Drone.FlightSteps.CeilingMaxPitchDeg; } }
+        public virtual string DescribePitch { get { return Drone.FlightSteps.DescribePitch(Drone.Config); } }
+        public virtual DataPairList GetSettings_Pitch { get { return Drone.FlightSteps.GetSettings_Pitch(); } }
+
+
+        public virtual float FloorMinDeltaYawDeg { get { return Drone.FlightSteps.FloorMinDeltaYawDeg; } }
+        public virtual float CeilingMaxDeltaYawDeg { get { return Drone.FlightSteps.CeilingMaxDeltaYawDeg; } }
+        public virtual string DescribeDeltaYaw { get { return Drone.FlightSteps.DescribeDeltaYaw(Drone.Config); } }
+        public virtual DataPairList GetSettings_DeltaYaw { get { return Drone.FlightSteps.GetSettings_DeltaYaw(); } }
+
+
+        public virtual float FloorMinRollDeg { get { return Drone.FlightSteps.FloorMinRollDeg; } }
+        public virtual float CeilingMaxRollDeg { get { return Drone.FlightSteps.CeilingMaxRollDeg; } }
+        public virtual string DescribeRoll { get { return Drone.FlightSteps.DescribeRoll(Drone.Config); } }
+        public virtual DataPairList GetSettings_Roll { get { return Drone.FlightSteps.GetSettings_Roll(); } }
+
+
+        public virtual (float, float) MinMaxVerticalAxisM { get { return Drone.FlightSteps.MinMaxVerticalAxisM; } }
+        public virtual string DescribeElevation { get { return Drone.FlightSteps.DescribeElevation(); } }
+        public virtual DataPairList GetSettings_Altitude { get { return Drone.FlightSteps.GetSettings_Altitude(); } }
+
+
+        public virtual string DescribeSpeed { get { return Drone.FlightSteps.DescribeSpeed(); } }
+        public virtual DataPairList GetSettings_Speed { get { return Drone.FlightSteps.GetSettings_Speed(); } }
+        public virtual float MaxSpeedMps { get { return Drone.FlightSteps.MaxSpeedMps; } }
 
 
         // The ObjectForm only wants to draw features up to a certain BlockId

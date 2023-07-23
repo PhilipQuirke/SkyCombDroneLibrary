@@ -40,7 +40,7 @@ namespace SkyCombDrone.PersistModel
             (var chartWs, var lastRow) = Data.PrepareChartArea(GraphTabName, chartName, TardisTabName);
             if ((lastRow > 0) && (MaxDatumId > 0) && (summary != null))
             {
-                (float minAltitude, float maxAltitude) = summary.MinMaxVerticalAxisM();
+                (float minAltitude, float maxAltitude) = summary.MinMaxVerticalAxisM;
 
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
                 Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
