@@ -40,7 +40,7 @@ namespace SkyCombDrone.DrawSpace
 
         public DrawPath(DroneDrawScope drawScope, bool simple) : base(drawScope)
         {
-            Title = "Drone path over land contours";
+            Title = DroneDrawScope.DescribePath;
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
             Metrics = DroneDrawScope.GetSettings_Altitude;
 

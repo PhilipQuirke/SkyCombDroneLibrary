@@ -400,9 +400,9 @@ namespace SkyCombDrone.DroneModel
         {
             return new DataPairList
             {
-                { "Max Drone Alt M", MaxAltitudeM, HeightNdp },
-                { "Min Drone Alt M", MinAltitudeM, HeightNdp },
-                { "Range Drone Alt M", MaxAltitudeM - MinAltitudeM, HeightNdp },
+                { "Max Drone Altitude M", MaxAltitudeM, HeightNdp },
+                { "Min Drone Altitude M", MinAltitudeM, HeightNdp },
+                { "Range Drone Altitude M", MaxAltitudeM - MinAltitudeM, HeightNdp },
             };
         }
 

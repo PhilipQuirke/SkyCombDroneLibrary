@@ -385,21 +385,20 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public string DescribeFlightPath()
-        {
+        public string DescribeFlightPath { get { 
             string answer = "";
 
             if (HasFlightSections)
-                answer += FlightSections.DescribePath();
+                answer += FlightSections.DescribePath;
 
             if (HasFlightLegs)
-                answer += FlightLegs.DescribeLegs();
+                answer += FlightLegs.DescribeLegs;
 
             if (HasFlightSteps)
-                answer += FlightSteps.DescribeLinealM();
+                answer += FlightSteps.DescribeLinealM;
 
             return answer;
-        }
+        } }
 
 
         // Return the FlightStep that is closest to the specified flightMs 

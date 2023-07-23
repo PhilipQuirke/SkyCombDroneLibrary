@@ -380,13 +380,12 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public string DescribeLegs()
-        {
+        public string DescribeLegs { get {      
             if (Legs.Count == 0)
                 return "";
 
             return string.Format(", {0} legs", Legs.Count);
-        }
+        } }
 
 
         public void AssertGood(bool hasFlightSteps)

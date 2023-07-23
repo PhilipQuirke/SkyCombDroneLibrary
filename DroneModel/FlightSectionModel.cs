@@ -162,12 +162,11 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public string DescribePath()
-        {
+        public string DescribePath { get { 
             return string.Format("Drone Path: {0} x {1}m",
                 NorthingRangeM().ToString("0"),
                 EastingRangeM().ToString("0"));
-        }
+        } }
 
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore)

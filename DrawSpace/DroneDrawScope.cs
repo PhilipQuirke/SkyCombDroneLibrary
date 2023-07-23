@@ -41,6 +41,7 @@ namespace SkyCombDrone.DrawSpace
 
         public virtual float FloorMinSumLinealM { get { return Drone.FlightSteps.FloorMinSumLinealM; } }
         public virtual float CeilingMaxSumLinealM { get { return Drone.FlightSteps.CeilingMaxSumLinealM; } }
+        public virtual string DescribePath { get { return Drone.DescribeFlightPath; } }
         public virtual DataPairList GetSettings_FlightPath { get { return Drone.FlightSteps.GetSettings_FlightPath(); } }
 
 
@@ -63,11 +64,11 @@ namespace SkyCombDrone.DrawSpace
 
 
         public virtual (float, float) MinMaxVerticalAxisM { get { return Drone.FlightSteps.MinMaxVerticalAxisM; } }
-        public virtual string DescribeElevation { get { return Drone.FlightSteps.DescribeElevation(); } }
+        public virtual string DescribeElevation { get { return Drone.FlightSteps.DescribeElevation; } }
         public virtual DataPairList GetSettings_Altitude { get { return Drone.FlightSteps.GetSettings_Altitude(); } }
 
 
-        public virtual string DescribeSpeed { get { return Drone.FlightSteps.DescribeSpeed(); } }
+        public virtual string DescribeSpeed { get { return Drone.FlightSteps.DescribeSpeed; } }
         public virtual DataPairList GetSettings_Speed { get { return Drone.FlightSteps.GetSettings_Speed(); } }
         public virtual float MaxSpeedMps { get { return Drone.FlightSteps.MaxSpeedMps; } }
 

@@ -99,8 +99,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // Return a string like "Ground: 42-47m, Surface: 44-49m, Drone: 42-84m" 
-        public string DescribeElevation()
-        {
+        public string DescribeElevation { get { 
             string answer = "";
 
             if (MinDemM != UnknownValue)
@@ -146,24 +145,22 @@ namespace SkyCombDrone.DroneModel
             }
 
             return answer;
-        }
+        } }
 
 
         // Describe the drone path lineal meters
-        public string DescribeLinealM()
-        {
+        public string DescribeLinealM { get { 
             string answer = "";
 
             if (MaxSumLinealM > 0)
                 answer += ", flew " + MaxSumLinealM.ToString("0") + "m";
 
             return answer;
-        }
+        } }
 
 
         // Describe the drone max/avg speed
-        public string DescribeSpeed()
-        {
+        public string DescribeSpeed { get { 
             string answer = "Drone Speed";
 
             if (MaxSpeedMps != UnknownValue)
@@ -172,7 +169,7 @@ namespace SkyCombDrone.DroneModel
                     MaxSpeedMps.ToString("0.0"));
 
             return answer;
-        }
+        } }
 
 
         // Get object's settings related to altitude (e.g. for use in graph labeling)
