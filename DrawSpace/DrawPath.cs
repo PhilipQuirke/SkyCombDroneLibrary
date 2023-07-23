@@ -11,7 +11,7 @@ using System.Drawing;
 namespace SkyCombDrone.DrawSpace
 {
     // Code to draw images related to drone flight path data
-    public class DrawPath : Draw
+    public class DrawPath : DrawGraph
     {
         // Class supports drawing various backgrounds
         public enum BackgroundType
@@ -38,8 +38,12 @@ namespace SkyCombDrone.DrawSpace
         private Transform TransformMToPixels;
 
 
-        public DrawPath(DroneDrawScope drawScope, bool simple)
+        public DrawPath(DroneDrawScope drawScope, bool simple) : base(drawScope)
         {
+            Title = "Drone path over land contours";
+            Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
+            Metrics = DroneDrawScope.GetSettings_Altitude;
+
             Simple = simple;
             Reset(drawScope);
         }
@@ -371,7 +375,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw drone flight path based on Drone/GroundSpace data
         // Use the FlightStep data EastM and NorthM, and the cummulative Min/MaxNorthSumM and Min/MaxEastSumM data.
         // Also use FlightLeg data to draw straight lines.
-        public void Initialise(Size size, RelativeLocation processObjectLocation = null, BackgroundType backgroundType = BackgroundType.DsmElevations)
+        public void Initialise(Size size, RelativeLocation? processObjectLocation, BackgroundType backgroundType)
         {
             try
             {
@@ -465,8 +469,14 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
+        public override void Initialise(Size size)
+        {
+            Initialise(size, null, BackgroundType.DsmElevations);
+        }
+
+
         // Draw drone flight path based on Drone/GroundSpace data
-        public virtual Image<Bgr, byte> CurrImage()
+        public override Image<Bgr, byte> CurrImage()
         {
             try
             {

@@ -41,6 +41,7 @@ namespace SkyCombDrone.DrawSpace
 
         public virtual float FloorMinSumLinealM { get { return Drone.FlightSteps.FloorMinSumLinealM; } }
         public virtual float CeilingMaxSumLinealM { get { return Drone.FlightSteps.CeilingMaxSumLinealM; } }
+        public virtual DataPairList GetSettings_FlightPath { get { return Drone.FlightSteps.GetSettings_FlightPath(); } }
 
 
         public virtual float FloorMinPitchDeg { get { return Drone.FlightSteps.FloorMinPitchDeg; } }
