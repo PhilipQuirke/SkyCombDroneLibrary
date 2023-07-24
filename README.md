@@ -1,7 +1,7 @@
 # [SkyComb Drone Library](https://github.com/PhilipQuirke/SkyCombDroneLibrary/) 
 
 SkyComb Drone Library is a library that:
-- takes as input the flight log (SRT) file created by a drone during a flight
+- takes as input the flight log (SRT) and video files created by a drone during a flight
 - integrates ground data provided by the SkyComb Ground library
 - generates a summary of the drone flight and saves it to a datastore (xls)   
 
