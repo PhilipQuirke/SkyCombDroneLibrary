@@ -33,7 +33,7 @@ namespace SkyCombDrone.DrawSpace
 
         public Image<Bgr, byte> BaseImage;
         // Move locations to desired centre of FOV
-        private RelativeLocation TranslateM;
+        private DroneLocation TranslateM;
         // Transform meters to pixels
         private Transform TransformMToPixels;
 
@@ -66,7 +66,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Convert from a Location (in meters) to a Point (in pixels)
-        public Point LocationMToPixelPoint(RelativeLocation orgLocationM)
+        public Point DroneLocnMToPixelPoint(DroneLocation orgLocationM)
         {
             var locationM = orgLocationM.Translate(TranslateM);
 
@@ -75,20 +75,20 @@ namespace SkyCombDrone.DrawSpace
 
             return new Point((int)x, (int)y);
         }
-        private Point FlightPath_LocationMToPixelPoint(FlightStep theStep)
+        private Point FlightPath_DroneLocnMToPixelPoint(FlightStep theStep)
         {
-            return LocationMToPixelPoint(theStep.DroneLocationM);
+            return DroneLocnMToPixelPoint(theStep.DroneLocnM);
         }
-        private Point FlightPath_LocationMToPixelPoint(FlightSteps flightSteps, int stepId)
+        private Point FlightPath_DroneLocnMToPixelPoint(FlightSteps flightSteps, int stepId)
         {
-            return FlightPath_LocationMToPixelPoint(flightSteps.Steps[stepId]);
+            return FlightPath_DroneLocnMToPixelPoint(flightSteps.Steps[stepId]);
         }
 
 
         // Convert from a Location (in meters) to a square Rectangle (in pixels)
-        public Rectangle LocationMToPixelSquare(RelativeLocation locationM, int rectPixels)
+        public Rectangle DroneLocnMToPixelSquare(DroneLocation locationM, int rectPixels)
         {
-            var pixelPoint = LocationMToPixelPoint(locationM);
+            var pixelPoint = DroneLocnMToPixelPoint(locationM);
             Rectangle pixelRect = new(
                 pixelPoint.X - rectPixels / 2,
                 pixelPoint.Y - rectPixels / 2,
@@ -105,7 +105,7 @@ namespace SkyCombDrone.DrawSpace
             if ((flightStep == null) || (flightStep.YawDeg == UnknownValue))
                 return;
 
-            var thisPoint = LocationMToPixelPoint(flightStep.DroneLocationM);
+            var thisPoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
 
             var (bottomLeft, centerTop, bottomRight) = flightStep.DirectionChevron();
 
@@ -123,7 +123,7 @@ namespace SkyCombDrone.DrawSpace
             if ((flightStep == null) || (flightStep.YawDeg == UnknownValue))
                 return;
 
-            var thisPoint = LocationMToPixelPoint(flightStep.DroneLocationM);
+            var thisPoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
             var legname = flightStep.LegName;
 
             // Using flightStep.YawDeg, decide where to draw the text relative to thisPoint.
@@ -165,8 +165,8 @@ namespace SkyCombDrone.DrawSpace
                 var thisThickness = highlight ? HighlightThickness : NormalThickness;
 
                 // Draw the leg as a straight line in black or blue.
-                var startPoint = FlightPath_LocationMToPixelPoint(flightSteps, leg.MinStepId);
-                var endPoint = FlightPath_LocationMToPixelPoint(flightSteps, leg.MaxStepId);
+                var startPoint = FlightPath_DroneLocnMToPixelPoint(flightSteps, leg.MinStepId);
+                var endPoint = FlightPath_DroneLocnMToPixelPoint(flightSteps, leg.MaxStepId);
                 Line(ref image, startPoint, endPoint, thisBgr, thisThickness);
 
                 // Draw the leg Name near the start of the leg.
@@ -189,8 +189,8 @@ namespace SkyCombDrone.DrawSpace
                 if (startStepId >= endStepId)
                     continue;
 
-                startPoint = FlightPath_LocationMToPixelPoint(flightSteps, startStepId);
-                endPoint = FlightPath_LocationMToPixelPoint(flightSteps, endStepId);
+                startPoint = FlightPath_DroneLocnMToPixelPoint(flightSteps, startStepId);
+                endPoint = FlightPath_DroneLocnMToPixelPoint(flightSteps, endStepId);
                 Line(ref image, startPoint, endPoint, DroneColors.ColorToBgr(DroneColors.InScopeDroneColor), HighlightThickness);
             }
         }
@@ -210,7 +210,7 @@ namespace SkyCombDrone.DrawSpace
             int prevLegId = UnknownValue;
             foreach (var step in flightSteps.Steps)
             {
-                var thisPoint = FlightPath_LocationMToPixelPoint(step.Value);
+                var thisPoint = FlightPath_DroneLocnMToPixelPoint(step.Value);
 
                 int thisStepId = step.Key;
 
@@ -248,7 +248,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // Draw the ground or surface elevations as background of shades of brown or green
+        // Draw the ground or surface elevations or "seen" as background of shades of brown or green
         private void DrawGroundOrSurfaceElevations(ref Image<Bgr, byte> image, BackgroundType backgroundType)
         {
             if (BaseDrawScope.Drone.GroundData == null)
@@ -266,7 +266,7 @@ namespace SkyCombDrone.DrawSpace
             }
             else if (backgroundType == BackgroundType.SeenArea)
             {
-                theGrid = BaseDrawScope.Drone.GroundData.DemGrid;
+                theGrid = BaseDrawScope.Drone.GroundData.SeenGrid;
                 highColor = Color.White;
                 lowColor = Color.LightGray;
             }
@@ -293,9 +293,9 @@ namespace SkyCombDrone.DrawSpace
             {
                 for (int col = 1; col < theGrid.NumCols + 1; col++)
                 {
-                    var droneLocnM = new RelativeLocation(row - GroundGrid.GroundBufferM, col - GroundGrid.GroundBufferM);
+                    var droneLocnM = new DroneLocation(row - GroundGrid.GroundBufferM, col - GroundGrid.GroundBufferM);
 
-                    var locationRect = LocationMToPixelSquare(droneLocnM, pixelsPerMeter);
+                    var locationRect = DroneLocnMToPixelSquare(droneLocnM, pixelsPerMeter);
 
                     // Add pixels to the right and bottom of square to avoid drawing gaps in image caused by:
                     // - int rounding
@@ -375,7 +375,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw drone flight path based on Drone/GroundSpace data
         // Use the FlightStep data EastM and NorthM, and the cummulative Min/MaxNorthSumM and Min/MaxEastSumM data.
         // Also use FlightLeg data to draw straight lines.
-        public void Initialise(Size size, RelativeLocation? processObjectLocation, BackgroundType backgroundType)
+        public void Initialise(Size size, DroneLocation? processObjectLocation, BackgroundType backgroundType)
         {
             try
             {
@@ -403,12 +403,12 @@ namespace SkyCombDrone.DrawSpace
                     var flightSteps = BaseDrawScope.Drone.FlightSteps;
                     float pathImageWidthM = (tightFocus ? 0 : flightSteps.MaxImageWidthM());
 
-                    RelativeLocation minLocation = new();
-                    RelativeLocation maxLocation = new();
+                    DroneLocation minLocation = new();
+                    DroneLocation maxLocation = new();
                     if (tightFocus)
                     {
-                        minLocation = processObjectLocation.Translate(new RelativeLocation(-tightFocusM, -tightFocusM));
-                        maxLocation = processObjectLocation.Translate(new RelativeLocation(tightFocusM, tightFocusM));
+                        minLocation = processObjectLocation.Translate(new DroneLocation(-tightFocusM, -tightFocusM));
+                        maxLocation = processObjectLocation.Translate(new DroneLocation(tightFocusM, tightFocusM));
                     }
                     else
                     {
@@ -492,7 +492,7 @@ namespace SkyCombDrone.DrawSpace
                     if (flightStep != null)
                     {
                         // Draw a circle to show current drone location.
-                        var dronePoint = LocationMToPixelPoint(flightStep.DroneLocationM);
+                        var dronePoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
                         Circle(ref image, dronePoint, activeBgr);
 
                         // PQR ToDo Draw the Block (instead of the FlightStep) InputImageSizeM
@@ -503,10 +503,10 @@ namespace SkyCombDrone.DrawSpace
                             var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
                                 flightStep.Calculate_InputImageArea_Corners();
 
-                            var topLeftPoint = LocationMToPixelPoint(topLeftLocn);
-                            var topRightPoint = LocationMToPixelPoint(topRightLocn);
-                            var bottomRightPoint = LocationMToPixelPoint(bottomRightLocn);
-                            var bottomLeftPoint = LocationMToPixelPoint(bottomLeftLocn);
+                            var topLeftPoint = DroneLocnMToPixelPoint(topLeftLocn);
+                            var topRightPoint = DroneLocnMToPixelPoint(topRightLocn);
+                            var bottomRightPoint = DroneLocnMToPixelPoint(bottomRightLocn);
+                            var bottomLeftPoint = DroneLocnMToPixelPoint(bottomLeftLocn);
 
                             Line(ref image, topLeftPoint, topRightPoint, activeBgr, NormalThickness);
                             Line(ref image, topRightPoint, bottomRightPoint, activeBgr, NormalThickness);

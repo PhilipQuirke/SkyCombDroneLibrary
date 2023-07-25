@@ -254,19 +254,19 @@ namespace SkyCombDrone.DroneModel
         {
             (MinTardisId, MaxTardisId) = SummariseInt(MinTardisId, MaxTardisId, tardis.TardisId);
 
-            if (tardis.DroneLocationM != null)
+            if (tardis.DroneLocnM != null)
             {
                 if (MinDroneLocnM == null)
                 {
-                    MinDroneLocnM = new DroneLocation(tardis.DroneLocationM);
-                    MaxDroneLocnM = new DroneLocation(tardis.DroneLocationM);
+                    MinDroneLocnM = new DroneLocation(tardis.DroneLocnM);
+                    MaxDroneLocnM = new DroneLocation(tardis.DroneLocnM);
                 }
                 else
                 {
-                    MinDroneLocnM.NorthingM = Math.Min(MinDroneLocnM.NorthingM, tardis.DroneLocationM.NorthingM);
-                    MinDroneLocnM.EastingM = Math.Min(MinDroneLocnM.EastingM, tardis.DroneLocationM.EastingM);
-                    MaxDroneLocnM.NorthingM = Math.Max(MaxDroneLocnM.NorthingM, tardis.DroneLocationM.NorthingM);
-                    MaxDroneLocnM.EastingM = Math.Max(MaxDroneLocnM.EastingM, tardis.DroneLocationM.EastingM);
+                    MinDroneLocnM.NorthingM = Math.Min(MinDroneLocnM.NorthingM, tardis.DroneLocnM.NorthingM);
+                    MinDroneLocnM.EastingM = Math.Min(MinDroneLocnM.EastingM, tardis.DroneLocnM.EastingM);
+                    MaxDroneLocnM.NorthingM = Math.Max(MaxDroneLocnM.NorthingM, tardis.DroneLocnM.NorthingM);
+                    MaxDroneLocnM.EastingM = Math.Max(MaxDroneLocnM.EastingM, tardis.DroneLocnM.EastingM);
                 }
             }
 

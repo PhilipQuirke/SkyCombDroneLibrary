@@ -24,8 +24,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-
-        public void SetVideoFlightSectionData(int col, string title, VideoData video)
+        public void SetVideoFlightSectionData(int col, string title, VideoData? video)
         {
             if (video != null)
                 Data.SetTitleAndDataListColumn(title + VideoInputTitleSuffix, Chapter1TitleRow, col, video.GetSettings());

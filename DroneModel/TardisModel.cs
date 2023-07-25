@@ -24,7 +24,7 @@ namespace SkyCombDrone.DroneModel
 
         // Drone location relative to drone encompassing box (in meters).
         // NorthingM and EastingM are normally in the range 0 to 5000 (5km).
-        public DroneLocation DroneLocationM { get; set; }
+        public DroneLocation? DroneLocnM { get; set; }
         // Lineal (straight line) distance drone travelled since previous Tardis 
         public float LinealM { get; set; } = UnknownValue;
         // Sum of lineal distance for this and all previous Tardis
@@ -63,7 +63,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // Calculates TimeMs and SumTimeMs
-        public void CalculateSettings_TimeMs(TardisModel prevTardis)
+        public void CalculateSettings_TimeMs(TardisModel? prevTardis)
         {
             if (prevTardis == null)
                 TimeMs = (int)StartTime.TotalMilliseconds;
@@ -82,11 +82,11 @@ namespace SkyCombDrone.DroneModel
             LinealM = 0;
             SumLinealM = 0;
 
-            if (DroneLocationM != null && prevTardis != null && prevTardis.DroneLocationM != null)
+            if (DroneLocnM != null && prevTardis != null && prevTardis.DroneLocnM != null)
             {
                 LinealM = new RelativeLocation(
-                    DroneLocationM.NorthingM - prevTardis.DroneLocationM.NorthingM,
-                    DroneLocationM.EastingM - prevTardis.DroneLocationM.EastingM)
+                    DroneLocnM.NorthingM - prevTardis.DroneLocnM.NorthingM,
+                    DroneLocnM.EastingM - prevTardis.DroneLocnM.EastingM)
                         .DiagonalM();
                 Assert(LinealM < 1000, "CalculateSettings_LinealM: 1km step");
                 SumLinealM = prevTardis.SumLinealM + LinealM;
@@ -144,10 +144,10 @@ namespace SkyCombDrone.DroneModel
             StartTime = other.StartTime;
             TimeMs = other.TimeMs;
 
-            if (other.DroneLocationM != null)
-                DroneLocationM = new(other.DroneLocationM);
+            if (other.DroneLocnM != null)
+                DroneLocnM = new(other.DroneLocnM);
             else
-                DroneLocationM = null;
+                DroneLocnM = null;
 
             LinealM = other.LinealM;
             SumLinealM = other.SumLinealM;
@@ -191,8 +191,8 @@ namespace SkyCombDrone.DroneModel
                 { "Start Time", TimeSpanToString(StartTime) },
                 { "Time Ms", TimeMs, MillisecondsNdp },
                 { "Sum Time Ms", SumTimeMs, MillisecondsNdp },
-                { "Northing M", DroneLocationM!=null ? DroneLocationM.NorthingM : UnknownValue , LocationNdp },
-                { "Easting M", DroneLocationM!=null ? DroneLocationM.EastingM : UnknownValue , LocationNdp },
+                { "Northing M", DroneLocnM!=null ? DroneLocnM.NorthingM : UnknownValue , LocationNdp },
+                { "Easting M", DroneLocnM!=null ? DroneLocnM.EastingM : UnknownValue , LocationNdp },
                 { "Lineal M", LinealM == UnknownValue ? UnknownLinealValue : LinealM, LocationNdp }, // Improve graphing
                 { "Sum Lineal M", SumLinealM == UnknownValue ? UnknownLinealValue : SumLinealM, LocationNdp }, // Improve graphing
                 { "Speed Mps", SpeedMps(), LocationNdp },
@@ -213,7 +213,7 @@ namespace SkyCombDrone.DroneModel
             StartTime = StringToTimeSpan(settings[1]);
             TimeMs = StringToNonNegInt(settings[2]);
             // SumTimeMs = StringToNonNegInt(settings[3]);
-            DroneLocationM = new DroneLocation(settings[4], settings[5]);
+            DroneLocnM = new DroneLocation(settings[4], settings[5]);
             LinealM = StringToFloat(settings[6]);
             SumLinealM = StringToFloat(settings[7]);
             // SpeedMps = settings[8]

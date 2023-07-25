@@ -48,7 +48,7 @@ namespace SkyCombDrone.DroneLogic
                 Assert(eastingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive eastingM");
             }
 
-            DroneLocationM = new(northingM, eastingM);
+            DroneLocnM = new(northingM, eastingM);
         }
     };
 
@@ -70,7 +70,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Add the flight section, indexed by SectionMinMs units
-        public void AddSection(FlightSection thisSection, FlightSection prevSection)
+        public void AddSection(FlightSection thisSection, FlightSection? prevSection)
         {
             thisSection.CalculateSettings_TimeMs(prevSection);
             Sections.Add(thisSection.TardisId, thisSection);

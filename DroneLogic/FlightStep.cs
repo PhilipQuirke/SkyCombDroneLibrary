@@ -109,10 +109,10 @@ namespace SkyCombDrone.DroneLogic
                     if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
                         return false;
 
-                    if (nearbySection.GlobalLocation.Specified && (nearbySection.DroneLocationM != null))
+                    if (nearbySection.GlobalLocation.Specified && (nearbySection.DroneLocnM != null))
                     {
-                        nearbyNorthingM += nearbySection.DroneLocationM.NorthingM;
-                        nearbyEastingM += nearbySection.DroneLocationM.EastingM;
+                        nearbyNorthingM += nearbySection.DroneLocnM.NorthingM;
+                        nearbyEastingM += nearbySection.DroneLocnM.EastingM;
                         nearbyLocationCount++;
                     }
 
@@ -144,7 +144,7 @@ namespace SkyCombDrone.DroneLogic
             }
 
             if (nearbyLocationCount > 0)
-                DroneLocationM = new(nearbyNorthingM / nearbyLocationCount, nearbyEastingM / nearbyLocationCount);
+                DroneLocnM = new(nearbyNorthingM / nearbyLocationCount, nearbyEastingM / nearbyLocationCount);
 
             if ((nearbyPosYawCount > 0) && (nearbyNegYawCount > 0))
             {
@@ -167,7 +167,7 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings_DemM(GroundData groundData)
         {
             if ((groundData != null) && (groundData.DemGrid != null))
-                DemM = groundData.DemGrid.GetElevationByDroneLocn(DroneLocationM);
+                DemM = groundData.DemGrid.GetElevationByDroneLocn(DroneLocnM);
         }
 
 
@@ -175,7 +175,7 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings_DsmM(GroundData groundData)
         {
             if ((groundData != null) && (groundData.DsmGrid != null))
-                DsmM = groundData.DsmGrid.GetElevationByDroneLocn(DroneLocationM);
+                DsmM = groundData.DsmGrid.GetElevationByDroneLocn(DroneLocnM);
         }
 
 
@@ -263,7 +263,7 @@ namespace SkyCombDrone.DroneLogic
                 var unitForwardVelocity = StepVelocityMps.GetUnitVector();
 
                 // Working out the center of the image area
-                InputImageCenter = DroneLocationM.Clone();
+                InputImageCenter = DroneLocnM.Clone();
 
                 InputImageCenter.NorthingM += (float)(groundForwardM * unitForwardVelocity.Value.Y);
                 InputImageCenter.EastingM += (float)(groundForwardM * unitForwardVelocity.Value.X);
@@ -285,7 +285,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate InputImageArea corners
         // Area covered by the step's video image (may be forward of drone's location).
-        public (RelativeLocation topLeft, RelativeLocation topRight, RelativeLocation bottomRight, RelativeLocation bottomLeft)
+        public (DroneLocation topLeft, DroneLocation topRight, DroneLocation bottomRight, DroneLocation bottomLeft)
             Calculate_InputImageArea_Corners()
         {
             // A drone yaw of 0 represents north
@@ -297,16 +297,16 @@ namespace SkyCombDrone.DroneLogic
             var halfHeight = InputImageSizeM.Value.Y / 2.0;
 
             // Rotate the image area by the drone's yaw.
-            RelativeLocation inputImageTopLeft = new(
+            DroneLocation inputImageTopLeft = new(
                 (float)(sinYaw * (-halfHeight) + cosYaw * (+halfWidth)),
                 (float)(cosYaw * (-halfHeight) - sinYaw * (+halfWidth)));
-            RelativeLocation inputImageTopRight = new(
+            DroneLocation inputImageTopRight = new(
                 (float)(sinYaw * (+halfHeight) + cosYaw * (+halfWidth)),
                 (float)(cosYaw * (+halfHeight) - sinYaw * (+halfWidth)));
-            RelativeLocation inputImageBottomRight = new(
+            DroneLocation inputImageBottomRight = new(
                 (float)(sinYaw * (+halfHeight) + cosYaw * (-halfWidth)),
                 (float)(cosYaw * (+halfHeight) - sinYaw * (-halfWidth)));
-            RelativeLocation inputImageBottomLeft = new(
+            DroneLocation inputImageBottomLeft = new(
                 (float)(sinYaw * (-halfHeight) + cosYaw * (-halfWidth)),
                 (float)(cosYaw * (-halfHeight) - sinYaw * (-halfWidth)));
 
@@ -325,7 +325,7 @@ namespace SkyCombDrone.DroneLogic
         // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
-        public RelativeLocation CalcImageFeatureLocationM(RelativeLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
+        public DroneLocation CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
         {
             if (InputImageSizeM == null)
                 return null;
@@ -347,8 +347,8 @@ namespace SkyCombDrone.DroneLogic
 
             // Physical offset of the object within the drone physical field of vision.
             // Rotated to match the flight direction of the drone.
-            RelativeLocation objectLocationRotatedM =
-                new(RelativeLocation.RotatePoint(objectInImageLocnM, Math.PI - YawRad));
+            DroneLocation objectLocationRotatedM =
+                new(DroneLocation.RotatePoint(objectInImageLocnM, Math.PI - YawRad));
 
             // With multiple blocks per step we translate by the block delta
             var answer = InputImageCenter.Translate(deltaBlockLocnM);
@@ -378,7 +378,7 @@ namespace SkyCombDrone.DroneLogic
 
         public void AssertGood()
         {
-            Assert(DroneLocationM != null, "FlightStep.AssertGood: No LocationM");
+            Assert(DroneLocnM != null, "FlightStep.AssertGood: No LocationM");
             Assert(StepVelocityMps != null, "FlightStep.AssertGood: No VelocityMps");
             Assert(InputImageCenter != null, "FlightStep.AssertGood: No InputImageCenter");
         }
@@ -601,8 +601,8 @@ namespace SkyCombDrone.DroneLogic
                 // Smoothing should not generate values outside the original envelope
                 float epsilon = 0.3f;
                 var theStepSpeed = theStep.SpeedMps();
-                Assert(theStep.DroneLocationM.NorthingM <= Sections.MaxDroneLocnM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
-                Assert(theStep.DroneLocationM.EastingM <= Sections.MaxDroneLocnM.EastingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.EastingM");
+                Assert(theStep.DroneLocnM.NorthingM <= Sections.MaxDroneLocnM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
+                Assert(theStep.DroneLocnM.EastingM <= Sections.MaxDroneLocnM.EastingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.EastingM");
                 Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
                 Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStep.SpeedMps() + " > " + Sections.MaxSpeedMps);
@@ -705,8 +705,8 @@ namespace SkyCombDrone.DroneLogic
                         // Use simple linear smoothing.
                         var minStep = Steps[leg.MinStepId];
                         var maxStep = Steps[leg.MaxStepId];
-                        var minLocn = minStep.DroneLocationM;
-                        var maxLocn = maxStep.DroneLocationM;
+                        var minLocn = minStep.DroneLocnM;
+                        var maxLocn = maxStep.DroneLocnM;
                         var deltaLocn = new RelativeLocation(
                             maxLocn.NorthingM - minLocn.NorthingM,
                             maxLocn.EastingM - minLocn.EastingM);
@@ -723,7 +723,7 @@ namespace SkyCombDrone.DroneLogic
                             Assert(fraction > 0, "CalculateSettings_RefineLocationData: Fraction logic 1");
                             Assert(fraction < 1, "CalculateSettings_RefineLocationData: Fraction logic 2");
 
-                            theStep.DroneLocationM = new(
+                            theStep.DroneLocnM = new(
                                 minLocn.NorthingM + deltaLocn.NorthingM * fraction,
                                 minLocn.EastingM + deltaLocn.EastingM * fraction);
 
@@ -740,7 +740,7 @@ namespace SkyCombDrone.DroneLogic
                         for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
                         {
                             Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocationM != null))
+                            if ((theStep != null) && (theStep.DroneLocnM != null))
                                 arraySize++;
                         }
 
@@ -752,11 +752,11 @@ namespace SkyCombDrone.DroneLogic
                         for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
                         {
                             Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocationM != null))
+                            if ((theStep != null) && (theStep.DroneLocnM != null))
                             {
                                 timeRaw[arrayIndex] = theStep.SumTimeMs;
-                                northingRaw[arrayIndex] = theStep.DroneLocationM.NorthingM;
-                                eastingRaw[arrayIndex] = theStep.DroneLocationM.EastingM;
+                                northingRaw[arrayIndex] = theStep.DroneLocnM.NorthingM;
+                                eastingRaw[arrayIndex] = theStep.DroneLocnM.EastingM;
                                 arrayIndex++;
                             }
                         }
@@ -774,10 +774,10 @@ namespace SkyCombDrone.DroneLogic
                         for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
                         {
                             Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocationM != null))
+                            if ((theStep != null) && (theStep.DroneLocnM != null))
                             {
-                                theStep.DroneLocationM.NorthingM = northingSmooth[arrayIndex];
-                                theStep.DroneLocationM.EastingM = eastingSmooth[arrayIndex];
+                                theStep.DroneLocnM.NorthingM = northingSmooth[arrayIndex];
+                                theStep.DroneLocnM.EastingM = eastingSmooth[arrayIndex];
 
                                 // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
                                 theStep.CalculateSettings_RefineLocationData(videoData, prevStep);

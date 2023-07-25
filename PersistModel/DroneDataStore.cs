@@ -119,7 +119,7 @@ namespace SkyCombDrone.PersistModel
             OpticalFlightName = opticalFlightName;
             OutputVideoName = outputVideoName;
 
-            SetWorkbookProperties();
+            SetWorkbookAnalystProperties();
             SaveIndex();
             SaveFiles();
 

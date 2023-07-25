@@ -71,9 +71,9 @@ namespace SkyCombDrone.DroneModel
             PointF bottomRight = new(width / 2, width / 2);
 
             return (
-                RelativeLocation.RotatePoint(bottomLeft, YawRad),
+                DroneLocation.RotatePoint(bottomLeft, YawRad),
                 new(0, 0),
-                RelativeLocation.RotatePoint(bottomRight, YawRad)
+                DroneLocation.RotatePoint(bottomRight, YawRad)
             );
         }
 
