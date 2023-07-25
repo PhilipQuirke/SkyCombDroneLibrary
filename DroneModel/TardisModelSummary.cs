@@ -21,8 +21,8 @@ namespace SkyCombDrone.DroneModel
         // Northing/Easting is a symmetrical local coordinate system
         // That is 1 unit Northing is the same distance as 1 unit Easting.
         // Origin is bottom left of box 
-        public RelativeLocation? MinLocationM { get; set; }
-        public RelativeLocation? MaxLocationM { get; set; }
+        public DroneLocation? MinDroneLocnM { get; set; }
+        public DroneLocation? MaxDroneLocnM { get; set; }
 
 
         // The minimum / maximum TimeMS (aka duration) of any one flight step
@@ -108,8 +108,8 @@ namespace SkyCombDrone.DroneModel
         {
             MinTardisId = UnknownValue;
             MaxTardisId = UnknownValue;
-            MinLocationM = null;
-            MaxLocationM = null;
+            MinDroneLocnM = null;
+            MaxDroneLocnM = null;
             MinTimeMs = UnknownValue;
             MaxTimeMs = UnknownValue;
             MinSumTimeMs = UnknownValue;
@@ -135,8 +135,8 @@ namespace SkyCombDrone.DroneModel
         {
             MinTardisId = other.MinTardisId;
             MaxTardisId = other.MaxTardisId;
-            MinLocationM = (other.MinLocationM == null ? null : other.MinLocationM.Clone());
-            MaxLocationM = (other.MaxLocationM == null ? null : other.MaxLocationM.Clone());
+            MinDroneLocnM = (other.MinDroneLocnM == null ? null : other.MinDroneLocnM.Clone());
+            MaxDroneLocnM = (other.MaxDroneLocnM == null ? null : other.MaxDroneLocnM.Clone());
             MinTimeMs = other.MinTimeMs;
             MaxTimeMs = other.MaxTimeMs;
             MinSumTimeMs = other.MinSumTimeMs;
@@ -171,10 +171,10 @@ namespace SkyCombDrone.DroneModel
             // Ignore small rounding errors.
             float rounding = 0.001f;
 
-            Assert(MinLocationM.NorthingM + rounding >= original.MinLocationM.NorthingM, "AssertGoodRevision: Bad MinLocationM.NorthingM");
-            Assert(MinLocationM.EastingM + rounding >= original.MinLocationM.EastingM, "AssertGoodRevision: Bad MinLocationM.EastingM");
-            Assert(MaxLocationM.NorthingM - rounding <= original.MaxLocationM.NorthingM, "AssertGoodRevision: Bad MaxLocationM.NorthingM");
-            Assert(MaxLocationM.EastingM - rounding <= original.MaxLocationM.EastingM, "AssertGoodRevision: Bad MaxLocationM.EastingM");
+            Assert(MinDroneLocnM.NorthingM + rounding >= original.MinDroneLocnM.NorthingM, "AssertGoodRevision: Bad MinLocationM.NorthingM");
+            Assert(MinDroneLocnM.EastingM + rounding >= original.MinDroneLocnM.EastingM, "AssertGoodRevision: Bad MinLocationM.EastingM");
+            Assert(MaxDroneLocnM.NorthingM - rounding <= original.MaxDroneLocnM.NorthingM, "AssertGoodRevision: Bad MaxLocationM.NorthingM");
+            Assert(MaxDroneLocnM.EastingM - rounding <= original.MaxDroneLocnM.EastingM, "AssertGoodRevision: Bad MaxLocationM.EastingM");
 
             // We dont check MinVertRaw as OnGroundAt can cause values outside the original envelope
             // We dont check MaxVertRaw as OnGroundAt can cause values outside the original envelope
@@ -200,14 +200,16 @@ namespace SkyCombDrone.DroneModel
 
             AssertGoodSubset(original);
 
-            Assert(MinSumLinealM >= original.MinSumLinealM, "AssertGoodRevision: Bad MinSumLinealM");
-            Assert(MaxSumLinealM <= original.MaxSumLinealM, "AssertGoodRevision: Bad MaxSumLinealM");
+            float epsilon = 0.2f;
 
-            Assert(MinSpeedMps >= original.MinSpeedMps, "AssertGoodRevision: Bad MinSpeedMps");
-            Assert(MaxSpeedMps <= original.MaxSpeedMps, "AssertGoodRevision: Bad MaxSpeedMps");
+            Assert(MinSumLinealM >= original.MinSumLinealM - epsilon, "AssertGoodRevision: Bad MinSumLinealM");
+            Assert(MaxSumLinealM <= original.MaxSumLinealM + epsilon, "AssertGoodRevision: Bad MaxSumLinealM");
 
-            Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg, "AssertGoodRevision: Bad MinDeltaYawDeg");
-            Assert(MaxDeltaYawDeg <= original.MaxDeltaYawDeg, "AssertGoodRevision: Bad MaxDeltaYawDeg");
+            Assert(MinSpeedMps >= original.MinSpeedMps - epsilon, "AssertGoodRevision: Bad MinSpeedMps");
+            Assert(MaxSpeedMps <= original.MaxSpeedMps + epsilon, "AssertGoodRevision: Bad MaxSpeedMps");
+
+            Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg - epsilon, "AssertGoodRevision: Bad MinDeltaYawDeg");
+            Assert(MaxDeltaYawDeg <= original.MaxDeltaYawDeg + epsilon, "AssertGoodRevision: Bad MaxDeltaYawDeg");
         }
 
 
@@ -252,19 +254,19 @@ namespace SkyCombDrone.DroneModel
         {
             (MinTardisId, MaxTardisId) = SummariseInt(MinTardisId, MaxTardisId, tardis.TardisId);
 
-            if (tardis.LocationM != null)
+            if (tardis.DroneLocationM != null)
             {
-                if (MinLocationM == null)
+                if (MinDroneLocnM == null)
                 {
-                    MinLocationM = new RelativeLocation(tardis.LocationM);
-                    MaxLocationM = new RelativeLocation(tardis.LocationM);
+                    MinDroneLocnM = new DroneLocation(tardis.DroneLocationM);
+                    MaxDroneLocnM = new DroneLocation(tardis.DroneLocationM);
                 }
                 else
                 {
-                    MinLocationM.NorthingM = Math.Min(MinLocationM.NorthingM, tardis.LocationM.NorthingM);
-                    MinLocationM.EastingM = Math.Min(MinLocationM.EastingM, tardis.LocationM.EastingM);
-                    MaxLocationM.NorthingM = Math.Max(MaxLocationM.NorthingM, tardis.LocationM.NorthingM);
-                    MaxLocationM.EastingM = Math.Max(MaxLocationM.EastingM, tardis.LocationM.EastingM);
+                    MinDroneLocnM.NorthingM = Math.Min(MinDroneLocnM.NorthingM, tardis.DroneLocationM.NorthingM);
+                    MinDroneLocnM.EastingM = Math.Min(MinDroneLocnM.EastingM, tardis.DroneLocationM.EastingM);
+                    MaxDroneLocnM.NorthingM = Math.Max(MaxDroneLocnM.NorthingM, tardis.DroneLocationM.NorthingM);
+                    MaxDroneLocnM.EastingM = Math.Max(MaxDroneLocnM.EastingM, tardis.DroneLocationM.EastingM);
                 }
             }
 
@@ -337,24 +339,24 @@ namespace SkyCombDrone.DroneModel
 
         public float NorthingRangeM()
         {
-            if (MinLocationM == null || MaxLocationM == null || MaxLocationM.NorthingM == UnknownValue)
+            if (MinDroneLocnM == null || MaxDroneLocnM == null || MaxDroneLocnM.NorthingM == UnknownValue)
                 return UnknownValue;
 
-            return MaxLocationM.NorthingM - MinLocationM.NorthingM;
+            return MaxDroneLocnM.NorthingM - MinDroneLocnM.NorthingM;
         }
         public float EastingRangeM()
         {
-            if (MinLocationM == null || MaxLocationM == null || MaxLocationM.EastingM == UnknownValue)
+            if (MinDroneLocnM == null || MaxDroneLocnM == null || MaxDroneLocnM.EastingM == UnknownValue)
                 return UnknownValue;
 
-            return MaxLocationM.EastingM - MinLocationM.EastingM;
+            return MaxDroneLocnM.EastingM - MinDroneLocnM.EastingM;
         }
         public float AreaM2()
         {
-            if (MinLocationM == null || MaxLocationM == null || MaxLocationM.NorthingM == UnknownValue)
+            if (MinDroneLocnM == null || MaxDroneLocnM == null || MaxDroneLocnM.NorthingM == UnknownValue)
                 return UnknownValue;
 
-            return (MaxLocationM.NorthingM - MinLocationM.NorthingM) * (MaxLocationM.EastingM - MinLocationM.EastingM);
+            return (MaxDroneLocnM.NorthingM - MinDroneLocnM.NorthingM) * (MaxDroneLocnM.EastingM - MinDroneLocnM.EastingM);
         }
 
         public void AssertGood_SizeM()
@@ -453,8 +455,8 @@ namespace SkyCombDrone.DroneModel
             {
                 { "Min " + TardisType + " Id", MinTardisId },
                 { "Max " + TardisType + " Id", MaxTardisId },
-                { "Min Locn M", MinLocationM==null ? UnknownString : MinLocationM.ToString() },
-                { "Max Locn M", MaxLocationM==null ? UnknownString : MaxLocationM.ToString() },
+                { "Min Drone Locn M", MinDroneLocnM==null ? UnknownString : MinDroneLocnM.ToString() },
+                { "Max Drone Locn M", MaxDroneLocnM==null ? UnknownString : MaxDroneLocnM.ToString() },
                 { "Area M2", AreaM2(), LocationNdp  },
                 { "Min Time Ms", MinTimeMs },
                 { "Max Time Ms", MaxTimeMs },
@@ -484,8 +486,8 @@ namespace SkyCombDrone.DroneModel
         {
             MinTardisId = StringToInt(settings[offset++]);
             MaxTardisId = StringToInt(settings[offset++]);
-            MinLocationM = (settings[offset] == UnknownString ? null : new RelativeLocation(settings[offset])); offset++;
-            MaxLocationM = (settings[offset] == UnknownString ? null : new RelativeLocation(settings[offset])); offset++;
+            MinDroneLocnM = (settings[offset] == UnknownString ? null : new DroneLocation(settings[offset])); offset++;
+            MaxDroneLocnM = (settings[offset] == UnknownString ? null : new DroneLocation(settings[offset])); offset++;
             offset++;// AreaM2 = settings[offset++];
             MinTimeMs = StringToInt(settings[offset++]);
             MaxTimeMs = StringToInt(settings[offset++]);

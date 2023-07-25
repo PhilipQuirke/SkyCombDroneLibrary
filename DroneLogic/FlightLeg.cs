@@ -141,7 +141,7 @@ namespace SkyCombDrone.DroneLogic
                         if (badSumAltitude || badStepAltitude || badYaw || badSumPitch || badStepPitch || badDuration)
                         {
                             if ((legDurationMs < config.MinLegDurationMs) ||
-                                (RelativeLocation.DistanceM(startStep.LocationM, thisStep.LocationM) < config.MinLegDistanceM))
+                                (RelativeLocation.DistanceM(startStep.DroneLocationM, thisStep.DroneLocationM) < config.MinLegDistanceM))
                             {
                                 // This leg violate the duration or distance rule,
                                 // remove the leg and clean up the steps.
@@ -205,7 +205,7 @@ namespace SkyCombDrone.DroneLogic
                 if (startKey > 0)
                 {
                     if ((legDurationMs < config.MinLegDurationMs) ||
-                        (RelativeLocation.DistanceM(startStep.LocationM, endStep.LocationM) < config.MinLegDistanceM))
+                        (RelativeLocation.DistanceM(startStep.DroneLocationM, endStep.DroneLocationM) < config.MinLegDistanceM))
                         // This leg violate the duration or distance rule,
                         // remove the leg and clean up the steps.                        
                         RemoveLeg(steps, startKey, endKey);

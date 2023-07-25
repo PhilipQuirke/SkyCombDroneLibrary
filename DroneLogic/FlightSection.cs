@@ -40,11 +40,15 @@ namespace SkyCombDrone.DroneLogic
                         (this.GlobalLocation.Longitude - sections.MinGlobalLocation.Longitude) /
                         (sections.MaxGlobalLocation.Longitude - sections.MinGlobalLocation.Longitude));
 
+                // northingM / eastingM are normally in the range 0 to 5000 (5km)
                 Assert(northingM >= 0, "FlightSection.CalculateSettings_LocationM: Negative northingM");
                 Assert(eastingM >= 0, "FlightSection.CalculateSettings_LocationM: Negative eastingM");
+                // 1000km is rediculous. Likely a NZGTM2000 value has been mixed with a DroneLocation
+                Assert(northingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive northingM");
+                Assert(eastingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive eastingM");
             }
 
-            LocationM = new(northingM, eastingM);
+            DroneLocationM = new(northingM, eastingM);
         }
     };
 
@@ -130,6 +134,8 @@ namespace SkyCombDrone.DroneLogic
             Assert(MaxGlobalLocation != null, "FlightSections.AssertGood: No MaxGlobalLocation");
             Assert(MinGlobalLocation.Longitude < MaxGlobalLocation.Longitude, "FlightSections.AssertGood: Longitude misordered");
             Assert(MinGlobalLocation.Latitude < MaxGlobalLocation.Latitude, "FlightSections.AssertGood: Latitude misordered");
+            MinGlobalLocation.AssertNZ();
+            MaxGlobalLocation.AssertNZ();
         }
         public void AssertGood()
         {
@@ -146,23 +152,25 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings()
         {
             // From the raw input data, calculate some deltas and cumulative values
-            FlightSection prevSection = null;
+            FlightSection? prevSection = null;
             foreach ((int thisKey, FlightSection thisSection) in Sections)
             {
-                if (prevSection == null)
+                if (thisSection.GlobalLocation.Specified)
                 {
-                    MinGlobalLocation = new(thisSection.GlobalLocation);
-                    MaxGlobalLocation = new(thisSection.GlobalLocation);
-                }
-                else
-                {
-                    MinGlobalLocation.Latitude = Math.Min(MinGlobalLocation.Latitude, thisSection.GlobalLocation.Latitude);
-                    MinGlobalLocation.Longitude = Math.Min(MinGlobalLocation.Longitude, thisSection.GlobalLocation.Longitude);
+                    if (MinGlobalLocation == null)
+                    {
+                        MinGlobalLocation = new(thisSection.GlobalLocation);
+                        MaxGlobalLocation = new(thisSection.GlobalLocation);
+                    }
+                    else
+                    {
+                        MinGlobalLocation.Latitude = Math.Min(MinGlobalLocation.Latitude, thisSection.GlobalLocation.Latitude);
+                        MinGlobalLocation.Longitude = Math.Min(MinGlobalLocation.Longitude, thisSection.GlobalLocation.Longitude);
 
-                    MaxGlobalLocation.Latitude = Math.Max(MaxGlobalLocation.Latitude, thisSection.GlobalLocation.Latitude);
-                    MaxGlobalLocation.Longitude = Math.Max(MaxGlobalLocation.Longitude, thisSection.GlobalLocation.Longitude);
+                        MaxGlobalLocation.Latitude = Math.Max(MaxGlobalLocation.Latitude, thisSection.GlobalLocation.Latitude);
+                        MaxGlobalLocation.Longitude = Math.Max(MaxGlobalLocation.Longitude, thisSection.GlobalLocation.Longitude);
+                    }
                 }
-
                 prevSection = thisSection;
             }
             AssertGood_GlobalLocations();
@@ -171,8 +179,8 @@ namespace SkyCombDrone.DroneLogic
             // Calculate encompassing box size in local coordinate system - NorthingM/EastingM
             // Assume that the box flown by drone is sufficiently small that the longitude/latitude
             // conversion to meters is effectively constant across the box area.
-            MinLocationM = new(0, 0);
-            MaxLocationM = RelativeLocation.DistanceM(MinGlobalLocation, MaxGlobalLocation);
+            MinDroneLocnM = new(0, 0);
+            MaxDroneLocnM = RelativeLocation.DistanceM(MinGlobalLocation, MaxGlobalLocation);
 
 
             prevSection = null;

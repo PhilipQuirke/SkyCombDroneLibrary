@@ -1,7 +1,5 @@
 ﻿using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
-using System;
-using System.Collections.Generic;
 
 
 // Models are used in-memory and to persist/load data to/from the datastore
@@ -65,6 +63,8 @@ namespace SkyCombDrone.DroneModel
 
             GlobalLocation.Longitude = double.Parse(settings[14]);
             GlobalLocation.Latitude = double.Parse(settings[15]);
+
+            GlobalLocation.AssertNZ();
         }
 
 
@@ -103,21 +103,26 @@ namespace SkyCombDrone.DroneModel
         public GlobalLocation? MaxGlobalLocation { get; set; } // Value is always very similar to MinGlobalLocation
 
 
-        // The Min/MaxRelativeLocation values represent a box encompassing the locations the drone flew over.
+        // The Min/MaxCountryLocation values represent a box encompassing the locations the drone flew over.
         // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
-        // so the Min/MaxRelativeLocation box is commonly a larger area than the area the drone flew over.
-        public RelativeLocation? MinRelativeLocation { get {
+        // so the Min/MaxCountryLocation box is commonly a larger area than the area the drone flew over.
+        // The location is in country coordinates. In NZ, using NZTM, example has Northing=5916626 Easting=1751330 
+        public CountryLocation? MinCountryLocation { get {
                 if (MinGlobalLocation == null)
                     return null;
                 (var northingM, var eastingM) = NztmProjection.WgsToNztm(MinGlobalLocation.Latitude, MinGlobalLocation.Longitude);
-                return new RelativeLocation((float)northingM, (float)eastingM);
+                var answer = new CountryLocation((float)northingM, (float)eastingM);
+                answer.AssertGood();
+                return answer;
             }
         }
-        public RelativeLocation? MaxRelativeLocation { get {
+        public CountryLocation? MaxCountryLocation { get {
                 if (MaxGlobalLocation == null)
                     return null;
                 (var northingM, var eastingM) = NztmProjection.WgsToNztm(MaxGlobalLocation.Latitude, MaxGlobalLocation.Longitude);
-                return new RelativeLocation((float)northingM, (float)eastingM);
+                var answer = new CountryLocation((float)northingM, (float)eastingM);
+                answer.AssertGood();
+                return answer;
             }
         }
 
@@ -182,10 +187,10 @@ namespace SkyCombDrone.DroneModel
             answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
             answer.Add("Max Global Location", (MaxGlobalLocation != null ? MaxGlobalLocation.ToString() : ""));
 
-            if (MinRelativeLocation != null)
-                answer.Add("Min NZTM M", MinRelativeLocation.ToString());
-            if (MaxRelativeLocation != null)
-                answer.Add("Max NZTM M", MaxRelativeLocation.ToString());
+            if (MinCountryLocation != null)
+                answer.Add("Min Country M", MinCountryLocation.ToString());
+            if (MaxCountryLocation != null)
+                answer.Add("Max Country M", MaxCountryLocation.ToString());
 
             return answer;
         }
@@ -204,6 +209,9 @@ namespace SkyCombDrone.DroneModel
             MaxDateTime = DateTime.Parse(settings[27]);
             MinGlobalLocation = new GlobalLocation(settings[28]);
             MaxGlobalLocation = new GlobalLocation(settings[29]);
+
+            MinGlobalLocation.AssertNZ();
+            MinGlobalLocation.AssertNZ();
         }
     }
 }

@@ -13,8 +13,8 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Drone encompassing box size in local coordinate system - NorthingM/EastingM
-        public virtual RelativeLocation MinLocationM { get { return Drone.FlightSections.MinLocationM; } }
-        public virtual RelativeLocation MaxLocationM { get { return Drone.FlightSections.MaxLocationM; } }
+        public virtual DroneLocation MinDroneLocnM { get { return Drone.FlightSections.MinDroneLocnM; } }
+        public virtual DroneLocation MaxDroneLocnM { get { return Drone.FlightSections.MaxDroneLocnM; } }
 
 
         // First millisecond of flight data drawn. Used on graphs with a time axis

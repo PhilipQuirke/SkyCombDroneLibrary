@@ -77,7 +77,7 @@ namespace SkyCombDrone.DrawSpace
         }
         private Point FlightPath_LocationMToPixelPoint(FlightStep theStep)
         {
-            return LocationMToPixelPoint(theStep.LocationM);
+            return LocationMToPixelPoint(theStep.DroneLocationM);
         }
         private Point FlightPath_LocationMToPixelPoint(FlightSteps flightSteps, int stepId)
         {
@@ -105,7 +105,7 @@ namespace SkyCombDrone.DrawSpace
             if ((flightStep == null) || (flightStep.YawDeg == UnknownValue))
                 return;
 
-            var thisPoint = LocationMToPixelPoint(flightStep.LocationM);
+            var thisPoint = LocationMToPixelPoint(flightStep.DroneLocationM);
 
             var (bottomLeft, centerTop, bottomRight) = flightStep.DirectionChevron();
 
@@ -123,7 +123,7 @@ namespace SkyCombDrone.DrawSpace
             if ((flightStep == null) || (flightStep.YawDeg == UnknownValue))
                 return;
 
-            var thisPoint = LocationMToPixelPoint(flightStep.LocationM);
+            var thisPoint = LocationMToPixelPoint(flightStep.DroneLocationM);
             var legname = flightStep.LegName;
 
             // Using flightStep.YawDeg, decide where to draw the text relative to thisPoint.
@@ -412,8 +412,8 @@ namespace SkyCombDrone.DrawSpace
                     }
                     else
                     {
-                        minLocation = BaseDrawScope.MinLocationM;
-                        maxLocation = BaseDrawScope.MaxLocationM;
+                        minLocation = BaseDrawScope.MinDroneLocnM;
+                        maxLocation = BaseDrawScope.MaxDroneLocnM;
                     }
 
                     // The Min/MaxNorthing/EastingSumM values represent the range of locations the drone flew over.
@@ -492,7 +492,7 @@ namespace SkyCombDrone.DrawSpace
                     if (flightStep != null)
                     {
                         // Draw a circle to show current drone location.
-                        var dronePoint = LocationMToPixelPoint(flightStep.LocationM);
+                        var dronePoint = LocationMToPixelPoint(flightStep.DroneLocationM);
                         Circle(ref image, dronePoint, activeBgr);
 
                         // PQR ToDo Draw the Block (instead of the FlightStep) InputImageSizeM

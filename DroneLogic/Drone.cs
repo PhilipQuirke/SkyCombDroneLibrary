@@ -261,7 +261,8 @@ namespace SkyCombDrone.DroneLogic
             {
                 GroundData = GroundDataFactory.Create();
                 GroundData.GlobalCalculateElevations(
-                    FlightSections.MinGlobalLocation, FlightSections.MaxGlobalLocation,
+                    FlightSections.MinGlobalLocation, 
+                    FlightSections.MaxGlobalLocation,
                     groundDirectory);
             }
         }
@@ -604,8 +605,8 @@ namespace SkyCombDrone.DroneLogic
         {
             string longitude = "";
             string latitude = "";
-            string nztmX = "";
-            string nztmY = "";
+            string countryX = "";
+            string countryY = "";
             string eastingM = "";
             string northingM = "";
 
@@ -617,12 +618,12 @@ namespace SkyCombDrone.DroneLogic
                     
             if(HasFlightSections)
             {
-                var max = FlightSections.MaxRelativeLocation;
-                var min = FlightSections.MinRelativeLocation;
+                var max = FlightSections.MaxCountryLocation;
+                var min = FlightSections.MinCountryLocation;
                 if ((max != null) && (min != null))
                 {
-                    nztmX = max.EastingM.ToString();
-                    nztmY = max.NorthingM.ToString();
+                    countryX = max.EastingM.ToString();
+                    countryY = max.NorthingM.ToString();
                     eastingM = ((int)(max.EastingM - min.EastingM)).ToString();
                     northingM = ((int)(max.NorthingM - min.NorthingM)).ToString(); 
                 }
@@ -634,8 +635,8 @@ namespace SkyCombDrone.DroneLogic
                 { "Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : "") },
                 { "Latitude", latitude },
                 { "Longitude", longitude },
-                { "NZTM X", nztmX },
-                { "NZTM Y", nztmY },
+                { "Country X", countryX },
+                { "Country Y", countryY },
                 { "East M", eastingM },
                 { "North M", northingM },
                 { "DemPerc", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : "") },

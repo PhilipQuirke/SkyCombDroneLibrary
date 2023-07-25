@@ -29,7 +29,7 @@ namespace SkyCombDrone.DroneModel
         // Center of the step's video IMAGE (not drone) location. May be meters forward of drone location.
         // Accuracy: Depends on drone height (poor) and ground elevation (good) accuracy.
         // Used in ModelCombFeature via FlightStep.CalcImageFeatureLocationM
-        public RelativeLocation? InputImageCenter { get; set; }
+        public DroneLocation? InputImageCenter { get; set; }
 
         // InputImageSizeM:  
         // The width & height (in metres) of the thermal image of the ground (aka drone thermal field of vision)
@@ -121,7 +121,7 @@ namespace SkyCombDrone.DroneModel
             i++; // Skip LegName 
             DsmM = StringToFloat(settings[i++]);
             DemM = StringToFloat(settings[i++]);
-            InputImageCenter = new RelativeLocation(settings[i++]);
+            InputImageCenter = new DroneLocation(settings[i++]);
             InputImageSizeM = new AreaF(settings[i++]);
             StepVelocityMps = new VelocityF(settings[i++]);
             ImageVelocityMps = new VelocityF(settings[i++]);
