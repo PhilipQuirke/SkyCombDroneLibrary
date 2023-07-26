@@ -6,6 +6,7 @@ using Emgu.CV.Util;
 using SkyCombDrone.CommonSpace;
 using System.Drawing;
 
+
 namespace SkyCombDrone.DrawSpace
 {
     // Code to draw stuff on images

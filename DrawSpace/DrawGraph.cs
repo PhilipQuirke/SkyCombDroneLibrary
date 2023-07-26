@@ -13,7 +13,7 @@ namespace SkyCombDrone.DrawSpace
     // Horizontal axis is either ElapsedFlightDurationMs or SumLinealM.
     public abstract class DrawGraph : Draw
     {
-        public DroneDrawScope DroneDrawScope = null;
+        public DroneDrawScope? DroneDrawScope = null;
 
         public string Title;
         public string Description;
@@ -22,10 +22,10 @@ namespace SkyCombDrone.DrawSpace
         public string HorizLeftLabel;
         public string HorizRightLabel;
 
-        public DataPairList Metrics = null;
+        public DataPairList? Metrics = null;
 
         public Size Size;
-        public Image<Bgr, byte> BaseImage = null;
+        public Image<Bgr, byte>? BaseImage = null;
 
         // Horizontal mapping of raw data to graph pixels.
         public float MinHorizRaw = 0;

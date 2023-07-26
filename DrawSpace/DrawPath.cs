@@ -6,6 +6,8 @@ using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
 using System.Drawing;
+using System.Resources;
+using System.Windows.Forms;
 
 
 namespace SkyCombDrone.DrawSpace
@@ -40,9 +42,9 @@ namespace SkyCombDrone.DrawSpace
 
         public DrawPath(DroneDrawScope drawScope, bool simple) : base(drawScope)
         {
-            Title = DroneDrawScope.DescribePath;
+            Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
-            Metrics = DroneDrawScope.GetSettings_Altitude;
+            Metrics = (DroneDrawScope != null ? DroneDrawScope.GetSettings_Altitude : null);
 
             Simple = simple;
             Reset(drawScope);
@@ -403,6 +405,12 @@ namespace SkyCombDrone.DrawSpace
                     var flightSteps = BaseDrawScope.Drone.FlightSteps;
                     float pathImageWidthM = (tightFocus ? 0 : flightSteps.MaxImageWidthM());
 
+                    if (pathImageWidthM > 2 * GroundGrid.GroundBufferM)
+                        // We store DEM/DSM data up to GroundBufferM beyond the flight path in each direction.
+                        // A drone flying high above ground gives an image width beyond the DEM/DSM coverage.
+                        // To avoid gray boundaries on image, we reduce the pathImageWidthM.
+                        pathImageWidthM = 2 * GroundGrid.GroundBufferM;
+
                     DroneLocation minLocation = new();
                     DroneLocation maxLocation = new();
                     if (tightFocus)
@@ -544,6 +552,33 @@ namespace SkyCombDrone.DrawSpace
             }
         }
 
+
+        // Draw a red cross at the location of the drone flight on the country map 
+        public void DrawCountryGraphLocationCross(Drone drone, ref Bitmap countryGraphBitmap)
+        {
+            var currCountryLocn = drone.FlightSections.MinCountryLocation;
+            if (currCountryLocn == null)
+                return;
+
+            var currCountryN = currCountryLocn.NorthingM;
+            var currCountryE = currCountryLocn.EastingM;
+
+            (var minCountryN, var minCountryE) = NztmProjection.WgsToNztm(-47.5, 166);
+            (var maxCountryN, var maxCountryE) = NztmProjection.WgsToNztm(-34.0, 179);
+
+            var crossXFraction = (currCountryE - minCountryE) / (maxCountryE - minCountryE);
+            var crossYFraction = (currCountryN - minCountryN) / (maxCountryN - minCountryN);
+
+            var countryGraphImage = countryGraphBitmap.ToImage<Bgr, byte>();
+
+            Point crossCenter = new Point(
+                (int)(crossXFraction * countryGraphImage.Width),
+                countryGraphImage.Height - (int)(crossYFraction * countryGraphImage.Height));
+
+            Draw.Cross(ref countryGraphImage, crossCenter, DroneColors.ErrorBgr, 3, 20);
+
+            countryGraphBitmap = countryGraphImage.ToBitmap();
+        }
     }
 }
 
