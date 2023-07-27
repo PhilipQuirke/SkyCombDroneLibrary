@@ -47,16 +47,38 @@ namespace SkyCombDrone.PersistModel
                     var firstVideoData = new VideoModel(firstVideoName, true, readDateEncodedUtc); // guess at thermal
 
                     // Do we have a second video (in a thermal/optical pair) that overlaps the first video timewise closely?
-                    var secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, (firstVideoData.Thermal ? -1 : +1)));
-                    VideoModel secondVideoData = null;
+                    var secondVideoName = "";
+                    VideoModel? secondVideoData = null;
+
+                    // First guess + 1
+                    secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, +1));
                     if (secondVideoName.Length > 0)
                     {
                         secondVideoData = new VideoModel(secondVideoName, true, readDateEncodedUtc); // guess at thermal
 
                         // Based on video DateEncodedUtc datetime and durationMs this is an accurate match mechanism
                         if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
-                            // We only have one video
+                        {
                             secondVideoName = "";
+                            secondVideoData = null;
+                        }
+                    }
+
+                    // Second guess - 1
+                    if(secondVideoName == "")
+                    {
+                        secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, -1));
+                        if (secondVideoName.Length > 0)
+                        {
+                            secondVideoData = new VideoModel(secondVideoName, true, readDateEncodedUtc); // guess at thermal
+
+                            // Based on video DateEncodedUtc datetime and durationMs this is an accurate match mechanism
+                            if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
+                            {
+                                secondVideoName = "";
+                                secondVideoData = null;
+                            }
+                        }
                     }
 
                     if (secondVideoName.Length > 0)
