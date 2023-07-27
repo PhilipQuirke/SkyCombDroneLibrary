@@ -3,6 +3,7 @@ using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
 using System.Diagnostics;
+using System.Drawing;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -84,7 +85,9 @@ namespace SkyCombDrone.DroneLogic
         public static Drone Create(
             Action<string> showDroneSettings,
             Func<string, DateTime> readDateEncodedUtc,
-            DroneDataStore dataStore, DroneConfigModel config, string groundDirectory, string inputFileName)
+            DroneDataStore dataStore, DroneConfigModel config, 
+            string groundDirectory, string inputFileName,
+            Bitmap? countryBitmap)
         {
             Drone answer;
             string phase = "";
@@ -154,7 +157,7 @@ namespace SkyCombDrone.DroneLogic
 
                         phase = "Saving drone datastore...";
                         showDroneSettings(phase);
-                        answer.SaveSettings(dataStore);
+                        answer.SaveSettings(dataStore, countryBitmap);
                     }
                 }
 

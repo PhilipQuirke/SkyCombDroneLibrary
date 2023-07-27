@@ -1,8 +1,10 @@
-﻿using SkyCombDrone.DroneLogic;
+﻿using Emgu.CV;
+using SkyCombDrone.DrawSpace;
+using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
-
+using System.Drawing;
 
 namespace SkyCombDrone.PersistModel
 {
@@ -24,6 +26,22 @@ namespace SkyCombDrone.PersistModel
         }
 
 
+        public static (string, DataPairList?) SaveDronePath(BaseDataStore data, Drone drone, DrawPath.BackgroundType type, int row, int col)
+        {
+            // Generate a bitmap of the DSM land overlaid with the drone path 
+            var drawScope = new DroneDrawScope(drone);
+            var drawPath = new DrawPath(drawScope, true);
+            bool DSM = (type == DrawPath.BackgroundType.DsmElevations);
+
+            drawPath.Initialise(new Size(600, 600), null, type);
+            var pathBitmap = drawPath.CurrImage().ToBitmap();
+
+            data.SaveBitmap(pathBitmap, DSM ? "DSM" : "DEM", row, col);
+
+            return (drawPath.Title, drawPath.Metrics);
+        }
+
+
         public void SetVideoFlightSectionData(int col, string title, VideoData? video)
         {
             if (video != null)
@@ -36,9 +54,9 @@ namespace SkyCombDrone.PersistModel
 
         // Save the Drone Summary tab data. 
         // This includes settings the user can edit in the UI: RunFrom/ToS, CameraDownDeg, OnGroundAt
-        public void SaveData_Summary()
+        public void SaveData_Summary(Bitmap? countryBitmap)
         {
-            Data.SelectOrAddWorksheet(DroneTabName);
+            (var newDroneTab, var _ ) = Data.SelectOrAddWorksheet(DroneTabName);
             Data.ClearWorksheet();
 
             Data.SetTitles(DroneSummaryTitle);
@@ -64,6 +82,24 @@ namespace SkyCombDrone.PersistModel
 
             Data.FormatSummaryPage();
 
+            if (newDroneTab && Data.SelectWorksheet(GroundTabName))
+            {
+                // We draw DEM, DSM and Country graphs on the GROUND summary tab
+                // These plots combine ground and drone data.
+
+                if (countryBitmap != null)
+                {
+                    var localBitmap = (Bitmap)countryBitmap.Clone();
+                    new DrawPath(null, true).DrawCountryGraphLocationCross(Drone, ref localBitmap);
+                    Data.SaveBitmap(localBitmap, "Country", 2, 3, 45);
+                }
+
+                DroneSave.SaveDronePath(Data, Drone, DrawPath.BackgroundType.DsmElevations, 2, 7);
+
+                DroneSave.SaveDronePath(Data, Drone, DrawPath.BackgroundType.DemElevations, 2, 17);
+            }
+
+            // Update the Index tab with the current date/time
             Data.SetLastUpdateDateTime(DroneTabName);
         }
 

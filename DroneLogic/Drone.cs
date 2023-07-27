@@ -6,6 +6,7 @@ using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
+using System.Drawing;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -363,7 +364,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void SaveSettings(DroneDataStore dataStore)
+        public void SaveSettings(DroneDataStore dataStore, Bitmap? countryBitmap)
         {
             var effort = Stopwatch.StartNew();
 
@@ -374,7 +375,7 @@ namespace SkyCombDrone.DroneLogic
             GroundSave.Save(dataStore, GroundData, true);
 
             DroneSave datawriter = new(dataStore, this);
-            datawriter.SaveData_Summary();
+            datawriter.SaveData_Summary(countryBitmap);
             datawriter.SaveData_Detail(true, effort);
 
             dataStore.Close();
@@ -586,7 +587,7 @@ namespace SkyCombDrone.DroneLogic
 
         // After selecting/loading a file and its settings, user has edited the drone settings.
         // The new settings have been loaded into the config objects. Update our drone data accordingly.
-        public void WriteDataStore(DroneDataStore dataStore)
+        public void WriteDataStore(DroneDataStore dataStore, Bitmap? countryBitmap)
         {
             // We need to update the Drone datastore
             dataStore.Open();
@@ -594,7 +595,7 @@ namespace SkyCombDrone.DroneLogic
             GroundSave.Save(dataStore, GroundData, false);
 
             DroneSave datawriter = new(dataStore, this);
-            datawriter.SaveData_Summary();
+            datawriter.SaveData_Summary(countryBitmap);
             datawriter.SaveData_Detail(false);
             dataStore.Close();
         }
