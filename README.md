@@ -9,7 +9,7 @@ This "drone data" library is incorporated into the tools:
 - [SkyComb Analyst](https://github.com/PhilipQuirke/SkyCombAnalyst/) 
 - [SkyComb Flights](https://github.com/PhilipQuirke/SkyCombFlights/)
 
-The folders are:
+The code folders are:
 - **CommonSpace:** Constants and generic code shared by SkyCombDroneLibrary, SkyCombFlights & SkyCombAnalyst
 - **DroneModel:** In-memory representations (models) of drone flight objects including sections, steps, legs,
 - **DroneLogic:** Logic on how to parse flight logs, integrate ground data, correct flight data, and summarise the flight data    
