@@ -601,11 +601,28 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        public string GoogleMapsLink()
+        {
+            if (HasFlightSections && (FlightSections.MaxGlobalLocation != null))
+            {
+                var latLong =
+                    FlightSections.MaxGlobalLocation.Latitude.ToString() + "," +
+                    FlightSections.MaxGlobalLocation.Longitude.ToString();
+
+                return
+                    @"https://www.google.com/maps?q=" + latLong +
+                    @"&ll=" + latLong + @"&z=10";
+            }
+
+            return "";
+        }
+
+
         // Get the drone settings needed to describe the flight in the SkyCombFLights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
-            string longitude = "";
             string latitude = "";
+            string longitude = "";
             string countryX = "";
             string countryY = "";
             string eastingM = "";
@@ -613,8 +630,8 @@ namespace SkyCombDrone.DroneLogic
 
             if(HasFlightSections && (FlightSections.MaxGlobalLocation != null))
             {
-                longitude = FlightSections.MaxGlobalLocation.Longitude.ToString();
                 latitude = FlightSections.MaxGlobalLocation.Latitude.ToString();
+                longitude = FlightSections.MaxGlobalLocation.Longitude.ToString();
             }
                     
             if(HasFlightSections)
@@ -640,8 +657,9 @@ namespace SkyCombDrone.DroneLogic
                 { "Country Y", countryY },
                 { "East M", eastingM },
                 { "North M", northingM },
-                { "DemPerc", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : "") },
-                { "DsmPerc", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : "") }
+                { "DEM %", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : "") },
+                { "DSM %", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : "") },
+                { "Google Maps", GoogleMapsLink() },
             };
         }
 
