@@ -180,10 +180,10 @@ namespace SkyCombDrone.DroneModel
         // Parse durations strings "145", "145.12", "2:25", "2:25.12" into milliseconds
         public static float DurationStringtoSecs(string durationStr)
         {
+            float answer = 0;
+
             try
             {
-                float answer = 0;
-
                 durationStr = durationStr.ToLower().Trim();
                 if (durationStr.Length > 0)
                 {
@@ -193,10 +193,16 @@ namespace SkyCombDrone.DroneModel
                     {
                         var minutes = durationStr.Substring(0, pos);
                         answer += float.Parse(minutes) * 60;
-                        durationStr = durationStr.Substring(pos + 1);
+
+                        // Could see string "2:" or "2:25" or "2:25.12"
+                        if(durationStr.Length>pos)
+                            durationStr = durationStr.Substring(pos + 1);
+                        else
+                            durationStr = "";
                     }
 
-                    answer += float.Parse(durationStr);
+                    if (durationStr.Length > 0)
+                        answer += float.Parse(durationStr);
                 }
 
                 return answer;

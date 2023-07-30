@@ -93,13 +93,18 @@ namespace SkyCombDrone.DroneModel
         // Get this FlightStep object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
         public override DataPairList GetSettings()
         {
+            if(InputImageCenter != null)
+                InputImageCenter.AssertGood();
+            if (InputImageSizeM != null)
+                InputImageSizeM.AssertGood();
+
             var answer = base.GetSettings();
             answer[0].Key = "Step";
 
             answer.Add("Leg Id", LegId);
             answer.Add("Leg Name", LegName);
-            answer.Add("Dsm M", DsmM, HeightNdp);
-            answer.Add("Dem M", DemM, HeightNdp);
+            answer.Add("DSM", DsmM, HeightNdp); // Graphs depend on this name (TBC)
+            answer.Add("DEM", DemM, HeightNdp); // Graphs depend on this name (TBC)
             answer.Add("Image Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
             answer.Add("Image Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
             answer.Add("Step Vel Mps", StepVelocityMps.ToString(5));
@@ -126,6 +131,9 @@ namespace SkyCombDrone.DroneModel
             StepVelocityMps = new VelocityF(settings[i++]);
             ImageVelocityMps = new VelocityF(settings[i++]);
             i++; // Skip HasLeg  
+
+            InputImageCenter.AssertGood();
+            InputImageSizeM.AssertGood();
         }
 
 

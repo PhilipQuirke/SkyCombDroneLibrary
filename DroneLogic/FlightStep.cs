@@ -1,10 +1,9 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+using Emgu.CV.Dnn;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 
@@ -239,6 +238,31 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // How do we best calculate the camera down angle?
+        public float CameraToVerticalForwardDeg { get {
+            if (FlightSection.Drone.Config.GimbalDataAvail == GimbalDataEnum.ManualNo)
+            {
+                // Camera may be pointing straight down (CameraDownDeg=90)
+                // or forward in direction of flight (CameraDownDeg=0)
+                // or in between (say CameraDownDeg=72)
+                // Calculate difference between CameraDownAngle and the vertical.
+                // Assumes drone camera down angle is constant over the period image is seen. 
+                int cameraToVertDeg = FlightSection.Drone.Config.CameraToVerticalForwardDeg;
+                Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 90, "BestCameraDownDeg: Bad cameraToVertDeg");
+                return cameraToVertDeg;
+            }
+            else
+            {
+                // Gimbal pitch is available! Excellent.
+                // Use it to calculate the angle to the vertical.
+                // This may differ for the first and last feature.
+                var cameraToVertDeg = 90 + PitchDeg;
+                Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 120, "BestCameraDownDeg: Bad firstCameraToVertDeg");
+                return cameraToVertDeg;
+            }
+        } }
+
+
         // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
         // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
         public void CalculateSettings_InputImageCenter(VideoModel videoData)
@@ -256,7 +280,7 @@ namespace SkyCombDrone.DroneLogic
                 // PitchDeg & RollDeg so we can ignore them.
 
                 // The actual camera area imaged depends on CameraDownDeg.
-                float degreesToVerticalForward = FlightSection.Drone.Config.CameraToVerticalForwardDeg;
+                float degreesToVerticalForward = CameraToVerticalForwardDeg;
                 double groundForwardM = downVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
 
                 // The unitForwardVelocity is the direction of flight - based on drone yaw
@@ -264,9 +288,9 @@ namespace SkyCombDrone.DroneLogic
 
                 // Working out the center of the image area
                 InputImageCenter = DroneLocnM.Clone();
-
                 InputImageCenter.NorthingM += (float)(groundForwardM * unitForwardVelocity.Value.Y);
                 InputImageCenter.EastingM += (float)(groundForwardM * unitForwardVelocity.Value.X);
+                InputImageCenter.AssertGood();
 
                 if (videoData != null)
                 {
@@ -278,6 +302,7 @@ namespace SkyCombDrone.DroneLogic
                     int videoHeight = videoData.ImageHeight;
                     int videoWidth = videoData.ImageWidth;
                     InputImageSizeM = new(imageXSizeM, imageXSizeM * videoHeight / videoWidth);
+                    InputImageSizeM.AssertGood();
                 }
             }
         }
