@@ -2,6 +2,7 @@
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 
@@ -66,6 +67,24 @@ namespace SkyCombDrone.DroneLogic
         public FlightSections(List<string>? settings = null) : base(settings)
         {
             Sections = new();
+        }
+
+
+        public override int GetTardisMaxKey() 
+        { 
+            if (Sections.Count == 0)
+                return 0;
+
+            return Sections.Keys[Sections.Count - 1];
+        }
+
+
+        // Return the child FlightStep
+        public override TardisModel? GetTardisModel(int index) 
+        {
+            FlightSection? answer = null;
+            Sections.TryGetValue(index, out answer);
+            return answer;    
         }
 
 

@@ -1,5 +1,4 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
-using Emgu.CV.Dnn;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
@@ -478,8 +477,8 @@ namespace SkyCombDrone.DroneLogic
     // FlightSteps is a list of FlightStep and other summary data (based on the FlightInputList and ground data)
     public class FlightSteps : FlightStepsModel
     {
-        Drone Drone { get; }
-        FlightSections Sections { get; }
+        private Drone Drone { get; }
+        private FlightSections Sections { get; }
 
         // The list of flight steps sorted in time order.
         // The index is the number of SectionMinMs units since the flight started.
@@ -493,6 +492,25 @@ namespace SkyCombDrone.DroneLogic
             Drone = drone;
             Sections = drone.FlightSections;
             FileName = drone.FlightSections.FileName;
+        }
+
+
+
+        public override int GetTardisMaxKey()
+        {
+            if (Steps.Count == 0)
+                return 0;
+
+            return Steps.Keys[Steps.Count - 1];
+        }
+
+
+        // Return the child FlightStep
+        public override TardisModel? GetTardisModel(int index)
+        {
+            FlightStep? answer = null;
+            Steps.TryGetValue(index, out answer);
+            return answer;
         }
 
 

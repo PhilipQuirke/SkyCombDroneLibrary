@@ -1,6 +1,4 @@
 ﻿using SkyCombGround.CommonSpace;
-using System;
-using System.Collections.Generic;
 
 
 // Models are used in-memory and to persist/load data to/from the datastore
@@ -286,6 +284,12 @@ namespace SkyCombDrone.DroneModel
 
             (MinRollDeg, MaxRollDeg) = SummariseFloat(MinRollDeg, MaxRollDeg, tardis.RollDeg);
         }
+
+
+        // This class is used with classes that own a list of TardisModels
+        // This child accessor allows us to write more abstracted code e.g. in DrawPath
+        public virtual int GetTardisMaxKey() { return 0; }
+        public virtual TardisModel? GetTardisModel(int index) {  return null; }
 
 
         // Return a string like "Drone Delta Yaw: -0.2 to +6.4 degrees" 

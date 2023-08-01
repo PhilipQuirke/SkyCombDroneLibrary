@@ -12,7 +12,7 @@ namespace SkyCombDrone.DroneModel
     // Main use for a FlightLeg is to limit the scope of CombProcessModel processing.
     // Pitch, Roll and Speed are deliberately ignored (not considered) and may NOT be mostly constant. 
     // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
-    public class FlightLegModel : TardisSummaryModel
+    public abstract class FlightLegModel : TardisSummaryModel
     {
         // The minimum percentage overlap between a leg and the RunFrom/To for leg
         // to be consider in-scope for highlighting in UI

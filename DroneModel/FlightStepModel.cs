@@ -1,6 +1,5 @@
 ﻿using SkyCombGround.CommonSpace;
-using System.Collections.Generic;
-using System.Drawing;
+
 
 
 // Models are used in-memory and to persist/load data to/from the datastore
@@ -58,23 +57,6 @@ namespace SkyCombDrone.DroneModel
         {
             if (settings != null)
                 LoadSettings(settings);
-        }
-
-
-        // DirectionChevron
-        // Arrow head showing direction of drone's flight
-        public (PointF, PointF, PointF) DirectionChevron()
-        {
-            int width = 8;
-
-            PointF bottomLeft = new(-width / 2, width / 2);
-            PointF bottomRight = new(width / 2, width / 2);
-
-            return (
-                DroneLocation.RotatePoint(bottomLeft, YawRad),
-                new(0, 0),
-                DroneLocation.RotatePoint(bottomRight, YawRad)
-            );
         }
 
 
@@ -148,7 +130,7 @@ namespace SkyCombDrone.DroneModel
 
 
     // FlightStepsModel summarises a list of FlightSteps and other summary data
-    public class FlightStepsModel : FlightStepSummaryModel
+    public abstract class FlightStepsModel : FlightStepSummaryModel
     {
         // The file name containing the flight data
         public string FileName { get; set; }

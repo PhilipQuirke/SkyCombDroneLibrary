@@ -1,5 +1,4 @@
 ﻿using SkyCombGround.CommonSpace;
-using System;
 
 
 // Models are used in-memory and to persist/load data to/from the datastore
@@ -57,6 +56,11 @@ namespace SkyCombDrone.DroneModel
             MinDsmM = other.MinDsmM;
             MaxDsmM = other.MaxDsmM;
         }
+
+
+        // This class does not own any FlightSteps or FlightSections
+        public override int GetTardisMaxKey() { return 0; }
+        public override TardisModel? GetTardisModel(int index) { return null; }
 
 
         public void SummariseStep(FlightStepModel thisStep)

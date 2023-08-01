@@ -1,9 +1,7 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
-using Microsoft.VisualBasic.Logging;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using System;
-using System.Collections.Generic;
+
 
 
 // Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
@@ -78,6 +76,11 @@ namespace SkyCombDrone.DroneLogic
 
             return nearestStep;
         }
+
+
+        // This class does not own any FlightSteps or FlightSections
+        public override int GetTardisMaxKey() { return 0; }
+        public override TardisModel? GetTardisModel(int index) { return null; }
     };
 
 

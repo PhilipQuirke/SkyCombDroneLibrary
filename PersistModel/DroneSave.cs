@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
+using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
@@ -26,17 +27,20 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public static (string, DataPairList?) SaveDronePath(BaseDataStore data, Drone drone, DrawPath.BackgroundType type, int row, int col)
+        public static (string, DataPairList?) SaveDronePath(
+            BaseDataStore data, Drone drone, TardisSummaryModel tardisModel, 
+            DrawPath.BackgroundType type, int row, int col)
         {
             // Generate a bitmap of the DSM land overlaid with the drone path 
-            var drawScope = new DroneDrawScope(drone);
+            var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
             var drawPath = new DrawPath(drawScope, true);
-            bool DSM = (type == DrawPath.BackgroundType.DsmElevations);
 
             drawPath.Initialise(new Size(600, 600), null, type);
             var pathBitmap = drawPath.CurrImage().ToBitmap();
 
-            data.SaveBitmap(pathBitmap, DSM ? "DSM" : "DEM", row, col);
+            data.SaveBitmap(pathBitmap,
+                (type == DrawPath.BackgroundType.DsmElevations ? "DSM" :
+                    (type == DrawPath.BackgroundType.DsmElevations ? "DEM" : "SEEN" )), row, col);
 
             return (drawPath.Title, drawPath.Metrics);
         }
@@ -94,9 +98,9 @@ namespace SkyCombDrone.PersistModel
                     Data.SaveBitmap(localBitmap, "Country", 2, 3, 45);
                 }
 
-                DroneSave.SaveDronePath(Data, Drone, DrawPath.BackgroundType.DsmElevations, 2, 7);
+                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.DsmElevations, 2, 7);
 
-                DroneSave.SaveDronePath(Data, Drone, DrawPath.BackgroundType.DemElevations, 2, 17);
+                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.DemElevations, 2, 17);
             }
 
             // Update the Index tab with the current date/time

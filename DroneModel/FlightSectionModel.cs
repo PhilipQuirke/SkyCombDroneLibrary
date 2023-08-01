@@ -79,7 +79,7 @@ namespace SkyCombDrone.DroneModel
 
 
     // Raw input data about a flight 
-    public class FlightSectionsModel : TardisSummaryModel
+    public abstract class FlightSectionsModel : TardisSummaryModel
     {
         // The file name containing the flight data
         public string FileName { get; set; } = "";

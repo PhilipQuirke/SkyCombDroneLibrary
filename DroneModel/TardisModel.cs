@@ -1,4 +1,5 @@
 ﻿using SkyCombGround.CommonSpace;
+using System.Drawing;
 
 
 // Models are used in-memory and to persist/load data to/from the datastore
@@ -59,6 +60,22 @@ namespace SkyCombDrone.DroneModel
         public TardisModel(int tardisId)
         {
             TardisId = tardisId;
+        }
+
+
+        public TardisModel(TardisModel other)
+        {
+            TardisId = other.TardisId;
+            StartTime = other.StartTime;
+            TimeMs = other.TimeMs;
+            DroneLocnM = ( other.DroneLocnM != null ? other.DroneLocnM.Clone() : null);
+            LinealM = other.LinealM;
+            SumLinealM = other.SumLinealM;
+            YawDeg = other.YawDeg;
+            DeltaYawDeg = other.DeltaYawDeg;
+            PitchDeg = other.PitchDeg;
+            RollDeg = other.RollDeg;
+            AltitudeM = other.AltitudeM;
         }
 
 
@@ -156,6 +173,23 @@ namespace SkyCombDrone.DroneModel
             PitchDeg = other.PitchDeg;
             RollDeg = other.RollDeg;
             AltitudeM = other.AltitudeM;
+        }
+
+
+        // DirectionChevron
+        // Arrow head showing direction of drone's flight
+        public (PointF, PointF, PointF) DirectionChevron()
+        {
+            int width = 8;
+
+            PointF bottomLeft = new(-width / 2, width / 2);
+            PointF bottomRight = new(width / 2, width / 2);
+
+            return (
+                DroneLocation.RotatePoint(bottomLeft, YawRad),
+                new(0, 0),
+                DroneLocation.RotatePoint(bottomRight, YawRad)
+            );
         }
 
 

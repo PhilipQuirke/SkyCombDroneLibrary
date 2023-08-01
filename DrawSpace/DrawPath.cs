@@ -3,6 +3,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneLogic;
+using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
 using System.Drawing;
@@ -27,17 +28,16 @@ namespace SkyCombDrone.DrawSpace
         const int NumShades = 20;
 
 
-        public DroneDrawScope BaseDrawScope = null;
+        public DroneDrawScope? BaseDrawScope = null;
         public bool Simple = true;
 
         // Size to draw text on the image
         public int TextFontScale = 1;
 
-        public Image<Bgr, byte> BaseImage;
         // Move locations to desired centre of FOV
-        private DroneLocation TranslateM;
+        private DroneLocation? TranslateM;
         // Transform meters to pixels
-        private Transform TransformMToPixels;
+        private Transform? TransformMToPixels;
 
 
         public DrawPath(DroneDrawScope drawScope, bool simple) : base(drawScope)
@@ -77,13 +77,13 @@ namespace SkyCombDrone.DrawSpace
 
             return new Point((int)x, (int)y);
         }
-        private Point FlightPath_DroneLocnMToPixelPoint(FlightStep theStep)
+        private Point FlightPath_DroneLocnMToPixelPoint(TardisModel theStep)
         {
             return DroneLocnMToPixelPoint(theStep.DroneLocnM);
         }
-        private Point FlightPath_DroneLocnMToPixelPoint(FlightSteps flightSteps, int stepId)
+        private Point FlightPath_DroneLocnMToPixelPoint(TardisSummaryModel flightSteps, int stepId)
         {
-            return FlightPath_DroneLocnMToPixelPoint(flightSteps.Steps[stepId]);
+            return FlightPath_DroneLocnMToPixelPoint(flightSteps.GetTardisModel(stepId));
         }
 
 
@@ -102,7 +102,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw a direction chevron (arrow) on top of the flight path leg.
-        private void FlightPath_Chevron(ref Image<Bgr, byte> image, FlightStep flightStep, Bgr color, int thickness = NormalThickness)
+        private void FlightPath_Chevron(ref Image<Bgr, byte> image, TardisModel? flightStep, Bgr color, int thickness = NormalThickness)
         {
             if ((flightStep == null) || (flightStep.YawDeg == UnknownValue))
                 return;
@@ -120,13 +120,13 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw the leg name near the flight path leg.
-        private void FlightPath_LegName(ref Image<Bgr, byte> image, FlightStep flightStep, bool highlight)
+        private void FlightPath_LegName(ref Image<Bgr, byte> image, TardisModel? flightStep, bool highlight)
         {
             if ((flightStep == null) || (flightStep.YawDeg == UnknownValue))
                 return;
 
             var thisPoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
-            var legname = flightStep.LegName;
+            var legname = (flightStep is FlightStep ? (flightStep as FlightStep).LegName : "" );
 
             // Using flightStep.YawDeg, decide where to draw the text relative to thisPoint.
             if (flightStep.YawDeg < 45)
@@ -397,7 +397,7 @@ namespace SkyCombDrone.DrawSpace
                 }
 
 
-                if ((BaseDrawScope.Drone == null) || !BaseDrawScope.Drone.HasFlightSteps)
+                if (BaseDrawScope.TardisSummary == null)
                     NoDataText(ref image, new Point(50, (int)(size.Height * 0.15)));
                 else
                 {
