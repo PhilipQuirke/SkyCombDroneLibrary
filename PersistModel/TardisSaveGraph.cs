@@ -72,7 +72,7 @@ namespace SkyCombDrone.PersistModel
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
                 Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                Data.SetAxises(chart, "", "Distance", "0", "0.0");
+                Data.SetAxises(chart, "", "Distance", "0", "0.00");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;

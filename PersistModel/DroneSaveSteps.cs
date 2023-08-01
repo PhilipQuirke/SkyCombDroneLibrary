@@ -1,8 +1,10 @@
-﻿using OfficeOpenXml.Drawing.Chart;
+﻿using Emgu.CV;
+using OfficeOpenXml.Drawing.Chart;
 using SkyCombDrone.CommonSpace;
+using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
-using System;
+using System.Drawing;
 
 
 namespace SkyCombDrone.PersistModel
@@ -105,6 +107,7 @@ namespace SkyCombDrone.PersistModel
         // Add a graph of the drone & ground elevations as per smoothed Steps data
         public void AddElevationsGraph()
         {
+            /*
             AddElevationsGraph(
                 2,
                 "StepsElevations",
@@ -112,6 +115,25 @@ namespace SkyCombDrone.PersistModel
                 Steps,
                 FlightStep.DsmSetting,
                 FlightStep.DemSetting);
+            */
+
+
+            (var _, var lastRow) = Data.PrepareChartArea(GraphTabName, "StepsElevations", TardisTabName);
+            if ((lastRow > 0) && (MaxDatumId > 0) && (Steps != null))
+            {
+                var FirstGraphRow = 2 * StandardChartRows;
+
+                // Generate a bitmap of the DSM land overlaid with the drone path 
+                var drawScope = new DroneDrawScope(Drone);
+                var drawAltitudes = new DrawAltitudeByLinealM(drawScope);
+
+                drawAltitudes.Initialise(new Size(1600, 300));
+                var pathBitmap = drawAltitudes.CurrImage().ToBitmap();
+
+                Data.SaveBitmap(pathBitmap, "StepsElevations", FirstGraphRow, 0);
+
+                Data.SetTitleAndDataListColumn("Metrics", FirstGraphRow + 1, ChartWidth + 1, Steps.GetSettings_Altitude(), true, 1);
+            }
         }
 
 

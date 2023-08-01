@@ -227,7 +227,7 @@ namespace SkyCombDrone.DroneModel
         {
             var answer =
                 "From " + VideoModel.DurationSecToString(RunVideoFromS) +
-                " to " + VideoModel.DurationSecToString(RunVideoToS) + " secs\r\n";
+                " to " + VideoModel.DurationSecToString(RunVideoToS) + " \r\n";
 
             if (OnGroundAt != OnGroundAtEnum.Neither)
                 answer += "On ground at: " + OnGroundAt + "\r\n";
