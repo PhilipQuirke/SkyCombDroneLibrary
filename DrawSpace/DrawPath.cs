@@ -201,8 +201,8 @@ namespace SkyCombDrone.DrawSpace
         // Draw the flight path steps
         private void DrawFlightSteps(ref Image<Bgr, byte> image)
         {
-            var flightSteps = BaseDrawScope.Drone.FlightSteps;
-            var hasLegs = BaseDrawScope.Drone.HasFlightLegs;
+            var flightSteps = BaseDrawScope.TardisSummary;
+            var hasLegs = ((BaseDrawScope.Drone != null) && BaseDrawScope.Drone.HasFlightLegs);
 
             int firstRunStepId = BaseDrawScope.FirstRunStepId;
             int lastRunStepId = BaseDrawScope.LastRunStepId;
@@ -210,11 +210,17 @@ namespace SkyCombDrone.DrawSpace
 
             Point prevPoint = new(UnknownValue, UnknownValue);
             int prevLegId = UnknownValue;
-            foreach (var step in flightSteps.Steps)
-            {
-                var thisPoint = FlightPath_DroneLocnMToPixelPoint(step.Value);
 
-                int thisStepId = step.Key;
+            int maxStepId = BaseDrawScope.TardisSummary.GetTardisMaxKey();
+            for(int theStepId = 0; theStepId <= maxStepId; theStepId++)
+            {
+                var step = BaseDrawScope.TardisSummary.GetTardisModel(theStepId);
+                if(step == null)
+                    continue;
+
+                var thisPoint = FlightPath_DroneLocnMToPixelPoint(step);
+                int thisStepId = step.TardisId;
+                int thisLegId = (step is FlightStep ? (step as FlightStep).LegId : UnknownValue);
 
                 bool highlight = runScopeSet &&
                     (thisStepId >= firstRunStepId) &&
@@ -227,7 +233,7 @@ namespace SkyCombDrone.DrawSpace
                         Line(ref image, prevPoint, thisPoint, thisColor);
 
                     if (thisStepId % 1000 == 0)
-                        FlightPath_Chevron(ref image, step.Value, thisColor);
+                        FlightPath_Chevron(ref image, step, thisColor);
                 }
                 else
                 {
@@ -235,17 +241,17 @@ namespace SkyCombDrone.DrawSpace
                     // Rely on the above code to draw a long line for the leg.
                     // Exception: For the first step of the leg we need to connect
                     // up the previous non-leg step.
-                    if (((step.Value.LegId <= 0) || (prevLegId <= 0)) &&
+                    if (((thisLegId <= 0) || (prevLegId <= 0)) &&
                         (thisStepId > 0) && (prevPoint.X != UnknownValue))
                         Line(ref image, prevPoint, thisPoint, thisColor);
 
                     // Draw chevrons along the path to path every so often to show direction.
                     if ((!hasLegs) && (thisStepId % 50 == 0))
-                        FlightPath_Chevron(ref image, step.Value, thisColor);
+                        FlightPath_Chevron(ref image, step, thisColor);
                 }
 
                 prevPoint = thisPoint;
-                prevLegId = step.Value.LegId;
+                prevLegId = thisLegId;
             }
         }
 
@@ -253,7 +259,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
         private void DrawGroundOrSurfaceElevations(ref Image<Bgr, byte> image, BackgroundType backgroundType)
         {
-            if (BaseDrawScope.Drone.GroundData == null)
+            if((BaseDrawScope.Drone == null) || (BaseDrawScope.Drone.GroundData == null))
                 return;
 
             // Are we drawing surface or ground elevations or seen?
@@ -402,8 +408,12 @@ namespace SkyCombDrone.DrawSpace
                 else
                 {
                     // Drone video image covers an area to either side of the drone flight path.
-                    var flightSteps = BaseDrawScope.Drone.FlightSteps;
-                    float pathImageWidthM = (tightFocus ? 0 : flightSteps.MaxImageWidthM());
+                    var drone = BaseDrawScope.Drone; // Maybe null
+                    var tardisSummary = BaseDrawScope.TardisSummary;
+                    float pathImageWidthM = 
+                        (tightFocus ? 0 : 
+                            (drone != null ? drone.FlightSteps.MaxImageWidthM() : 
+                                2 * GroundGrid.GroundBufferM));
 
                     if (pathImageWidthM > 2 * GroundGrid.GroundBufferM)
                         // We store DEM/DSM data up to GroundBufferM beyond the flight path in each direction.
