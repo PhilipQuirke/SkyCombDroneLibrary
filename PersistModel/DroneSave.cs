@@ -28,14 +28,14 @@ namespace SkyCombDrone.PersistModel
 
 
         public static (string, DataPairList?) SaveDronePath(
-            BaseDataStore data, Drone drone, TardisSummaryModel tardisModel, 
-            DrawPath.BackgroundType type, int row, int col)
+            BaseDataStore data, Drone? drone, TardisSummaryModel? tardisModel, 
+            DrawPath.BackgroundType type, int row, int col, int pixels = 600)
         {
             // Generate a bitmap of the DSM land overlaid with the drone path 
             var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
-            var drawPath = new DrawPath(drawScope, true);
+            var drawPath = new DrawPath(drawScope, false);
 
-            drawPath.Initialise(new Size(600, 600), null, type);
+            drawPath.Initialise(new Size(pixels, pixels), null, type);
             var pathBitmap = drawPath.CurrImage().ToBitmap();
 
             data.SaveBitmap(pathBitmap,
@@ -94,7 +94,7 @@ namespace SkyCombDrone.PersistModel
                 if (countryBitmap != null)
                 {
                     var localBitmap = (Bitmap)countryBitmap.Clone();
-                    new DrawPath(null, true).DrawCountryGraphLocationCross(Drone, ref localBitmap);
+                    new DrawPath(null, false).DrawCountryGraphLocationCross(Drone, ref localBitmap);
                     Data.SaveBitmap(localBitmap, "Country", 2, 3, 45);
                 }
 

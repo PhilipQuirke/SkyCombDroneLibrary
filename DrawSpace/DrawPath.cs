@@ -29,7 +29,12 @@ namespace SkyCombDrone.DrawSpace
 
 
         public DroneDrawScope? BaseDrawScope = null;
-        public bool Simple = true;
+
+        // Do we draw legs as straight lines or just draw each point?
+        private bool DrawLegs = true;
+        // A gap in the Tardis location that makes us NOT draw a line
+        private int DrawLineMaxGapM = 10;
+
 
         // Size to draw text on the image
         public int TextFontScale = 1;
@@ -40,13 +45,13 @@ namespace SkyCombDrone.DrawSpace
         private Transform? TransformMToPixels;
 
 
-        public DrawPath(DroneDrawScope drawScope, bool simple) : base(drawScope)
+        public DrawPath(DroneDrawScope drawScope, bool drawLegs) : base(drawScope)
         {
             Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
             Metrics = (DroneDrawScope != null ? DroneDrawScope.GetSettings_Altitude : null);
 
-            Simple = simple;
+            DrawLegs = drawLegs;
             Reset(drawScope);
         }
 
@@ -201,7 +206,6 @@ namespace SkyCombDrone.DrawSpace
         // Draw the flight path steps
         private void DrawFlightSteps(ref Image<Bgr, byte> image)
         {
-            var flightSteps = BaseDrawScope.TardisSummary;
             var hasLegs = ((BaseDrawScope.Drone != null) && BaseDrawScope.Drone.HasFlightLegs);
 
             int firstRunStepId = BaseDrawScope.FirstRunStepId;
@@ -227,9 +231,13 @@ namespace SkyCombDrone.DrawSpace
                     (thisStepId <= lastRunStepId);
                 var thisColor = DroneColors.ColorToBgr(highlight ? DroneColors.InScopeDroneColor : DroneColors.OutScopeDroneColor);
 
-                if (Simple)
+                if (!DrawLegs)
                 {
-                    if (prevPoint.X != UnknownValue)
+                    // If drone moved less than 10M between steps, draw a line.
+                    // Useful when drawing several flights in same graph.
+                    if((prevPoint.X != UnknownValue) &&
+                        Math.Abs(prevPoint.X - thisPoint.X) < DrawLineMaxGapM &&
+                        Math.Abs(prevPoint.Y - thisPoint.Y) < DrawLineMaxGapM)
                         Line(ref image, prevPoint, thisPoint, thisColor);
 
                     if (thisStepId % 1000 == 0)
@@ -469,11 +477,11 @@ namespace SkyCombDrone.DrawSpace
                             // Draw the ground or surface elevations as background of shades of brown or green
                             DrawGroundOrSurfaceElevations(ref image, backgroundType);
 
-                        if(! Simple)
+                        if(DrawLegs)
                             // Draw all flight path legs (as straight lines)
                             DrawFlightLegs(ref image);
 
-                        // Draw the flight path sections
+                        // Draw the flight path steps
                         DrawFlightSteps(ref image);
                     }
                 }
