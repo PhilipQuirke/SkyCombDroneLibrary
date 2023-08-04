@@ -324,8 +324,8 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Update DemGrid.GroundDatum.Seen with area seen by the input video over specified steps
-        public void CalculateSettings_AreaSeen(int minStepId, int maxStepId)
+        // Update SwatheGrid with area seen by the input video over specified steps
+        public void CalculateSettings_SwatheSeen(int minStepId, int maxStepId)
         {
             try
             {
@@ -334,7 +334,7 @@ namespace SkyCombDrone.DroneLogic
 
                 if (HasInputVideo && HasFlightSections && HasGroundData)
                 {
-                    GroundData.SeenGrid = new(GroundData.DemGrid);
+                    GroundData.SwatheGrid = new(GroundData.DemGrid);
 
                     // For each flight step, calculate the part of the grid seen
                     for (int stepId = minStepId; stepId <= maxStepId; stepId++)
@@ -353,13 +353,13 @@ namespace SkyCombDrone.DroneLogic
                             step.Calculate_InputImageArea_Corners();
 
                         // Update the area as "seen"
-                        GroundData.SeenGrid.SeenDroneRect(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
+                        GroundData.SwatheGrid.SwatheDroneRect(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw ThrowException("Drone.CalculateSettings_AreaSeen: " + ex.Message);
+                throw ThrowException("Drone.CalculateSettings_SwatheSeen: " + ex.Message);
             }
         }
 
@@ -477,8 +477,8 @@ namespace SkyCombDrone.DroneLogic
                     SectionIdToVideoMs(startSectionId),
                     SectionIdToVideoMs(endSectionId));
 
-                // Calculate area seen by the input video over specified steps
-                CalculateSettings_AreaSeen(startSectionId, endSectionId);
+                // Calculate swathe seen by the input video over specified steps
+                CalculateSettings_SwatheSeen(startSectionId, endSectionId);
             }
         }
 

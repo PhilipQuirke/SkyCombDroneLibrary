@@ -135,7 +135,7 @@ namespace SkyCombDrone.DrawSpace
         public override string DescribeSpeed { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeSpeed ); } }
 
 
-        public DroneDrawScope(Drone drone) : base (drone.FlightSteps)
+        public DroneDrawScope(Drone drone) : base (drone == null ? null : drone.FlightSteps)
         {
             Drone = drone;
         }

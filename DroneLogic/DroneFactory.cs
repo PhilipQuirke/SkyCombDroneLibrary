@@ -15,9 +15,9 @@ namespace SkyCombDrone.DroneLogic
         public int CalcSectionsMs = 0; // Flight log sections
         public int CalcGroundMs = 0; // Covers both DEM and DSM elevations 
         public int CalcStepsMs = 0; // Covers both steps and legs 
-        public int CalcSeenMs = 0; // Area seen by input video
+        public int CalcSwatheMs = 0; // Swathe (area) seen by input video
         public int SaveDataStoreMs = 0;
-        public int CalcEffortMs { get { return CalcVideosMs + CalcSectionsMs + CalcGroundMs + CalcStepsMs + CalcSeenMs + SaveDataStoreMs; } }
+        public int CalcEffortMs { get { return CalcVideosMs + CalcSectionsMs + CalcGroundMs + CalcStepsMs + CalcSwatheMs + SaveDataStoreMs; } }
 
         public int LoadVideosMs = 0;
         public int LoadFlightLogMs = 0; // Covers sections, steps and legs
@@ -34,7 +34,7 @@ namespace SkyCombDrone.DroneLogic
                 { "Calc Sections Ms", CalcSectionsMs },
                 { "Calc Ground Ms", CalcGroundMs },
                 { "Calc Steps Ms", CalcStepsMs },
-                { "Calc Seen Ms", CalcSeenMs },
+                { "Calc Seen Ms", CalcSwatheMs },
                 { "Save Data Store Ms", SaveDataStoreMs },
                 { "Calc Effort Ms", CalcEffortMs },
                 { "Load Videos Ms", LoadVideosMs },
@@ -53,7 +53,7 @@ namespace SkyCombDrone.DroneLogic
             CalcSectionsMs = StringToNonNegInt(settings[1]);
             CalcGroundMs = StringToNonNegInt(settings[2]);
             CalcStepsMs = StringToNonNegInt(settings[3]);
-            CalcSeenMs = StringToNonNegInt(settings[4]);
+            CalcSwatheMs = StringToNonNegInt(settings[4]);
             SaveDataStoreMs = StringToNonNegInt(settings[5]);
             // CalcEffortMs 
             LoadVideosMs = StringToNonNegInt(settings[7]);
@@ -150,10 +150,10 @@ namespace SkyCombDrone.DroneLogic
                         }
                         answer.EffortDurations.CalcStepsMs = EffortMs();
 
-                        phase = "Calculating area seen...";
+                        phase = "Calculating swathe seen...";
                         showDroneSettings(phase);
                         answer.DefaultConfigRunFromTo();
-                        answer.EffortDurations.CalcSeenMs = EffortMs();
+                        answer.EffortDurations.CalcSwatheMs = EffortMs();
 
                         phase = "Saving drone datastore...";
                         showDroneSettings(phase);

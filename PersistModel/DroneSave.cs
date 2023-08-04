@@ -40,7 +40,7 @@ namespace SkyCombDrone.PersistModel
 
             data.SaveBitmap(pathBitmap,
                 (type == DrawPath.BackgroundType.DsmElevations ? "DSM" :
-                    (type == DrawPath.BackgroundType.DsmElevations ? "DEM" : "SEEN" )), row, col);
+                    (type == DrawPath.BackgroundType.DsmElevations ? "DEM" : "SWATHE" )), row, col);
 
             return (drawPath.Title, drawPath.Metrics);
         }

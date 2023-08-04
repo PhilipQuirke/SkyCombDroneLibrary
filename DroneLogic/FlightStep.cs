@@ -266,43 +266,52 @@ namespace SkyCombDrone.DroneLogic
         // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
         public void CalculateSettings_InputImageCenter(VideoModel videoData)
         {
+            InputImageCenter = new();
+
             // Can only calculate this if we can compare the ground elevation & drone altitude.
             if (DemM == UnknownValue)
-                InputImageCenter = new();
-            else
+                return;
+
+            // If the camera is pointing at the horizon, then the 
+            // image area is huge and useless for animal detection.
+            // If camera image includes the horizon, then ignore this step.
+            // (For thermal cameras the horizon is often brighter causing
+            // thermal bloom with causes over estimates of temperature.)
+            var vfovDeg = videoData.VFOVDeg;
+            float degreesToVerticalForward = CameraToVerticalForwardDeg;
+            if(degreesToVerticalForward >= 90 - vfovDeg / 2)
+                return;
+
+            // Vertical distance from drone to ground
+            double downVertM = DistanceDown();
+
+            // Distance across ground to center of image area - in the direct of flight.
+            // Note that the drone camera gimbal automatically compensates for
+            // PitchDeg & RollDeg so we can ignore them.
+
+            // The actual camera area imaged depends on CameraDownDeg.
+            double groundForwardM = downVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
+
+            // The unitForwardVelocity is the direction of flight - based on drone yaw
+            var unitForwardVelocity = StepVelocityMps.GetUnitVector();
+
+            // Working out the center of the image area
+            InputImageCenter = DroneLocnM.Clone();
+            InputImageCenter.NorthingM += (float)(groundForwardM * unitForwardVelocity.Value.Y);
+            InputImageCenter.EastingM += (float)(groundForwardM * unitForwardVelocity.Value.X);
+            InputImageCenter.AssertGood();
+
+            if (videoData != null)
             {
-                // Vertical distance from drone to ground
-                double downVertM = DistanceDown();
+                // InputImageSizeM
+                double viewLength = Math.Sqrt(downVertM * downVertM + groundForwardM * groundForwardM);
+                double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
+                float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
 
-                // Distance across ground to center of image area - in the direct of flight.
-                // Note that the drone camera gimbal automatically compensates for
-                // PitchDeg & RollDeg so we can ignore them.
-
-                // The actual camera area imaged depends on CameraDownDeg.
-                float degreesToVerticalForward = CameraToVerticalForwardDeg;
-                double groundForwardM = downVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
-
-                // The unitForwardVelocity is the direction of flight - based on drone yaw
-                var unitForwardVelocity = StepVelocityMps.GetUnitVector();
-
-                // Working out the center of the image area
-                InputImageCenter = DroneLocnM.Clone();
-                InputImageCenter.NorthingM += (float)(groundForwardM * unitForwardVelocity.Value.Y);
-                InputImageCenter.EastingM += (float)(groundForwardM * unitForwardVelocity.Value.X);
-                InputImageCenter.AssertGood();
-
-                if (videoData != null)
-                {
-                    // InputImageSizeM
-                    double viewLength = Math.Sqrt(downVertM * downVertM + groundForwardM * groundForwardM);
-                    double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
-                    float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
-
-                    int videoHeight = videoData.ImageHeight;
-                    int videoWidth = videoData.ImageWidth;
-                    InputImageSizeM = new(imageXSizeM, imageXSizeM * videoHeight / videoWidth);
-                    InputImageSizeM.AssertGood();
-                }
+                int videoHeight = videoData.ImageHeight;
+                int videoWidth = videoData.ImageWidth;
+                InputImageSizeM = new(imageXSizeM, imageXSizeM * videoHeight / videoWidth);
+                InputImageSizeM.AssertGood();
             }
         }
 

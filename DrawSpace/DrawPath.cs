@@ -21,7 +21,7 @@ namespace SkyCombDrone.DrawSpace
         {
             DemElevations,  // Ground elevations
             DsmElevations,  // Surface elevations
-            SeenArea        // Overflown by drone and seen by video camera
+            SwatheSeen      // Area overflown by drone and seen by video camera
         }
 
         // Number of shades of green or brown to use in the background
@@ -280,9 +280,9 @@ namespace SkyCombDrone.DrawSpace
                 highColor = DroneColors.GroundHighColor;
                 lowColor = DroneColors.GroundLowColor;
             }
-            else if (backgroundType == BackgroundType.SeenArea)
+            else if (backgroundType == BackgroundType.SwatheSeen)
             {
-                theGrid = BaseDrawScope.Drone.GroundData.SeenGrid;
+                theGrid = BaseDrawScope.Drone.GroundData.SwatheGrid;
                 highColor = Color.White;
                 lowColor = Color.LightGray;
             }
@@ -292,7 +292,7 @@ namespace SkyCombDrone.DrawSpace
 
             // Calculate the range of surface elevations
             (double minValue, double maxValue) = theGrid.GetMinMaxElevationM();
-            if (backgroundType == BackgroundType.SeenArea)
+            if (backgroundType == BackgroundType.SwatheSeen)
             {
                 minValue = 0;
                 maxValue = 1;
@@ -331,8 +331,8 @@ namespace SkyCombDrone.DrawSpace
                         // Calculate the shade of the square based on its elevation
                         int shadeIndex = (int)Math.Max(0, Math.Min(NumShades - 1,
                             1.0f * NumShades * (elevationM - minValue) / (maxValue - minValue)));
-                        // PQR if (backgroundType == BackgroundType.SeenArea)
-                        // PQR     shadeIndex = (datum.Seen ? NumShades - 1 : 0);
+                        if (backgroundType == BackgroundType.SwatheSeen)
+                            shadeIndex = (elevationM > 0 ? NumShades - 1 : 0);
 
                         image.Draw(locationRect, DroneColors.ColorToBgr(theShades[shadeIndex]),
                             -1); // If thickness is less than 1, the rectangle is filled up
