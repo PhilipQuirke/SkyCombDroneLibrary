@@ -75,6 +75,9 @@ namespace SkyCombDrone.DroneLogic
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemGrid != null) && (GroundData.DemGrid.NumElevationsStored > 0); } }
 
 
+        // How many legs to show in the UI
+        public int NumLegsShown { get { return HasFlightLegs && Config.UseLegs ? FlightLegs.Legs.Count : 0; } }
+
         
         public Drone(DroneConfigModel config)
         {
@@ -310,6 +313,11 @@ namespace SkyCombDrone.DroneLogic
                 FlightLegs = new();
                 FlightLegs.Calculate_Pass1(FlightSections, FlightSteps, Config);
 
+                // Are legs a sufficiently large fraction of the flight to use them?
+                Config.UseLegs =
+                    (FlightLegs.Legs.Count>2) &&
+                    (FlightLegs.LegPercentage(FlightSteps.MaxStepId) > 33);
+
                 // Refine the flight steps settings using leg information
                 FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs);
 
@@ -488,9 +496,7 @@ namespace SkyCombDrone.DroneLogic
         // Default the RunFromS and RunToS config values 
         public void DefaultConfigRunFromTo()
         {
-            int maxStepId = FlightSteps.MaxStepId;
-
-            if (HasFlightLegs && ( FlightLegs.LegPercentage(maxStepId) > 33))
+            if (HasFlightLegs && Config.UseLegs)
                 // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
                 // This is the "interesting" part of the flight that the Flow and Comb processes are best applied to.
                 SetConfigRunFromToBySection(
@@ -503,7 +509,7 @@ namespace SkyCombDrone.DroneLogic
                 Config.RunVideoToS = InputVideo.DurationMs / 1000.0f;
 
                 // Calculate swathe seen by the input video over specified steps
-                CalculateSettings_SwatheSeen(1, maxStepId);
+                CalculateSettings_SwatheSeen(1, (HasFlightSteps ? FlightSteps.MaxStepId : 9999));
             }
         }
 

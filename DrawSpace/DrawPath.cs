@@ -51,7 +51,11 @@ namespace SkyCombDrone.DrawSpace
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
             Metrics = (DroneDrawScope != null ? DroneDrawScope.GetSettings_Altitude : null);
 
-            DrawLegs = drawLegs;
+            DrawLegs = drawLegs &&
+                (DroneDrawScope != null) && 
+                (DroneDrawScope.Drone != null) && 
+                (DroneDrawScope.Drone.NumLegsShown > 0);
+
             Reset(drawScope);
         }
 
@@ -478,7 +482,7 @@ namespace SkyCombDrone.DrawSpace
                             // Draw the ground or surface elevations as background of shades of brown or green
                             DrawElevationOrSwathe(ref image, backgroundType);
 
-                        if(DrawLegs)
+                        if(DrawLegs) 
                             // Draw all flight path legs (as straight lines)
                             DrawFlightLegs(ref image);
 

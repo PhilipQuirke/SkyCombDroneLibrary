@@ -1,6 +1,5 @@
 ﻿using SkyCombGround.CommonSpace;
-using System;
-using System.Collections.Generic;
+
 
 
 // Models are used in-memory and to persist/load data to/from the datastore
@@ -74,6 +73,12 @@ namespace SkyCombDrone.DroneModel
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // section Drone Location Accuracy for more detail. 
         public int SmoothSectionSize { get; set; } = 4;
+
+
+        // Does this flight benefit from the use of the legs?
+        // Defaults to "yes" if legs are >=33% of the flight path.
+        public bool UseLegs { get; set; } = true;
+
 
 
         // For many drones the thermal and optical videos have different pixel resolution and horizontal field of vision(HFOV).
@@ -161,7 +166,8 @@ namespace SkyCombDrone.DroneModel
                 { "Gimbal Data Available", GimbalDataAvail.ToString() },
                 { "Camera Down Degrees", CameraDownDeg },
                 { "On Ground At", OnGroundAt.ToString() },
-                { "Num Smooth Steps", SmoothSectionSize },
+                { "Smooth Section Size", SmoothSectionSize },
+                { "Use Legs", UseLegs },
                 { "Exclude Margin Ratio", ExcludeDisplayMarginRatio, 3 },
                 { "Notes", ( Notes == "" ? " " : Notes ) },
             };
@@ -180,6 +186,7 @@ namespace SkyCombDrone.DroneModel
             CameraDownDeg = StringToNonNegInt(settings[i++]);
             OnGroundAt = (OnGroundAtEnum)Enum.Parse(typeof(OnGroundAtEnum), settings[i++]);
             SmoothSectionSize = StringToNonNegInt(settings[i++]);
+            UseLegs = StringToBool(settings[i++]);
             ExcludeDisplayMarginRatio = StringToFloat(settings[i++]);
             Notes = settings[i++];
 
