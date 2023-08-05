@@ -252,11 +252,14 @@ namespace SkyCombDrone.DroneLogic
             }
             else
             {
-                // Gimbal pitch is available! Excellent.
+                // Gimbal pitch is available!
                 // Use it to calculate the angle to the vertical.
                 // This may differ for the first and last feature.
                 var cameraToVertDeg = 90 + PitchDeg;
-                Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 120, "BestCameraDownDeg: Bad firstCameraToVertDeg");
+
+                // Pitch is normally -45 to -90. Rarely can be +35 (looking up) or -125 (looking backwards).
+                // Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 135, "BestCameraDownDeg: Bad firstCameraToVertDeg");
+
                 return cameraToVertDeg;
             }
         } }

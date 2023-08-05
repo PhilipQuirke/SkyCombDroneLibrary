@@ -329,7 +329,7 @@ namespace SkyCombDrone.DroneLogic
         {
             try
             {
-                if ((GroundData.DemGrid == null) || ! GroundData.DemGrid.HasElevationData())
+                if ((GroundData == null) || (GroundData.DemGrid == null) || ! GroundData.DemGrid.HasElevationData())
                     return;
 
                 if (HasInputVideo && HasFlightSections && HasGroundData)
@@ -343,8 +343,10 @@ namespace SkyCombDrone.DroneLogic
                         if (step == null)
                             continue;
 
-                        // We only consider flight steps inside a leg, as Comb only applies to legs
-                        if ((step.LegId <= 0) || (step.InputImageSizeM == null))
+                        // We need an image area to continue.
+                        // For example, if camera is pointing near horizontal the image area
+                        // is useless for analysis purposes, and doesnt have a InputImageSizeM
+                        if (step.InputImageSizeM == null)
                             continue;
 
                         // Get corners of area covered by the step's video image (may be forward of drone's location).
@@ -353,7 +355,7 @@ namespace SkyCombDrone.DroneLogic
                             step.Calculate_InputImageArea_Corners();
 
                         // Update the area as "seen"
-                        GroundData.SwatheGrid.SwatheDroneRect(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
+                        GroundData.SwatheGrid.DroneRectSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
                     }
                 }
             }
@@ -486,18 +488,22 @@ namespace SkyCombDrone.DroneLogic
         // Default the RunFromS and RunToS config values 
         public void DefaultConfigRunFromTo()
         {
-            if (HasFlightLegs)
-                // If we have drone data with legs, use the first and last legs to default the Run From/To.
+            int maxStepId = FlightSteps.MaxStepId;
+
+            if (HasFlightLegs && ( FlightLegs.LegPercentage(maxStepId) > 33))
+                // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
                 // This is the "interesting" part of the flight that the Flow and Comb processes are best applied to.
                 SetConfigRunFromToBySection(
                     FlightLegs.Legs[0].MinStepId,
                     FlightLegs.Legs[^1].MaxStepId);
             else if (HasInputVideo)
             {
-                // Default the RunFrom/To to approximately 10%/90% of the video length
-                var videoS = InputVideo.DurationMs / 1000.0f;
-                Config.RunVideoFromS = (float)Math.Round(0.1f * videoS, 0);
-                Config.RunVideoToS = (float)Math.Round(0.9f * videoS, 0);
+                // Default the RunFrom/To to the full video length
+                Config.RunVideoFromS = 0;
+                Config.RunVideoToS = InputVideo.DurationMs / 1000.0f;
+
+                // Calculate swathe seen by the input video over specified steps
+                CalculateSettings_SwatheSeen(1, maxStepId);
             }
         }
 

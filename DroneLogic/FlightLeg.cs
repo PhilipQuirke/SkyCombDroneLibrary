@@ -3,7 +3,6 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
 
-
 // Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
 namespace SkyCombDrone.DroneLogic
 {
@@ -49,7 +48,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the FlightStep in this leg that is closest to the specified flightMS
-        public FlightStep MsToNearestFlightStep(int flightMs, FlightStepList steps)
+        public FlightStep? MsToNearestFlightStep(int flightMs, FlightStepList steps)
         {
             Assert(flightMs >= MinSumTimeMs, "FlightLeg.FlightMsToNearestFlightStep: Bad logic 1");
             Assert(flightMs <= MaxSumTimeMs, "FlightLeg.FlightMsToNearestFlightStep: Bad logic 2"); ;
@@ -93,6 +92,21 @@ namespace SkyCombDrone.DroneLogic
 
         public FlightLegs()
         {
+        }
+
+
+        // What (rough) percentage of the flight is included in legs?
+        // (Flights controlled by human hand, rather than pre-programmed, have very few legs.)
+        public int LegPercentage(int totalSteps)
+        {
+            if(totalSteps==0 )
+                return 0;
+
+            int legSteps = 0;
+            foreach( var leg in Legs )
+                legSteps += leg.MaxStepId - leg.MinStepId + 1;  
+
+            return (int)(100.0 * legSteps / totalSteps);
         }
 
 
