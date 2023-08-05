@@ -29,7 +29,7 @@ namespace SkyCombDrone.PersistModel
 
         public static (string, DataPairList?) SaveDronePath(
             BaseDataStore data, Drone? drone, TardisSummaryModel? tardisModel, 
-            DrawPath.BackgroundType type, int row, int col, int pixels = 600)
+            DrawPath.BackgroundType type, int row, int col, int pixels = 700)
         {
             // Generate a bitmap of the DSM land overlaid with the drone path 
             var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
@@ -38,9 +38,15 @@ namespace SkyCombDrone.PersistModel
             drawPath.Initialise(new Size(pixels, pixels), null, type);
             var pathBitmap = drawPath.CurrImage().ToBitmap();
 
-            data.SaveBitmap(pathBitmap,
-                (type == DrawPath.BackgroundType.DsmElevations ? "DSM" :
-                    (type == DrawPath.BackgroundType.DsmElevations ? "DEM" : "SWATHE" )), row, col);
+            var bitmapName = "UNKNOWN";
+            switch(type)
+            {
+                case DrawPath.BackgroundType.DsmElevations: bitmapName = "DSM"; break;
+                case DrawPath.BackgroundType.DemElevations: bitmapName = "DEM"; break;
+                case DrawPath.BackgroundType.SwatheSeen: bitmapName = "SWATHE"; break;
+            };
+
+            data.SaveBitmap(pathBitmap, bitmapName, row, col);
 
             return (drawPath.Title, drawPath.Metrics);
         }
@@ -98,9 +104,11 @@ namespace SkyCombDrone.PersistModel
                     Data.SaveBitmap(localBitmap, "Country", 2, 3, 45);
                 }
 
-                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.DsmElevations, 2, 7);
+                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.DsmElevations, 0, 7);
 
-                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.DemElevations, 2, 17);
+                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.DemElevations, 31, 7);
+
+                DroneSave.SaveDronePath(Data, Drone, null, DrawPath.BackgroundType.SwatheSeen, 31, 0);
             }
 
             // Update the Index tab with the current date/time

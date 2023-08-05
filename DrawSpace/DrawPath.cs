@@ -265,7 +265,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
-        private void DrawGroundOrSurfaceElevations(ref Image<Bgr, byte> image, BackgroundType backgroundType)
+        private void DrawElevationOrSwathe(ref Image<Bgr, byte> image, BackgroundType backgroundType)
         {
             if((BaseDrawScope.Drone == null) || (BaseDrawScope.Drone.GroundData == null))
                 return;
@@ -347,7 +347,8 @@ namespace SkyCombDrone.DrawSpace
             }
 
             // Overdraw the highest elevation with a white triangle
-            if (maxElevationM > 0)
+            if((maxElevationM > 0) &&
+                (backgroundType != BackgroundType.SwatheSeen))
             {
                 var where = new Point(maxLocation.X + maxLocation.Width / 2, maxLocation.Y + maxLocation.Height / 2);
 
@@ -475,7 +476,7 @@ namespace SkyCombDrone.DrawSpace
 
                         if (!tightFocus)
                             // Draw the ground or surface elevations as background of shades of brown or green
-                            DrawGroundOrSurfaceElevations(ref image, backgroundType);
+                            DrawElevationOrSwathe(ref image, backgroundType);
 
                         if(DrawLegs)
                             // Draw all flight path legs (as straight lines)
