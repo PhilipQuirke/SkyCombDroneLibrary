@@ -108,24 +108,24 @@ namespace SkyCombDrone.DroneModel
         // so the Min/MaxCountryLocation box is commonly a larger area than the area the drone flew over.
         // The location is in country coordinates. In NZ, using NZTM, example has Northing=5916626 Easting=1751330 
         public CountryLocation? MinCountryLocation { get {
-                if (MinGlobalLocation == null)
-                    return null;
-                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MinGlobalLocation.Latitude, MinGlobalLocation.Longitude);
-                var answer = new CountryLocation((float)northingM, (float)eastingM);
-                answer.AssertGood();
-                return answer;
+                return (MinGlobalLocation == null ? null : NztmProjection.WgsToNztm(MinGlobalLocation));
             }
         }
         public CountryLocation? MaxCountryLocation { get {
-                if (MaxGlobalLocation == null)
-                    return null;
-                (var northingM, var eastingM) = NztmProjection.WgsToNztm(MaxGlobalLocation.Latitude, MaxGlobalLocation.Longitude);
-                var answer = new CountryLocation((float)northingM, (float)eastingM);
-                answer.AssertGood();
-                return answer;
+                return (MaxGlobalLocation == null ? null : NztmProjection.WgsToNztm(MaxGlobalLocation));
             }
         }
+        public CountryLocation? CenterCountryLocation { get {
+                var min = MinCountryLocation;
+                var max = MaxCountryLocation;
+                if (min == null || max == null)
+                    return null;
 
+                return new CountryLocation(
+                    (min.NorthingM + max.NorthingM) / 2,
+                    (min.EastingM + max.EastingM) / 2);
+            }
+        }
 
         public FlightSectionsModel(List<string>? settings = null) : base("Section")
         {

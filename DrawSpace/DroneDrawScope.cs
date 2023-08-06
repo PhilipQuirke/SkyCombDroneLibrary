@@ -140,7 +140,7 @@ namespace SkyCombDrone.DrawSpace
             Drone = drone;
         }
 
-        public DroneDrawScope(TardisSummaryModel tardisModel) : base(tardisModel)
+        public DroneDrawScope(TardisSummaryModel? tardisModel) : base(tardisModel)
         {
             Drone = null;
         }

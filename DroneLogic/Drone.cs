@@ -640,22 +640,24 @@ namespace SkyCombDrone.DroneLogic
             string eastingM = "";
             string northingM = "";
 
-            if(HasFlightSections && (FlightSections.MaxGlobalLocation != null))
+            if (HasFlightSections)
             {
-                latitude = FlightSections.MaxGlobalLocation.Latitude.ToString();
-                longitude = FlightSections.MaxGlobalLocation.Longitude.ToString();
-            }
-                    
-            if(HasFlightSections)
-            {
-                var max = FlightSections.MaxCountryLocation;
-                var min = FlightSections.MinCountryLocation;
-                if ((max != null) && (min != null))
+                var minG = FlightSections.MinGlobalLocation;
+                var maxG = FlightSections.MaxGlobalLocation;
+                if (minG != null && maxG != null)
                 {
-                    countryX = max.EastingM.ToString();
-                    countryY = max.NorthingM.ToString();
-                    eastingM = ((int)(max.EastingM - min.EastingM)).ToString();
-                    northingM = ((int)(max.NorthingM - min.NorthingM)).ToString(); 
+                    latitude = ((minG.Latitude + maxG.Latitude) / 2).ToString();
+                    longitude = ((minG.Longitude + maxG.Longitude) / 2).ToString();
+                }
+
+                var minC = FlightSections.MinCountryLocation;
+                var maxC = FlightSections.MaxCountryLocation;
+                if ((maxC != null) && (minC != null))
+                {
+                    countryX = ((minC.EastingM + maxC.EastingM)/2).ToString();
+                    countryY = ((minC.NorthingM + maxC.NorthingM)/2).ToString();
+                    eastingM = ((int)(maxC.EastingM - minC.EastingM)).ToString();
+                    northingM = ((int)(maxC.NorthingM - minC.NorthingM)).ToString(); 
                 }
             }
 

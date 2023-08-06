@@ -7,8 +7,7 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundSpace;
 using System.Drawing;
-using System.Resources;
-using System.Windows.Forms;
+
 
 
 namespace SkyCombDrone.DrawSpace
@@ -45,7 +44,7 @@ namespace SkyCombDrone.DrawSpace
         private Transform? TransformMToPixels;
 
 
-        public DrawPath(DroneDrawScope drawScope, bool drawLegs) : base(drawScope)
+        public DrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope)
         {
             Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
@@ -128,6 +127,14 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
+        public void DrawText(ref Image<Bgr, byte> image, string text, Point thisPoint, bool highlight = true)
+        { 
+            Text(ref image, text, thisPoint, TextFontScale,
+                DroneColors.ColorToBgr(highlight? DroneColors.LegNameColor : DroneColors.OutScopeDroneColor),
+                    2);
+        }
+
+
         // Draw the leg name near the flight path leg.
         private void FlightPath_LegName(ref Image<Bgr, byte> image, TardisModel? flightStep, bool highlight)
         {
@@ -149,9 +156,7 @@ namespace SkyCombDrone.DrawSpace
             else
                 thisPoint.X += 10;
 
-            Text(ref image, legname, thisPoint, TextFontScale,
-                DroneColors.ColorToBgr(highlight ? DroneColors.LegNameColor : DroneColors.OutScopeDroneColor),
-                2);
+            DrawText(ref image, legname, thisPoint, highlight);
         }
 
 
@@ -577,9 +582,8 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw a red cross at the location of the drone flight on the country map 
-        public void DrawCountryGraphLocationCross(Drone drone, ref Bitmap countryGraphBitmap)
+        public void DrawCountryGraphLocationCross(CountryLocation currCountryLocn, ref Bitmap countryGraphBitmap)
         {
-            var currCountryLocn = drone.FlightSections.MinCountryLocation;
             if (currCountryLocn == null)
                 return;
 

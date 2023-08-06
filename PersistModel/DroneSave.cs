@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.Structure;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
@@ -27,16 +28,12 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public static (string, DataPairList?) SaveDronePath(
-            BaseDataStore data, Drone? drone, TardisSummaryModel? tardisModel, 
-            DrawPath.BackgroundType type, int row, int col, int pixels = 700)
+        // Generate a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
+        public static (string, DataPairList?, string, Emgu.CV.Image<Bgr,byte>) CreateDronePath(
+            DrawPath drawPath, DrawPath.BackgroundType type, int pixels = 700)
         {
-            // Generate a bitmap of the DSM land overlaid with the drone path 
-            var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
-            var drawPath = new DrawPath(drawScope, false);
-
             drawPath.Initialise(new Size(pixels, pixels), null, type);
-            var pathBitmap = drawPath.CurrImage().ToBitmap();
+            var pathImage = drawPath.CurrImage();
 
             var bitmapName = "UNKNOWN";
             switch(type)
@@ -46,9 +43,23 @@ namespace SkyCombDrone.PersistModel
                 case DrawPath.BackgroundType.SwatheSeen: bitmapName = "SWATHE"; break;
             };
 
-            data.SaveBitmap(pathBitmap, bitmapName, row, col);
+            return (drawPath.Title, drawPath.Metrics, bitmapName, pathImage);
+        }
 
-            return (drawPath.Title, drawPath.Metrics);
+
+        // Generate and save a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
+        public static void SaveDronePath(
+             BaseDataStore data, Drone? drone, TardisSummaryModel? tardisModel,
+             DrawPath.BackgroundType type, int row, int col, int pixels = 700)
+        {
+            // Generate a bitmap of the DSM land overlaid with the drone path 
+            var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
+            var drawPath = new DrawPath(drawScope, false);
+
+            (var _, var _, var bitmapName, var pathImage) = 
+                CreateDronePath( drawPath, type, pixels);
+
+            data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col);
         }
 
 
@@ -100,7 +111,8 @@ namespace SkyCombDrone.PersistModel
                 if (countryBitmap != null)
                 {
                     var localBitmap = (Bitmap)countryBitmap.Clone();
-                    new DrawPath(null, false).DrawCountryGraphLocationCross(Drone, ref localBitmap);
+                    new DrawPath(null, false).DrawCountryGraphLocationCross(
+                        Drone.FlightSections.MinCountryLocation, ref localBitmap);
                     Data.SaveBitmap(localBitmap, "Country", 2, 3, 45);
                 }
 
