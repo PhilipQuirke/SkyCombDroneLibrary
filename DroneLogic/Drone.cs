@@ -315,6 +315,7 @@ namespace SkyCombDrone.DroneLogic
 
                 // Are legs a sufficiently large fraction of the flight to use them?
                 Config.UseLegs =
+                    (FlightSteps.Steps.Count>200) && 
                     (FlightLegs.Legs.Count>2) &&
                     (FlightLegs.LegPercentage(FlightSteps.MaxStepId) > 33);
 
@@ -328,6 +329,8 @@ namespace SkyCombDrone.DroneLogic
             {
                 FlightLegs = new();
                 FlightLegs.Calculate_NoFlightData(Config);
+
+                Config.UseLegs = false;
             }
         }
 
