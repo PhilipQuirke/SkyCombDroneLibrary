@@ -42,7 +42,7 @@ namespace SkyCombDrone.DrawSpace
         static public readonly int DroneHorizAxisY = 2;
 
 
-        public DrawGraph(DroneDrawScope drawScope)
+        public DrawGraph(DroneDrawScope? drawScope)
         {
             DroneDrawScope = drawScope;
         }

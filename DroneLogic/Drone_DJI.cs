@@ -2,7 +2,6 @@
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
-using System;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -11,10 +10,14 @@ namespace SkyCombDrone.DroneLogic
     // Class to load flight log information from a drone manufactured by vendor DJI
     public class Drone_DJI
     {
-        public const string FileType = "SRT";
-
+        public const string DjiPrefix = "SRT";
+        public const string DjiGeneric = "SRT (DJI)";
+        public const string DjiM2E = "SRT (DJI M2E Dual)";
+        public const string DjiMavic3 = "SRT (DJI Mavic 3";
+        public const string DjM300 = "SRT (DJI M300)";
 
         System.IO.StreamReader File = null;
+
 
 
         private double FindTokenValue(string line, string token, int tokenPos, string suffix)
@@ -61,44 +64,8 @@ namespace SkyCombDrone.DroneLogic
             //      ev: Exposure value
             //      ct: Color Temperature. Mid-day sun is around 5500
 
-            // Sample file data from different types of DJI drones:
-            //      
-            //      1
-            //      00:00:00,000-- > 00:00:00,033
-            //      < font size = "36" > FrameCnt : 1, DiffTime: 33ms
-            //      2022 - 07 - 10 19:59:42,210,511
-            //      [iso: 12800][shutter: 1 / 30.0][fnum: 280][ev: 1.7][ct: 5199][color_md: default][focal_len: 240][dzoom_ratio: 10000, delta: 0],[latitude: -36.891878] [longtitude: 174.703095] [altitude: 51.773998] [Drone: Yaw:-62.1, Pitch: 2.7, Roll: 1.6] </ font >
-            //      
-            //      1
-            //      00:00:00,000-- > 00:00:00,016
-            //      < font size = "28" > SrtCnt : 1, DiffTime: 16ms
-            //      2022 - 06 - 27 14:31:29.447
-            //      [iso: 140][shutter: 1 / 1250.0][fnum: 170][ev: 0][ct: 5358][color_md: default][focal_len: 240][latitude: -36.999425][longitude: 174.567936][rel_alt: 1.100 abs_alt: -70.436] </ font >
-            //      
-            //      1
-            //      00:00:00,000 --> 00:00:00,033
-            //      < font size="28">SrtCnt : 1, DiffTime : 33ms
-            //      2022 - 10-23 15:53:15.928
-            //      [iso: 120] [shutter: 1 / 640.0] [fnum: 170] [ev: 0] 
-            //      ag: 1000 sdg: 1000 idg: 4096 1 / 592.610] xhs: 168 ag_reg: 256
-            //      worked[ag: 1000 sdg: 1000 idg: 4109 shu: 1 / 592.694]
-            //      tar: 120 luma: 122 lv: 12013 usteb 0 iqeb 401
-            //      peb: -260 ak: 262[262 0 0] * r_ll:1000
-            //      alg: 148[87 123] > 51 * 0[123 175] > 112
-            //      gr: 304 geb: -242 reb: -508 lvr: 1000 peb_range[-401 500 lvr: 1000]
-            //      anti - flk[mode: 0 frq: 0]
-            //      [RGBGain: (2253, 1000, 1730)][ct: 5207]
-            //      [adj_dbg_info:[CCM: 362, 32853, 32793, 32800, 347, 32830, 4, 32896, 378]
-            //      [color_temperature: 4932]
-            //      [iridix_strength: 13][dmsc_sharp_alt_ld: 29][dmsc_sharp_alt_ldu: 22][dmsc_sharp_alt_lu: 7]
-            //      [sinter_strength_1: 5][sinter_strength_4: 5]
-            //      [color_md: default][focal_len: 240][dzoom_ratio: 10000, delta: 0],[latitude: -35.443070][longitude: 174.351088][rel_alt: 18.200 abs_alt: 52.793][cmpr: lens pos = 37(stat 18), point(49, 49), window: (10, 10), (10, 10) of(30, 30), temp: 3200, inf: 36][sensor_temperature: 32] </ font >
-            //
-            //      19
-            //      00:00:00,598-- > 00:00:00,634
-            //      < font size = "28" > FrameCnt: 19, DiffTime: 36ms
-            //      2023 - 05 - 31 19:04:26.691
-            //      [focal_len: 40.00][dzoom_ratio: 1.00], [latitude: -37.920295] [longitude: 176.456417] [rel_alt: 62.370 abs_alt: 227.373] [gb_yaw: -142.5 gb_pitch: -28.7 gb_roll: 0.0] </ font >
+            // For sample file data from different types of DJI drones refer 
+            // https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/FlightLogs.md 
 
             File = null;
 
@@ -113,7 +80,8 @@ namespace SkyCombDrone.DroneLogic
                     return (false, cameraPitchYawRoll);
 
                 // For DJI drones, flight information is in the SRT text file 
-                sections.FileType = Drone_DJI.FileType;
+                sections.FileType = DjiGeneric;
+
 
                 File = new(sections.FileName);
 
@@ -239,12 +207,13 @@ namespace SkyCombDrone.DroneLogic
                             if (tokenPos >= 0)
                                 thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, "]");
 
+
                             // Find the longitude
                             token = "[longtitude:"; // sic. Older versions mispelt the longitude as longtitude.
                             tokenPos = line.IndexOf(token);
                             if (tokenPos >= 0)
                             {
-                                sections.FileType = "SRT (DJI M2E Dual)";
+                                sections.FileType = DjiM2E;
                                 thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
                             }
                             else
@@ -253,8 +222,33 @@ namespace SkyCombDrone.DroneLogic
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                 {
-                                    sections.FileType = "SRT (DJI)";
+                                    sections.FileType = DjiMavic3;
                                     thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
+                                }
+                                else 
+                                {
+                                    // try to parse "GPS(-41.3899,174.0177,0.0M) BAROMETER:97.7M"
+                                    token = "GPS(";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                    {
+                                        sections.FileType = DjM300;
+                                        thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, ",");
+
+                                        token = ",";
+                                        tokenPos = line.IndexOf(token);
+                                        if (tokenPos >= 0)
+                                        {
+                                            thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, ",");
+
+                                            token = "BAROMETER:";
+                                            tokenPos = line.IndexOf(token);
+                                            if (tokenPos >= 0)
+                                            {
+                                                thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "M");
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
@@ -323,6 +317,7 @@ namespace SkyCombDrone.DroneLogic
                                     thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
                             }
 
+
                             // PQR Input text not used:
                             // Dave Clark's DJI has: [dzoom_ratio: 10000, delta: 0]
                             // Lennard Spark's DJI has: [dzoom_ratio: 1.00]
@@ -369,16 +364,40 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Horizontal field of view in degrees. Differs per manufacturer's camera.
-        // Refer https://www.dji.com/nz/mavic-2-enterprise/specs
         public static void SetCameraHFOV(Drone drone)
         {
-            if ((drone != null) && (drone.FlightSections != null) &&
-                drone.FlightSections.FileType.StartsWith(Drone_DJI.FileType))
+            if ((drone != null) && drone.HasFlightSections &&
+                drone.FlightSections.FileType.StartsWith(Drone_DJI.DjiPrefix))
             {
-                if (drone.HasThermalVideo)
-                    drone.ThermalVideo.HFOVDeg = 57;
-                if (drone.HasOpticalVideo)
-                    drone.OpticalVideo.HFOVDeg = 85;
+                switch (drone.FlightSections.FileType)
+                {
+                    case DjiMavic3:
+                        // Lennard Sparks DJI Mavic 3t
+                        // Thermal camera: 640×512 @ 30fps
+                        // DFOV: Diagonal Field of View = 61 degrees
+                        // so HFOV = 381. degrees and VFOV = 47.6 degrees 
+                        if (drone.HasThermalVideo)
+                            drone.ThermalVideo.HFOVDeg = 38;
+                        break;
+
+                    case DjM300:
+                        // Colin Aitchison DJI M300 with XT2 19mm
+                        // https://www.pbtech.co.nz/product/CAMDJI20219/DJI-Zenmuse-XT2-ZXT2B19FR-Camera-19mm-Lens--30-Hz says:
+                        // FOV 57.12 Degrees x 42.44 Degrees
+                        if (drone.HasThermalVideo)
+                            drone.ThermalVideo.HFOVDeg = 42;
+                        break;
+
+                    default:
+                    case DjiM2E:
+                        // Philip Quirke's DJI Mavic 2 Enterprise Dual
+                        // Refer https://www.dji.com/nz/mavic-2-enterprise/specs
+                        if (drone.HasThermalVideo)
+                            drone.ThermalVideo.HFOVDeg = 57;
+                        if (drone.HasOpticalVideo)
+                            drone.OpticalVideo.HFOVDeg = 77;
+                        break;
+                }
             }
         }
     }

@@ -21,16 +21,22 @@ namespace SkyCombDrone.DrawSpace
 
         public DroneDrawScope? BaseDrawScope = null;
 
+
         // Do we draw legs as straight lines or just draw each point?
         private bool DrawLegs = true;
-        // A gap in the Tardis location that makes us NOT draw a line
+        // A gap (jump) in the Tardis location sequence that makes us NOT draw a line
         private int DrawLineMaxGapM = 10;
 
 
         // How to draw text on the image
+        public int TextThickness = 2;
         public int TextFontScale = 1;
         public Bgr TextNormalColor;
         public Bgr TextHighlightColor;
+
+
+        // Do we draw the NorthingM, EastingM range of the drone's movement as text on the image?
+        public bool DrawRange = false;
 
 
         // Move locations to desired centre of FOV
@@ -128,7 +134,7 @@ namespace SkyCombDrone.DrawSpace
         public void DrawText(ref Image<Bgr, byte> image, string text, Point thisPoint, bool highlight = true)
         { 
             Text(ref image, text, thisPoint, TextFontScale,
-                highlight? TextHighlightColor : TextNormalColor, 2);
+                highlight? TextHighlightColor : TextNormalColor, TextThickness);
         }
 
 
@@ -370,28 +376,17 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // In the picturebox draw the legend as a scale of colours from startColor to endColor
-        public static Image<Bgr, byte> DrawContourLegend(Size size, Color startColor, Color endColor)
+        // Draw the NorthingM, EastingM range of the drone's movement as text
+        private void DrawDroneRange(ref Image<Bgr, byte> image, Size size, DroneLocation minLocation, DroneLocation maxLocation)
         {
-            var theShades = GetColorShades(startColor, endColor, NumShades);
+            var minPoint = DroneLocnMToPixelPoint(minLocation);
+            var maxPoint = DroneLocnMToPixelPoint(maxLocation);
+            int inset = 15;
 
-            var inc = 1.0f * size.Height / NumShades;
-
-            var image = NewLightGrayImage(size);
-
-            for (int i = 0; i < NumShades; i++)
-            {
-                Rectangle thisRect = new Rectangle(0, 0, size.Width, (int)inc);
-                thisRect.Y = (int)(i * inc);
-                image.Draw(thisRect, DroneColors.ColorToBgr(theShades[i]),
-                    -1); // If thickness is less than 1, the rectangle is filled up
-            }
-
-            // Draw an up triangle centered near the top.
-            var center = new Point(size.Width / 2 - 1, size.Width / 2);
-            UpTriangle(ref image, center, UpTriangleLen, DroneColors.WhiteBgr, HighlightThickness);
-
-            return image.Clone();
+            DrawText(ref image, ((int)(minLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, minPoint.Y + 3 * inset));
+            DrawText(ref image, ((int)(maxLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, maxPoint.Y - 3 * inset));
+            DrawText(ref image, ((int)(minLocation.EastingM)).ToString(), new Point(minPoint.X + 3 * inset, minPoint.Y ));
+            DrawText(ref image, ((int)(maxLocation.EastingM)).ToString(), new Point(maxPoint.X - 3 * inset, minPoint.Y));
         }
 
 
@@ -484,16 +479,20 @@ namespace SkyCombDrone.DrawSpace
                         if (spareVertPxs > 2)
                             TransformMToPixels.YMargin -= spareVertPxs;
 
+                        // Draw the ground or surface elevations as background of shades of brown or green
                         if (!tightFocus)
-                            // Draw the ground or surface elevations as background of shades of brown or green
                             DrawElevationOrSwathe(ref image, groundType);
 
-                        if(DrawLegs) 
-                            // Draw all flight path legs (as straight lines)
+                        // Draw all flight path legs (as straight lines)
+                        if (DrawLegs) 
                             DrawFlightLegs(ref image);
 
                         // Draw the flight path steps
                         DrawFlightSteps(ref image);
+
+                        // Draw the NorthingM, EastingM range of the drone's movement as text
+                        if (DrawRange)
+                            DrawDroneRange(ref image, size, minLocation, maxLocation);
                     }
                 }
 
@@ -606,6 +605,31 @@ namespace SkyCombDrone.DrawSpace
             Draw.Cross(ref countryGraphImage, crossCenter, DroneColors.ErrorBgr, 3, 20);
 
             countryGraphBitmap = countryGraphImage.ToBitmap();
+        }
+
+
+        // In the picturebox draw the legend as a scale of colours from startColor to endColor
+        public static Image<Bgr, byte> DrawContourLegend(Size size, Color startColor, Color endColor)
+        {
+            var theShades = GetColorShades(startColor, endColor, NumShades);
+
+            var inc = 1.0f * size.Height / NumShades;
+
+            var image = NewLightGrayImage(size);
+
+            for (int i = 0; i < NumShades; i++)
+            {
+                Rectangle thisRect = new Rectangle(0, 0, size.Width, (int)inc);
+                thisRect.Y = (int)(i * inc);
+                image.Draw(thisRect, DroneColors.ColorToBgr(theShades[i]),
+                    -1); // If thickness is less than 1, the rectangle is filled up
+            }
+
+            // Draw an up triangle centered near the top.
+            var center = new Point(size.Width / 2 - 1, size.Width / 2);
+            UpTriangle(ref image, center, UpTriangleLen, DroneColors.WhiteBgr, HighlightThickness);
+
+            return image.Clone();
         }
     }
 }

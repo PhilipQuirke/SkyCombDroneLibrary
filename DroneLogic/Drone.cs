@@ -633,12 +633,13 @@ namespace SkyCombDrone.DroneLogic
         // Get the drone settings needed to describe the flight in the SkyCombFLights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
-            string latitude = "";
-            string longitude = "";
-            string countryX = "";
-            string countryY = "";
-            string eastingM = "";
-            string northingM = "";
+            double latitude = 0;
+
+            double longitude = 0;
+            float countryX = 0;
+            float countryY = 0;
+            float eastingM = 0;
+            float northingM = 0;
 
             if (HasFlightSections)
             {
@@ -646,18 +647,18 @@ namespace SkyCombDrone.DroneLogic
                 var maxG = FlightSections.MaxGlobalLocation;
                 if (minG != null && maxG != null)
                 {
-                    latitude = ((minG.Latitude + maxG.Latitude) / 2).ToString();
-                    longitude = ((minG.Longitude + maxG.Longitude) / 2).ToString();
+                    latitude = (minG.Latitude + maxG.Latitude) / 2;
+                    longitude = (minG.Longitude + maxG.Longitude) / 2;
                 }
 
                 var minC = FlightSections.MinCountryLocation;
                 var maxC = FlightSections.MaxCountryLocation;
                 if ((maxC != null) && (minC != null))
                 {
-                    countryX = ((minC.EastingM + maxC.EastingM)/2).ToString();
-                    countryY = ((minC.NorthingM + maxC.NorthingM)/2).ToString();
-                    eastingM = ((int)(maxC.EastingM - minC.EastingM)).ToString();
-                    northingM = ((int)(maxC.NorthingM - minC.NorthingM)).ToString(); 
+                    countryX = (minC.EastingM + maxC.EastingM)/2;
+                    countryY = (minC.NorthingM + maxC.NorthingM)/2;
+                    eastingM = (maxC.EastingM - minC.EastingM);
+                    northingM = (maxC.NorthingM - minC.NorthingM); 
                 }
             }
 
@@ -665,12 +666,12 @@ namespace SkyCombDrone.DroneLogic
             {
                 { "DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(ShortDateFormat) : "") },
                 { "Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : "") },
-                { "Latitude", latitude },
-                { "Longitude", longitude },
-                { "Country X", countryX },
-                { "Country Y", countryY },
-                { "East M", eastingM },
-                { "North M", northingM },
+                { "Latitude", latitude, LatLongNdp },
+                { "Longitude", longitude, LatLongNdp },
+                { "Country X", countryX, 0 },
+                { "Country Y", countryY, 0 },
+                { "East M", eastingM, 0 },
+                { "North M", northingM, 0 },
                 { "DEM %", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : "") },
                 { "DSM %", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : "") },
                 { "Google Maps", GoogleMapsLink() },

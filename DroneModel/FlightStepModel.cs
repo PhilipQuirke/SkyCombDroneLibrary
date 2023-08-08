@@ -161,12 +161,26 @@ namespace SkyCombDrone.DroneModel
         }
 
 
+        public string ShortFileName()
+        {
+            if (FileName == "")
+                return "";
+
+            var answer = FileName.Substring(FileName.LastIndexOf('\\') + 1);
+
+            // Uppercase filename and lowercase suffix for consistency
+            return
+                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
+                answer.Substring(answer.LastIndexOf('.')).ToLower();
+        }
+
+
         // Get this FlightSteps object's settings as datapairs (e.g. for saving to a datastore)
         public override DataPairList GetSettings()
         {
             var answer = base.GetSettings();
 
-            answer.Add("File Name", FileName);
+            answer.Add("File Name", ShortFileName());
             answer.Add("# Smooth Steps", NumSmoothSteps);
             answer.Add("Avg Speed Mps", AvgSpeedMps, 2);
             answer.Add("Min Dem M", MinDemM, HeightNdp);
