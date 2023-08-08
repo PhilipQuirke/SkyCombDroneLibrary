@@ -331,7 +331,7 @@ namespace SkyCombDrone.DrawSpace
             try
             {
                 Size = size;
-                var image = LightGrayImage(size);
+                var image = NewLightGrayImage(size);
 
                 CalculateStepWidthAndStride(
                     DroneDrawScope.FloorMinSumLinealM,
@@ -428,7 +428,7 @@ namespace SkyCombDrone.DrawSpace
             {
                 Size = size;
 
-                var image = LightGrayImage(size);
+                var image = NewLightGrayImage(size);
 
                 if (DroneDrawScope.Drone == null)
                 {
@@ -617,7 +617,7 @@ namespace SkyCombDrone.DrawSpace
                 // For better visuals, don't let maxSpeed be tiny. At least 2m/s
                 MaxVertRaw = (float)Math.Max(2.0, Math.Ceiling(DroneDrawScope.MaxSpeedMps));
 
-            var image = LightGrayImage(size);
+            var image = NewLightGrayImage(size);
 
             if (MaxVertRaw == UnknownValue)
             {
@@ -660,7 +660,7 @@ namespace SkyCombDrone.DrawSpace
             MinVertRaw = DroneDrawScope.FloorMinPitchDeg;
             MaxVertRaw = DroneDrawScope.CeilingMaxPitchDeg;
 
-            var image = LightGrayImage(size);
+            var image = NewLightGrayImage(size);
 
             if ((DroneDrawScope.Drone == null) || (MaxVertRaw == UnknownValue))
             {
@@ -703,7 +703,7 @@ namespace SkyCombDrone.DrawSpace
             MinVertRaw = DroneDrawScope.FloorMinDeltaYawDeg;
             MaxVertRaw = DroneDrawScope.CeilingMaxDeltaYawDeg;
 
-            var image = LightGrayImage(size);
+            var image = NewLightGrayImage(size);
 
             if ((MaxVertRaw == UnknownValue) || (DroneDrawScope.Drone == null))
             {
@@ -746,7 +746,7 @@ namespace SkyCombDrone.DrawSpace
             MinVertRaw = DroneDrawScope.FloorMinRollDeg;
             MaxVertRaw = DroneDrawScope.CeilingMaxRollDeg;
 
-            var image = LightGrayImage(size);
+            var image = NewLightGrayImage(size);
 
             if ((DroneDrawScope.Drone == null) || (MaxVertRaw == UnknownValue))
             {
@@ -785,7 +785,7 @@ namespace SkyCombDrone.DrawSpace
             Title = "Drone Legs";
             SetHorizLabelsByTime();
 
-            var image = LightGrayImage(size);
+            var image = NewLightGrayImage(size);
 
             var outColor = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
             var inColor = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);

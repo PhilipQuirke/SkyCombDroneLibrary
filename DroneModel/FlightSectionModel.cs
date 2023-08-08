@@ -115,7 +115,8 @@ namespace SkyCombDrone.DroneModel
                 return (MaxGlobalLocation == null ? null : NztmProjection.WgsToNztm(MaxGlobalLocation));
             }
         }
-        public CountryLocation? CenterCountryLocation { get {
+        // The centre of flight locations in country coordinate system
+        public CountryLocation? CountryCentroid { get {
                 var min = MinCountryLocation;
                 var max = MaxCountryLocation;
                 if (min == null || max == null)
@@ -126,6 +127,7 @@ namespace SkyCombDrone.DroneModel
                     (min.EastingM + max.EastingM) / 2);
             }
         }
+
 
         public FlightSectionsModel(List<string>? settings = null) : base("Section")
         {

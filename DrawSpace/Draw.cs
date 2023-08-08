@@ -21,10 +21,17 @@ namespace SkyCombDrone.DrawSpace
         public const int UpTriangleLen = 12;
 
 
-        // Create a lightgray rectangle        
-        public static Image<Bgr, byte> LightGrayImage(Size size)
+        // Create a new rectangle        
+        public static Image<Bgr, byte> NewImage(Size size, Bgr color)
         {
-            return new Image<Bgr, byte>(size.Width, size.Height, new Bgr(240, 240, 240));
+            return new Image<Bgr, byte>(size.Width, size.Height, color);
+        }
+
+
+        // Create a new lightgray rectangle        
+        public static Image<Bgr, byte> NewLightGrayImage(Size size)
+        {
+            return NewImage(size, new Bgr(240, 240, 240));
         }
 
 
@@ -90,7 +97,7 @@ namespace SkyCombDrone.DrawSpace
         public static Image<Bgr, byte> Message(Size size, string message, Bgr color, int fontScale = 1)
         {
             // Create a lightgray rectangle
-            var image = LightGrayImage(size);
+            var image = NewLightGrayImage(size);
 
             Text(ref image, message, new Point(50, 50), fontScale, color);
 
