@@ -383,10 +383,10 @@ namespace SkyCombDrone.DrawSpace
             var maxPoint = DroneLocnMToPixelPoint(maxLocation);
             int inset = 15;
 
-            DrawText(ref image, ((int)(minLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, minPoint.Y + 3 * inset));
-            DrawText(ref image, ((int)(maxLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, maxPoint.Y - 3 * inset));
-            DrawText(ref image, ((int)(minLocation.EastingM)).ToString(), new Point(minPoint.X + 3 * inset, minPoint.Y ));
-            DrawText(ref image, ((int)(maxLocation.EastingM)).ToString(), new Point(maxPoint.X - 3 * inset, minPoint.Y));
+            DrawText(ref image, ((int)(minLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, minPoint.Y + inset));
+            DrawText(ref image, ((int)(maxLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, maxPoint.Y - 5 * inset));
+            DrawText(ref image, ((int)(minLocation.EastingM)).ToString(), new Point(minPoint.X + inset, minPoint.Y ));
+            DrawText(ref image, ((int)(maxLocation.EastingM)).ToString(), new Point(maxPoint.X - 5 * inset, minPoint.Y));
         }
 
 

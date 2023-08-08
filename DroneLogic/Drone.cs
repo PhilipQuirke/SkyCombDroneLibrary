@@ -497,14 +497,41 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Default the RunFromS and RunToS config values 
+        // This code mirrors the Drone.DefaultConfigRunFromTo() code
+        public (int startMs, int endMs) CalculateDefaultConfigRunFromToMs( bool useLegs )
+        {
+            if (HasFlightLegs)
+            {
+                if (useLegs)
+                    return (SectionIdToVideoMs(FlightLegs.Legs[0].MinStepId),
+                            SectionIdToVideoMs(FlightLegs.Legs[^1].MaxStepId));
+                else
+                    return (SectionIdToVideoMs(FlightSteps.MinStepId),
+                            SectionIdToVideoMs(FlightSteps.MaxStepId));
+            }
+            else if (HasInputVideo)
+                return (0, InputVideo.DurationMs);
+
+            return (0, 0);
+        }
+
+
+        // Default the RunFromS and RunToS config values 
         public void DefaultConfigRunFromTo()
         {
-            if (HasFlightLegs && Config.UseLegs)
-                // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
-                // This is the "interesting" part of the flight that the Flow and Comb processes are best applied to.
-                SetConfigRunFromToBySection(
-                    FlightLegs.Legs[0].MinStepId,
-                    FlightLegs.Legs[^1].MaxStepId);
+            if (HasFlightLegs)
+            {
+                if (Config.UseLegs)
+                    // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
+                    // This is the "interesting" part of the flight that the Flow and Comb processes are best applied to.
+                    SetConfigRunFromToBySection(
+                        FlightLegs.Legs[0].MinStepId,
+                        FlightLegs.Legs[^1].MaxStepId);
+                else
+                    SetConfigRunFromToBySection(
+                        FlightSteps.MinStepId,
+                        FlightSteps.MaxStepId);
+            }
             else if (HasInputVideo)
             {
                 // Default the RunFrom/To to the full video length
