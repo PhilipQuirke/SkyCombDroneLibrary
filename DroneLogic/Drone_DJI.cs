@@ -27,20 +27,92 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        private string ReadLine()
+        // The file has a format which repeats:
+        //      A series of data (4 to 7) lines repeated to one frame
+        //      One blank line
+        private List<string>? ReadParagraph()
         {
-            return File.ReadLine();
+            List<string>? answer = new();
+
+            while (true)
+            {
+                string line = File.ReadLine();
+                if (line == null)
+                    break;
+
+                line = line.Trim();
+                if (line.Length == 0)
+                    break;
+
+                answer.Add(line);
+            }
+
+            if (answer.Count == 0)
+                answer = null;
+
+            return answer;
         }
 
 
-        private string ReadLineNoSpaces()
+        // Parse the RHS of the line to read a TimeSpan:
+        //      00:02:59,000 --> 00:03:00,000
+        // The M300 has this bug edge case:
+        //      00:02:59,000 --> 00:02:60,000
+        public TimeSpan ParseDuration(string line)
         {
-            string line = ReadLine();
-            if (line == null)
-                return null;
+            TimeSpan answer;
 
-            return line.Replace(" ", "");
+            line = line.Replace(" ", "");
+            line = line.Substring(line.IndexOf('>') + 2);
+
+            // Set the StartTime to nearest second 
+            try
+            {
+                answer = TimeSpan.Parse(line.Substring(0, line.IndexOf(',')));
+            } catch( Exception ex)
+            {
+                if(line.Contains(":60"))
+                {
+                    line = line.Replace(":60", ":00");
+                    answer = TimeSpan.Parse(line.Substring(0, line.IndexOf(',')));
+
+                    answer += TimeSpan.FromSeconds(60);
+                }
+                else
+                    throw ex;
+            }
+
+            // Parse the separate milliseconds field
+            line = line.Substring(line.IndexOf(',') + 1);
+            int milliseconds = ConfigBase.StringToNonNegInt(line);
+
+            // In rare cases the milliseconds is greater than 1000 e.g. 1824
+            // Add milliseconds to the timespan StartTime
+            answer += TimeSpan.FromMilliseconds(milliseconds);
+
+            return answer; 
         }
+
+
+        // Parse the line to read a DateTime
+        // The time appears to be in local time (not UTC)
+        public DateTime ParseDateTime(string line)
+        {
+            DateTime answer;
+
+            if (line.IndexOf(',') > 0)
+            {
+                answer = DateTime.Parse(line.Substring(0, line.IndexOf(',')));
+                line = line.Substring(line.IndexOf(',') + 1);
+                var theMilliSeconds = ConfigBase.StringToNonNegInt(line.Substring(0, line.IndexOf(',')));
+                answer = answer.AddMilliseconds(theMilliSeconds);
+            }
+            else
+                answer = DateTime.Parse(line);
+
+            return answer;
+        }
+
 
 
         // Load the drone flight data for a DJI Mavic 2 Enterprise or DJI Mini from a SRT file
@@ -85,27 +157,21 @@ namespace SkyCombDrone.DroneLogic
 
                 File = new(sections.FileName);
 
-                // Read the first line
-                string line = ReadLineNoSpaces();
-
                 // Loop through all the lines
-                FlightSection prevSection = null;
+                FlightSection? prevSection = null;
                 int wantSectionId = 0;
-                while (line != null)
+                while (true)
                 {
-                    // Have already read line "15" containing the video frame number
+                    var paragraph = ReadParagraph();
+                    // Four is the lowest number of lines seen in a drone flight log paragraph
+                    if((paragraph == null) || (paragraph.Count < 4))
+                        break;
 
-                    // Read line "00:00:01,595 --> 00:00:01,711"
-                    line = ReadLine();
-                    line = line.Substring(line.IndexOf('>') + 2);
-                    // Set the StartTime to nearest second 
-                    var startTime = TimeSpan.Parse(line.Substring(0, line.IndexOf(',')));
-                    line = line.Substring(line.IndexOf(',') + 1);
-                    // Parse the separate milliseconds field
-                    int milliseconds = ConfigBase.StringToNonNegInt(line);
-                    // In rare cases the milliseconds is greater than 1000 e.g. 1824
-                    // Add milliseconds to the timespan StartTime
-                    startTime += TimeSpan.FromMilliseconds(milliseconds);
+                    // Line 0: The video frame number e.g 15
+
+                    // Line 1: The time period covered "00:00:01,595 --> 00:00:01,711"
+                    var line = paragraph[1];
+                    var startTime = ParseDuration(line);
 
 
                     // We want at most 1 section per FlightSection.SectionMinMs.
@@ -120,209 +186,208 @@ namespace SkyCombDrone.DroneLogic
                         wantSectionId = thisSectionId + 1;
 
 
-                        // Read line "<font size="36">FrameCnt : 15, DiffTime : 116ms"
-                        line = ReadLine();
-                        if(line == null)
-                            break;
-
-
-                        // M2E Dual: Read line "2022-04-10 18:03:55,167,480"
-                        // DJI Mini: Read line "2022-06-27 14:31:29.480"
-                        // For M2E Dual the time appears to be in local time (not UTC)
-                        line = File.ReadLine();
-                        if (line == null)
-                            break;
-                        DateTime theDateTime;
-                        if (line.IndexOf(',') > 0)
+                        // Line 2:
+                        // M300: Time e.g. 2021.09.18 21:23:27
+                        // Most drones: Frame duration e.g. "<font size="36">FrameCnt : 15, DiffTime : 116ms"
+                        line = paragraph[2];
+                        if (line.Substring(0, 2) == "20")
                         {
-                            theDateTime = DateTime.Parse(line.Substring(0, line.IndexOf(',')));
-                            line = line.Substring(line.IndexOf(',') + 1);
-                            var theMilliSeconds = ConfigBase.StringToNonNegInt(line.Substring(0, line.IndexOf(',')));
-                            theDateTime = theDateTime.AddMilliseconds(theMilliSeconds);
-                        }
-                        else
-                            theDateTime = DateTime.Parse(line);
-                        if (prevSection == null)
-                            sections.MinDateTime = theDateTime;
-                        else
-                            sections.MaxDateTime = theDateTime;
+                            // Matrice 300 paragraph looks like:
+                            //      8
+                            //      00:00:07,000-- > 00:00:08,000
+                            //      2021.09.18 21:23:30
+                            //      GPS(-44.3266, 170.5650, 0.0M) BAROMETER: 363.3M
 
-                        // Read & process the next line(s) until we get a blank line
-                        line = ReadLineNoSpaces();
-                        if (line == null)
-                            break;
-                        while ((line != null) && line.Trim().Length > 0)
-                        {
-                            // Find the fnum (if any) 
-                            var token = "[fnum:";
-                            var tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                            {
-                                // Only optical videos have this.
-                                sections.Thermal = false;
-
-                                var tokenValue = (int)FindTokenValue(line, token, tokenPos, "]");
-                                if (prevSection == null)
-                                {
-                                    video.MinFStop = tokenValue;
-                                    video.MaxFStop = tokenValue;
-                                }
-                                else
-                                {
-                                    video.MinFStop = Math.Min(video.MinFStop, tokenValue);
-                                    video.MaxFStop = Math.Max(video.MaxFStop, tokenValue);
-                                }
-                            }
-
-                            // Find the ColorMD
-                            token = "[color_md:";
-                            tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                            {
-                                var tokenValue = line.Substring(tokenPos + token.Length);
-                                video.ColorMd = tokenValue.Substring(0, tokenValue.IndexOf("]")).Trim();
-                            }
-
-                            // Find the focal length (if any)
-                            token = "[focal_len:";
-                            tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                            {
-                                var tokenValue = (int)FindTokenValue(line, token, tokenPos, "]");
-                                if (prevSection == null)
-                                {
-                                    video.MinFocalLength = tokenValue;
-                                    video.MaxFocalLength = tokenValue;
-                                }
-                                else
-                                {
-                                    video.MinFocalLength = Math.Min(video.MinFocalLength, tokenValue);
-                                    video.MaxFocalLength = Math.Max(video.MaxFocalLength, tokenValue);
-                                }
-                            }
-
-                            // Find the latitude
-                            token = "[latitude:";
-                            tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                                thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, "]");
-
-
-                            // Find the longitude
-                            token = "[longtitude:"; // sic. Older versions mispelt the longitude as longtitude.
-                            tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                            {
-                                sections.FileType = DjiM2E;
-                                thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
-                            }
+                            if (prevSection == null)
+                                sections.MinDateTime = ParseDateTime(line);
                             else
+                                sections.MaxDateTime = ParseDateTime(line);
+
+                            // Parse "GPS(-41.3899,174.0177,0.0M) BAROMETER:97.7M"
+                            line = paragraph[3].Replace(" ", ""); 
+                            string token = "GPS(";
+                            int tokenPos = line.IndexOf(token);
+                            if (tokenPos >= 0)
                             {
-                                token = "[longitude:";
+                                sections.FileType = DjM300;
+                                thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, ",");
+
+                                token = ",";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                 {
-                                    sections.FileType = DjiMavic3;
-                                    thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
-                                }
-                                else 
-                                {
-                                    // try to parse "GPS(-41.3899,174.0177,0.0M) BAROMETER:97.7M"
-                                    token = "GPS(";
+                                    thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, ",");
+
+                                    token = "BAROMETER:";
                                     tokenPos = line.IndexOf(token);
                                     if (tokenPos >= 0)
                                     {
-                                        sections.FileType = DjM300;
-                                        thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, ",");
-
-                                        token = ",";
-                                        tokenPos = line.IndexOf(token);
-                                        if (tokenPos >= 0)
-                                        {
-                                            thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, ",");
-
-                                            token = "BAROMETER:";
-                                            tokenPos = line.IndexOf(token);
-                                            if (tokenPos >= 0)
-                                            {
-                                                thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "M");
-                                            }
-                                        }
+                                        thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "M");
                                     }
                                 }
                             }
-
-
-                            // Note:
-                            // If the drone flew in ATTI or OPTI mode (and not GPS mode)
-                            // then the latitude and longitude will be zero.
-                            // and thisSection.GlobalLocation.Specified will be false.
-
-
-                            // Find the altitude
-                            token = "[altitude:"; // For M2E Dual
-                            tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                                thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "]");
+                        }
+                        else
+                        { 
+                            // M2E Dual: "2022-04-10 18:03:55,167,480"
+                            // DJI Mini: "2022-06-27 14:31:29.480"
+                            line = paragraph[3];
+                            if (prevSection == null)
+                                sections.MinDateTime = ParseDateTime(line);
                             else
+                                sections.MaxDateTime = ParseDateTime(line);
+
+                            int lineNum = 4;
+                            while (lineNum < paragraph.Count)
                             {
-                                // For DJI Mini 2022 e.g.[rel_alt:1.100 abs_alt:-70.436]
-                                // For Lennard Spark's DJI: [rel_alt: 62.370 abs_alt: 227.373]
-                                token = "abs_alt:";
+                                line = paragraph[lineNum].Replace(" ", "");
+
+                                // Find the fnum (if any) 
+                                var token = "[fnum:";
+                                var tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                {
+                                    // Only optical videos have this.
+                                    sections.Thermal = false;
+
+                                    var tokenValue = (int)FindTokenValue(line, token, tokenPos, "]");
+                                    if (prevSection == null)
+                                    {
+                                        video.MinFStop = tokenValue;
+                                        video.MaxFStop = tokenValue;
+                                    }
+                                    else
+                                    {
+                                        video.MinFStop = Math.Min(video.MinFStop, tokenValue);
+                                        video.MaxFStop = Math.Max(video.MaxFStop, tokenValue);
+                                    }
+                                }
+
+                                // Find the ColorMD
+                                token = "[color_md:";
+                                tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                {
+                                    var tokenValue = line.Substring(tokenPos + token.Length);
+                                    video.ColorMd = tokenValue.Substring(0, tokenValue.IndexOf("]")).Trim();
+                                }
+
+                                // Find the focal length (if any)
+                                token = "[focal_len:";
+                                tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                {
+                                    var tokenValue = (int)FindTokenValue(line, token, tokenPos, "]");
+                                    if (prevSection == null)
+                                    {
+                                        video.MinFocalLength = tokenValue;
+                                        video.MaxFocalLength = tokenValue;
+                                    }
+                                    else
+                                    {
+                                        video.MinFocalLength = Math.Min(video.MinFocalLength, tokenValue);
+                                        video.MaxFocalLength = Math.Max(video.MaxFocalLength, tokenValue);
+                                    }
+                                }
+
+                                // Find the latitude
+                                token = "[latitude:";
+                                tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                    thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, "]");
+
+
+                                // Find the longitude
+                                token = "[longtitude:"; // sic. Older versions mispelt the longitude as longtitude.
+                                tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                {
+                                    sections.FileType = DjiM2E;
+                                    thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
+                                }
+                                else
+                                {
+                                    token = "[longitude:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                    {
+                                        sections.FileType = DjiMavic3;
+                                        thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
+                                    }
+
+                                }
+
+
+                                // Note:
+                                // If the drone flew in ATTI or OPTI mode (and not GPS mode)
+                                // then the latitude and longitude will be zero.
+                                // and thisSection.GlobalLocation.Specified will be false.
+
+
+                                // Find the altitude
+                                token = "[altitude:"; // For M2E Dual
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                     thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "]");
+                                else
+                                {
+                                    // For DJI Mini 2022 e.g.[rel_alt:1.100 abs_alt:-70.436]
+                                    // For Lennard Spark's DJI: [rel_alt: 62.370 abs_alt: 227.373]
+                                    token = "abs_alt:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                        thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "]");
+                                }
+
+                                // Find the yaw
+                                token = "gb_yaw:";
+                                tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                {
+                                    // For a DJI Mavic 3t get: [gb_yaw: -142.5 gb_pitch: -28.7 gb_roll: 0.0]
+                                    cameraPitchYawRoll = GimbalDataEnum.AutoYes;
+
+                                    thisSection.YawDeg = (float)FindTokenValue(line, token, tokenPos, "gb_pitch");
+
+                                    // Find the pitch
+                                    token = "gb_pitch:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                        thisSection.PitchDeg = (float)FindTokenValue(line, token, tokenPos, "gb_roll");
+
+                                    // Set the roll
+                                    token = "gb_roll:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                        thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
+                                }
+                                else
+                                {
+                                    // For older DJIs: [Drone: Yaw:147.9, Pitch:4.5, Roll:-0.1]
+                                    token = "Yaw:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                        thisSection.YawDeg = (float)FindTokenValue(line, token, tokenPos, ",");
+
+                                    // Find the pitch
+                                    token = "Pitch:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                        thisSection.PitchDeg = (float)FindTokenValue(line, token, tokenPos, ",");
+
+                                    // Set the roll
+                                    token = "Roll:";
+                                    tokenPos = line.IndexOf(token);
+                                    if (tokenPos >= 0)
+                                        thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
+                                }
+
+                                // Input text not used:
+                                //      [dzoom_ratio: 10000, delta: 0]
+                                //      [dzoom_ratio: 1.00]
+
+                                lineNum++;
                             }
-
-                            // Find the yaw
-                            token = "gb_yaw:";
-                            tokenPos = line.IndexOf(token);
-                            if (tokenPos >= 0)
-                            {
-                                // For a DJI Mavic 3t get: [gb_yaw: -142.5 gb_pitch: -28.7 gb_roll: 0.0]
-                                cameraPitchYawRoll = GimbalDataEnum.AutoYes;
-
-                                thisSection.YawDeg = (float)FindTokenValue(line, token, tokenPos, "gb_pitch");
-
-                                // Find the pitch
-                                token = "gb_pitch:";
-                                tokenPos = line.IndexOf(token);
-                                if (tokenPos >= 0)
-                                    thisSection.PitchDeg = (float)FindTokenValue(line, token, tokenPos, "gb_roll");
-
-                                // Set the roll
-                                token = "gb_roll:";
-                                tokenPos = line.IndexOf(token);
-                                if (tokenPos >= 0)
-                                    thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
-                            }
-                            else
-                            {
-                                // For older DJIs: [Drone: Yaw:147.9, Pitch:4.5, Roll:-0.1]
-                                token = "Yaw:";
-                                tokenPos = line.IndexOf(token);
-                                if (tokenPos >= 0)
-                                    thisSection.YawDeg = (float)FindTokenValue(line, token, tokenPos, ",");
-
-                                // Find the pitch
-                                token = "Pitch:";
-                                tokenPos = line.IndexOf(token);
-                                if (tokenPos >= 0)
-                                    thisSection.PitchDeg = (float)FindTokenValue(line, token, tokenPos, ",");
-
-                                // Set the roll
-                                token = "Roll:";
-                                tokenPos = line.IndexOf(token);
-                                if (tokenPos >= 0)
-                                    thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
-                            }
-
-
-                            // PQR Input text not used:
-                            // Dave Clark's DJI has: [dzoom_ratio: 10000, delta: 0]
-                            // Lennard Spark's DJI has: [dzoom_ratio: 1.00]
-
-                            line = ReadLineNoSpaces();
                         }
 
                         // Add the FlightSection to the Flight
@@ -330,16 +395,6 @@ namespace SkyCombDrone.DroneLogic
 
                         prevSection = thisSection;
                     }
-                    else
-                    {
-                        line = ReadLineNoSpaces();
-                        while (line != null && line.Trim().Length > 0)
-                            line = ReadLineNoSpaces();
-                    }
-
-                    // Read the first line of the next-frame lines.
-                    // If there is not a next frame, returns null.
-                    line = ReadLine();
                 }
 
                 // The M2E has a published thermal frame rate of 8fps, implying a thermal TimeDelta of 113 to 116 ms.
