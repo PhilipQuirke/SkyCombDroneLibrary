@@ -3,7 +3,7 @@ using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundSpace;
+using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;

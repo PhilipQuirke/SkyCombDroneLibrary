@@ -1,5 +1,5 @@
 ﻿using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundSpace;
+using SkyCombGround.GroundLogic;
 
 
 // Models are used in-memory and to persist/load data to/from the datastore

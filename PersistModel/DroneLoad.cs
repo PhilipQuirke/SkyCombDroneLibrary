@@ -1,8 +1,6 @@
 ﻿using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundSpace;
-using SkyCombGround.PersistModel;
 
 
 

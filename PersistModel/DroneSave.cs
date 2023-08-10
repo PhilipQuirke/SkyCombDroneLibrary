@@ -4,7 +4,7 @@ using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundSpace;
+using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
