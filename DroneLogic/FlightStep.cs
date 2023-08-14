@@ -164,16 +164,16 @@ namespace SkyCombDrone.DroneLogic
         // Estimate the ground elevation (in metres) of this flight step
         public void CalculateSettings_DemM(GroundData groundData)
         {
-            if ((groundData != null) && (groundData.DemGrid != null))
-                DemM = groundData.DemGrid.GetElevationByDroneLocn(DroneLocnM);
+            if ((groundData != null) && (groundData.DemModel != null))
+                DemM = groundData.DemModel.GetElevationByDroneLocn(DroneLocnM);
         }
 
 
         // Estimate the surface elevation (in metres) of this flight step
         public void CalculateSettings_DsmM(GroundData groundData)
         {
-            if ((groundData != null) && (groundData.DsmGrid != null))
-                DsmM = groundData.DsmGrid.GetElevationByDroneLocn(DroneLocnM);
+            if ((groundData != null) && (groundData.DsmModel != null))
+                DsmM = groundData.DsmModel.GetElevationByDroneLocn(DroneLocnM);
         }
 
 
@@ -535,7 +535,7 @@ namespace SkyCombDrone.DroneLogic
                 (theCalc.DemM != UnknownValue))
             {
                 var droneToGroundDeltaM = theCalc.DemM - theCalc.AltitudeM;
-                if (Math.Abs(droneToGroundDeltaM) > ground.DemGrid.ElevationAccuracyM)
+                if (Math.Abs(droneToGroundDeltaM) > ground.DemModel.ElevationAccuracyM)
                     return droneToGroundDeltaM;
             }
 

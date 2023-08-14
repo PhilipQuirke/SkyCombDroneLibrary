@@ -4,10 +4,12 @@ using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
+using SkyCombGround.GroundModel;
 using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
+using SkyCombDrone.CommonSpace;
 
 namespace SkyCombDrone.PersistModel
 {
@@ -31,9 +33,9 @@ namespace SkyCombDrone.PersistModel
 
         // Generate a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
         public static (string, DataPairList?, string, Emgu.CV.Image<Bgr,byte>) CreateDronePath(
-            DrawPath drawPath, GroundType type, bool graybackground, int pixels = 700)
+            DrawPath drawPath, GroundType type, int pixels = 700)
         {
-            drawPath.Initialise(new Size(pixels, pixels), null, type, graybackground);
+            drawPath.Initialise(new Size(pixels, pixels), null, type);
             var pathImage = drawPath.CurrImage();
 
             var bitmapName = "UNKNOWN";
@@ -56,9 +58,10 @@ namespace SkyCombDrone.PersistModel
             // Generate a bitmap of the DSM land overlaid with the drone path 
             var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
             var drawPath = new DrawPath(drawScope, false);
+            drawPath.BackgroundColor = DroneColors.WhiteBgr; // So we dont paint under-necessary area.
 
             (var _, var _, var bitmapName, var pathImage) = 
-                CreateDronePath( drawPath, groundType, false, pixels);
+                CreateDronePath( drawPath, groundType, pixels);
 
             data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col);
         }

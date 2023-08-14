@@ -72,7 +72,7 @@ namespace SkyCombDrone.DroneLogic
         public bool HasDroneYaw { get { return HasFlightSteps && FlightSteps.MaxDeltaYawDeg != UnknownValue; } }
         public bool HasDroneRoll { get { return HasFlightSteps && FlightSteps.MaxRollDeg != UnknownValue; } }
         public bool HasDisplaySections { get { return DisplaySections != null; } }
-        public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemGrid != null) && (GroundData.DemGrid.NumElevationsStored > 0); } }
+        public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemModel != null) && (GroundData.DemModel.NumElevationsStored > 0); } }
 
 
         // How many legs to show in the UI
@@ -340,12 +340,12 @@ namespace SkyCombDrone.DroneLogic
         {
             try
             {
-                if ((GroundData == null) || (GroundData.DemGrid == null) || ! GroundData.DemGrid.HasElevationData())
+                if ((GroundData == null) || (GroundData.DemModel == null) || ! GroundData.DemModel.HasElevationData())
                     return;
 
                 if (HasInputVideo && HasFlightSections && HasGroundData)
                 {
-                    GroundData.SwatheGrid = new(GroundData.DemGrid);
+                    GroundData.SwatheModel = new(GroundData.DemModel);
 
                     // For each flight step, calculate the part of the grid seen
                     for (int stepId = minStepId; stepId <= maxStepId; stepId++)
@@ -366,7 +366,7 @@ namespace SkyCombDrone.DroneLogic
                             step.Calculate_InputImageArea_Corners();
 
                         // Update the area as "seen"
-                        GroundData.SwatheGrid.DroneRectSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
+                        GroundData.SwatheModel.DroneRectSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
                     }
                 }
             }
@@ -701,8 +701,8 @@ namespace SkyCombDrone.DroneLogic
                 { "Country Y", countryY, 0 },
                 { "East M", eastingM, 0 },
                 { "North M", northingM, 0 },
-                { "DEM %", (HasGroundData && (GroundData.DemGrid != null) ? GroundData.DemGrid.PercentDatumElevationsAvailable.ToString() : "") },
-                { "DSM %", (HasGroundData && (GroundData.DsmGrid != null) ? GroundData.DsmGrid.PercentDatumElevationsAvailable.ToString() : "") },
+                { "DEM %", (HasGroundData && (GroundData.DemModel != null) ? GroundData.DemModel.PercentDatumElevationsAvailable.ToString() : "") },
+                { "DSM %", (HasGroundData && (GroundData.DsmModel != null) ? GroundData.DsmModel.PercentDatumElevationsAvailable.ToString() : "") },
                 { "Google Maps", GoogleMapsLink() },
             };
         }

@@ -31,9 +31,10 @@ namespace SkyCombDrone.CommonSpace
 
         // Some libraries need BGR colors
         static public Bgr ColorToBgr(Color theColor) { return new Bgr(theColor.B, theColor.G, theColor.R); }
+        static public Bgr WhiteBgr { get; } = new Bgr(255, 255, 255);
+        static public Bgr GrayBgr { get; } = new Bgr(240, 240, 240);
         static public Bgr BlackBgr { get; } = new Bgr(0, 0, 0);
         static public Bgr GreenBgr { get; } = new Bgr(0, 128, 0);
         static public Bgr ErrorBgr { get; } = new Bgr(0, 0, 255);
-        static public Bgr WhiteBgr { get; } = new Bgr(255, 255, 255);
     }
 }
