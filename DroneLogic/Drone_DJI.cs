@@ -16,7 +16,7 @@ namespace SkyCombDrone.DroneLogic
         public const string DjiMavic3 = "SRT (DJI Mavic 3";
         public const string DjM300 = "SRT (DJI M300)";
 
-        System.IO.StreamReader File = null;
+        System.IO.StreamReader? File = null;
 
 
 
@@ -162,6 +162,10 @@ namespace SkyCombDrone.DroneLogic
                 int wantSectionId = 0;
                 while (true)
                 {
+                    // On occasion the flight log ends mid paragraph
+                    // giving a bad flight step. We ignore incomplete paragraphs.
+                    bool paragraph_good = false;
+
                     var paragraph = ReadParagraph();
                     // Four is the lowest number of lines seen in a drone flight log paragraph
                     if((paragraph == null) || (paragraph.Count < 4))
@@ -223,6 +227,8 @@ namespace SkyCombDrone.DroneLogic
                                     if (tokenPos >= 0)
                                     {
                                         thisSection.AltitudeM = (float)FindTokenValue(line, token, tokenPos, "M");
+
+                                        paragraph_good = true;
                                     }
                                 }
                             }
@@ -304,6 +310,8 @@ namespace SkyCombDrone.DroneLogic
                                 {
                                     sections.FileType = DjiM2E;
                                     thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
+
+                                    paragraph_good = true;
                                 }
                                 else
                                 {
@@ -313,6 +321,7 @@ namespace SkyCombDrone.DroneLogic
                                     {
                                         sections.FileType = DjiMavic3;
                                         thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
+                                        paragraph_good = true;
                                     }
 
                                 }
@@ -390,8 +399,9 @@ namespace SkyCombDrone.DroneLogic
                             }
                         }
 
-                        // Add the FlightSection to the Flight
-                        sections.AddSection(thisSection, prevSection);
+                        if(paragraph_good)
+                            // Add the FlightSection to the Flight
+                            sections.AddSection(thisSection, prevSection);
 
                         prevSection = thisSection;
                     }

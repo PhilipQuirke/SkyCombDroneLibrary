@@ -29,8 +29,6 @@ namespace SkyCombDrone.DrawSpace
         public bool DrawSteps = true;
         // Do we draw legs as straight lines or just draw each point?
         public bool DrawLegs = true;
-        // Do we draw the NorthingM, EastingM range of the drone's movement as text on the image?
-        public bool DrawRange = false;
 
         public Bgr BackgroundColor = DroneColors.GrayBgr;
 
@@ -279,6 +277,10 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
+        public void DrawTitle(ref Image<Bgr, byte> image, string title)
+        {
+            DrawText(ref image, title, new Point(5, 15));
+        }   
 
 
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
@@ -402,20 +404,6 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // Draw the NorthingM, EastingM range of the drone's movement as text
-        public void DrawDroneRange(ref Image<Bgr, byte> image, Size size, DroneLocation minLocation, DroneLocation maxLocation)
-        {
-            var minPoint = DroneLocnMToPixelPoint(minLocation);
-            var maxPoint = DroneLocnMToPixelPoint(maxLocation);
-            int inset = 15;
-
-            DrawText(ref image, ((int)(minLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, minPoint.Y + inset));
-            DrawText(ref image, ((int)(maxLocation.NorthingM)).ToString(), new Point(minPoint.X + inset, maxPoint.Y - 5 * inset));
-            DrawText(ref image, ((int)(minLocation.EastingM)).ToString(), new Point(minPoint.X + inset, minPoint.Y ));
-            DrawText(ref image, ((int)(maxLocation.EastingM)).ToString(), new Point(maxPoint.X - 5 * inset, minPoint.Y));
-        }
-
-
         // Draw drone flight path based on Drone/GroundSpace data
         // Use the FlightStep data EastM and NorthM, and the cummulative Min/MaxNorthSumM and Min/MaxEastSumM data.
         // Also use FlightLeg data to draw straight lines.
@@ -513,10 +501,6 @@ namespace SkyCombDrone.DrawSpace
                         // Draw the flight path steps
                         if(DrawSteps)
                             DrawFlightSteps(ref image);
-
-                        // Draw the NorthingM, EastingM range of the drone's movement as text
-                        if (DrawRange)
-                            DrawDroneRange(ref image, size, minLocation, maxLocation);
                     }
                 }
 
