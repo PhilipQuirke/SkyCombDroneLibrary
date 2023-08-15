@@ -32,8 +32,8 @@ namespace SkyCombDrone.PersistModel
 
 
         // Generate a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
-        public static (string, DataPairList?, string, Emgu.CV.Image<Bgr,byte>) CreateDronePath(
-            DrawPath drawPath, GroundType type, int pixels = 700)
+        public static (string title, DataPairList? metrics, string bitmapName, Emgu.CV.Image<Bgr,byte> pathImage) 
+            CreateDronePath( DrawPath drawPath, GroundType type, int pixels )
         {
             drawPath.Initialise(new Size(pixels, pixels), null, type);
             var pathImage = drawPath.CurrImage();

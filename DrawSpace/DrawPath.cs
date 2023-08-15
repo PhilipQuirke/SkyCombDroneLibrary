@@ -360,8 +360,8 @@ namespace SkyCombDrone.DrawSpace
             else if (backgroundType == GroundType.SwatheSeen)
             {
                 groundModel = BaseDrawScope.Drone.GroundData.SwatheModel;
-                highColor = Color.White;
-                lowColor = Color.LightGray;
+                highColor = DroneColors.SwatheHighColor;
+                lowColor = DroneColors.SwatheLowColor;
             }
 
             if ((groundModel == null) || !groundModel.HasElevationData())
@@ -403,7 +403,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw the NorthingM, EastingM range of the drone's movement as text
-        private void DrawDroneRange(ref Image<Bgr, byte> image, Size size, DroneLocation minLocation, DroneLocation maxLocation)
+        public void DrawDroneRange(ref Image<Bgr, byte> image, Size size, DroneLocation minLocation, DroneLocation maxLocation)
         {
             var minPoint = DroneLocnMToPixelPoint(minLocation);
             var maxPoint = DroneLocnMToPixelPoint(maxLocation);

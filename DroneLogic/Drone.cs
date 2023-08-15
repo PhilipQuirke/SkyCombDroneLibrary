@@ -335,39 +335,41 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Update SwatheGrid with area seen by the input video over specified steps
+        // Calculate swathe seen by the input video over specified steps
         public void CalculateSettings_SwatheSeen(int minStepId, int maxStepId)
         {
             try
             {
-                if ((GroundData == null) || (GroundData.DemModel == null) || ! GroundData.DemModel.HasElevationData())
+                if ((GroundData == null) || 
+                    (GroundData.DemModel == null) || 
+                    (! GroundData.DemModel.HasElevationData()) ||
+                    (!HasInputVideo) ||
+                    (!HasFlightSections) ||
+                    (!HasGroundData))
                     return;
 
-                if (HasInputVideo && HasFlightSections && HasGroundData)
+                GroundData.SwatheModel = new(GroundData.DemModel);
+
+                // For each flight step, calculate the part of the grid seen
+                for (int stepId = minStepId; stepId <= maxStepId; stepId++)
                 {
-                    GroundData.SwatheModel = new(GroundData.DemModel);
+                    FlightSteps.Steps.TryGetValue(stepId, out var step);
+                    if (step == null)
+                        continue;
 
-                    // For each flight step, calculate the part of the grid seen
-                    for (int stepId = minStepId; stepId <= maxStepId; stepId++)
-                    {
-                        FlightSteps.Steps.TryGetValue(stepId, out var step);
-                        if (step == null)
-                            continue;
+                    // We need an image area to continue.
+                    // For example, if camera is pointing near horizontal the image area
+                    // is useless for analysis purposes, and doesnt have a InputImageSizeM
+                    if (step.InputImageSizeM == null)
+                        continue;
 
-                        // We need an image area to continue.
-                        // For example, if camera is pointing near horizontal the image area
-                        // is useless for analysis purposes, and doesnt have a InputImageSizeM
-                        if (step.InputImageSizeM == null)
-                            continue;
+                    // Get corners of area covered by the step's video image (may be forward of drone's location).
+                    // This rectangle is commonly rotated relative to the X/Y axises.
+                    var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
+                        step.Calculate_InputImageArea_Corners();
 
-                        // Get corners of area covered by the step's video image (may be forward of drone's location).
-                        // This rectangle is commonly rotated relative to the X/Y axises.
-                        var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
-                            step.Calculate_InputImageArea_Corners();
-
-                        // Update the area as "seen"
-                        GroundData.SwatheModel.DroneRectSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
-                    }
+                    // Update the area as "seen"
+                    GroundData.SwatheModel.DroneRectSeen(topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn);
                 }
             }
             catch (Exception ex)
@@ -490,7 +492,6 @@ namespace SkyCombDrone.DroneLogic
                     SectionIdToVideoMs(startSectionId),
                     SectionIdToVideoMs(endSectionId));
 
-                // Calculate swathe seen by the input video over specified steps
                 CalculateSettings_SwatheSeen(startSectionId, endSectionId);
             }
         }
@@ -537,7 +538,6 @@ namespace SkyCombDrone.DroneLogic
                 Config.RunVideoFromS = 0;
                 Config.RunVideoToS = InputVideo.DurationMs / 1000.0f;
 
-                // Calculate swathe seen by the input video over specified steps
                 CalculateSettings_SwatheSeen(1, 9999);
             }
         }
