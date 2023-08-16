@@ -85,7 +85,7 @@ namespace SkyCombDrone.DroneLogic
         public static Drone Create(
             Action<string> showDroneSettings,
             Func<string, DateTime> readDateEncodedUtc,
-            DroneDataStore dataStore, DroneConfigModel config, 
+            DroneDataStore droneDataStore, DroneConfigModel config, 
             string groundDirectory, string inputFileName,
             Bitmap? countryBitmap)
         {
@@ -102,18 +102,18 @@ namespace SkyCombDrone.DroneLogic
 
                 phase = "Loading video...";
                 showDroneSettings(phase);
-                if (answer.LoadSettings_Videos(dataStore, readDateEncodedUtc))
+                if (answer.LoadSettings_Videos(droneDataStore, readDateEncodedUtc))
                 {
                     answer.EffortDurations.LoadVideosMs = EffortMs();
 
                     phase = "Loading flight log...";
                     showDroneSettings(phase);
-                    var loadedFlight = answer.LoadSettings_Flight(dataStore);
+                    var loadedFlight = answer.LoadSettings_Flight(droneDataStore);
                     answer.EffortDurations.LoadFlightLogMs = EffortMs();
 
                     phase = "Loading ground elevations...";
                     showDroneSettings(phase);
-                    var loadedGround = answer.LoadSettings_Ground(dataStore);
+                    var loadedGround = answer.LoadSettings_Ground(droneDataStore);
                     answer.EffortDurations.LoadGroundMs = EffortMs();
 
                     if (!(loadedFlight && loadedGround))
@@ -134,6 +134,7 @@ namespace SkyCombDrone.DroneLogic
                         showDroneSettings(phase);
                         answer.CalculateSettings_FlightSections();
                         answer.EffortDurations.CalcSectionsMs = EffortMs();
+                        droneDataStore.Close();
 
                         phase = "Calculating ground elevations...";
                         showDroneSettings(phase);
@@ -157,7 +158,7 @@ namespace SkyCombDrone.DroneLogic
 
                         phase = "Saving drone datastore...";
                         showDroneSettings(phase);
-                        answer.SaveSettings(dataStore, countryBitmap);
+                        answer.SaveSettings(droneDataStore, countryBitmap);
                     }
                 }
 

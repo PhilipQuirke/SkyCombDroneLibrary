@@ -13,11 +13,11 @@ namespace SkyCombDrone.DroneLogic
         public const string DjiPrefix = "SRT";
         public const string DjiGeneric = "SRT (DJI)";
         public const string DjiM2E = "SRT (DJI M2E Dual)";
-        public const string DjiMavic3 = "SRT (DJI Mavic 3";
+        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
         public const string DjM300 = "SRT (DJI M300)";
 
-        System.IO.StreamReader? File = null;
 
+        System.IO.StreamReader? File = null;
 
 
         private double FindTokenValue(string line, string token, int tokenPos, string suffix)
@@ -437,7 +437,7 @@ namespace SkyCombDrone.DroneLogic
                 switch (drone.FlightSections.FileType)
                 {
                     case DjiMavic3:
-                        // Lennard Sparks DJI Mavic 3t
+                        // Lennard Sparks' DJI Mavic 3t
                         // Thermal camera: 640×512 @ 30fps
                         // DFOV: Diagonal Field of View = 61 degrees
                         // so HFOV = 381. degrees and VFOV = 47.6 degrees 
@@ -446,7 +446,7 @@ namespace SkyCombDrone.DroneLogic
                         break;
 
                     case DjM300:
-                        // Colin Aitchison DJI M300 with XT2 19mm
+                        // Colin Aitchison's DJI M300 with XT2 19mm
                         // https://www.pbtech.co.nz/product/CAMDJI20219/DJI-Zenmuse-XT2-ZXT2B19FR-Camera-19mm-Lens--30-Hz says:
                         // FOV 57.12 Degrees x 42.44 Degrees
                         if (drone.HasThermalVideo)

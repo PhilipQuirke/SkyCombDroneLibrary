@@ -408,11 +408,11 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void SaveAndClose()
+        public void Save()
         {
             Data.SelectWorksheet(IndexTabName);
             Data.Worksheet.View.SetTabSelected();
-            Data.SaveAndClose();
+            Data.Save();
         }
     }
 }

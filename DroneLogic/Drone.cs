@@ -75,10 +75,12 @@ namespace SkyCombDrone.DroneLogic
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemModel != null) && (GroundData.DemModel.NumElevationsStored > 0); } }
 
 
+        // Do we use the flight leg information?
+        public bool UseFlightLegs { get { return HasFlightLegs && Config.UseLegs && FlightLegs.Legs.Count > 0; } }
         // How many legs to show in the UI
-        public int NumLegsShown { get { return HasFlightLegs && Config.UseLegs ? FlightLegs.Legs.Count : 0; } }
+        public int NumLegsShown { get { return UseFlightLegs ? FlightLegs.Legs.Count : 0; } }
 
-        
+
         public Drone(DroneConfigModel config)
         {
             Config = config;
@@ -226,9 +228,9 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Load ground data (if any) from the DataStore 
-        public bool LoadSettings_Ground(DroneDataStore dataStore)
+        public bool LoadSettings_Ground(DroneDataStore droneDataStore)
         {
-            GroundData = GroundLoad.Load(dataStore);
+            GroundData = GroundLoad.Load(droneDataStore);
 
             return HasGroundData;
         }

@@ -170,7 +170,7 @@ namespace SkyCombDrone.PersistModel
                     Drone.EffortDurations.SaveDataStoreMs = (int)effort.Elapsed.TotalMilliseconds;
                 SaveData_Effort();
 
-                SaveAndClose();
+                Save();
             }
             catch (Exception ex)
             {
