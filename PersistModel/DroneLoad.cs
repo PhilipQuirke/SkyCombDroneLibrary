@@ -47,7 +47,7 @@ namespace SkyCombDrone.PersistModel
         public FlightSections FlightInputSettings(int titleCol)
         {
             return new FlightSections(
-            Data.GetColumnSettingsIfAvailable(DroneTabName, FlightSectionTitleSuffix, Chapter2TitleRow, titleCol));
+                Data.GetColumnSettingsIfAvailable(DroneTabName, FlightSectionTitleSuffix, Chapter2TitleRow, titleCol));
         }
 
 

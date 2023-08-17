@@ -282,26 +282,13 @@ namespace SkyCombDrone.DroneLogic
                                 token = "[focal_len:";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
-                                {
-                                    var tokenValue = (int)FindTokenValue(line, token, tokenPos, "]");
-                                    if (prevSection == null)
-                                    {
-                                        video.MinFocalLength = tokenValue;
-                                        video.MaxFocalLength = tokenValue;
-                                    }
-                                    else
-                                    {
-                                        video.MinFocalLength = Math.Min(video.MinFocalLength, tokenValue);
-                                        video.MaxFocalLength = Math.Max(video.MaxFocalLength, tokenValue);
-                                    }
-                                }
+                                    thisSection.FocalLength = (float)FindTokenValue(line, token, tokenPos, "]");
 
                                 // Find the latitude
                                 token = "[latitude:";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                     thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, "]");
-
 
                                 // Find the longitude
                                 token = "[longtitude:"; // sic. Older versions mispelt the longitude as longtitude.

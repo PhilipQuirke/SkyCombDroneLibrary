@@ -20,6 +20,8 @@ namespace SkyCombDrone.DrawSpace
         const int NumShades = 20;
         // A gap (jump) in the Tardis location sequence that makes us NOT draw a line
         const int DrawLineMaxGapM = 10;
+        // If the camera is pointing almost horizontal we dont draw the image area.
+        const int DegreesToVerticalCutoff = 80;
 
 
         public DroneDrawScope? BaseDrawScope = null;
@@ -560,7 +562,7 @@ namespace SkyCombDrone.DrawSpace
                             // If camera is vertically down then lines from drone to image area
                             // are unnecessary & look ugly. Suppress them for small angles.
                             var degsToVertical = Math.Abs(flightStep.CameraToVerticalForwardDeg);
-                            if (degsToVertical > 15)
+                            if((degsToVertical > 15) && (degsToVertical < DegreesToVerticalCutoff))
                             {
                                 // Draw lines from drone to image area to "connect" the drone location to the image area.
                                 // Todo: Make line dotted.
@@ -568,14 +570,17 @@ namespace SkyCombDrone.DrawSpace
                                 Line(ref image, dronePoint, bottomLeftPoint, activeBgr);
                             }
 
-                            // Draw a cross at the center of the image.
-                            // If CameraDownDeg is 90, the drone circle and leg cross will overlap.
-                            // Otherwise the cross location helps visualises the impact of CameraDownDeg.
-                            Point imageCenter = new(
-                                (topLeftPoint.X + bottomRightPoint.X) / 2,
-                                (topLeftPoint.Y + bottomRightPoint.Y) / 2);
-                            int thickness = (degsToVertical < 5 ? NormalThickness : HighlightThickness);
-                            Draw.Cross(ref image, imageCenter, activeBgr, thickness);
+                            if(degsToVertical < DegreesToVerticalCutoff)
+                            {
+                                // Draw a cross at the center of the image.
+                                // If CameraDownDeg is 90, the drone circle and leg cross will overlap.
+                                // Otherwise the cross location helps visualises the impact of CameraDownDeg.
+                                Point imageCenter = new(
+                                    (topLeftPoint.X + bottomRightPoint.X) / 2,
+                                    (topLeftPoint.Y + bottomRightPoint.Y) / 2);
+                                int thickness = (degsToVertical < 5 ? NormalThickness : HighlightThickness);
+                                Draw.Cross(ref image, imageCenter, activeBgr, thickness);
+                            }
                         }
                     }
                 }

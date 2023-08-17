@@ -83,9 +83,6 @@ namespace SkyCombDrone.DroneModel
         // OPTICAL CAMERA SETTINGS
 
 
-        // FocalLength. A FocalLength of 280 is same as f2.8 lens 
-        public int MinFocalLength { get; set; } = UnknownValue;
-        public int MaxFocalLength { get; set; } = UnknownValue;
         // FStop. An FStop of 450 is same as f4.5
         // https://www.outdoorphotographyschool.com/aperture-and-f-stops-explained says:
         // An f-stop (or f-number) is the ratio of the lens focal length divided by the
@@ -255,8 +252,6 @@ namespace SkyCombDrone.DroneModel
             {
                 answer.Add("Min FStop", MinFStop);
                 answer.Add("Max FStop", MaxFStop);
-                answer.Add("Min Focal Length", MinFocalLength);
-                answer.Add("Max Focal Length", MaxFocalLength);
             }
 
             return answer;
@@ -303,8 +298,6 @@ namespace SkyCombDrone.DroneModel
             {
                 MinFStop = ConfigBase.StringToInt(settings[i++]);
                 MaxFStop = ConfigBase.StringToInt(settings[i++]);
-                MinFocalLength = ConfigBase.StringToInt(settings[i++]);
-                MaxFocalLength = ConfigBase.StringToInt(settings[i++]);
             }
         }
 

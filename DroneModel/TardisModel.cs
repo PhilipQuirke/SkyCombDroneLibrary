@@ -57,6 +57,12 @@ namespace SkyCombDrone.DroneModel
         public float AltitudeM { get; set; } = UnknownValue;
 
 
+        // Drone camera focal length e.g. 40 to 242 in a single Lennard Sparks thermal video SRT
+        // A FocalLength of 280 is same as f2.8 lens
+        public float FocalLength { get; set; } = UnknownValue;
+
+
+
         public TardisModel(int tardisId)
         {
             TardisId = tardisId;
@@ -76,6 +82,7 @@ namespace SkyCombDrone.DroneModel
             PitchDeg = other.PitchDeg;
             RollDeg = other.RollDeg;
             AltitudeM = other.AltitudeM;
+            FocalLength = other.FocalLength;
         }
 
 
@@ -173,6 +180,7 @@ namespace SkyCombDrone.DroneModel
             PitchDeg = other.PitchDeg;
             RollDeg = other.RollDeg;
             AltitudeM = other.AltitudeM;
+            FocalLength = other.FocalLength;
         }
 
 
@@ -208,7 +216,8 @@ namespace SkyCombDrone.DroneModel
         public const int PitchDegSetting = 12;
         public const int RollDegSetting = 13;
         public const int AltitudeMSetting = 14;
-        public const int FirstFreeSetting = 15;
+        public const int FocalLengthSetting = 15;
+        public const int FirstFreeSetting = 16;
 
 
         // As save/load settings, convert UnknownValue to improve graphing. 
@@ -235,6 +244,7 @@ namespace SkyCombDrone.DroneModel
                 { "Pitch", PitchDeg == UnknownValue ? UnknownLinealValue : PitchDeg, DegreesNdp },
                 { "Roll", RollDeg == UnknownValue ? UnknownLinealValue : RollDeg, DegreesNdp },
                 { "Altitude M", AltitudeM, HeightNdp },
+                { "Focal Len", FocalLength, 2 },
             };
         }
 
@@ -256,6 +266,7 @@ namespace SkyCombDrone.DroneModel
             PitchDeg = StringToFloat(settings[11]);
             RollDeg = StringToFloat(settings[12]);
             AltitudeM = StringToFloat(settings[13]);
+            FocalLength = StringToFloat(settings[14]);
 
 
             if (LinealM == UnknownLinealValue)

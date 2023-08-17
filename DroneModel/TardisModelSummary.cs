@@ -50,11 +50,6 @@ namespace SkyCombDrone.DroneModel
         public float MaxSpeedMps { get; set; }
 
 
-        // The minimum / maximum altitude of drone above sealevel in metres. More accurate version of FlightInputList.Min/MaxAltitude
-        public float MinAltitudeM { get; set; }
-        public float MaxAltitudeM { get; set; }
-
-
         // The minimum delta yaw of the drone per step  
         public float MinDeltaYawDeg { get; set; }
         // The maximum delta yaw of the drone per step 
@@ -95,6 +90,17 @@ namespace SkyCombDrone.DroneModel
         public float CeilingMaxRollDeg { get { return MaxRollDeg == UnknownValue ? UnknownValue : MaxRollDeg < 0 ? 5 : (float)Math.Max(1, Math.Ceiling(MaxRollDeg)); } }
 
 
+        // The minimum / maximum altitude of drone above sealevel in metres. More accurate version of FlightInputList.Min/MaxAltitude
+        public float MinAltitudeM { get; set; }
+        public float MaxAltitudeM { get; set; }
+
+
+        // The minimum / maximum focal length
+        public float MinFocalLength { get; set; }
+        public float MaxFocalLength { get; set; }
+
+
+
         public TardisSummaryModel(string tardisIdName)
         {
             TardisType = tardisIdName;
@@ -118,14 +124,16 @@ namespace SkyCombDrone.DroneModel
             MaxSumLinealM = UnknownValue;
             MinSpeedMps = UnknownValue;
             MaxSpeedMps = UnknownValue;
-            MinAltitudeM = UnknownValue;
-            MaxAltitudeM = UnknownValue;
             MinDeltaYawDeg = UnknownValue;
             MaxDeltaYawDeg = UnknownValue;
             MinPitchDeg = UnknownValue;
             MaxPitchDeg = UnknownValue;
             MinRollDeg = UnknownValue;
             MaxRollDeg = UnknownValue;
+            MinAltitudeM = UnknownValue;
+            MaxAltitudeM = UnknownValue;
+            MinFocalLength = UnknownValue;
+            MaxFocalLength = UnknownValue;
         }
 
 
@@ -145,14 +153,16 @@ namespace SkyCombDrone.DroneModel
             MaxSumLinealM = other.MaxSumLinealM;
             MinSpeedMps = other.MinSpeedMps;
             MaxSpeedMps = other.MaxSpeedMps;
-            MinAltitudeM = other.MinAltitudeM;
-            MaxAltitudeM = other.MaxAltitudeM;
             MinDeltaYawDeg = other.MinDeltaYawDeg;
             MaxDeltaYawDeg = other.MaxDeltaYawDeg;
             MinPitchDeg = other.MinPitchDeg;
             MaxPitchDeg = other.MaxPitchDeg;
             MinRollDeg = other.MinRollDeg;
             MaxRollDeg = other.MaxRollDeg;
+            MinAltitudeM = other.MinAltitudeM;
+            MaxAltitudeM = other.MaxAltitudeM;
+            MinFocalLength = other.MinFocalLength;
+            MaxFocalLength = other.MaxFocalLength;
         }
 
 
@@ -276,13 +286,15 @@ namespace SkyCombDrone.DroneModel
 
             (MinSpeedMps, MaxSpeedMps) = SummariseFloat(MinSpeedMps, MaxSpeedMps, tardis.SpeedMps());
 
-            (MinAltitudeM, MaxAltitudeM) = SummariseFloat(MinAltitudeM, MaxAltitudeM, tardis.AltitudeM);
-
             (MinDeltaYawDeg, MaxDeltaYawDeg) = SummariseFloat(MinDeltaYawDeg, MaxDeltaYawDeg, tardis.DeltaYawDeg);
 
             (MinPitchDeg, MaxPitchDeg) = SummariseFloat(MinPitchDeg, MaxPitchDeg, tardis.PitchDeg);
 
             (MinRollDeg, MaxRollDeg) = SummariseFloat(MinRollDeg, MaxRollDeg, tardis.RollDeg);
+
+            (MinAltitudeM, MaxAltitudeM) = SummariseFloat(MinAltitudeM, MaxAltitudeM, tardis.AltitudeM);
+
+            (MinFocalLength, MaxFocalLength) = SummariseFloat(MinFocalLength, MaxFocalLength, tardis.FocalLength);
         }
 
 
@@ -480,6 +492,8 @@ namespace SkyCombDrone.DroneModel
                 { "Max Pitch Deg", MaxPitchDeg, DegreesNdp },
                 { "Min Roll Deg", MinRollDeg, DegreesNdp },
                 { "Max Roll Deg", MaxRollDeg, DegreesNdp },
+                { "Min Focal Length", MinFocalLength, 2 },
+                { "Max Focal Length", MaxFocalLength, 2 },
             };
         }
 
@@ -511,6 +525,8 @@ namespace SkyCombDrone.DroneModel
             MaxPitchDeg = StringToFloat(settings[offset++]);
             MinRollDeg = StringToFloat(settings[offset++]);
             MaxRollDeg = StringToFloat(settings[offset++]);
+            MinFocalLength = StringToFloat(settings[offset++]);
+            MaxFocalLength = StringToFloat(settings[offset++]);
         }
 
 

@@ -61,8 +61,8 @@ namespace SkyCombDrone.DroneModel
         {
             base.LoadSettings(settings);
 
-            GlobalLocation.Longitude = double.Parse(settings[14]);
-            GlobalLocation.Latitude = double.Parse(settings[15]);
+            GlobalLocation.Longitude = double.Parse(settings[15]);
+            GlobalLocation.Latitude = double.Parse(settings[16]);
 
             GlobalLocation.AssertNZ();
         }
@@ -204,13 +204,14 @@ namespace SkyCombDrone.DroneModel
         {
             base.LoadSettings(settings);
 
-            FileName = settings[23];
-            FileType = settings[24];
-            Thermal = (settings[25].ToLower() == "true");
-            MinDateTime = DateTime.Parse(settings[26]);
-            MaxDateTime = DateTime.Parse(settings[27]);
-            MinGlobalLocation = new GlobalLocation(settings[28]);
-            MaxGlobalLocation = new GlobalLocation(settings[29]);
+            int index = 25;
+            FileName = settings[index++];
+            FileType = settings[index++];
+            Thermal = (settings[index++].ToLower() == "true");
+            MinDateTime = DateTime.Parse(settings[index++]);
+            MaxDateTime = DateTime.Parse(settings[index++]);
+            MinGlobalLocation = new GlobalLocation(settings[index++]);
+            MaxGlobalLocation = new GlobalLocation(settings[index++]);
 
             MinGlobalLocation.AssertNZ();
             MinGlobalLocation.AssertNZ();
