@@ -134,7 +134,6 @@ namespace SkyCombDrone.DroneLogic
                         showDroneSettings(phase);
                         answer.CalculateSettings_FlightSections();
                         answer.EffortDurations.CalcSectionsMs = EffortMs();
-                        droneDataStore.Close();
 
                         phase = "Calculating ground elevations...";
                         showDroneSettings(phase);
