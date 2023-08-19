@@ -40,8 +40,10 @@ namespace SkyCombDrone.DroneModel
         // Newer drones provide the pitch, yaw, roll based on the camera gimbal orientation.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Flight.md 
         public GimbalDataEnum GimbalDataAvail { get; set; } = GimbalDataEnum.ManualNo;
+        // Can we use the gimbal data?
+        public bool UseGimbalData { get { return GimbalDataAvail != GimbalDataEnum.ManualNo;  } }
         // Used to display "Gimbal Pitch" versus "Drone Pitch" etc in the UI.
-        public string PitchYawRollPrefix { get { return GimbalDataAvail == GimbalDataEnum.ManualNo ? "Drone" : "Gimbal"; } }
+        public string PitchYawRollPrefix { get { return UseGimbalData ? "Gimbal" : "Drone"; } }
 
 
         // On an older drone, where GimbalDataAvail == ManualNo,

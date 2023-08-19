@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
+using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 using System.Drawing;
 
@@ -91,6 +92,11 @@ namespace SkyCombDrone.DroneModel
         public int MinFStop { get; set; } = UnknownValue;
         public int MaxFStop { get; set; } = UnknownValue;
 
+
+
+        // When drawing text on video images, the best font size depends on the image resolution.
+        public int FontScale { get { return ImageWidth < 1000 ? 1 : 2; } }
+        
 
 
         public VideoModel(string fileName, bool thermal, Func<string,DateTime> readDateEncodedUtc)

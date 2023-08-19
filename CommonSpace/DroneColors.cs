@@ -15,6 +15,8 @@ namespace SkyCombDrone.CommonSpace
 
         // Drone colors are shades of blue
         // Refer https://htmlcolorcodes.com/colors/shades-of-blue/
+        public static Bgr ActiveDroneBgr { get; } = new Bgr(31, 81, 255);
+        public static Bgr InScopeDroneBgr { get; } = new Bgr(126, 226, 255);
         public static Color ActiveDroneColor = Color.FromArgb(31, 81, 255);
         public static Color InScopeDroneColor = Color.FromArgb(126, 226, 255);
         public static Color OutScopeDroneColor = Color.DarkGray;
