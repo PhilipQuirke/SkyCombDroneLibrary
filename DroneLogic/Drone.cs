@@ -71,6 +71,8 @@ namespace SkyCombDrone.DroneLogic
         public bool HasDronePitch { get { return HasFlightSteps && FlightSteps.MaxPitchDeg != UnknownValue; } }
         public bool HasDroneYaw { get { return HasFlightSteps && FlightSteps.MaxDeltaYawDeg != UnknownValue; } }
         public bool HasDroneRoll { get { return HasFlightSteps && FlightSteps.MaxRollDeg != UnknownValue; } }
+        public bool HasDroneFocalLength { get { return HasFlightSteps && FlightSteps.MaxFocalLength != UnknownValue; } }
+        public bool HasDroneZoom { get { return HasFlightSteps && FlightSteps.MaxZoom != UnknownValue; } }
         public bool HasDisplaySections { get { return DisplaySections != null; } }
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemModel != null) && (GroundData.DemModel.NumElevationsStored > 0); } }
 

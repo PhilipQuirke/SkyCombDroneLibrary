@@ -1,10 +1,8 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
 using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Emgu.CV.Structure;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using System;
 using System.Drawing;
 
 

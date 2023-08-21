@@ -266,7 +266,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
-        // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
+        // Depends on CameraDownDeg, AltitudeM, DemM, StepVelocityMps & Zoom
         public void CalculateSettings_InputImageCenter(VideoModel videoData)
         {
             InputImageCenter = new();
@@ -310,6 +310,12 @@ namespace SkyCombDrone.DroneLogic
                 double viewLength = Math.Sqrt(downVertM * downVertM + groundForwardM * groundForwardM);
                 double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
                 float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
+
+                // If this drone camera supports zooming,
+                // the zoom reduces the input area.
+                // For Lennard Sparks drone zoom is in the range 1 to 6.07
+                var zoom = (Zoom >= 1 ? Zoom : 1);
+                imageXSizeM /= zoom;
 
                 int videoHeight = videoData.ImageHeight;
                 int videoWidth = videoData.ImageWidth;
