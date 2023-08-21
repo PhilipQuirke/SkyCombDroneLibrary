@@ -150,7 +150,7 @@ namespace SkyCombDrone.DrawSpace
         // Overdraw the vertical axis in FocusColor
         protected void OverDrawVertAxis(ref Image<Bgr, byte> image, float runMin, float runMax, float axisMax)
         {
-            var droneBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
+            var droneBgr = DroneColors.InScopeDroneBgr;
             var minProcHeight = RawDataToHeightPixels(runMin, axisMax, "OverDrawVertAxis:min");
             var maxProcHeight = RawDataToHeightPixels(runMax, axisMax, "OverDrawVertAxis:max");
             var indent = DroneVertAxisX - HighlightThickness;
@@ -164,7 +164,7 @@ namespace SkyCombDrone.DrawSpace
         // Overdraw the horizontal axis in FocusColor to show the frame range processed.
         protected void OverDrawHorzAxis(ref Image<Bgr, byte> image)
         {
-            var droneBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
+            var droneBgr = DroneColors.InScopeDroneBgr;
             var minProcWidth = StepToWidthBySection(DroneDrawScope.FirstRunStepId);
             var maxProcWidth = StepToWidthBySection(DroneDrawScope.LastRunStepId);
 
@@ -200,7 +200,7 @@ namespace SkyCombDrone.DrawSpace
         protected void DrawDroneCircle(ref Image<Bgr, byte> image, int x, int y)
         {
             if ((DroneDrawScope.Drone != null) && DroneDrawScope.CurrRunFlightStepValid())
-                Circle(ref image, new Point(x, y), DroneColors.ColorToBgr(DroneColors.ActiveDroneColor));
+                Circle(ref image, new Point(x, y), DroneColors.ActiveDroneBgr);
         }
 
 
@@ -274,8 +274,8 @@ namespace SkyCombDrone.DrawSpace
             {
                 var firstRunSectionId = DroneDrawScope.FirstRunStepId;
                 var lastRunSectionId = DroneDrawScope.LastRunStepId;
-                var inScopeDroneBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
-                var outScopeDroneBgr = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
+                var inScopeDroneBgr = DroneColors.InScopeDroneBgr;
+                var outScopeDroneBgr = DroneColors.OutScopeDroneBgr;
 
                 var prevHeight = RawDataToHeightPixels(prevAltitude - MinVertRaw, VertRangeRaw, "PrevAlt", false);
                 var thisHeight = RawDataToHeightPixels(thisAltitude - MinVertRaw, VertRangeRaw, "ThisAlt", false);
@@ -351,8 +351,8 @@ namespace SkyCombDrone.DrawSpace
                     {
                         var firstRunSectionId = DroneDrawScope.FirstRunStepId;
                         var lastRunSectionId = DroneDrawScope.LastRunStepId;
-                        var inScopeDroneBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
-                        var outScopeDroneBgr = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
+                        var inScopeDroneBgr = DroneColors.InScopeDroneBgr;
+                        var outScopeDroneBgr = DroneColors.OutScopeDroneBgr;
 
                         int prevSectionId = 0;
                         FlightStep prevStep = null;
@@ -446,8 +446,8 @@ namespace SkyCombDrone.DrawSpace
                     {
                         var firstRunSectionId = DroneDrawScope.FirstRunStepId;
                         var lastRunSectionId = DroneDrawScope.LastRunStepId;
-                        var inScopeDroneBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
-                        var outScopeDroneBgr = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
+                        var inScopeDroneBgr = DroneColors.InScopeDroneBgr;
+                        var outScopeDroneBgr = DroneColors.OutScopeDroneBgr;
 
                         int prevSectionId = 0;
                         FlightStep prevStep = null;
@@ -527,7 +527,7 @@ namespace SkyCombDrone.DrawSpace
 
                 SetHorizLabelsByTime();
 
-                var droneBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
+                var droneBgr = DroneColors.InScopeDroneBgr;
 
                 CalculateStepWidthAndStrideBySection();
 
@@ -787,8 +787,8 @@ namespace SkyCombDrone.DrawSpace
 
             var image = NewLightGrayImage(size);
 
-            var outColor = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
-            var inColor = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
+            var outColor = DroneColors.OutScopeDroneBgr;
+            var inColor = DroneColors.InScopeDroneBgr;
 
             CalculateStepWidthAndStrideBySection();
 

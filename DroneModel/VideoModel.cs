@@ -61,7 +61,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // The Color Palette name. Assumed constant through the video 
-        public string ColorMd { get; set; } = "";
+        public string ColorMd { get; set; } = "default";
 
 
         // The video capture object providing access to the video contents
@@ -245,7 +245,7 @@ namespace SkyCombDrone.DroneModel
                 { "VFOV Deg", VFOVDeg, 2 },
                 { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
                 { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(BaseConstants.DateFormat) },
-                { "Color Md", (ColorMd == "" ? UnknownString : ColorMd ) },
+                { "Color Md", (ColorMd == "" ? "default" : ColorMd ) },
                 { "Thermal", Thermal },
             };
 

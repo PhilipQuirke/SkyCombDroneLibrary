@@ -203,9 +203,8 @@ namespace SkyCombDrone.DroneModel
         // This function must align to the above GetSettings function.
         public override void LoadSettings(List<string> settings)
         {
-            base.LoadSettings(settings);
+            int index = LoadSettingsOffset(settings);
 
-            int index = 25;
             FileName = settings[index++];
             FileType = settings[index++];
             Thermal = (settings[index++].ToLower() == "true");

@@ -20,7 +20,7 @@ namespace SkyCombDrone.DrawSpace
                 if((image == null) || (flightStep==null) || (drone==null) || (drone.InputVideo==null))
                     return;
 
-                var activeBgr = DroneColors.ActiveDroneBgr;
+                var activeBgr = DroneColors.InScopeDroneBgr;
                 var fontScale = drone.InputVideo.FontScale;
                 var lineThick = 1 + fontScale;
 
@@ -41,11 +41,11 @@ namespace SkyCombDrone.DrawSpace
                 int toY = (int)(image.Height * toYperc / 100); // pixels
 
 
-                // Draw the zoom (if any) at top left
+                // Draw the zoom (if any) at top left. Generally 1 to 6.
                 if (flightStep.Zoom > 0)
                 {
-                    var textPt = new Point(leftX, fromY);
-                    Text(ref image, "x "+ flightStep.Zoom.ToString(), textPt, fontScale, activeBgr, fontScale);
+                    var textPt = new Point(10 * fontScale, 20 * fontScale);
+                    Text(ref image, "x" + flightStep.Zoom.ToString(), textPt, fontScale, activeBgr, fontScale);
                 }
 
 

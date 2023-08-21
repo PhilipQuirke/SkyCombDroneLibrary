@@ -512,7 +512,7 @@ namespace SkyCombDrone.DroneModel
 
         // Load this object's settings from strings (loaded from a datastore)
         // This function must align to the above GetSettings function.
-        public void LoadSettingsOffset(List<string> settings, int offset = 0)
+        public int LoadSettingsOffset(List<string> settings, int offset = 0)
         {
             MinTardisId = StringToInt(settings[offset++]);
             MaxTardisId = StringToInt(settings[offset++]);
@@ -541,6 +541,8 @@ namespace SkyCombDrone.DroneModel
             MaxFocalLength = StringToFloat(settings[offset++]);
             MinZoom = StringToFloat(settings[offset++]);
             MaxZoom = StringToFloat(settings[offset++]);
+
+            return offset;
         }
 
 

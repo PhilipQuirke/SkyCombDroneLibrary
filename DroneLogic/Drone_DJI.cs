@@ -284,7 +284,11 @@ namespace SkyCombDrone.DroneLogic
                                 token = "[color_md:";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
+                                {
                                     video.ColorMd = FindTokenString(line, token, tokenPos, "]");
+                                    if ((video.ColorMd == "") || (video.ColorMd == "unknown"))
+                                        video.ColorMd = "default";
+                                }
 
                                 // Find the focal length (if any)
                                 token = "[focal_len:";

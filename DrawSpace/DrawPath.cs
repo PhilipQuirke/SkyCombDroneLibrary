@@ -54,8 +54,8 @@ namespace SkyCombDrone.DrawSpace
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
             Metrics = (DroneDrawScope != null ? DroneDrawScope.GetSettings_Altitude : null);
 
-            TextNormalColor = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
-            TextHighlightColor = DroneColors.ColorToBgr(DroneColors.LegNameColor);
+            TextNormalColor = DroneColors.OutScopeDroneBgr;
+            TextHighlightColor = DroneColors.LegNameBgr;
 
             DrawLegs = drawLegs &&
                 (DroneDrawScope != null) && 
@@ -182,8 +182,7 @@ namespace SkyCombDrone.DrawSpace
                     (leg.MinStepId >= firstRunStepId) &&
                     (leg.MaxStepId <= lastRunStepId);
 
-                var thisColor = highlight ? DroneColors.InScopeDroneColor : DroneColors.OutScopeDroneColor;
-                var thisBgr = DroneColors.ColorToBgr(thisColor);
+                var thisBgr = highlight ? DroneColors.InScopeDroneBgr : DroneColors.OutScopeDroneBgr;
                 var thisThickness = highlight ? HighlightThickness : NormalThickness;
 
                 // Draw the leg as a straight line in black or blue.
@@ -213,7 +212,7 @@ namespace SkyCombDrone.DrawSpace
 
                 startPoint = FlightPath_DroneLocnMToPixelPoint(flightSteps, startStepId);
                 endPoint = FlightPath_DroneLocnMToPixelPoint(flightSteps, endStepId);
-                Line(ref image, startPoint, endPoint, DroneColors.ColorToBgr(DroneColors.InScopeDroneColor), HighlightThickness);
+                Line(ref image, startPoint, endPoint, DroneColors.InScopeDroneBgr, HighlightThickness);
             }
         }
 
@@ -244,7 +243,7 @@ namespace SkyCombDrone.DrawSpace
                 bool highlight = runScopeSet &&
                     (thisStepId >= firstRunStepId) &&
                     (thisStepId <= lastRunStepId);
-                var thisColor = DroneColors.ColorToBgr(highlight ? DroneColors.InScopeDroneColor : DroneColors.OutScopeDroneColor);
+                var thisColor = highlight ? DroneColors.InScopeDroneBgr : DroneColors.OutScopeDroneBgr;
 
                 if (!DrawLegs)
                 {
@@ -532,7 +531,7 @@ namespace SkyCombDrone.DrawSpace
                 {
                     var activeBgr = DroneColors.ActiveDroneBgr;
                     var inScopeBgr = DroneColors.InScopeDroneBgr;
-                    var outScopeBgr = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
+                    var outScopeBgr = DroneColors.OutScopeDroneBgr;
 
                     var flightStep = BaseDrawScope.CurrRunFlightStep;
                     if (flightStep != null)
