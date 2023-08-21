@@ -61,8 +61,9 @@ namespace SkyCombDrone.DroneModel
         {
             base.LoadSettings(settings);
 
-            GlobalLocation.Longitude = double.Parse(settings[15]);
-            GlobalLocation.Latitude = double.Parse(settings[16]);
+            int i = FirstFreeSetting - 1;
+            GlobalLocation.Longitude = double.Parse(settings[i++]);
+            GlobalLocation.Latitude = double.Parse(settings[i++]);
 
             GlobalLocation.AssertNZ();
         }

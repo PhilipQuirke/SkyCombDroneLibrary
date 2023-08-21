@@ -15,14 +15,16 @@ namespace SkyCombDrone.CommonSpace
 
         // Drone colors are shades of blue
         // Refer https://htmlcolorcodes.com/colors/shades-of-blue/
-        public static Bgr ActiveDroneBgr { get; } = new Bgr(31, 81, 255);
-        public static Bgr InScopeDroneBgr { get; } = new Bgr(126, 226, 255);
+
         public static Color ActiveDroneColor = Color.FromArgb(31, 81, 255);
         public static Color InScopeDroneColor = Color.FromArgb(126, 226, 255);
         public static Color OutScopeDroneColor = Color.DarkGray;
+        public static Bgr ActiveDroneBgr { get { return ColorToBgr(ActiveDroneColor); } }
+        public static Bgr InScopeDroneBgr { get { return ColorToBgr(InScopeDroneColor); } }
 
         // Drone leg text color is a shade of blue
-        public static Color LegNameColor = InScopeDroneColor; //  Pink: Color.FromArgb(255, 174, 247);
+        public static Color LegNameColor = InScopeDroneColor;
+        public static Bgr LegNameBgr { get { return ColorToBgr(LegNameColor); } }
 
         // Hot object and feature colours are red, orange & yellow
         public static Color InScopeObjectColor = Color.Red;

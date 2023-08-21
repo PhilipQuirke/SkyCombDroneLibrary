@@ -20,10 +20,21 @@ namespace SkyCombDrone.DroneLogic
         System.IO.StreamReader? File = null;
 
 
-        private double FindTokenValue(string line, string token, int tokenPos, string suffix)
+        // Return the value of the token in the line, where token end is marked by the suffix
+        private string FindTokenString(string line, string token, int tokenPos, string suffix1, string suffix2 = "")
         {
             var tokenValue = line.Substring(tokenPos + token.Length);
-            return double.Parse(tokenValue.Substring(0, tokenValue.IndexOf(suffix)).Trim());
+            var index1 = tokenValue.IndexOf(suffix1);
+            var index2 = (suffix2 == "" ? 1000 : tokenValue.IndexOf(suffix2));
+
+            return tokenValue.Substring(0, Math.Min(index1, index2)).Trim();
+        }
+
+
+        // Return the value of the token in the line, where token end is marked by the suffix
+        private double FindTokenValue(string line, string token, int tokenPos, string suffix1, string suffix2="")
+        {
+            return double.Parse(FindTokenString(line, token, tokenPos, suffix1, suffix2));
         }
 
 
@@ -273,16 +284,19 @@ namespace SkyCombDrone.DroneLogic
                                 token = "[color_md:";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
-                                {
-                                    var tokenValue = line.Substring(tokenPos + token.Length);
-                                    video.ColorMd = tokenValue.Substring(0, tokenValue.IndexOf("]")).Trim();
-                                }
+                                    video.ColorMd = FindTokenString(line, token, tokenPos, "]");
 
                                 // Find the focal length (if any)
                                 token = "[focal_len:";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                     thisSection.FocalLength = (float)FindTokenValue(line, token, tokenPos, "]");
+                                
+                                // Find the zoom (if any)
+                                token = "[dzoom_ratio:";
+                                tokenPos = line.IndexOf(token);
+                                if (tokenPos >= 0)
+                                    thisSection.Zoom = (float)FindTokenValue(line, token, tokenPos, "]", ",");
 
                                 // Find the latitude
                                 token = "[latitude:";
@@ -310,7 +324,6 @@ namespace SkyCombDrone.DroneLogic
                                         thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
                                         paragraph_good = true;
                                     }
-
                                 }
 
 

@@ -530,8 +530,8 @@ namespace SkyCombDrone.DrawSpace
 
                 if (TransformMToPixels.Scale > 0)
                 {
-                    var activeBgr = DroneColors.ColorToBgr(DroneColors.ActiveDroneColor);
-                    var inScopeBgr = DroneColors.ColorToBgr(DroneColors.InScopeDroneColor);
+                    var activeBgr = DroneColors.ActiveDroneBgr;
+                    var inScopeBgr = DroneColors.InScopeDroneBgr;
                     var outScopeBgr = DroneColors.ColorToBgr(DroneColors.OutScopeDroneColor);
 
                     var flightStep = BaseDrawScope.CurrRunFlightStep;

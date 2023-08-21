@@ -100,6 +100,10 @@ namespace SkyCombDrone.DroneModel
         public float MaxFocalLength { get; set; }
 
 
+        // The minimum / maximum zoom
+        public float MinZoom { get; set; }
+        public float MaxZoom { get; set; }
+
 
         public TardisSummaryModel(string tardisIdName)
         {
@@ -134,6 +138,8 @@ namespace SkyCombDrone.DroneModel
             MaxAltitudeM = UnknownValue;
             MinFocalLength = UnknownValue;
             MaxFocalLength = UnknownValue;
+            MinZoom = UnknownValue;
+            MaxZoom = UnknownValue;
         }
 
 
@@ -163,6 +169,8 @@ namespace SkyCombDrone.DroneModel
             MaxAltitudeM = other.MaxAltitudeM;
             MinFocalLength = other.MinFocalLength;
             MaxFocalLength = other.MaxFocalLength;
+            MinZoom = other.MinZoom;
+            MaxZoom = other.MaxZoom;
         }
 
 
@@ -295,6 +303,8 @@ namespace SkyCombDrone.DroneModel
             (MinAltitudeM, MaxAltitudeM) = SummariseFloat(MinAltitudeM, MaxAltitudeM, tardis.AltitudeM);
 
             (MinFocalLength, MaxFocalLength) = SummariseFloat(MinFocalLength, MaxFocalLength, tardis.FocalLength);
+
+            (MinZoom, MaxZoom) = SummariseFloat(MinZoom, MaxZoom, tardis.Zoom);
         }
 
 
@@ -494,6 +504,8 @@ namespace SkyCombDrone.DroneModel
                 { "Max Roll Deg", MaxRollDeg, DegreesNdp },
                 { "Min Focal Length", MinFocalLength, 2 },
                 { "Max Focal Length", MaxFocalLength, 2 },
+                { "Min Zoom", MinZoom, 2 },
+                { "Max Zoom", MaxZoom, 2 },
             };
         }
 
@@ -527,6 +539,8 @@ namespace SkyCombDrone.DroneModel
             MaxRollDeg = StringToFloat(settings[offset++]);
             MinFocalLength = StringToFloat(settings[offset++]);
             MaxFocalLength = StringToFloat(settings[offset++]);
+            MinZoom = StringToFloat(settings[offset++]);
+            MaxZoom = StringToFloat(settings[offset++]);
         }
 
 

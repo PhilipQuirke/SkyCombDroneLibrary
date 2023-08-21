@@ -20,15 +20,34 @@ namespace SkyCombDrone.DrawSpace
                 if((image == null) || (flightStep==null) || (drone==null) || (drone.InputVideo==null))
                     return;
 
-                var color = DroneColors.InScopeDroneBgr;
+                var activeBgr = DroneColors.ActiveDroneBgr;
                 var fontScale = drone.InputVideo.FontScale;
                 var lineThick = 1 + fontScale;
 
-                // We want the small lines to be the same length for yaw and pitch
+                // We want the small lines to be the same length whether vert or horiz
                 int smallPerc = 2;
                 int smallPixels = (int)Math.Min(
                     image.Width * smallPerc / 100,
                     image.Height * smallPerc / 100);
+
+                int leftPerc = 10;
+                int rightPerc = 90;
+                int leftX = (int)(image.Width * leftPerc / 100); // pixels
+                int rightX = (int)(image.Width * rightPerc / 100); // pixels
+
+                int fromYperc = 10;
+                int toYperc = 90;
+                int fromY = (int)(image.Height * fromYperc / 100); // pixels
+                int toY = (int)(image.Height * toYperc / 100); // pixels
+
+
+                // Draw the zoom (if any) at top left
+                if (flightStep.Zoom > 0)
+                {
+                    var textPt = new Point(leftX, fromY);
+                    Text(ref image, "x "+ flightStep.Zoom.ToString(), textPt, fontScale, activeBgr, fontScale);
+                }
+
 
                 // Draw the drone direction (yaw) at the bottom few % of the image  
                 if (flightStep.YawDeg > -180)
@@ -37,13 +56,8 @@ namespace SkyCombDrone.DrawSpace
                     if (middleDeg < 0)
                         middleDeg += 360;
 
-                    int leftPerc = 10;
-                    int rightPerc = 90;
-
                     int topY = smallPixels;
                     int bottomY = 2 * smallPixels;
-                    int leftX = (int)(image.Width * leftPerc / 100);
-                    int rightX = (int)(image.Width * rightPerc / 100);
 
                     // Draw the static "wide M" shape
                     var topLeftPt = new Point(leftX, topY);
@@ -52,13 +66,13 @@ namespace SkyCombDrone.DrawSpace
                     var bottomRightPt = new Point(rightX, bottomY);
                     var bottomLeftPt = new Point(leftX, bottomY);
                     var bottomMiddlePt = new Point((leftX + rightX) / 2, bottomY);
-                    image.Draw(new LineSegment2D(topLeftPt, bottomLeftPt), color, lineThick);
-                    image.Draw(new LineSegment2D(topRightPt, bottomRightPt), color, lineThick);
-                    image.Draw(new LineSegment2D(topLeftPt, topRightPt), color, lineThick); // Long line
+                    image.Draw(new LineSegment2D(topLeftPt, bottomLeftPt), activeBgr, lineThick);
+                    image.Draw(new LineSegment2D(topRightPt, bottomRightPt), activeBgr, lineThick);
+                    image.Draw(new LineSegment2D(topLeftPt, topRightPt), activeBgr, lineThick); // Long line
 
                     // Draw a two-sided triangle as the location indicator
-                    image.Draw(new LineSegment2D(topMiddlePt, new Point(bottomMiddlePt.X - smallPixels, bottomY)), color, lineThick);
-                    image.Draw(new LineSegment2D(topMiddlePt, new Point(bottomMiddlePt.X + smallPixels, bottomY)), color, lineThick);
+                    image.Draw(new LineSegment2D(topMiddlePt, new Point(bottomMiddlePt.X - smallPixels, bottomY)), activeBgr, lineThick);
+                    image.Draw(new LineSegment2D(topMiddlePt, new Point(bottomMiddlePt.X + smallPixels, bottomY)), activeBgr, lineThick);
 
                     // Text is drawn lower.
                     bottomMiddlePt.Y += 12 * fontScale;
@@ -85,33 +99,29 @@ namespace SkyCombDrone.DrawSpace
                             var deltaX = distDeg * (topRightPt.X - topLeftPt.X) / HFOVDeg;
 
                             var pt = new Point(bottomMiddlePt.X + (int)deltaX, bottomMiddlePt.Y);
-                            image.Draw(new LineSegment2D(new Point(pt.X, topY), new Point(pt.X, bottomY)), color, lineThick);
+                            image.Draw(new LineSegment2D(new Point(pt.X, topY), new Point(pt.X, bottomY)), activeBgr, lineThick);
 
                             var textPt = new Point(pt.X - 5 * fontScale * compassDirections[i].Length, bottomMiddlePt.Y);
-                            Text(ref image, compassDirections[i], textPt, fontScale, color, fontScale);
+                            Text(ref image, compassDirections[i], textPt, fontScale, activeBgr, fontScale);
                         }
 
                     if (drawDirectionDigits)
                     {
                         var middleTextPt = new Point(bottomMiddlePt.X - 15 * fontScale, bottomMiddlePt.Y);
-                        Text(ref image, middleDeg.ToString(), middleTextPt, fontScale, color, fontScale);
+                        Text(ref image, middleDeg.ToString(), middleTextPt, fontScale, activeBgr, fontScale);
                     }
                 }
 
 
+                // Draw the pitch (if any & it is variable) on the LHS
                 if (drone.Config.UseGimbalData && (flightStep.PitchDeg >= -100))
                 {
                     // We show the true pitchdeg in text 
-                    // but locate it based on a 0 to 90 range.
+                    // but locate it based on a 0 to 90 range (in case of weird values).
                     int pitchDeg = - (int)flightStep.PitchDeg;
                     string pitchStr = pitchDeg.ToString();
                     pitchDeg = Math.Max(0, Math.Min(90, pitchDeg));
 
-                    int fromYperc = 10;
-                    int toYperc = 90;
-
-                    int fromY = (int)(image.Height * fromYperc / 100);
-                    int toY = (int)(image.Height * toYperc / 100);
                     int fromX = smallPixels;
                     int toX = 2 * smallPixels;
                     int middleY = pitchDeg * (toY - fromY) / 90 + fromY;
@@ -122,16 +132,16 @@ namespace SkyCombDrone.DrawSpace
                     var bottomRightPt = new Point(toX, toY);
                     var bottomLeftPt = new Point(fromX, toY);
                     var middleRightPt = new Point(toX, middleY);
-                    image.Draw(new LineSegment2D(topLeftPt, topRightPt), color, 3);
-                    image.Draw(new LineSegment2D(bottomLeftPt, bottomRightPt), color, 3);
-                    image.Draw(new LineSegment2D(topLeftPt, bottomLeftPt), color, 2); // Long line
+                    image.Draw(new LineSegment2D(topLeftPt, topRightPt), activeBgr, 3);
+                    image.Draw(new LineSegment2D(bottomLeftPt, bottomRightPt), activeBgr, 3);
+                    image.Draw(new LineSegment2D(topLeftPt, bottomLeftPt), activeBgr, 2); // Long line
 
-                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY - smallPixels)), color, 3);
-                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY + smallPixels)), color, 3);
+                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY - smallPixels)), activeBgr, 3);
+                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY + smallPixels)), activeBgr, 3);
 
                     middleRightPt.Y += 10;
                     middleRightPt.X += 10;
-                    Text(ref image, pitchStr, middleRightPt, 2, color, 2);
+                    Text(ref image, pitchStr, middleRightPt, 2, activeBgr, 2);
                 }
             }
             catch (Exception ex)
