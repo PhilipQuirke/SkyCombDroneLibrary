@@ -292,7 +292,7 @@ namespace SkyCombDrone.DroneModel
             (MinLinealM, MaxLinealM) = SummariseFloat(MinLinealM, MaxLinealM, tardis.LinealM);
             (MinSumLinealM, MaxSumLinealM) = SummariseFloat(MinSumLinealM, MaxSumLinealM, tardis.SumLinealM);
 
-            (MinSpeedMps, MaxSpeedMps) = SummariseFloat(MinSpeedMps, MaxSpeedMps, tardis.SpeedMps());
+            (MinSpeedMps, MaxSpeedMps) = SummariseFloat(MinSpeedMps, MaxSpeedMps, tardis.SpeedMps);
 
             (MinDeltaYawDeg, MaxDeltaYawDeg) = SummariseFloat(MinDeltaYawDeg, MaxDeltaYawDeg, tardis.DeltaYawDeg);
 

@@ -565,8 +565,8 @@ namespace SkyCombDrone.DrawSpace
                             {
                                 // Draw lines from drone to image area to "connect" the drone location to the image area.
                                 // Todo: Make line dotted.
-                                Line(ref image, dronePoint, topLeftPoint, activeBgr);
-                                Line(ref image, dronePoint, bottomLeftPoint, activeBgr);
+                                Line(ref image, dronePoint, topRightPoint, activeBgr);
+                                Line(ref image, dronePoint, bottomRightPoint, activeBgr);
                             }
 
                             if(degsToVertical < DegreesToVerticalCutoff)

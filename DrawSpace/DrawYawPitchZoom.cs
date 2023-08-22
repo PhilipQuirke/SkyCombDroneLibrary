@@ -107,8 +107,9 @@ namespace SkyCombDrone.DrawSpace
 
                     if (drawDirectionDigits)
                     {
-                        var middleTextPt = new Point(bottomMiddlePt.X - 15 * fontScale, bottomMiddlePt.Y);
-                        Text(ref image, middleDeg.ToString(), middleTextPt, fontScale, activeBgr, fontScale);
+                        var degStr = middleDeg.ToString();
+                        var degPt = new Point(bottomMiddlePt.X - 5 * fontScale * degStr.Length, bottomMiddlePt.Y);
+                        Text(ref image, degStr, degPt, fontScale, activeBgr, fontScale);
                     }
                 }
 

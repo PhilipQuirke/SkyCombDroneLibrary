@@ -54,9 +54,6 @@ namespace SkyCombDrone.PersistModel
                 foreach (var step in Steps.Steps)
                     Data.SetDataListRowKeysAndValues(ref stepRow, step.Value.GetSettings());
 
-                Data.SetColumnWidth(FlightStepModel.StepVelMpsSetting, 20);
-                Data.SetColumnWidth(FlightStepModel.ImgVelMpsSetting, 20);
-
                 Data.SetNumberColumnNdp(TardisModel.PitchDegSetting, DegreesNdp);
                 Data.SetNumberColumnNdp(TardisModel.YawDegSetting, DegreesNdp);
                 Data.SetNumberColumnNdp(TardisModel.DeltaYawDegSetting, DegreesNdp);

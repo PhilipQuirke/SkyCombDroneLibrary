@@ -37,20 +37,15 @@ namespace SkyCombDrone.DroneModel
         // Accuracy: Depends on drone height (poor) and ground elevation (good) accuracy.
         public AreaF? InputImageSizeM { get; set; }
 
-
-        // Drone absolute velocity and direction as vector. Vector length is SpeedMps
-        // The drone absolute (compass) direction of travel IS relevant.
-        public VelocityF? StepVelocityMps { get; set; }
-
-
-        // ImageVelocityMps: "Point of view" velocity and turn rate (in drone Mps).
-        // Think of it as the velocity you could detect solely by looking at the video image.
-        // So: 
-        //  - The drone current-step speed IS relevant
-        //  - The drone CHANGE in direction from previous step IS relevant.
-        //  - The drone absolute direction of travel is NOT relevant.
-        //  - The drone height above ground is NOT directly relevant (but is relevant if used to calculate GroundVelocityMps).
-        protected VelocityF? ImageVelocityMps { get; set; }
+        // Input image unit vector
+        // If GimbalDataAvail
+        // then Yaw is camera direction and may differ from drone direction to travel.
+        // else Yaw is the drone direction of travel.
+        // Either way we use yaw to determine the InputImageCenter.
+        public VelocityF InputImageUnitVector { get { 
+                return new VelocityF(
+                    (float)Math.Cos( - YawRad - Math.PI / 2 ), 
+                    (float)Math.Sin( - YawRad - Math.PI / 2 )); } }
 
 
         public FlightStepModel(FlightSectionModel flightSection, List<string>? settings = null) : base(flightSection.TardisId)
@@ -67,9 +62,7 @@ namespace SkyCombDrone.DroneModel
         public const int DemSetting = FirstFreeSetting + 3;
         public const int ImageCenterSetting = FirstFreeSetting + 4;
         public const int ImageSizeMSetting = FirstFreeSetting + 5;
-        public const int StepVelMpsSetting = FirstFreeSetting + 6;
-        public const int ImgVelMpsSetting = FirstFreeSetting + 7;
-        public const int HasLegSetting = FirstFreeSetting + 8;
+        public const int HasLegSetting = FirstFreeSetting + 6;
 
 
         // Get this FlightStep object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
@@ -89,8 +82,6 @@ namespace SkyCombDrone.DroneModel
             answer.Add("DEM", DemM, HeightNdp); // Graphs depend on this name (TBC)
             answer.Add("Image Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
             answer.Add("Image Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
-            answer.Add("Step Vel Mps", StepVelocityMps.ToString(5));
-            answer.Add("Img Vel Mps", (ImageVelocityMps != null ? ImageVelocityMps.ToString(PixelVelNdp) : "0,0"));
             answer.Add("Has Leg", (LegId > 0 ? 1 : 0));
 
             return answer;
@@ -110,8 +101,6 @@ namespace SkyCombDrone.DroneModel
             DemM = StringToFloat(settings[i++]);
             InputImageCenter = new DroneLocation(settings[i++]);
             InputImageSizeM = new AreaF(settings[i++]);
-            StepVelocityMps = new VelocityF(settings[i++]);
-            ImageVelocityMps = new VelocityF(settings[i++]);
             i++; // Skip HasLeg  
 
             InputImageCenter.AssertGood();

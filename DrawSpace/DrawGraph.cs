@@ -603,7 +603,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.SpeedMps(); }
+        override public float GetVertRaw(FlightStep step) { return step.SpeedMps; }
 
 
         // Show drone (aka ground) speed as a graph.

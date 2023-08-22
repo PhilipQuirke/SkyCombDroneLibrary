@@ -177,43 +177,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Calculate StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
-        public void CalculateSettings_StepAndImageVelocityMps(FlightStep? prevStep)
-        {
-            StepVelocityMps = new();
-            ImageVelocityMps = new();
-
-            if ((prevStep != null) &&
-               (prevStep.YawDeg != UnknownValue) &&
-               (YawDeg != UnknownValue))
-            {
-                var stepSpeed = SpeedMps();
-                // Yaw gives the drone's current direction of travel.
-                // If yaw = 0° and the camera is looking to the ground (i.e.nadir), then top of the image points to the north.
-                StepVelocityMps.Value.X = (float)(stepSpeed * Math.Sin(YawRad));
-                StepVelocityMps.Value.Y = (float)(stepSpeed * Math.Cos(YawRad));
-
-                // If drone forward velocity is very low, and yaw is significantly non-zero,
-                // then PoV vector should be horizontal.
-                if ((stepSpeed < 0.3) && // 30cm per second
-                   (DeltaYawDeg > 11)) // 11 degrees
-                    ImageVelocityMps = new VelocityF(stepSpeed, 0);
-
-                else if ((stepSpeed < 0.3) && // 30cm per second
-                        (DeltaYawDeg < -11)) // 11 degrees
-                    ImageVelocityMps = new VelocityF(-stepSpeed, 0); // PQR TODO is sign correct?
-
-                else
-                    // Assuming the camera is pointing "forward"
-                    // from PoV the movement is all "upwards",
-                    // as the video image "moves" downwards.
-                    ImageVelocityMps = new VelocityF(
-                        (float)(stepSpeed * Math.Sin(DeltaYawRad)),
-                        (float)(stepSpeed * Math.Cos(DeltaYawRad)));
-            }
-        }
-
-
         // Use a weighted average of DroneToGroundAltStartSyncM and DroneToGroundAltEndSyncM
         // to improve the AltitudeM accuracy.
         public void CalculateSettings_AltitudeM_ApplyOnGroundAt(
@@ -266,7 +229,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
-        // Depends on CameraDownDeg, AltitudeM, DemM, StepVelocityMps & Zoom
+        // Depends on CameraDownDeg, AltitudeM, DemM, Yaw & Zoom
         public void CalculateSettings_InputImageCenter(VideoModel videoData)
         {
             InputImageCenter = new();
@@ -295,13 +258,16 @@ namespace SkyCombDrone.DroneLogic
             // The actual camera area imaged depends on CameraDownDeg.
             double groundForwardM = downVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
 
-            // The unitForwardVelocity is the direction of flight - based on drone yaw
-            var unitForwardVelocity = StepVelocityMps.GetUnitVector();
+            // Get unit vector in the direction the camera is pointing
+            var unitVector = InputImageUnitVector;
 
             // Working out the center of the image area
+            // PQR TODO
+            // This assumes the land under the drone is flat.
+            // If land is rising then the centre is closer.
             InputImageCenter = DroneLocnM.Clone();
-            InputImageCenter.NorthingM += (float)(groundForwardM * unitForwardVelocity.Value.Y);
-            InputImageCenter.EastingM += (float)(groundForwardM * unitForwardVelocity.Value.X);
+            InputImageCenter.NorthingM -= (float)(groundForwardM * unitVector.Value.Y);
+            InputImageCenter.EastingM -= (float)(groundForwardM * unitVector.Value.X);
             InputImageCenter.AssertGood();
 
             if (videoData != null)
@@ -330,10 +296,10 @@ namespace SkyCombDrone.DroneLogic
         public (DroneLocation topLeft, DroneLocation topRight, DroneLocation bottomRight, DroneLocation bottomLeft)
             Calculate_InputImageArea_Corners()
         {
-            // A drone yaw of 0 represents north
-            var unitVector = StepVelocityMps.GetUnitVector();
-            var cosYaw = unitVector.Value.X;
+            // Get unit vector in the direction the camera is pointing
+            var unitVector = InputImageUnitVector;
             var sinYaw = unitVector.Value.Y;
+            var cosYaw = unitVector.Value.X;
 
             var halfWidth = InputImageSizeM.Value.X / 2.0;
             var halfHeight = InputImageSizeM.Value.Y / 2.0;
@@ -367,7 +333,7 @@ namespace SkyCombDrone.DroneLogic
         // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
-        public DroneLocation CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
+        public DroneLocation? CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
         {
             if (InputImageSizeM == null)
                 return null;
@@ -401,28 +367,17 @@ namespace SkyCombDrone.DroneLogic
 
 
         // After the location of this step has been refined, 
-        // recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
+        // recalculate the LinealM, SpeedMps, SumLinealM, InputImageCenter & InputImageSizeM
         public void CalculateSettings_RefineLocationData(VideoModel videoData, FlightStep? prevStep)
         {
-            if (prevStep != null)
-            {
-                CalculateSettings_LinealM(prevStep);
+            if (prevStep == null)
+                return;
 
-                // Calculates StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
-                CalculateSettings_StepAndImageVelocityMps(prevStep);
+            CalculateSettings_LinealM(prevStep);
 
-                // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
-                // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps.
-                CalculateSettings_InputImageCenter(videoData);
-            }
-        }
-
-
-        public void AssertGood()
-        {
-            Assert(DroneLocnM != null, "FlightStep.AssertGood: No LocationM");
-            Assert(StepVelocityMps != null, "FlightStep.AssertGood: No VelocityMps");
-            Assert(InputImageCenter != null, "FlightStep.AssertGood: No InputImageCenter");
+            // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
+            // Depends on CameraDownDeg, AltitudeM, DemM, Yaw & Zoom.
+            CalculateSettings_InputImageCenter(videoData);
         }
     };
 
@@ -469,7 +424,7 @@ namespace SkyCombDrone.DroneLogic
 
                 summary.SummariseStep(thisStep);
 
-                var thisSpeedMps = thisStep.SpeedMps();
+                var thisSpeedMps = thisStep.SpeedMps;
                 if (thisSpeedMps != BaseConstants.UnknownValue)
                 {
                     numSpeedSteps++;
@@ -511,7 +466,6 @@ namespace SkyCombDrone.DroneLogic
             Sections = drone.FlightSections;
             FileName = drone.FlightSections.FileName;
         }
-
 
 
         public override int GetTardisMaxKey()
@@ -610,7 +564,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM.
-        // Depends on AltitudeM, DemM & StepVelocityMps.
+        // Depends on AltitudeM, DemM, Yaw & Zoom.
         public void CalculateSettings_CameraDownDeg(VideoData videoData)
         {
             foreach (var thisStep in Steps)
@@ -661,12 +615,12 @@ namespace SkyCombDrone.DroneLogic
 
                 // Smoothing should not generate values outside the original envelope
                 float epsilon = 0.3f;
-                var theStepSpeed = theStep.SpeedMps();
+                var theStepSpeed = theStep.SpeedMps;
                 Assert(theStep.DroneLocnM.NorthingM <= Sections.MaxDroneLocnM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
                 Assert(theStep.DroneLocnM.EastingM <= Sections.MaxDroneLocnM.EastingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.EastingM");
                 Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
-                Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStep.SpeedMps() + " > " + Sections.MaxSpeedMps);
+                Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
                 Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: DeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
                 Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: PitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
 
@@ -717,9 +671,6 @@ namespace SkyCombDrone.DroneLogic
 
                     theStep.CalculateSettings_DemM(groundData);
                     theStep.CalculateSettings_DsmM(groundData);
-
-                    // Calculates StepVelocityMps & ImageVelocityMps. Depends on Yaw & SpeedMps
-                    theStep.CalculateSettings_StepAndImageVelocityMps(prevStep);
 
                     prevStep = theStep;
                 }

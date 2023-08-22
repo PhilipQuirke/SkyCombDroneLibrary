@@ -121,13 +121,12 @@ namespace SkyCombDrone.DroneModel
 
 
         // Calculate the speed of this Tardis in meters per second
-        public float SpeedMps()
-        {
+        public float SpeedMps { get { 
             if (TimeMs <= 0 || LinealM <= 0)
                 return 0;
 
             return 1000.0f * LinealM / TimeMs;
-        }
+        } }
 
 
         // Return the difference in Yaw between two steps (with minimal Yaw value)
@@ -242,7 +241,7 @@ namespace SkyCombDrone.DroneModel
                 { "Easting M", DroneLocnM!=null ? DroneLocnM.EastingM : UnknownValue , LocationNdp },
                 { "Lineal M", LinealM == UnknownValue ? UnknownLinealValue : LinealM, LocationNdp }, // Improve graphing
                 { "Sum Lineal M", SumLinealM == UnknownValue ? UnknownLinealValue : SumLinealM, LocationNdp }, // Improve graphing
-                { "Speed Mps", SpeedMps(), LocationNdp },
+                { "Speed Mps", SpeedMps, LocationNdp },
                 { "Yaw", YawDeg == UnknownValue ? UnknownLinealValue : YawDeg, DegreesNdp },
                 { "Delta Yaw", DeltaYawDeg == UnknownValue ? UnknownLinealValue : DeltaYawDeg, DegreesNdp },
                 { "Pitch", PitchDeg == UnknownValue ? UnknownLinealValue : PitchDeg, DegreesNdp },
