@@ -248,7 +248,7 @@ namespace SkyCombDrone.DroneLogic
             if(degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
-            // Vertical distance from drone to ground
+            // Vertical distance from drone to ground (impacted by FixAltitudeM)
             double downVertM = DistanceDown();
 
             // Distance across ground to center of image area - in the direct of flight.
@@ -266,8 +266,8 @@ namespace SkyCombDrone.DroneLogic
             // This assumes the land under the drone is flat.
             // If land is rising then the centre is closer.
             InputImageCenter = DroneLocnM.Clone();
-            InputImageCenter.NorthingM -= (float)(groundForwardM * unitVector.Value.Y);
-            InputImageCenter.EastingM -= (float)(groundForwardM * unitVector.Value.X);
+            InputImageCenter.NorthingM += (float)(groundForwardM * unitVector.Value.Y);
+            InputImageCenter.EastingM += (float)(groundForwardM * unitVector.Value.X);
             InputImageCenter.AssertGood();
 
             if (videoData != null)

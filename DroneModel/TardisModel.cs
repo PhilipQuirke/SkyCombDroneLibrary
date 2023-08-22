@@ -102,7 +102,7 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        // Calculate lineal distance drone travelled since last Tardis (in meters). Impacts SpeedMps() value
+        // Calculate lineal distance drone travelled since last Tardis (in meters). Impacts SpeedMps value
         public void CalculateSettings_LinealM(TardisModel prevTardis)
         {
             LinealM = 0;

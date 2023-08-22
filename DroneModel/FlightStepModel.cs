@@ -37,15 +37,15 @@ namespace SkyCombDrone.DroneModel
         // Accuracy: Depends on drone height (poor) and ground elevation (good) accuracy.
         public AreaF? InputImageSizeM { get; set; }
 
-        // Input image unit vector
+        // Unit vector from drone location to the input image.
         // If GimbalDataAvail
-        // then Yaw is camera direction and may differ from drone direction to travel.
+        // then Yaw is in camera direction and may differ from drone direction to travel.
         // else Yaw is the drone direction of travel.
         // Either way we use yaw to determine the InputImageCenter.
         public VelocityF InputImageUnitVector { get { 
                 return new VelocityF(
-                    (float)Math.Cos( - YawRad - Math.PI / 2 ), 
-                    (float)Math.Sin( - YawRad - Math.PI / 2 )); } }
+                    - (float)Math.Cos( YawRad + Math.PI / 2 ), 
+                    + (float)Math.Sin( YawRad + Math.PI / 2 )); } }
 
 
         public FlightStepModel(FlightSectionModel flightSection, List<string>? settings = null) : base(flightSection.TardisId)
