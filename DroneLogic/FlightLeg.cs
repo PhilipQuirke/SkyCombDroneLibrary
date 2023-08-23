@@ -360,7 +360,7 @@ namespace SkyCombDrone.DroneLogic
             foreach (var step in steps.Steps)
             {
                 if (step.Value.LegId <= 0)
-                    break;
+                    continue;
 
                 foreach (var leg in Legs)
                     if (step.Value.LegId == leg.LegId)

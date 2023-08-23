@@ -17,7 +17,7 @@ namespace SkyCombDrone.DroneLogic
         // There is a 1 to 1 relationship between Sections and Steps.
         public FlightSection FlightSection { get; }
 
-        public FlightLeg FlightLeg { get; set; } = null;
+        public FlightLeg? FlightLeg { get; set; } 
 
 
 
@@ -191,12 +191,14 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Vertical distance from drone to ground
-        public float DistanceDown()
-        {
-            return
-            AltitudeM
-            + (FlightLeg != null ? FlightLeg.FixAltitudeM : 0)
-            - DemM;
+        public float DistanceDown { get {
+                float answer = AltitudeM - DemM;
+
+                if (FlightLeg != null)
+                    answer += FlightLeg.FixAltitudeM;
+
+                return answer;
+            }
         }
 
 
@@ -249,7 +251,7 @@ namespace SkyCombDrone.DroneLogic
                 return;
 
             // Vertical distance from drone to ground (impacted by FixAltitudeM)
-            double downVertM = DistanceDown();
+            double downVertM = DistanceDown;
 
             // Distance across ground to center of image area - in the direct of flight.
             // Note that the drone camera gimbal automatically compensates for
