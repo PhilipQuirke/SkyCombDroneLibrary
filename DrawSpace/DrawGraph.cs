@@ -104,7 +104,7 @@ namespace SkyCombDrone.DrawSpace
 
         // The height on the vertical axis of graph that theDatum corresponds to
         // The height is measured in pixels downwards. 
-        protected int RawDataToHeightPixels(double theDatum, double theMax, string useCase = "", bool assert = true)
+        protected int RawDataToHeightPixels(double theDatum, double theMax)
         {
             int thisPxsDown;
 
@@ -121,13 +121,6 @@ namespace SkyCombDrone.DrawSpace
                 // If theDatum == theMax we want the datum to appear on (the top row of) the graph => thisPxsDown=0 
                 // If theDatum == 0 we want the datum to appear at the origin. So => thisPxsDown=pxsDowntoOrigin
                 thisPxsDown = (int)(pxsDowntoOrigin - pxsUpFromOrigin);
-
-                if (assert)
-                {
-                    // The height should never be outside the graph vertical range
-                    // PQR Fails on DJI_0098 on first run Assert(thisPxsDown >= 0, "DroneDatumToHeight: thisPxsDown negative. " + useCase);
-                    // PQR Fails on DJI_0120 on third run Assert(thisPxsDown <= Size.Height, "DroneDatumToHeight: thisPxsDown too big. " + useCase);
-                }
             }
 
             return thisPxsDown;
@@ -142,7 +135,7 @@ namespace SkyCombDrone.DrawSpace
             Line(ref image, new PointF(DroneVertAxisX, 0), new PointF(DroneVertAxisX, xPos), DroneColors.BlackBgr, 1);
 
             // Horizontal axis
-            var yPos = RawDataToHeightPixels(0, 1, "DrawHorizAxis");
+            var yPos = RawDataToHeightPixels(0, 1);
             Line(ref image, new PointF(DroneVertAxisX, yPos), new PointF(Size.Width, yPos), DroneColors.BlackBgr, 1);
         }
 
@@ -151,8 +144,8 @@ namespace SkyCombDrone.DrawSpace
         protected void OverDrawVertAxis(ref Image<Bgr, byte> image, float runMin, float runMax, float axisMax)
         {
             var droneBgr = DroneColors.InScopeDroneBgr;
-            var minProcHeight = RawDataToHeightPixels(runMin, axisMax, "OverDrawVertAxis:min");
-            var maxProcHeight = RawDataToHeightPixels(runMax, axisMax, "OverDrawVertAxis:max");
+            var minProcHeight = RawDataToHeightPixels(runMin, axisMax);
+            var maxProcHeight = RawDataToHeightPixels(runMax, axisMax);
             var indent = DroneVertAxisX - HighlightThickness;
 
             Line(ref image, new PointF(indent, minProcHeight), new PointF(indent, maxProcHeight), droneBgr, HighlightThickness);
@@ -254,16 +247,16 @@ namespace SkyCombDrone.DrawSpace
             // Draw ground elevation
             if (prevStep.DemM != UnknownValue && thisStep.DemM != UnknownValue)
             {
-                var prevHeight = RawDataToHeightPixels(prevStep.DemM - MinVertRaw, VertRangeRaw, "PrevDem", false);
-                var thisHeight = RawDataToHeightPixels(thisStep.DemM - MinVertRaw, VertRangeRaw, "ThisDem", false);
+                var prevHeight = RawDataToHeightPixels(prevStep.DemM - MinVertRaw, VertRangeRaw);
+                var thisHeight = RawDataToHeightPixels(thisStep.DemM - MinVertRaw, VertRangeRaw);
                 Line(ref image, new PointF(prevWidth, prevHeight), new PointF(thisWidth, thisHeight), DroneColors.ColorToBgr(DroneColors.GroundLineColor), 2);
             }
 
             // Draw surface (tree top) elevation
             if (prevStep.DsmM != UnknownValue && thisStep.DsmM != UnknownValue)
             {
-                var prevHeight = RawDataToHeightPixels(prevStep.DsmM - MinVertRaw, VertRangeRaw, "PrevDsm", false);
-                var thisHeight = RawDataToHeightPixels(thisStep.DsmM - MinVertRaw, VertRangeRaw, "ThisDsm", false);
+                var prevHeight = RawDataToHeightPixels(prevStep.DsmM - MinVertRaw, VertRangeRaw);
+                var thisHeight = RawDataToHeightPixels(thisStep.DsmM - MinVertRaw, VertRangeRaw);
                 Line(ref image, new PointF(prevWidth, prevHeight), new PointF(thisWidth, thisHeight), DroneColors.ColorToBgr(DroneColors.SurfaceLineColor), 2);
             }
 
@@ -277,8 +270,8 @@ namespace SkyCombDrone.DrawSpace
                 var inScopeDroneBgr = DroneColors.InScopeDroneBgr;
                 var outScopeDroneBgr = DroneColors.OutScopeDroneBgr;
 
-                var prevHeight = RawDataToHeightPixels(prevAltitude - MinVertRaw, VertRangeRaw, "PrevAlt", false);
-                var thisHeight = RawDataToHeightPixels(thisAltitude - MinVertRaw, VertRangeRaw, "ThisAlt", false);
+                var prevHeight = RawDataToHeightPixels(prevAltitude - MinVertRaw, VertRangeRaw);
+                var thisHeight = RawDataToHeightPixels(thisAltitude - MinVertRaw, VertRangeRaw);
                 var highlight =
                     (firstRunSectionId != UnknownValue) && (lastRunSectionId != UnknownValue) &&
                     (thisStep.FlightSection.TardisId >= firstRunSectionId) &&
@@ -402,7 +395,7 @@ namespace SkyCombDrone.DrawSpace
             if ((VertRangeRaw > 0) && (DroneDrawScope.CurrRunFlightStep!=null))
                 DrawDroneCircle(ref image,
                     StepToWidth(DroneDrawScope.CurrRunFlightStep.SumLinealM),
-                    RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw, "CurrAlt"));
+                    RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw));
 
             return image.Clone();
         }
@@ -502,7 +495,7 @@ namespace SkyCombDrone.DrawSpace
             if (VertRangeRaw > 0)
                 DrawDroneCircle(ref image,
                     StepToWidthBySection(DroneDrawScope.CurrRunStepId),
-                    RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw, "CurrAlt"));
+                    RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw));
 
             return image.Clone();
         }
@@ -556,7 +549,7 @@ namespace SkyCombDrone.DrawSpace
                             minRunRaw = Math.Min(minRunRaw, thisRunRaw);
                         }
 
-                        var thisHeight = RawDataToHeightPixels(thisRunRaw, MaxVertRaw, "DrawTimeGraph.DrawLines");
+                        var thisHeight = RawDataToHeightPixels(thisRunRaw, MaxVertRaw);
 
                         Line(ref image,
                             new PointF(StepToWidthBySection(prevSectionId), prevHeight),
@@ -585,7 +578,7 @@ namespace SkyCombDrone.DrawSpace
             if (VertRangeRaw > 0)
                 DrawDroneCircle(ref image,
                     StepToWidthBySection(DroneDrawScope.CurrRunStepId),
-                    RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep), MaxVertRaw, "DrawTimeGraph"));
+                    RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep), MaxVertRaw));
 
             return image.Clone();
         }

@@ -264,7 +264,7 @@ namespace SkyCombDrone.DroneLogic
             var unitVector = InputImageUnitVector;
 
             // Working out the center of the image area
-            // PQR TODO
+            // PQR TODO *****
             // This assumes the land under the drone is flat.
             // If land is rising then the centre is closer.
             InputImageCenter = DroneLocnM.Clone();

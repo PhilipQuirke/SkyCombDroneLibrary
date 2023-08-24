@@ -594,9 +594,9 @@ namespace SkyCombDrone.DroneLogic
 
             if (!success)
             {
-                // Try to load the flight log from a second drone manufacturer's flight log file
+                // Try to load the flight log from a second drone manufacturer's flight log file. PQR TODO
                 flightData = new FlightSections();
-                success = false; // PQR TODO
+                success = false; 
             }
 
             if (!success)
