@@ -125,7 +125,9 @@ namespace SkyCombDrone.PersistModel
                 var drawAltitudes = new DrawAltitudeByLinealM(drawScope);
 
                 drawAltitudes.Initialise(new Size(1600, 300));
-                var pathBitmap = drawAltitudes.CurrImage().ToBitmap();
+                var pathImage = drawAltitudes.BaseImage.Clone();
+                drawAltitudes.CurrImage(ref pathImage);
+                var pathBitmap = pathImage.ToBitmap();
 
                 Data.SaveBitmap(pathBitmap, "StepsElevations", FirstGraphRow, 0);
 

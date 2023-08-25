@@ -521,12 +521,10 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw drone flight path based on Drone/GroundSpace data
-        public override Image<Bgr, byte> CurrImage()
+        public override void CurrImage(ref Image<Bgr, byte> image)
         {
             try
             {
-                var image = BaseImage.Clone();
-
                 if (TransformMToPixels.Scale > 0)
                 {
                     var activeBgr = DroneColors.ActiveDroneBgr;
@@ -583,8 +581,6 @@ namespace SkyCombDrone.DrawSpace
                         }
                     }
                 }
-
-                return image.Clone();
             }
             catch (Exception ex)
             {

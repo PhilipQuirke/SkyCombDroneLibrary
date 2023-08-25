@@ -202,7 +202,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Generate an image of the graph as per scope settings.
-        public abstract Image<Bgr, byte> CurrImage();
+        public abstract void CurrImage(ref Image<Bgr, byte> image);
     }
 
 
@@ -324,7 +324,7 @@ namespace SkyCombDrone.DrawSpace
             try
             {
                 Size = size;
-                var image = NewLightGrayImage(size);
+                BaseImage = NewLightGrayImage(size);
 
                 CalculateStepWidthAndStride(
                     DroneDrawScope.FloorMinSumLinealM,
@@ -333,11 +333,11 @@ namespace SkyCombDrone.DrawSpace
                 if (DroneDrawScope.Drone == null)
                 {
                     Title = "Drone Altitude";
-                    DrawNoData(ref image);
+                    DrawNoData(ref BaseImage);
                 }
                 else
                 {
-                    DrawAxises(ref image);
+                    DrawAxises(ref BaseImage);
 
                     (MinVertRaw, MaxVertRaw) = DroneDrawScope.MinMaxVerticalAxisM;
                     if (VertRangeRaw > 0)
@@ -364,7 +364,7 @@ namespace SkyCombDrone.DrawSpace
                                     var thisWidth = StepToWidth(thisStep.SumLinealM);
                                     var prevWidth = StepToWidth(prevStep.SumLinealM);
 
-                                    DrawAltitudeStep(ref image, prevStep, thisStep, prevWidth, thisWidth);
+                                    DrawAltitudeStep(ref BaseImage, prevStep, thisStep, prevWidth, thisWidth);
                                 }
 
                                 prevStep = thisStep;
@@ -378,7 +378,6 @@ namespace SkyCombDrone.DrawSpace
                         Metrics = DroneDrawScope.GetSettings_Altitude;
                     }
                 }
-                BaseImage = image.Clone();
             }
             catch (Exception ex)
             {
@@ -388,16 +387,12 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw altitude data based on Drone/GroundSpace data
-        public override Image<Bgr, byte> CurrImage()
+        public override void CurrImage(ref Image<Bgr, byte> image)
         {
-            var image = BaseImage.Clone();
-
             if ((VertRangeRaw > 0) && (DroneDrawScope.CurrRunFlightStep!=null))
                 DrawDroneCircle(ref image,
                     StepToWidth(DroneDrawScope.CurrRunFlightStep.SumLinealM),
                     RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw));
-
-            return image.Clone();
         }
     }
 
@@ -420,17 +415,16 @@ namespace SkyCombDrone.DrawSpace
             try
             {
                 Size = size;
-
-                var image = NewLightGrayImage(size);
+                BaseImage = NewLightGrayImage(size);
 
                 if (DroneDrawScope.Drone == null)
                 {
                     Title = "Drone Altitude";
-                    DrawNoData(ref image);
+                    DrawNoData(ref BaseImage);
                 }
                 else
                 {
-                    DrawAxises(ref image);
+                    DrawAxises(ref BaseImage);
 
                     CalculateStepWidthAndStrideBySection();
 
@@ -459,7 +453,7 @@ namespace SkyCombDrone.DrawSpace
                                     var thisWidth = StepToWidthBySection(thisStep.FlightSection.TardisId);
                                     var prevWidth = thisWidth - StepWidthPxs;
 
-                                    DrawAltitudeStep(ref image, prevStep, thisStep, prevWidth, thisWidth);
+                                    DrawAltitudeStep(ref BaseImage, prevStep, thisStep, prevWidth, thisWidth);
                                 }
 
                                 prevStep = thisStep;
@@ -468,7 +462,7 @@ namespace SkyCombDrone.DrawSpace
 
                         // Overdraw the horizontal axis in FocusColor to show the frame range processed.
                         if ((firstRunSectionId != UnknownValue) && (lastRunSectionId != UnknownValue))
-                            OverDrawHorzAxis(ref image);
+                            OverDrawHorzAxis(ref BaseImage);
 
                         Title = DroneDrawScope.DescribeElevation;
                         SetVerticalLabels("m");
@@ -477,8 +471,6 @@ namespace SkyCombDrone.DrawSpace
                         Metrics = DroneDrawScope.GetSettings_Altitude;
                     }
                 }
-
-                BaseImage = image.Clone();
             }
             catch (Exception ex)
             {
@@ -488,16 +480,12 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw altitude data based on Drone/GroundSpace data
-        public override Image<Bgr, byte> CurrImage()
+        public override void CurrImage(ref Image<Bgr, byte> image)
         {
-            var image = BaseImage.Clone();
-
             if (VertRangeRaw > 0)
                 DrawDroneCircle(ref image,
                     StepToWidthBySection(DroneDrawScope.CurrRunStepId),
                     RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw));
-
-            return image.Clone();
         }
     }
 
@@ -514,7 +502,6 @@ namespace SkyCombDrone.DrawSpace
         {
             try
             {
-
                 VertFraction = (float)(MaxVertRaw / (MaxVertRaw - MinVertRaw));
                 DrawAxises(ref image);
 
@@ -571,16 +558,12 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        public override Image<Bgr, byte> CurrImage()
+        public override void CurrImage(ref Image<Bgr, byte> image)
         {
-            var image = BaseImage.Clone();
-
             if (VertRangeRaw > 0)
                 DrawDroneCircle(ref image,
                     StepToWidthBySection(DroneDrawScope.CurrRunStepId),
                     RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep), MaxVertRaw));
-
-            return image.Clone();
         }
     }
 
@@ -610,22 +593,20 @@ namespace SkyCombDrone.DrawSpace
                 // For better visuals, don't let maxSpeed be tiny. At least 2m/s
                 MaxVertRaw = (float)Math.Max(2.0, Math.Ceiling(DroneDrawScope.MaxSpeedMps));
 
-            var image = NewLightGrayImage(size);
+            BaseImage = NewLightGrayImage(size);
 
             if (MaxVertRaw == UnknownValue)
             {
                 Title = "Drone Speed";
-                DrawNoData(ref image);
+                DrawNoData(ref BaseImage);
             }
             else
             {
                 Title = DroneDrawScope.DescribeSpeed;
                 SetVerticalLabels("m/s");
                 Metrics = DroneDrawScope.GetSettings_Speed;
-                DrawLines(ref image);
+                DrawLines(ref BaseImage);
             }
-
-            BaseImage = image.Clone();
         }
     }
 
@@ -650,25 +631,24 @@ namespace SkyCombDrone.DrawSpace
         public override void Initialise(Size size)
         {
             Size = size;
+            BaseImage = NewLightGrayImage(size);
+
             MinVertRaw = DroneDrawScope.FloorMinPitchDeg;
             MaxVertRaw = DroneDrawScope.CeilingMaxPitchDeg;
 
-            var image = NewLightGrayImage(size);
 
             if ((DroneDrawScope.Drone == null) || (MaxVertRaw == UnknownValue))
             {
                 Title = "Drone Pitch";
-                DrawNoData(ref image);
+                DrawNoData(ref BaseImage);
             }
             else
             {
                 Title = DroneDrawScope.DescribePitch;
                 SetVerticalLabels();
                 Metrics = DroneDrawScope.GetSettings_Pitch;
-                DrawLines(ref image);
+                DrawLines(ref BaseImage);
             }
-
-            BaseImage = image.Clone();
         }
     }
 
@@ -693,25 +673,23 @@ namespace SkyCombDrone.DrawSpace
         public override void Initialise(Size size)
         {
             Size = size;
+            BaseImage = NewLightGrayImage(size);
+
             MinVertRaw = DroneDrawScope.FloorMinDeltaYawDeg;
             MaxVertRaw = DroneDrawScope.CeilingMaxDeltaYawDeg;
-
-            var image = NewLightGrayImage(size);
 
             if ((MaxVertRaw == UnknownValue) || (DroneDrawScope.Drone == null))
             {
                 Title = "Drone Delta Yaw";
-                DrawNoData(ref image);
+                DrawNoData(ref BaseImage);
             }
             else
             {
                 Title = DroneDrawScope.DescribeDeltaYaw;
                 SetVerticalLabels("", "0.0");
                 Metrics = DroneDrawScope.GetSettings_DeltaYaw;
-                DrawLines(ref image);
+                DrawLines(ref BaseImage);
             }
-
-            BaseImage = image.Clone();
         }
     }
 
@@ -736,25 +714,23 @@ namespace SkyCombDrone.DrawSpace
         public override void Initialise(Size size)
         {
             Size = size;
+            BaseImage = NewLightGrayImage(size);
+
             MinVertRaw = DroneDrawScope.FloorMinRollDeg;
             MaxVertRaw = DroneDrawScope.CeilingMaxRollDeg;
-
-            var image = NewLightGrayImage(size);
 
             if ((DroneDrawScope.Drone == null) || (MaxVertRaw == UnknownValue))
             {
                 Title = "Drone Roll";
-                DrawNoData(ref image);
+                DrawNoData(ref BaseImage);
             }
             else
             {
                 Title = DroneDrawScope.DescribeRoll;
                 SetVerticalLabels();
                 Metrics = DroneDrawScope.GetSettings_Roll;
-                DrawLines(ref image);
+                DrawLines(ref BaseImage);
             }
-
-            BaseImage = image.Clone();
         }
     }
 
@@ -775,10 +751,10 @@ namespace SkyCombDrone.DrawSpace
         public override void Initialise(Size size)
         {
             Size = size;
+            BaseImage = NewLightGrayImage(size);
+
             Title = "Drone Legs";
             SetHorizLabelsByTime();
-
-            var image = NewLightGrayImage(size);
 
             var outColor = DroneColors.OutScopeDroneBgr;
             var inColor = DroneColors.InScopeDroneBgr;
@@ -788,7 +764,7 @@ namespace SkyCombDrone.DrawSpace
             int lineY = 15;
             var fromPoint = new PointF(DroneVertAxisX, lineY);
             var toPoint = new PointF(size.Width, lineY);
-            Line(ref image, fromPoint, toPoint, outColor, NormalThickness);
+            Line(ref BaseImage, fromPoint, toPoint, outColor, NormalThickness);
 
             if ((DroneDrawScope.Drone != null) && DroneDrawScope.Drone.HasFlightSteps && DroneDrawScope.Drone.HasFlightLegs)
             {
@@ -804,11 +780,11 @@ namespace SkyCombDrone.DrawSpace
 
                     fromPoint = new PointF(StepToWidthBySection(fromStep.FlightSection.TardisId), lineY);
                     toPoint = new PointF(StepToWidthBySection(toStep.FlightSection.TardisId), lineY);
-                    Line(ref image, fromPoint, toPoint, inColor, HighlightThickness);
+                    Line(ref BaseImage, fromPoint, toPoint, inColor, HighlightThickness);
 
                     // Draw name of leg above the line
                     var midPoint = new Point((int)fromPoint.X, lineY - 3);
-                    Text(ref image, leg.LegName, midPoint, 1, inColor);
+                    Text(ref BaseImage, leg.LegName, midPoint, 1, inColor);
                 }
 
                 Metrics = new DataPairList
@@ -816,15 +792,12 @@ namespace SkyCombDrone.DrawSpace
                         { "Num Legs", flightLegs.Legs.Count },
                     };
             }
-
-            BaseImage = image.Clone();
         }
 
 
         // Show drone Leg as a graph 
-        public override Image<Bgr, byte> CurrImage()
+        public override void CurrImage(ref Image<Bgr, byte> image)
         {
-            return BaseImage.Clone();
         }
     }
 }

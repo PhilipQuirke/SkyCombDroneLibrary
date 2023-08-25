@@ -36,7 +36,9 @@ namespace SkyCombDrone.PersistModel
             CreateDronePath( DrawPath drawPath, GroundType type, int pixels )
         {
             drawPath.Initialise(new Size(pixels, pixels), null, type);
-            var pathImage = drawPath.CurrImage();
+
+            var pathImage = drawPath.BaseImage.Clone();
+            drawPath.CurrImage(ref pathImage);
 
             var bitmapName = "UNKNOWN";
             switch(type)
