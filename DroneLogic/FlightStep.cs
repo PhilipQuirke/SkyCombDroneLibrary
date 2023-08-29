@@ -230,14 +230,15 @@ namespace SkyCombDrone.DroneLogic
         } }
 
 
-        // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
-        // Depends on CameraDownDeg, AltitudeM, DemM, Yaw & Zoom
-        public void CalculateSettings_InputImageCenter(VideoModel videoData)
+        // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
+        // InputImageCenterDem and InputImageCenterDem
+        // Depends on CameraDownDeg, AltitudeM, DsmM, Yaw, Zoom & GroundData
+        public void CalculateSettings_InputImageCenterDemDsm(VideoModel videoData, GroundData? groundData)
         {
             InputImageCenter = new();
 
             // Can only calculate this if we can compare the ground elevation & drone altitude.
-            if (DemM == UnknownValue)
+            if((DsmM == UnknownValue) || (DroneLocnM == null))
                 return;
 
             // If the camera is pointing at the horizon, then the 
@@ -264,13 +265,49 @@ namespace SkyCombDrone.DroneLogic
             var unitVector = InputImageUnitVector;
 
             // Working out the center of the image area
-            // PQR TODO *****
-            // This assumes the land under the drone is flat.
-            // If land is rising then the centre is closer.
-            InputImageCenter = DroneLocnM.Clone();
-            InputImageCenter.NorthingM += (float)(groundForwardM * unitVector.Value.Y);
-            InputImageCenter.EastingM += (float)(groundForwardM * unitVector.Value.X);
-            InputImageCenter.AssertGood();
+            // Can't assume land is flat. Land may be rising or falling.
+            // Can't assume a steady change. There may be an isolated hill in view.
+
+            // Start by assuming the land under the drone + image is flat.
+            var flatEarthLocn = DroneLocnM.Add(unitVector, (float)groundForwardM);
+
+
+            // If camera is pointing nearly straight down,
+            // then horizontal distance is small, and from drone's height
+            // distortion is small enough to ignore.
+            InputImageCenter = null;
+            if ((groundForwardM > 3) && (AltitudeM > DsmM + 3) &&
+                (groundData!=null) && (groundData.DsmModel!=null))
+            {
+                // Walk from DroneLocnM towards the flatEarthLocn, evaluating the
+                // earth DSM every 2 metres, until the DSM elevation is higher than
+                // than the drone line of sight towards the flatEarthLocn or we reach
+                // flatEarthLocn. We have DSM data at 1m intervals, in a grid pattern.
+                var paceForwardM = 2;
+                var paceDsmFall = Math.Cos(degreesToVerticalForward * DegreesToRadians);
+                var numPaces = (int)(groundForwardM / paceForwardM);
+                for (int paceNum = 1; paceNum < numPaces; paceNum++)
+                {
+                    var paceM = paceNum * paceForwardM;
+                    var paceLocn = DroneLocnM.Add(unitVector, paceM);
+                    var viewDsm = AltitudeM - paceDsmFall * paceM;
+                    InputImageDsmM = groundData.DsmModel.GetElevationByDroneLocn(paceLocn);
+
+                    // Drone altitude inaccuracies can mean we never reach the earthDSM.
+                    InputImageCenter = paceLocn;
+                    if (InputImageDsmM >= viewDsm)
+                        break;
+                }
+            }
+            if (InputImageCenter == null)
+            {
+                InputImageCenter = flatEarthLocn;
+                InputImageDemM = DemM;
+                InputImageDsmM = DsmM;
+            }
+            else if(groundData.DemModel != null)
+                InputImageDemM = groundData.DemModel.GetElevationByDroneLocn(InputImageCenter);
+
 
             if (videoData != null)
             {
@@ -335,6 +372,7 @@ namespace SkyCombDrone.DroneLogic
         // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
+        // Does not consider land contour undulations within InputImageCenter+InputImageSizeM
         public DroneLocation? CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
         {
             if (InputImageSizeM == null)
@@ -370,7 +408,7 @@ namespace SkyCombDrone.DroneLogic
 
         // After the location of this step has been refined, 
         // recalculate the LinealM, SpeedMps, SumLinealM, InputImageCenter & InputImageSizeM
-        public void CalculateSettings_RefineLocationData(VideoModel videoData, FlightStep? prevStep)
+        public void CalculateSettings_RefineLocationData(VideoModel videoData, FlightStep? prevStep, GroundData? groundData)
         {
             if (prevStep == null)
                 return;
@@ -379,7 +417,7 @@ namespace SkyCombDrone.DroneLogic
 
             // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
             // Depends on CameraDownDeg, AltitudeM, DemM, Yaw & Zoom.
-            CalculateSettings_InputImageCenter(videoData);
+            CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
         }
     };
 
@@ -400,10 +438,10 @@ namespace SkyCombDrone.DroneLogic
 
 
         // The ground image area viewed by each step depends on FixAltitudeM
-        public void CalculateSettings_ApplyFixAltitudeM(VideoModel videoData)
+        public void CalculateSettings_ApplyFixAltitudeM(VideoModel videoData, GroundData? groundData)
         {
             foreach (var theStep in this)
-                theStep.Value.CalculateSettings_InputImageCenter(videoData);
+                theStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
         }
 
 
@@ -567,10 +605,10 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM.
         // Depends on AltitudeM, DemM, Yaw & Zoom.
-        public void CalculateSettings_CameraDownDeg(VideoData videoData)
+        public void CalculateSettings_CameraDownDeg(VideoData videoData, GroundData? groundData)
         {
             foreach (var thisStep in Steps)
-                thisStep.Value.CalculateSettings_InputImageCenter(videoData);
+                thisStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
         }
 
 
@@ -641,7 +679,7 @@ namespace SkyCombDrone.DroneLogic
             CalculateSettings_OnGroundAt(groundData);
 
             // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM. Depends on AltitudeM, DemM & StepVelocityMps
-            CalculateSettings_CameraDownDeg(videoData);
+            CalculateSettings_CameraDownDeg(videoData, groundData);
 
             // Update Altitude summary figures etc
             Steps.CalculateSettings_Summarise(this, Sections);
@@ -682,7 +720,7 @@ namespace SkyCombDrone.DroneLogic
 
                 // Calculate InputImageCenter and InputImageSizeM.
                 // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
-                CalculateSettings_CameraDownDeg(videoData);
+                CalculateSettings_CameraDownDeg(videoData, groundData);
 
                 Steps.CalculateSettings_Summarise(this, Sections);
             }
@@ -697,7 +735,7 @@ namespace SkyCombDrone.DroneLogic
         // A leg has ~ constant altitude, in a ~ constant direction for a significant duration 
         // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant.         
         // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-        public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs)
+        public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs, GroundData? groundData)
         {
             if ((legs != null) && (legs.Legs.Count > 0))
                 foreach (var leg in legs.Legs)
@@ -742,7 +780,7 @@ namespace SkyCombDrone.DroneLogic
                                 minLocn.EastingM + deltaLocn.EastingM * fraction);
 
                             // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                            theStep.CalculateSettings_RefineLocationData(videoData, prevStep);
+                            theStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
 
                             prevStep = theStep;
                         }
@@ -794,7 +832,7 @@ namespace SkyCombDrone.DroneLogic
                                 theStep.DroneLocnM.EastingM = eastingSmooth[arrayIndex];
 
                                 // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                                theStep.CalculateSettings_RefineLocationData(videoData, prevStep);
+                                theStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
 
                                 arrayIndex++;
                                 prevStep = theStep;
@@ -805,7 +843,7 @@ namespace SkyCombDrone.DroneLogic
                         Steps.TryGetValue(leg.MaxStepId + 1, out FlightStep? nextStep);
                         if ((nextStep != null) && (prevStep != null))
                             // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                            nextStep.CalculateSettings_RefineLocationData(videoData, prevStep);
+                            nextStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
                     }
 
                     // Calculate the summary of this leg's steps after smoothing them

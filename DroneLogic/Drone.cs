@@ -324,7 +324,7 @@ namespace SkyCombDrone.DroneLogic
                     (FlightLegs.LegPercentage(FlightSteps.MaxStepId) > 33);
 
                 // Refine the flight steps settings using leg information
-                FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs);
+                FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs, GroundData);
 
                 FlightLegs.Calculate_Pass2(FlightSteps);
                 FlightLegs.AssertGood(HasFlightSteps);

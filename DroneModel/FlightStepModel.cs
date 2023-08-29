@@ -18,9 +18,11 @@ namespace SkyCombDrone.DroneModel
 
 
         // The ground (not drone) elevation, above sea level (meters)
+        // directly below the drone
         public float DemM { get; set; } = UnknownValue;
 
         // The surface (i.e tree-top) elevation, above sea level (meters)
+        // directly below the drone
         public float DsmM { get; set; } = UnknownValue;
 
 
@@ -47,6 +49,14 @@ namespace SkyCombDrone.DroneModel
                     - (float)Math.Cos( YawRad + Math.PI / 2 ), 
                     + (float)Math.Sin( YawRad + Math.PI / 2 )); } }
 
+        // The ground (not drone) elevation, above sea level (meters)
+        // at the centre of the imaged area
+        public float InputImageDemM { get; set; } = UnknownValue;
+
+        // The surface (i.e tree-top) elevation, above sea level (meters)
+        // at the centre of the imaged area
+        public float InputImageDsmM { get; set; } = UnknownValue;
+
 
         public FlightStepModel(FlightSectionModel flightSection, List<string>? settings = null) : base(flightSection.TardisId)
         {
@@ -62,7 +72,9 @@ namespace SkyCombDrone.DroneModel
         public const int DemSetting = FirstFreeSetting + 3;
         public const int ImageCenterSetting = FirstFreeSetting + 4;
         public const int ImageSizeMSetting = FirstFreeSetting + 5;
-        public const int HasLegSetting = FirstFreeSetting + 6;
+        public const int ImageDemMSetting = FirstFreeSetting + 6;
+        public const int ImageDsmMSetting = FirstFreeSetting + 7;
+        public const int HasLegSetting = FirstFreeSetting + 8;
 
 
         // Get this FlightStep object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
@@ -82,6 +94,8 @@ namespace SkyCombDrone.DroneModel
             answer.Add("DEM", DemM, HeightNdp); // Graphs depend on this name (TBC)
             answer.Add("Image Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
             answer.Add("Image Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
+            answer.Add("Image Dem M", InputImageDemM, ElevationNdp);
+            answer.Add("Image Dsm M", InputImageDsmM, ElevationNdp);
             answer.Add("Has Leg", (LegId > 0 ? 1 : 0));
 
             return answer;
@@ -101,6 +115,8 @@ namespace SkyCombDrone.DroneModel
             DemM = StringToFloat(settings[i++]);
             InputImageCenter = new DroneLocation(settings[i++]);
             InputImageSizeM = new AreaF(settings[i++]);
+            InputImageDemM = StringToFloat(settings[i++]);
+            InputImageDsmM = StringToFloat(settings[i++]);
             i++; // Skip HasLeg  
 
             InputImageCenter.AssertGood();
