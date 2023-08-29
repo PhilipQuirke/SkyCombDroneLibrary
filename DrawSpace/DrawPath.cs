@@ -559,7 +559,7 @@ namespace SkyCombDrone.DrawSpace
                             // If camera is vertically down then lines from drone to image area
                             // are unnecessary & look ugly. Suppress them for small angles.
                             var degsToVertical = Math.Abs(flightStep.CameraToVerticalForwardDeg);
-                            if((degsToVertical > 15) && (degsToVertical < DegreesToVerticalCutoff))
+                            if((degsToVertical > 20) && (degsToVertical < DegreesToVerticalCutoff))
                             {
                                 // Draw lines from drone to image area to "connect" the drone location to the image area.
                                 // Todo: Make line dotted.
