@@ -31,7 +31,7 @@ namespace SkyCombDrone.DrawSpace
         // Create a new lightgray rectangle        
         public static Image<Bgr, byte> NewLightGrayImage(Size size)
         {
-            return NewImage(size, new Bgr(240, 240, 240));
+            return NewImage(size, DroneColors.GrayBgr);
         }
 
 
@@ -83,13 +83,13 @@ namespace SkyCombDrone.DrawSpace
         // The available OpenCV fonts are described in https://codeyarns.com/tech/2015-03-11-fonts-in-opencv.html
         public static void Text(ref Image<Bgr, byte> image, string text, Point point, double fontScale, Bgr color, int thickness = 1)
         {
-            image.Draw(text, point, FontFace.HersheyPlain, fontScale, color, thickness);
+            image.Draw(text, point, FontFace.HersheySimplex, fontScale, color, thickness);
         }
 
 
         public static void NoDataText(ref Image<Bgr, byte> image, Point where)
         {
-            Text(ref image, "No data", where, 2, DroneColors.BlackBgr);
+            Text(ref image, "No data", where, 1, DroneColors.BlackBgr);
         }
 
 

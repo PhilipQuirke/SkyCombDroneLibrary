@@ -36,7 +36,7 @@ namespace SkyCombDrone.DrawSpace
 
         // How to draw text (if any) on the image
         public int TextThickness = 2;
-        public int TextFontScale = 1;
+        public float TextFontScale = 0.5f;
         public Bgr TextNormalColor;
         public Bgr TextHighlightColor;
 
@@ -48,7 +48,7 @@ namespace SkyCombDrone.DrawSpace
         private Transform? TransformMToPixels;
 
 
-        public DrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope)
+        public DrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope, false)
         {
             Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
@@ -623,7 +623,7 @@ namespace SkyCombDrone.DrawSpace
 
             var inc = 1.0f * size.Height / NumShades;
 
-            var image = NewLightGrayImage(size);
+            var image = Draw.NewLightGrayImage(size);
 
             for (int i = 0; i < NumShades; i++)
             {

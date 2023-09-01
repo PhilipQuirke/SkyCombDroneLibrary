@@ -142,7 +142,7 @@ namespace SkyCombDrone.DrawSpace
 
                     middleRightPt.Y += 10;
                     middleRightPt.X += 10;
-                    Text(ref image, pitchStr, middleRightPt, 2, activeBgr, 2);
+                    Text(ref image, pitchStr, middleRightPt, 1, activeBgr, 2);
                 }
             }
             catch (Exception ex)
