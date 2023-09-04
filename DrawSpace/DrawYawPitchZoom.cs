@@ -22,6 +22,7 @@ namespace SkyCombDrone.DrawSpace
 
                 var activeBgr = DroneColors.WhiteBgr; //  InScopeDroneBgr;
                 var fontScale = drone.InputVideo.FontScale;
+                var halfFontScale = fontScale/2.0f;
                 var lineThick = 1 + fontScale;
 
                 // We want the small lines to be the same length whether vert or horiz
@@ -45,7 +46,7 @@ namespace SkyCombDrone.DrawSpace
                 if (flightStep.Zoom > 0)
                 {
                     var textPt = new Point(8 * fontScale, 20 * fontScale);
-                    Text(ref image, "x" + flightStep.Zoom.ToString(), textPt, fontScale, activeBgr, fontScale);
+                    Text(ref image, "x" + flightStep.Zoom.ToString(), textPt, halfFontScale, activeBgr, fontScale);
                 }
 
 
@@ -102,14 +103,14 @@ namespace SkyCombDrone.DrawSpace
                             image.Draw(new LineSegment2D(new Point(pt.X, topY), new Point(pt.X, bottomY)), activeBgr, lineThick);
 
                             var textPt = new Point(pt.X - 5 * fontScale * compassDirections[i].Length, bottomMiddlePt.Y);
-                            Text(ref image, compassDirections[i], textPt, fontScale, activeBgr, fontScale);
+                            Text(ref image, compassDirections[i], textPt, halfFontScale, activeBgr, fontScale);
                         }
 
                     if (drawDirectionDigits)
                     {
                         var degStr = middleDeg.ToString();
                         var degPt = new Point(bottomMiddlePt.X - 5 * fontScale * degStr.Length, bottomMiddlePt.Y);
-                        Text(ref image, degStr, degPt, fontScale, activeBgr, fontScale);
+                        Text(ref image, degStr, degPt, halfFontScale, activeBgr, fontScale);
                     }
                 }
 
@@ -142,7 +143,7 @@ namespace SkyCombDrone.DrawSpace
 
                     middleRightPt.Y += 10;
                     middleRightPt.X += 10;
-                    Text(ref image, pitchStr, middleRightPt, 1, activeBgr, 2);
+                    Text(ref image, pitchStr, middleRightPt, halfFontScale, activeBgr, fontScale);
                 }
             }
             catch (Exception ex)
