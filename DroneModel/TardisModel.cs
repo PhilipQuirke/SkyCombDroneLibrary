@@ -53,7 +53,7 @@ namespace SkyCombDrone.DroneModel
         public float RollDeg { get; set; } = UnknownValue;
 
 
-        // Drone altitude (height) above sea level in metres e.g. 61.241 m. Not very accurate
+        // Raw drone altitude (height) above sea level in metres e.g. 61.241 m. Not very accurate
         // Aka absolute altitude.
         public float AltitudeM { get; set; } = UnknownValue;
 

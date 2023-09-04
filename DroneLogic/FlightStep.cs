@@ -191,11 +191,10 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // Best estimate of drone altitude (height) above sea level in metres e.g. 61.241 m. Aka absolute altitude.
+        public float FixedAltitudeM { get { return ( AltitudeM == UnknownValue ? UnknownValue : AltitudeM + FixAltM ); } }
         // Vertical distance from drone to ground
-        public float DistanceDown { get {
-                return AltitudeM - DemM + FixAltM;
-            }
-        }
+        public float FixedDistanceDown { get { return FixedAltitudeM - DemM; } }
 
 
         // How do we best calculate the camera down angle?
@@ -247,8 +246,8 @@ namespace SkyCombDrone.DroneLogic
             if(degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
-            // Vertical distance from drone to ground (impacted by FixAltM)
-            double downVertM = DistanceDown;
+            // Vertical distance from drone to ground (including FixAltM)
+            double downVertM = FixedDistanceDown;
 
             // Distance across ground to center of image area - in the direct of flight.
             // Note that the drone camera gimbal automatically compensates for
@@ -286,7 +285,7 @@ namespace SkyCombDrone.DroneLogic
                 {
                     var paceM = paceNum * paceForwardM;
                     var paceLocn = DroneLocnM.Add(unitVector, paceM);
-                    var viewDsm = AltitudeM - paceDsmFall * paceM;
+                    var viewDsm = FixedAltitudeM - paceDsmFall * paceM;
                     InputImageDsmM = groundData.DsmModel.GetElevationByDroneLocn(paceLocn);
 
                     // Drone altitude inaccuracies can mean we never reach the earthDSM.
@@ -421,6 +420,7 @@ namespace SkyCombDrone.DroneLogic
     public class FlightStepList : SortedList<int, FlightStep>
     {
 
+        // Return a subset of this.Steps matching the specified legId
         public FlightStepList GetLegSteps(int legId)
         {
             FlightStepList answer = new();
@@ -433,31 +433,15 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Set the Step.FixAltM value for the specified steps.
-        public void SetFixAltM(int minStepId, int maxStepId, float fixAltM)
+        // FCor each step, set FixAltM and recalculate the ground image area viewed
+        public void CalculateSettings_FixAltM(float fixAltM, VideoModel videoData, GroundData? groundData)
         {
-            for (int theStepId = minStepId; theStepId <= maxStepId; theStepId++)
+            foreach (var theStep in this)
             {
-                FlightStep? theStep = null;
-                TryGetValue(theStepId, out theStep);
-                if (theStep == null)
-                    continue;
-
-                theStep.FixAltM = fixAltM;
-            }
-        }
-        public void SetFixAltM(float fixAltM)
-        {
-            foreach (var theStep in this)
                 theStep.Value.FixAltM = fixAltM;
-        }
 
-
-        // The ground image area viewed by each step depends on FixAltM
-        public void CalculateSettings_ApplyFixAltM(VideoModel videoData, GroundData? groundData)
-        {
-            foreach (var theStep in this)
                 theStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
+            }
         }
 
 

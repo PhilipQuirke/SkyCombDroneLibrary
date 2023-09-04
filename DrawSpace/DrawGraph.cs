@@ -298,7 +298,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.AltitudeM; }
+        override public float GetVertRaw(FlightStep step) { return step.FixedAltitudeM; }
 
 
         protected void DrawAltitudeStep(
