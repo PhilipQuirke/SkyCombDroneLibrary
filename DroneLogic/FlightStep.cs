@@ -332,7 +332,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate InputImageArea corners
         // Area covered by the step's video image (may be forward of drone's location).
-        public (DroneLocation topLeft, DroneLocation topRight, DroneLocation bottomRight, DroneLocation bottomLeft)
+        public (DroneLocation corner1, DroneLocation corner2, DroneLocation corner3, DroneLocation corner4)
             Calculate_InputImageArea_Corners()
         {
             // Get unit vector in the direction the camera is pointing
@@ -344,24 +344,24 @@ namespace SkyCombDrone.DroneLogic
             var halfHeight = InputImageSizeM.Value.Y / 2.0;
 
             // Rotate the image area by the drone's yaw.
-            DroneLocation inputImageTopLeft = new(
+            DroneLocation corner1 = new(
                 (float)(sinYaw * (-halfHeight) + cosYaw * (+halfWidth)),
                 (float)(cosYaw * (-halfHeight) - sinYaw * (+halfWidth)));
-            DroneLocation inputImageTopRight = new(
+            DroneLocation corner2 = new(
                 (float)(sinYaw * (+halfHeight) + cosYaw * (+halfWidth)),
                 (float)(cosYaw * (+halfHeight) - sinYaw * (+halfWidth)));
-            DroneLocation inputImageBottomRight = new(
+            DroneLocation corner3 = new(
                 (float)(sinYaw * (+halfHeight) + cosYaw * (-halfWidth)),
                 (float)(cosYaw * (+halfHeight) - sinYaw * (-halfWidth)));
-            DroneLocation inputImageBottomLeft = new(
+            DroneLocation corner4 = new(
                 (float)(sinYaw * (-halfHeight) + cosYaw * (-halfWidth)),
                 (float)(cosYaw * (-halfHeight) - sinYaw * (-halfWidth)));
 
             return (
-                inputImageTopLeft.Translate(InputImageCenter),
-                inputImageTopRight.Translate(InputImageCenter),
-                inputImageBottomRight.Translate(InputImageCenter),
-                inputImageBottomLeft.Translate(InputImageCenter)
+                corner1.Translate(InputImageCenter),
+                corner2.Translate(InputImageCenter),
+                corner3.Translate(InputImageCenter),
+                corner4.Translate(InputImageCenter)
             );
         }
 

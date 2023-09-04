@@ -543,18 +543,18 @@ namespace SkyCombDrone.DrawSpace
                         if (flightStep.InputImageSizeM != null)
                         {
                             // Draw lines to show the image area seen by the drone.
-                            var (topLeftLocn, topRightLocn, bottomRightLocn, bottomLeftLocn) =
+                            var (corner1, corner2, corner3, corner4) =
                                 flightStep.Calculate_InputImageArea_Corners();
 
-                            var topLeftPoint = DroneLocnMToPixelPoint(topLeftLocn);
-                            var topRightPoint = DroneLocnMToPixelPoint(topRightLocn);
-                            var bottomRightPoint = DroneLocnMToPixelPoint(bottomRightLocn);
-                            var bottomLeftPoint = DroneLocnMToPixelPoint(bottomLeftLocn);
+                            var point1 = DroneLocnMToPixelPoint(corner1);
+                            var point2 = DroneLocnMToPixelPoint(corner2);
+                            var point3 = DroneLocnMToPixelPoint(corner3);
+                            var point4 = DroneLocnMToPixelPoint(corner4);
 
-                            Line(ref image, topLeftPoint, topRightPoint, activeBgr, NormalThickness);
-                            Line(ref image, topRightPoint, bottomRightPoint, activeBgr, NormalThickness);
-                            Line(ref image, bottomRightPoint, bottomLeftPoint, activeBgr, NormalThickness);
-                            Line(ref image, bottomLeftPoint, topLeftPoint, activeBgr, NormalThickness);
+                            Line(ref image, point1, point2, activeBgr, NormalThickness);
+                            Line(ref image, point2, point3, activeBgr, NormalThickness);
+                            Line(ref image, point3, point4, activeBgr, NormalThickness);
+                            Line(ref image, point4, point1, activeBgr, NormalThickness);
 
                             // If camera is vertically down then lines from drone to image area
                             // are unnecessary & look ugly. Suppress them for small angles.
@@ -562,9 +562,8 @@ namespace SkyCombDrone.DrawSpace
                             if((degsToVertical > 20) && (degsToVertical < DegreesToVerticalCutoff))
                             {
                                 // Draw lines from drone to image area to "connect" the drone location to the image area.
-                                // Todo: Make line dotted.
-                                Line(ref image, dronePoint, topLeftPoint, activeBgr);
-                                Line(ref image, dronePoint, bottomLeftPoint, activeBgr);
+                                Line(ref image, dronePoint, point1, activeBgr);
+                                Line(ref image, dronePoint, point4, activeBgr);
                             }
 
                             if(degsToVertical < DegreesToVerticalCutoff)
@@ -573,8 +572,8 @@ namespace SkyCombDrone.DrawSpace
                                 // If CameraDownDeg is 90, the drone circle and leg cross will overlap.
                                 // Otherwise the cross location helps visualises the impact of CameraDownDeg.
                                 Point imageCenter = new(
-                                    (topLeftPoint.X + bottomRightPoint.X) / 2,
-                                    (topLeftPoint.Y + bottomRightPoint.Y) / 2);
+                                    (point1.X + point3.X) / 2,
+                                    (point1.Y + point3.Y) / 2);
                                 int thickness = (degsToVertical < 5 ? NormalThickness : HighlightThickness);
                                 Draw.Cross(ref image, imageCenter, activeBgr, thickness);
                             }

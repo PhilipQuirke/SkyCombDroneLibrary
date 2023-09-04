@@ -1,5 +1,4 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
-using Microsoft.VisualBasic.Logging;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
@@ -96,21 +95,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // What (rough) percentage of the flight is included in legs?
-        // (Flights controlled by human hand, rather than pre-programmed, have very few legs.)
-        public int LegPercentage(int totalSteps)
-        {
-            if(totalSteps==0 )
-                return 0;
-
-            int legSteps = 0;
-            foreach( var leg in Legs )
-                legSteps += leg.MaxStepId - leg.MinStepId + 1;  
-
-            return (int)(100.0 * legSteps / totalSteps);
-        }
-
-
         // What lineal distance is transversed in legs?
         public float SumLinealM()
         {
@@ -136,7 +120,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate the Step.LegId values
-        public List<string> Calculate_Steps(FlightSections sections, FlightSteps steps, DroneConfigModel config)
+        public List<string>? Calculate_Steps(FlightSections sections, FlightSteps steps, DroneConfigModel config)
         {
             try
             {

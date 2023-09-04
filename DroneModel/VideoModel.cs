@@ -1,6 +1,6 @@
-﻿using Emgu.CV;
+﻿// Copyright SkyComb Limited 2023. All rights reserved.
+using Emgu.CV;
 using Emgu.CV.CvEnum;
-using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 using System.Drawing;
 
