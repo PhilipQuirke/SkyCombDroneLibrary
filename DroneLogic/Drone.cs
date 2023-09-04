@@ -83,6 +83,20 @@ namespace SkyCombDrone.DroneLogic
         public int NumLegsShown { get { return UseFlightLegs ? FlightLegs.Legs.Count : 0; } }
 
 
+        // For many drones the thermal and optical videos have different pixel resolution and horizontal field of vision(HFOV).
+        // SkyComb Analyst shows the location of significant objects found in thermal video on top of the optical video.
+        // So it needs to know the difference between the HFOV of the thermal and optical videos
+        // ExcludeMarginRatio is the "margin" of the optical video that is not displayed in the thermal video, as a ratio between 0.0 and 0.5.
+        // Refer ExcludeMarginRatio.md section Camera Down Angle for more detail.
+        public float ExcludeDisplayMarginRatio { get {
+                if(HasTwoVideos)
+                    return Config.ExcludeDisplayMarginRatio;  
+                
+                return 0;
+            }
+        }
+
+
         public Drone(DroneConfigModel config)
         {
             Config = config;
