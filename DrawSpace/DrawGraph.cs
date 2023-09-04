@@ -162,20 +162,24 @@ namespace SkyCombDrone.DrawSpace
 
             if (LabelAxises)
             {
+                int edge = 2;
+
                 // Vertical axis top value
-                var thePoint = new Point(1, 20);
+                int indent = edge + (4 - VertTopLabel.Length) * (origin.X - edge) / 4;
+                var thePoint = new Point(indent, 20);
                 Text(ref image, VertTopLabel, thePoint, fontScale, black, fontThickness);
 
                 // Vertical axis bottom value
-                thePoint = new Point(1, origin.Y);
+                indent = edge + (4 - VertBottomLabel.Length) * (origin.X - edge) / 4;
+                thePoint = new Point(indent, origin.Y);
                 Text(ref image, VertBottomLabel, thePoint, fontScale, black, fontThickness);
 
                 // Horizontal axis left value
-                thePoint = new Point(origin.X + 8, Size.Height);
+                thePoint = new Point(origin.X, Size.Height - edge);
                 Text(ref image, HorizLeftLabel, thePoint, fontScale, black, fontThickness);
 
                 // Horizontal axis right value
-                thePoint = new Point(Size.Width - 60, Size.Height);
+                thePoint = new Point(Size.Width - 60, Size.Height - edge);
                 Text(ref image, HorizRightLabel, thePoint, fontScale, black, fontThickness);
             }
         }
@@ -247,8 +251,8 @@ namespace SkyCombDrone.DrawSpace
             LabelVertPixels = 0;
             if (LabelAxises)
             {
-                LabelHorzPixels = 40;
-                LabelVertPixels = 14;
+                LabelHorzPixels = 50;
+                LabelVertPixels = 18;
             }
 
             BaseImage = Draw.NewImage(size, DroneColors.GrayBgr);

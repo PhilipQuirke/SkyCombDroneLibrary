@@ -1,4 +1,5 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+using Microsoft.VisualBasic.Logging;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
@@ -107,6 +108,17 @@ namespace SkyCombDrone.DroneLogic
                 legSteps += leg.MaxStepId - leg.MinStepId + 1;  
 
             return (int)(100.0 * legSteps / totalSteps);
+        }
+
+
+        // What lineal distance is transversed in legs?
+        public float SumLinealM()
+        {
+            float linealM = 0;
+            foreach (var leg in Legs)
+                if((leg.MaxSumLinealM >=0) && (leg.MinSumLinealM >= 0))
+                    linealM += leg.MaxSumLinealM - leg.MinSumLinealM;
+            return linealM;
         }
 
 
@@ -281,12 +293,17 @@ namespace SkyCombDrone.DroneLogic
                             thisLeg.LegId = thisStep.Value.LegId;
                             thisLeg.MinTardisId = thisStep.Key;
                             thisLeg.MaxTardisId = thisStep.Key;
+                            thisLeg.MinSumLinealM = thisStep.Value.SumLinealM;
+                            thisLeg.MaxSumLinealM = thisStep.Value.SumLinealM;
                             thisLeg.WhyLegEnded = (whyEnd.Count > thisLegId - 1 ? whyEnd[thisLegId - 1] : "");
 
                             Legs.Add(thisLeg);
                         }
                         else
+                        {
                             thisLeg.MaxTardisId = thisStep.Key;
+                            thisLeg.MaxSumLinealM = thisStep.Value.SumLinealM;
+                        }
                     }
                     else
                         thisLeg = null;

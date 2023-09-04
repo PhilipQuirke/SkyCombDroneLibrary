@@ -331,11 +331,17 @@ namespace SkyCombDrone.DroneLogic
                 FlightLegs = new();
                 FlightLegs.Calculate_Pass1(FlightSections, FlightSteps, Config);
 
-                // Are legs a sufficiently large fraction of the flight to use them?
+                // Do we default to using legs? User can override in UI.
+                // We use legs if the total leg distance is > 33% of the total flight distance
                 Config.UseLegs =
-                    (FlightSteps.Steps.Count>200) && 
-                    (FlightLegs.Legs.Count>2) &&
-                    (FlightLegs.LegPercentage(FlightSteps.MaxStepId) > 33);
+                    (FlightSections.Sections.Count > 200) &&
+                    (FlightLegs.Legs.Count > 2);
+                if (Config.UseLegs)
+                {
+                    var legsLinealM = FlightLegs.SumLinealM();
+                    var sectionsLinealM = FlightSections.Sections.Last().Value.SumLinealM;
+                    Config.UseLegs =  (legsLinealM / sectionsLinealM > 0.33f);
+                }
 
                 // Refine the flight steps settings using leg information
                 FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs, GroundData);
