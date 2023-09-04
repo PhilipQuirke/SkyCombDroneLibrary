@@ -1,4 +1,5 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 
 
@@ -22,10 +23,6 @@ namespace SkyCombDrone.DroneModel
         public string LegName { get { return LegIdToName(LegId); } }
         public string WhyLegEnded { get; set; } = "";
 
-        // The amount to correct the altitude reported by the drone in this leg.
-        // Calculated by CombLeg.CalculateSettings to best reduce the CombObject location errors.
-        // ApplyFixAltitudeM impacts FlightSteps, CombFeatures & CombObjects member data.
-        public float FixAltitudeM { get; set; } = 0;
 
         public int MinStepId { get { return MinTardisId; } }
         public int MaxStepId { get { return MaxTardisId; } }
@@ -51,12 +48,10 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-
         // One-based settings index values. Must align with GetSettings procedure below
         public const int LegIdSetting = 1;
         public const int LegNameSetting = 2;
         public const int WhyEndSetting = 3;
-        public const int FixAltitudeMSetting = 4;
 
 
         // Get this object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
@@ -67,7 +62,6 @@ namespace SkyCombDrone.DroneModel
                 { "Leg Id", LegId },
                 { "Leg Name", LegName },
                 { "Why Leg Ended", WhyLegEnded },
-                { "Fix Altitude M", FixAltitudeM, HeightNdp }
             };
 
             answer.AddRange(base.GetSettings());
@@ -83,9 +77,8 @@ namespace SkyCombDrone.DroneModel
             LegId = StringToNonNegInt(settings[0]);
             // Name = settings[1];
             WhyLegEnded = settings[2];
-            FixAltitudeM = StringToFloat(settings[3]);
 
-            LoadSettingsOffset(settings, 4);
+            LoadSettingsOffset(settings, 3);
         }
     };
 }

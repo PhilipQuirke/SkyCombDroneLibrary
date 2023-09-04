@@ -4,6 +4,7 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using System.Drawing;
+using static System.Collections.Specialized.BitVector32;
 
 
 // Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
@@ -192,12 +193,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Vertical distance from drone to ground
         public float DistanceDown { get {
-                float answer = AltitudeM - DemM;
-
-                if (FlightLeg != null)
-                    answer += FlightLeg.FixAltitudeM;
-
-                return answer;
+                return AltitudeM - DemM + FixAltM;
             }
         }
 
@@ -251,7 +247,7 @@ namespace SkyCombDrone.DroneLogic
             if(degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
-            // Vertical distance from drone to ground (impacted by FixAltitudeM)
+            // Vertical distance from drone to ground (impacted by FixAltM)
             double downVertM = DistanceDown;
 
             // Distance across ground to center of image area - in the direct of flight.
@@ -437,8 +433,28 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // The ground image area viewed by each step depends on FixAltitudeM
-        public void CalculateSettings_ApplyFixAltitudeM(VideoModel videoData, GroundData? groundData)
+        // Set the Step.FixAltM value for the specified steps.
+        public void SetFixAltM(int minStepId, int maxStepId, float fixAltM)
+        {
+            for (int theStepId = minStepId; theStepId <= maxStepId; theStepId++)
+            {
+                FlightStep? theStep = null;
+                TryGetValue(theStepId, out theStep);
+                if (theStep == null)
+                    continue;
+
+                theStep.FixAltM = fixAltM;
+            }
+        }
+        public void SetFixAltM(float fixAltM)
+        {
+            foreach (var theStep in this)
+                theStep.Value.FixAltM = fixAltM;
+        }
+
+
+        // The ground image area viewed by each step depends on FixAltM
+        public void CalculateSettings_ApplyFixAltM(VideoModel videoData, GroundData? groundData)
         {
             foreach (var theStep in this)
                 theStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);

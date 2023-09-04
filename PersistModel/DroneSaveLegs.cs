@@ -32,7 +32,6 @@ namespace SkyCombDrone.PersistModel
 
             Data.SetColumnColor(FlightLegModel.LegIdSetting, row, Color.Blue);
             Data.SetColumnColor(FlightLegModel.LegNameSetting, row, Color.Blue);
-            Data.SetColumnColor(FlightLegModel.FixAltitudeMSetting, row, Color.Blue);
 
             Data.SetLastUpdateDateTime(Legs1TabName);
         }
