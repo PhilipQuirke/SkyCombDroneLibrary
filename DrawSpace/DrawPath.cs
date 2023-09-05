@@ -148,7 +148,7 @@ namespace SkyCombDrone.DrawSpace
                 return;
 
             var thisPoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
-            var legname = (flightStep is FlightStep ? (flightStep as FlightStep).LegName : "" );
+            var legname = (flightStep is FlightStep ? (flightStep as FlightStep).FlightLegName : "" );
 
             // Using flightStep.YawDeg, decide where to draw the text relative to thisPoint.
             if (flightStep.YawDeg < 45)
@@ -238,7 +238,7 @@ namespace SkyCombDrone.DrawSpace
 
                 var thisPoint = FlightPath_DroneLocnMToPixelPoint(step);
                 int thisStepId = step.TardisId;
-                int thisLegId = (step is FlightStep ? (step as FlightStep).LegId : UnknownValue);
+                int thisLegId = (step is FlightStep ? (step as FlightStep).FlightLegId : UnknownValue);
 
                 bool highlight = runScopeSet &&
                     (thisStepId >= firstRunStepId) &&

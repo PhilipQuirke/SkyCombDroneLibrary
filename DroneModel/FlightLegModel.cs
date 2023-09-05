@@ -1,5 +1,4 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
-using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 
 
@@ -19,8 +18,8 @@ namespace SkyCombDrone.DroneModel
         public const int MinOverlapPercent = 20; // 20 percent
 
 
-        public int LegId { get; set; } = 0;
-        public string LegName { get { return LegIdToName(LegId); } }
+        public int FlightLegId { get; set; } = 0;
+        public string FlightLegName { get { return LegIdToName(FlightLegId); } }
         public string WhyLegEnded { get; set; } = "";
 
 
@@ -38,7 +37,7 @@ namespace SkyCombDrone.DroneModel
 
         public void AssertGood(bool hasFlightSteps)
         {
-            Assert(LegId > 0, "FlightLeg.AssertGood: Bad LegId");
+            Assert(FlightLegId > 0, "FlightLeg.AssertGood: Bad LegId");
             if (hasFlightSteps)
             {
                 Assert(MinStepId >= 0, "FlightLeg.AssertGood: Bad MinStepId");
@@ -59,8 +58,8 @@ namespace SkyCombDrone.DroneModel
         {
             var answer = new DataPairList
             {
-                { "Leg Id", LegId },
-                { "Leg Name", LegName },
+                { "Flight Leg Id", FlightLegId },
+                { "Leg Name", FlightLegName },
                 { "Why Leg Ended", WhyLegEnded },
             };
 
@@ -74,7 +73,7 @@ namespace SkyCombDrone.DroneModel
         // This function must align to the above GetSettings function.
         public override void LoadSettings(List<string> settings)
         {
-            LegId = StringToNonNegInt(settings[0]);
+            FlightLegId = StringToNonNegInt(settings[0]);
             // Name = settings[1];
             WhyLegEnded = settings[2];
 

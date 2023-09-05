@@ -112,7 +112,7 @@ namespace SkyCombDrone.DroneLogic
             foreach (var theStep in steps.Steps)
             {
                 if (theStep.Key >= legStartKey)
-                    theStep.Value.LegId = 0;
+                    theStep.Value.FlightLegId = 0;
                 if (theStep.Key == legEndKey)
                     break;
             }
@@ -190,7 +190,7 @@ namespace SkyCombDrone.DroneLogic
                         {
                             // Include this step in the leg.
                             legDurationMs += thisStep.FlightSection.TimeMs;
-                            thisStep.LegId = maxLegId;
+                            thisStep.FlightLegId = maxLegId;
                             endStep = thisStep;
                             endKey = thisStepPair.Key;
                         }
@@ -202,7 +202,7 @@ namespace SkyCombDrone.DroneLogic
                            (Math.Abs(thisStep.PitchDeg) < config.MaxLegStepPitchDeg))
                         {
                             maxLegId++;
-                            thisStep.LegId = maxLegId;
+                            thisStep.FlightLegId = maxLegId;
 
                             startStep = thisStep;
                             endStep = thisStep;
@@ -240,7 +240,7 @@ namespace SkyCombDrone.DroneLogic
         {
             FlightLeg answer = new();
 
-            answer.LegId = 1;
+            answer.FlightLegId = 1;
             answer.WhyLegEnded = "N/A";
             answer.MinSumTimeMs = (int)(config.RunVideoFromS * 1000.0f);
             answer.MaxSumTimeMs = (int)(config.RunVideoToS * 1000.0f);
@@ -264,17 +264,17 @@ namespace SkyCombDrone.DroneLogic
                 FlightLeg? thisLeg = null;
                 foreach (var thisStep in steps.Steps)
                 {
-                    if (thisStep.Value.LegId > 0)
+                    if (thisStep.Value.FlightLegId > 0)
                     {
-                        int thisLegId = thisStep.Value.LegId;
+                        int thisLegId = thisStep.Value.FlightLegId;
 
-                        if ((thisLeg != null) && (thisLeg.LegId != thisLegId))
+                        if ((thisLeg != null) && (thisLeg.FlightLegId != thisLegId))
                             thisLeg = null;
 
                         if (thisLeg == null)
                         {
                             thisLeg = new();
-                            thisLeg.LegId = thisStep.Value.LegId;
+                            thisLeg.FlightLegId = thisStep.Value.FlightLegId;
                             thisLeg.MinTardisId = thisStep.Key;
                             thisLeg.MaxTardisId = thisStep.Key;
                             thisLeg.MinSumLinealM = thisStep.Value.SumLinealM;
@@ -321,7 +321,7 @@ namespace SkyCombDrone.DroneLogic
                             }
                             else
                                 // Remove the step from the leg
-                                theStep.LegId = 0;
+                                theStep.FlightLegId = 0;
                         }
 
                         minStepIdNew++;
@@ -343,7 +343,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 leg.ResetTardis();
                 foreach (var step in steps.Steps)
-                    if (step.Value.LegId == leg.LegId)
+                    if (step.Value.FlightLegId == leg.FlightLegId)
                     {
                         leg.SummariseTardis(step.Value);
                         step.Value.FlightLeg = leg;
@@ -360,11 +360,11 @@ namespace SkyCombDrone.DroneLogic
         {
             foreach (var step in steps.Steps)
             {
-                if (step.Value.LegId <= 0)
+                if (step.Value.FlightLegId <= 0)
                     continue;
 
                 foreach (var leg in Legs)
-                    if (step.Value.LegId == leg.LegId)
+                    if (step.Value.FlightLegId == leg.FlightLegId)
                     {
                         step.Value.FlightLeg = leg;
                         break;
@@ -384,8 +384,8 @@ namespace SkyCombDrone.DroneLogic
                 if (leg.OverlapsRunFromTo(steps, config))
                 {
                     if (firstLegId == UnknownValue)
-                        firstLegId = leg.LegId;
-                    lastLegId = leg.LegId;
+                        firstLegId = leg.FlightLegId;
+                    lastLegId = leg.FlightLegId;
                 }
                 else
                 {

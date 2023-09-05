@@ -14,8 +14,8 @@ namespace SkyCombDrone.DroneModel
 
         // A "leg" is a part of the flight in a constant direction, with constant altitude, of reasonable duration.
         // Many steps will NOT be part of a leg e.g. spinning, climbing, descending, or drone flight log doesn't provide Yaw data.
-        public int LegId { get; set; } = 0;
-        public string LegName { get { return LegIdToName(LegId); } }
+        public int FlightLegId { get; set; } = 0;
+        public string FlightLegName { get { return LegIdToName(FlightLegId); } }
 
 
         // The ground (not drone) elevation, above sea level (meters)
@@ -94,8 +94,8 @@ namespace SkyCombDrone.DroneModel
             var answer = base.GetSettings();
             answer[0].Key = "Step";
 
-            answer.Add("Leg Id", LegId);
-            answer.Add("Leg Name", LegName);
+            answer.Add("Leg Id", FlightLegId);
+            answer.Add("Leg Name", FlightLegName);
             answer.Add("DSM", DsmM, HeightNdp); // Graphs depend on this name (TBC)
             answer.Add("DEM", DemM, HeightNdp); // Graphs depend on this name (TBC)
             answer.Add("Img Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
@@ -103,7 +103,7 @@ namespace SkyCombDrone.DroneModel
             answer.Add("Img Dem M", InputImageDemM, ElevationNdp);
             answer.Add("Img Dsm M", InputImageDsmM, ElevationNdp);
             answer.Add("Fix Alt M", FixAltM, ElevationNdp);
-            answer.Add("Has Leg", (LegId > 0 ? 1 : 0));
+            answer.Add("Has Leg", (FlightLegId > 0 ? 1 : 0));
 
             return answer;
         }
@@ -116,7 +116,7 @@ namespace SkyCombDrone.DroneModel
             base.LoadSettings(settings);
 
             int i = FirstFreeSetting - 1;
-            LegId = StringToNonNegInt(settings[i++]);
+            FlightLegId = StringToNonNegInt(settings[i++]);
             i++; // Skip LegName 
             DsmM = StringToFloat(settings[i++]);
             DemM = StringToFloat(settings[i++]);

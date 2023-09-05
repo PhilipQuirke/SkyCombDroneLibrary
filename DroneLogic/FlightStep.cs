@@ -4,7 +4,6 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using System.Drawing;
-using static System.Collections.Specialized.BitVector32;
 
 
 // Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
@@ -420,13 +419,20 @@ namespace SkyCombDrone.DroneLogic
     public class FlightStepList : SortedList<int, FlightStep>
     {
 
+        public void AddStep(FlightStep step)
+        {
+            BaseConstants.Assert(step.StepId > 0, "FlightStepList.AddStep: No Id");
+            Add(step.StepId, step);
+        }
+
+
         // Return a subset of this.Steps matching the specified legId
         public FlightStepList GetLegSteps(int legId)
         {
             FlightStepList answer = new();
 
             foreach (var theStep in this)
-                if (theStep.Value.LegId == legId)
+                if (theStep.Value.FlightLegId == legId)
                     answer.Add(theStep.Value.StepId, theStep.Value);
 
             return answer;

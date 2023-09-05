@@ -842,7 +842,7 @@ namespace SkyCombDrone.DrawSpace
 
                     // Draw name of leg above the line
                     var midPoint = new Point((int)fromPoint.X, lineY - 3);
-                    Text(ref BaseImage, leg.LegName, midPoint, 0.4, inColor);
+                    Text(ref BaseImage, leg.FlightLegName, midPoint, 0.4, inColor);
                 }
 
                 Metrics = new DataPairList
