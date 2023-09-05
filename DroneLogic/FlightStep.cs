@@ -439,7 +439,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // FCor each step, set FixAltM and recalculate the ground image area viewed
+        // For each step, set FixAltM and recalculate the ground image area viewed
         public void CalculateSettings_FixAltM(float fixAltM, VideoModel videoData, GroundData? groundData)
         {
             foreach (var theStep in this)

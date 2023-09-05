@@ -19,7 +19,7 @@ namespace SkyCombDrone.DroneModel
 
 
         public int FlightLegId { get; set; } = 0;
-        public string FlightLegName { get { return LegIdToName(FlightLegId); } }
+        public string Name { get { return IdToLetter(FlightLegId); } }
         public string WhyLegEnded { get; set; } = "";
 
 
@@ -59,7 +59,7 @@ namespace SkyCombDrone.DroneModel
             var answer = new DataPairList
             {
                 { "Flight Leg Id", FlightLegId },
-                { "Leg Name", FlightLegName },
+                { "Leg Name", Name },
                 { "Why Leg Ended", WhyLegEnded },
             };
 

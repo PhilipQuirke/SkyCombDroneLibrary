@@ -15,7 +15,7 @@ namespace SkyCombDrone.DroneModel
         // A "leg" is a part of the flight in a constant direction, with constant altitude, of reasonable duration.
         // Many steps will NOT be part of a leg e.g. spinning, climbing, descending, or drone flight log doesn't provide Yaw data.
         public int FlightLegId { get; set; } = 0;
-        public string FlightLegName { get { return LegIdToName(FlightLegId); } }
+        public string FlightLegName { get { return IdToLetter(FlightLegId); } }
 
 
         // The ground (not drone) elevation, above sea level (meters)
@@ -79,8 +79,7 @@ namespace SkyCombDrone.DroneModel
         public const int ImageSizeMSetting = FirstFreeSetting + 5;
         public const int ImageDemMSetting = FirstFreeSetting + 6;
         public const int ImageDsmMSetting = FirstFreeSetting + 7;
-        public const int FixAltMSetting = FirstFreeSetting + 8;
-        public const int HasLegSetting = FirstFreeSetting + 9;
+        public const int HasLegSetting = FirstFreeSetting + 8;
 
 
         // Get this FlightStep object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
@@ -102,8 +101,8 @@ namespace SkyCombDrone.DroneModel
             answer.Add("Img Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
             answer.Add("Img Dem M", InputImageDemM, ElevationNdp);
             answer.Add("Img Dsm M", InputImageDsmM, ElevationNdp);
-            answer.Add("Fix Alt M", FixAltM, ElevationNdp);
             answer.Add("Has Leg", (FlightLegId > 0 ? 1 : 0));
+            // We do not save FixAltM
 
             return answer;
         }
@@ -124,8 +123,8 @@ namespace SkyCombDrone.DroneModel
             InputImageSizeM = new AreaF(settings[i++]);
             InputImageDemM = StringToFloat(settings[i++]);
             InputImageDsmM = StringToFloat(settings[i++]);
-            FixAltM = StringToFloat(settings[i++]);
             i++; // Skip HasLeg  
+            // We do not load FixAltM. It is updated by CombLeg on load
 
             InputImageCenter.AssertGood();
             InputImageSizeM.AssertGood();
