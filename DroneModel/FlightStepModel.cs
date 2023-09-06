@@ -124,7 +124,7 @@ namespace SkyCombDrone.DroneModel
             InputImageDemM = StringToFloat(settings[i++]);
             InputImageDsmM = StringToFloat(settings[i++]);
             i++; // Skip HasLeg  
-            // We do not load FixAltM. It is updated by CombLeg on load
+            // We do not load FixAltM. It is updated by CombSpan on load
 
             InputImageCenter.AssertGood();
             InputImageSizeM.AssertGood();
