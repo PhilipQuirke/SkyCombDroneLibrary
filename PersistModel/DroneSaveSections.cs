@@ -2,7 +2,6 @@
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
-using System;
 
 
 namespace SkyCombDrone.PersistModel
