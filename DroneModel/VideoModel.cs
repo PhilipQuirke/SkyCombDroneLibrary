@@ -180,7 +180,7 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        // Parse durations strings "145", "145.12", "2:25", "2:25.12" into milliseconds
+        // Parse durations strings "145", "145.12", "2:25", "2:25.12" into seconds
         public static float DurationStringtoSecs(string durationStr)
         {
             float answer = 0;
