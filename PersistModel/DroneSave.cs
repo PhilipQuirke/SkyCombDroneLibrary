@@ -5,7 +5,6 @@ using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundModel;
-using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -53,19 +52,22 @@ namespace SkyCombDrone.PersistModel
 
 
         // Generate and save a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
-        public static void SaveDronePath(
-             BaseDataStore data, Drone? drone, TardisSummaryModel? tardisModel,
-             GroundType groundType, int row, int col, int pixels = 700)
+        public void SaveDronePath(
+             TardisSummaryModel? tardisModel, GroundType groundType,
+             int row, int col, string title, int pixels = 700)
         {
-            // Generate a bitmap of the DSM land overlaid with the drone path 
-            var drawScope = (drone != null ? new DroneDrawScope(drone) : new DroneDrawScope(tardisModel));
+            var titleRow = row;
+            Data.SetTitle(ref titleRow, col, title);
+
+            // Generate a bitmap of the land overlaid with the drone path 
+            var drawScope = (Drone != null ? new DroneDrawScope(Drone) : new DroneDrawScope(tardisModel));
             var drawPath = new DrawPath(drawScope, false);
             drawPath.BackgroundColor = DroneColors.WhiteBgr; // So we dont paint under-necessary area.
 
             (var _, var _, var bitmapName, var pathImage) = 
                 CreateDronePath( drawPath, groundType, pixels);
 
-            data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col);
+            Data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col-1);
         }
 
 
@@ -114,19 +116,22 @@ namespace SkyCombDrone.PersistModel
                 // We draw DEM, DSM and Country graphs on the GROUND summary tab
                 // These plots combine ground and drone data.
 
-                if (countryBitmap != null)
+                if((countryBitmap != null) && (Drone.FlightSections != null))
                 {
+                    var row = Chapter1TitleRow;
+                    var col = 4;
+                    Data.SetTitle(ref row, col, "Flight location");
                     var localBitmap = (Bitmap)countryBitmap.Clone();
                     new DrawPath(null, false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
-                    Data.SaveBitmap(localBitmap, "Country", 2, 3, 45);
+                    Data.SaveBitmap(localBitmap, "Country", row-1, col-1, 45);
                 }
 
-                DroneSave.SaveDronePath(Data, Drone, null, GroundType.DsmElevations, 0, 7);
+                SaveDronePath(null, GroundType.DsmElevations, Chapter1TitleRow, 8, GroundModel.DsmTitle);
 
-                DroneSave.SaveDronePath(Data, Drone, null, GroundType.DemElevations, 31, 7);
+                SaveDronePath(null, GroundType.DemElevations, 39, 8, GroundModel.DemTitle);
 
-                DroneSave.SaveDronePath(Data, Drone, null, GroundType.SwatheSeen, 31, 0);
+                SaveDronePath(null, GroundType.SwatheSeen, 39, 1, GroundModel.SwatheTitle);
             }
 
             // Update the Index tab with the current date/time

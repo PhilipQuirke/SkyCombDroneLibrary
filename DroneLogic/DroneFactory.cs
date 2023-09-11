@@ -86,7 +86,7 @@ namespace SkyCombDrone.DroneLogic
             Action<string> showDroneSettings,
             Func<string, DateTime> readDateEncodedUtc,
             DroneDataStore droneDataStore, DroneConfigModel config, 
-            string groundDirectory, string inputFileName,
+            string groundDirectory, 
             Bitmap? countryBitmap)
         {
             Drone answer;
