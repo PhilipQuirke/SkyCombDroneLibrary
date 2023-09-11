@@ -156,12 +156,11 @@ namespace SkyCombDrone.PersistModel
                     Sections.SaveList();
 
                     Sections.SaveCharts();
+
+                    Legs.SaveList(Drone);
                 }
 
-                if (full)
-                    Legs.SaveList(Drone);
-
-                // Changing OnGroundAt or CameraDownDeg changes the Step data values AltitudeM, ImageCenter, ImageSizeM
+                // Changing OnGroundAt or CameraDownDeg changes the Step data values ImageCenter, ImageSizeM, etc.
                 Steps.SaveList();
 
                 if (full)
@@ -171,6 +170,8 @@ namespace SkyCombDrone.PersistModel
                     // Record how long it took to save the data
                     Drone.EffortDurations.SaveDataStoreMs = (int)effort.Elapsed.TotalMilliseconds;
                 SaveData_Effort();
+
+                Data.SelectWorksheet(DroneTabName);
 
                 Save();
             }

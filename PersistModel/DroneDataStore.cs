@@ -64,11 +64,18 @@ namespace SkyCombDrone.PersistModel
             foreach (var index in indexData)
             {
                 var cell = Worksheet.Cells[row, 1];
-                cell.Value = index.Key;
                 if (index.Key != "")
-                    SetInternalHyperLink(cell, index.Key);
+                {
+                    if ((index.Key == DemTabName) || (index.Key == DsmTabName) || (index.Key == SwatheTabName))
+                        cell.Value = index.Key + " (Hidden)";
+                    else
+                    {
+                        cell.Value = index.Key;
+                        SetInternalHyperLink(cell, index.Key);
+                    }
 
-                Worksheet.Cells[row, 2].Value = index.Value;
+                    Worksheet.Cells[row, 2].Value = index.Value;
+                }
 
                 row++;
             }
