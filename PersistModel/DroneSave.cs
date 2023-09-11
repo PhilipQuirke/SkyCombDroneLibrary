@@ -119,19 +119,19 @@ namespace SkyCombDrone.PersistModel
                 if((countryBitmap != null) && (Drone.FlightSections != null))
                 {
                     var row = Chapter1TitleRow;
-                    var col = 4;
-                    Data.SetTitle(ref row, col, "Flight location");
+                    var col = 10;
+                    Data.SetTitle(ref row, col, FlightLocationTitle);
                     var localBitmap = (Bitmap)countryBitmap.Clone();
                     new DrawPath(null, false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
                     Data.SaveBitmap(localBitmap, "Country", row-1, col-1, 45);
                 }
 
-                SaveDronePath(null, GroundType.DsmElevations, Chapter1TitleRow, 8, GroundModel.DsmTitle);
+                SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);
 
-                SaveDronePath(null, GroundType.DemElevations, 39, 8, GroundModel.DemTitle);
+                SaveDronePath(null, GroundType.DemElevations, 21, 7, GroundModel.DemTitle);
 
-                SaveDronePath(null, GroundType.SwatheSeen, 39, 1, GroundModel.SwatheTitle);
+                SaveDronePath(null, GroundType.SwatheSeen, 21, 17, GroundModel.SwatheTitle);
             }
 
             // Update the Index tab with the current date/time
