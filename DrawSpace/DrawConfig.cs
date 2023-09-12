@@ -11,7 +11,7 @@ namespace SkyCombDrone.DrawSpace
     {
         // Color map type (aka color palette) to apply to background of video.
         // Takes values "None" and the 21 values defined in https://docs.opencv.org/3.4/d3/d50/group__imgproc__colormap.html e.g. Magma
-        public string Palette { get; set; } = "bone";
+        public string Palette { get; set; } = "none";
         // Bounding rectangle padding in pixels. For example, 3
         public int AreaPadding { get; set; } = 2;
         // Bounding rectangle persistance in frames. For example, 1
