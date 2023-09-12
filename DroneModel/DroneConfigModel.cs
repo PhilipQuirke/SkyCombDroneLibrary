@@ -141,13 +141,14 @@ namespace SkyCombDrone.DroneModel
         public int MaxLegGapDurationMs { get; set; } = 2 * FlightSectionModel.SectionMinMs;
 
 
-        // The Camera down angle must be in range 0 to +90 degrees.
+        // The Camera down angle must be in range +1 to +90 degrees.
+        // Pointing at the horizon is 0 degrees, and is bad as areas imaged by the video are far away.
         public void ValidateCameraDownDeg()
         {
             if (GimbalDataAvail == GimbalDataEnum.ManualNo)
             {
-                if (CameraDownDeg < 0)
-                    CameraDownDeg = 0;
+                if (CameraDownDeg < 1)
+                    CameraDownDeg = 1;
 
                 if (CameraDownDeg > 90)
                     CameraDownDeg = 90;
