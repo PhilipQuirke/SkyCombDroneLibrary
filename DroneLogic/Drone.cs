@@ -221,7 +221,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load FlightLegs (if any)
                     phase = 6;
-                    if (dataStore.SelectWorksheet(DataConstants.Legs1TabName))
+                    if (dataStore.SelectWorksheet(DataConstants.LegsTabName))
                     {
                         dataReader.FlightLegs(FlightLegs, HasFlightSteps);
                         FlightLegs.AssertGood(HasFlightSteps);

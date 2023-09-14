@@ -148,7 +148,7 @@ namespace SkyCombDrone.PersistModel
             int row = 2;
             try
             {
-                if (Data.SelectWorksheet(Legs1TabName))
+                if (Data.SelectWorksheet(LegsTabName))
                 {
                     var cell = Data.Worksheet.Cells[row, 1];
                     while (cell != null && cell.Value != null && cell.Value.ToString() != "")

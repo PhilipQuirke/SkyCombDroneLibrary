@@ -178,6 +178,9 @@ namespace SkyCombDrone.PersistModel
 
                 Data.SelectWorksheet(DroneTabName);
 
+                Data.HideWorksheet(Sections1TabName);
+                Data.HideWorksheet(Sections2TabName);
+
                 Save();
             }
             catch (Exception ex)

@@ -66,7 +66,11 @@ namespace SkyCombDrone.PersistModel
                 var cell = Worksheet.Cells[row, 1];
                 if (index.Key != "")
                 {
-                    if ((index.Key == DemTabName) || (index.Key == DsmTabName) || (index.Key == SwatheTabName))
+                    if ((index.Key == DemTabName) || 
+                        (index.Key == DsmTabName) ||
+                        (index.Key == SwatheTabName) ||
+                        (index.Key == Sections1TabName) ||
+                        (index.Key == Sections2TabName))
                         cell.Value = index.Key + " (Hidden)";
                     else
                     {
