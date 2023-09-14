@@ -210,17 +210,17 @@ namespace SkyCombDrone.DroneModel
         // This function must align to the above GetSettings function.
         public override void LoadSettings(List<string> settings)
         {
-            base.LoadSettings(settings);
+            int offset = LoadSettingsOffset(settings);
 
-            FileName = settings[23];
-            NumSmoothSteps = StringToNonNegInt(settings[24]);
-            AvgSpeedMps = StringToFloat(settings[25]);
-            MinDemM = StringToFloat(settings[26]);
-            MaxDemM = StringToFloat(settings[27]);
-            MinDsmM = StringToFloat(settings[28]);
-            MaxDsmM = StringToFloat(settings[29]);
-            OnGroundAtFixStartM = StringToFloat(settings[30]);
-            OnGroundAtFixEndM = StringToFloat(settings[31]);
+            FileName = settings[offset++];
+            NumSmoothSteps = StringToNonNegInt(settings[offset++]);
+            AvgSpeedMps = StringToFloat(settings[offset++]);
+            MinDemM = StringToFloat(settings[offset++]);
+            MaxDemM = StringToFloat(settings[offset++]);
+            MinDsmM = StringToFloat(settings[offset++]);
+            MaxDsmM = StringToFloat(settings[offset++]);
+            OnGroundAtFixStartM = StringToFloat(settings[offset++]);
+            OnGroundAtFixEndM = StringToFloat(settings[offset++]);
         }
     }
 

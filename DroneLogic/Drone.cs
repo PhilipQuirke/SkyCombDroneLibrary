@@ -727,6 +727,7 @@ namespace SkyCombDrone.DroneLogic
                 { "Northing M", northingM, 0 },
                 { "DEM %", (HasGroundData && (GroundData.DemModel != null) ? GroundData.DemModel.PercentDatumElevationsAvailable.ToString() : "") },
                 { "DSM %", (HasGroundData && (GroundData.DsmModel != null) ? GroundData.DsmModel.PercentDatumElevationsAvailable.ToString() : "") },
+                { "File name", InputVideo.ShortFileName() },
                 { "Google Maps", GoogleMapsLink() },
             };
         }
