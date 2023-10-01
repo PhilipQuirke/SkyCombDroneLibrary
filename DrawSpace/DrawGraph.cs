@@ -148,40 +148,13 @@ namespace SkyCombDrone.DrawSpace
         // Draw vertical and horizontal axis
         protected void DrawAxisesAndLabels(ref Image<Bgr, byte> image)
         {
-            var origin = OriginPixel;
             var black = DroneColors.BlackBgr;
-            var lineThickness = 1;
-            var fontThickness = 1;
-            var fontScale = 0.5;
-
+  
             // Vertical axis
-            Line(ref image, new Point(origin.X, 0), origin, black, lineThickness);
+            Line(ref image, new Point(OriginPixel.X, 0), OriginPixel, black);
 
             // Horizontal axis
-            Line(ref image, origin, new Point(Size.Width, origin.Y), black, lineThickness);
-
-            if (LabelAxises)
-            {
-                int edge = 2;
-
-                // Vertical axis top value
-                int indent = edge + (4 - VertTopLabel.Length) * (origin.X - edge) / 4;
-                var thePoint = new Point(indent, 20);
-                Text(ref image, VertTopLabel, thePoint, fontScale, black, fontThickness);
-
-                // Vertical axis bottom value
-                indent = edge + (4 - VertBottomLabel.Length) * (origin.X - edge) / 4;
-                thePoint = new Point(indent, origin.Y);
-                Text(ref image, VertBottomLabel, thePoint, fontScale, black, fontThickness);
-
-                // Horizontal axis left value
-                thePoint = new Point(origin.X, Size.Height - edge);
-                Text(ref image, HorizLeftLabel, thePoint, fontScale, black, fontThickness);
-
-                // Horizontal axis right value
-                thePoint = new Point(Size.Width - 60, Size.Height - edge);
-                Text(ref image, HorizRightLabel, thePoint, fontScale, black, fontThickness);
-            }
+            Line(ref image, OriginPixel, new Point(Size.Width, OriginPixel.Y), black);
         }
 
 
@@ -270,7 +243,41 @@ namespace SkyCombDrone.DrawSpace
 
             CurrImage(ref baseImage);
 
-            return baseImage.ToBitmap();
+            var answer = baseImage.ToBitmap();
+
+            if (LabelAxises)
+            {
+                var origin = OriginPixel;
+                int horizEdge = 2;
+                int vertEdge = 20;
+
+                using (Graphics graphics = Graphics.FromImage(answer))
+                {
+                    // Define a font and brush for the text
+                    Font font = new Font("Arial", 11);
+                    SolidBrush brush = new SolidBrush(Color.Black);
+
+                    // Vertical axis top value
+                    int indent = horizEdge + (4 - VertTopLabel.Length) * (origin.X - horizEdge) / 4;
+                    var thePoint = new Point(indent, 5);
+                    graphics.DrawString(VertTopLabel, font, brush, thePoint); 
+
+                    // Vertical axis bottom value
+                    indent = horizEdge + (4 - VertBottomLabel.Length) * (origin.X - horizEdge) / 4;
+                    thePoint = new Point(indent, Size.Height - 2 * vertEdge); //  origin.Y);
+                    graphics.DrawString(VertBottomLabel, font, brush, thePoint);
+
+                    // Horizontal axis left value
+                    thePoint = new Point(origin.X, Size.Height - vertEdge);
+                    graphics.DrawString(HorizLeftLabel, font, brush, thePoint);
+
+                    // Horizontal axis right value
+                    thePoint = new Point(Size.Width - 60, Size.Height - vertEdge);
+                    graphics.DrawString(HorizRightLabel, font, brush, thePoint);
+                }
+            }
+
+            return answer;
         }
     }
 

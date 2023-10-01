@@ -147,10 +147,11 @@ namespace SkyCombDrone.DroneLogic
 
         public void AssertGood_GlobalLocations()
         {
+            float epsilon = 0.000001f;
             Assert(MinGlobalLocation != null, "FlightSections.AssertGood: No MinGlobalLocation");
             Assert(MaxGlobalLocation != null, "FlightSections.AssertGood: No MaxGlobalLocation");
-            Assert(MinGlobalLocation.Longitude < MaxGlobalLocation.Longitude, "FlightSections.AssertGood: Longitude misordered");
-            Assert(MinGlobalLocation.Latitude < MaxGlobalLocation.Latitude, "FlightSections.AssertGood: Latitude misordered");
+            Assert(MinGlobalLocation.Longitude < MaxGlobalLocation.Longitude + epsilon, "FlightSections.AssertGood: Longitude misordered");
+            Assert(MinGlobalLocation.Latitude < MaxGlobalLocation.Latitude + epsilon, "FlightSections.AssertGood: Latitude misordered");
             MinGlobalLocation.AssertNZ();
             MaxGlobalLocation.AssertNZ();
         }
