@@ -62,7 +62,7 @@ namespace SkyCombDrone.DrawSpace
         {
             DrawAxisesAndLabels(ref image);
 
-            NoDataText(ref image, new Point(50, (int)(Size.Height * 0.48)));
+            NoDataText(ref image, new Point(70, (int)(Size.Height * 0.48)));
 
             MinHorizRaw = 0;
             MaxHorizRaw = 1;
@@ -254,7 +254,7 @@ namespace SkyCombDrone.DrawSpace
                 using (Graphics graphics = Graphics.FromImage(answer))
                 {
                     // Define a font and brush for the text
-                    Font font = new Font("Arial", 11);
+                    Font font = new Font("Arial", 10);
                     SolidBrush brush = new SolidBrush(Color.Black);
 
                     // Vertical axis top value
@@ -389,7 +389,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone / ground altitude data. Horizontal axis is lineal distance travelled.
     public class DrawAltitudeByLinealM : DrawAltitude
     {
-        public DrawAltitudeByLinealM(DroneDrawScope drawScope, bool labelAxises) : base(drawScope, labelAxises)
+        public DrawAltitudeByLinealM(DroneDrawScope drawScope) : base(drawScope, true)
         {
             Description =
                 "Ground elevation (brown), Surface elevation (green), and " +
