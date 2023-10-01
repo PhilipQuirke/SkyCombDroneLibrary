@@ -29,9 +29,10 @@ namespace SkyCombDrone.DrawSpace
 
         // Do we draw and label the vertical and horizontal axises?
         // Shrinks the data area but makes the image more self-contained.
-        protected bool LabelAxises { get; } = false;
+        protected bool LabelVertAxis { get; } = false;
+        protected bool LabelHorizAxis { get; } = false;
         // If we label the axises, how many pixels we need for the labels
-        protected int LabelHorzPixels { get; set; } = 0;
+        protected int LabelHorizPixels { get; set; } = 0;
         protected int LabelVertPixels { get; set; } = 0;
         // Pixel space needed to draw the axises in
         static public readonly int VertAxisHorzPixels = 2;
@@ -51,10 +52,11 @@ namespace SkyCombDrone.DrawSpace
         public float VertFraction = 1;
 
 
-        public DrawGraph(DroneDrawScope? drawScope, bool labelAxises)
+        public DrawGraph(DroneDrawScope? drawScope, bool labelVertAxis, bool labelHorizAxis)
         {
             DroneDrawScope = drawScope;
-            LabelAxises = labelAxises;
+            LabelVertAxis = labelVertAxis;
+            LabelHorizAxis = labelHorizAxis;
         }
 
 
@@ -62,7 +64,7 @@ namespace SkyCombDrone.DrawSpace
         {
             DrawAxisesAndLabels(ref image);
 
-            NoDataText(ref image, new Point(70, (int)(Size.Height * 0.48)));
+            NoDataText(ref image, new Point(90, (int)(Size.Height * 0.48)));
 
             MinHorizRaw = 0;
             MaxHorizRaw = 1;
@@ -80,7 +82,7 @@ namespace SkyCombDrone.DrawSpace
             MaxHorizRaw = maxHorizRaw;
 
             // Calculate the step distance on the horizontal axis.
-            StepWidthPxs = 1.0F * (Size.Width - VertAxisHorzPixels - LabelHorzPixels) / (MaxHorizRaw - MinHorizRaw);
+            StepWidthPxs = 1.0F * (Size.Width - OriginPixel.X) / (MaxHorizRaw - MinHorizRaw);
 
             // Calculate the number of steps between drawing.
             // Ranges from 1 (short video) to say 52.8 (long video). 
@@ -97,7 +99,7 @@ namespace SkyCombDrone.DrawSpace
         // The horizontal position of the specified TardisId
         protected int StepToWidth(float thisValue, float minValue)
         {
-            return (int)(VertAxisHorzPixels + LabelHorzPixels + (thisValue - minValue) * StepWidthPxs);
+            return (int)(OriginPixel.X + (thisValue - minValue) * StepWidthPxs);
         }
         protected int StepToWidth(float thisValue)
         {
@@ -140,7 +142,7 @@ namespace SkyCombDrone.DrawSpace
         // Origin of axises in pixels
         protected Point OriginPixel { get {
             return new Point(
-                VertAxisHorzPixels + LabelHorzPixels, 
+                VertAxisHorzPixels + LabelHorizPixels, 
                 Size.Height - HorizAxisVertPixels - LabelVertPixels);
         } }
 
@@ -164,11 +166,12 @@ namespace SkyCombDrone.DrawSpace
             var droneBgr = DroneColors.InScopeDroneBgr;
             var minProcHeight = RawDataToHeightPixels(runMin, axisMax);
             var maxProcHeight = RawDataToHeightPixels(runMax, axisMax);
-            var indent = VertAxisHorzPixels - HighlightThickness;
+
+            var indent = OriginPixel.X;
 
             Line(ref image, new PointF(indent, minProcHeight), new PointF(indent, maxProcHeight), droneBgr, HighlightThickness);
-            Line(ref image, new PointF(indent, minProcHeight), new PointF(HighlightThickness * 3, minProcHeight), droneBgr, HighlightThickness);
-            Line(ref image, new PointF(indent, maxProcHeight), new PointF(HighlightThickness * 3, maxProcHeight), droneBgr, HighlightThickness);
+            Line(ref image, new PointF(indent, minProcHeight), new PointF(indent - HighlightThickness * 3, minProcHeight), droneBgr, HighlightThickness);
+            Line(ref image, new PointF(indent, maxProcHeight), new PointF(indent - HighlightThickness * 3, maxProcHeight), droneBgr, HighlightThickness);
         }
 
 
@@ -220,13 +223,8 @@ namespace SkyCombDrone.DrawSpace
         {
             Size = size;
 
-            LabelHorzPixels = 0;
-            LabelVertPixels = 0;
-            if (LabelAxises)
-            {
-                LabelHorzPixels = 50;
-                LabelVertPixels = 18;
-            }
+            LabelHorizPixels = (LabelVertAxis ? 50 : 0);
+            LabelVertPixels = (LabelHorizAxis ? 18 : 0 );
 
             BaseImage = Draw.NewImage(size, DroneColors.GrayBgr);
         }
@@ -245,11 +243,11 @@ namespace SkyCombDrone.DrawSpace
 
             var answer = baseImage.ToBitmap();
 
-            if (LabelAxises)
+            if (LabelVertAxis || LabelHorizAxis)
             {
                 var origin = OriginPixel;
-                int horizEdge = 2;
-                int vertEdge = 20;
+                const int horizEdge = 2;
+                const int vertEdge = 20;
 
                 using (Graphics graphics = Graphics.FromImage(answer))
                 {
@@ -257,23 +255,31 @@ namespace SkyCombDrone.DrawSpace
                     Font font = new Font("Arial", 10);
                     SolidBrush brush = new SolidBrush(Color.Black);
 
-                    // Vertical axis top value
-                    int indent = horizEdge + (4 - VertTopLabel.Length) * (origin.X - horizEdge) / 4;
-                    var thePoint = new Point(indent, 5);
-                    graphics.DrawString(VertTopLabel, font, brush, thePoint); 
+                    if (LabelVertAxis)
+                    {
+                        float charWidth = (origin.X - horizEdge) / 6.0f;
 
-                    // Vertical axis bottom value
-                    indent = horizEdge + (4 - VertBottomLabel.Length) * (origin.X - horizEdge) / 4;
-                    thePoint = new Point(indent, Size.Height - 2 * vertEdge); //  origin.Y);
-                    graphics.DrawString(VertBottomLabel, font, brush, thePoint);
+                        // Vertical axis top value
+                        var indent = horizEdge + (4 - VertTopLabel.Length) * charWidth;
+                        var thePoint = new Point((int)indent, 5);
+                        graphics.DrawString(VertTopLabel, font, brush, thePoint);
 
-                    // Horizontal axis left value
-                    thePoint = new Point(origin.X, Size.Height - vertEdge);
-                    graphics.DrawString(HorizLeftLabel, font, brush, thePoint);
+                        // Vertical axis bottom value
+                        indent = horizEdge + (4 - VertBottomLabel.Length) * charWidth;
+                        thePoint = new Point((int)indent, origin.Y - vertEdge);
+                        graphics.DrawString(VertBottomLabel, font, brush, thePoint);
+                    }
 
-                    // Horizontal axis right value
-                    thePoint = new Point(Size.Width - 60, Size.Height - vertEdge);
-                    graphics.DrawString(HorizRightLabel, font, brush, thePoint);
+                    if (LabelHorizAxis)
+                    {
+                        // Horizontal axis left value
+                        var thePoint = new Point(origin.X, Size.Height - vertEdge);
+                        graphics.DrawString(HorizLeftLabel, font, brush, thePoint);
+
+                        // Horizontal axis right value
+                        thePoint = new Point(Size.Width - 60, Size.Height - vertEdge);
+                        graphics.DrawString(HorizRightLabel, font, brush, thePoint);
+                    }
                 }
             }
 
@@ -295,7 +301,7 @@ namespace SkyCombDrone.DrawSpace
         abstract public float GetVertRaw(FlightStep step);
 
 
-        protected DrawVertRange(DroneDrawScope drawScope, bool labelAxises) : base(drawScope, labelAxises)
+        protected DrawVertRange(DroneDrawScope drawScope, bool labelVertAxis, bool labelHorizAxis) : base(drawScope, labelVertAxis, labelHorizAxis)
         {
         }
 
@@ -311,7 +317,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone / ground altitude data. Horizontal axis is time.
     public abstract class DrawAltitude : DrawVertRange
     {
-        protected DrawAltitude(DroneDrawScope drawScope, bool labelAxises) : base(drawScope, labelAxises)
+        protected DrawAltitude(DroneDrawScope drawScope) : base(drawScope, true, true)
         {
         }
 
@@ -389,7 +395,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone / ground altitude data. Horizontal axis is lineal distance travelled.
     public class DrawAltitudeByLinealM : DrawAltitude
     {
-        public DrawAltitudeByLinealM(DroneDrawScope drawScope) : base(drawScope, true)
+        public DrawAltitudeByLinealM(DroneDrawScope drawScope) : base(drawScope)
         {
             Description =
                 "Ground elevation (brown), Surface elevation (green), and " +
@@ -479,7 +485,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone / ground altitude data. Horizontal axis is time
     public class DrawAltitudeByTime : DrawAltitude
     {
-        public DrawAltitudeByTime(DroneDrawScope drawScope, bool labelAxises) : base(drawScope, labelAxises)
+        public DrawAltitudeByTime(DroneDrawScope drawScope) : base(drawScope)
         {
             Description =
                 "Graph of ground elevation in brown, surface (tree-top) elevation in green " +
@@ -570,7 +576,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw a drone metric measured against time.
     public abstract class DrawTimeGraph : DrawVertRange
     {
-        public DrawTimeGraph(DroneDrawScope drawScope) : base(drawScope, false)
+        public DrawTimeGraph(DroneDrawScope drawScope) : base(drawScope, true, false)
         {
         }
 
@@ -592,7 +598,7 @@ namespace SkyCombDrone.DrawSpace
                 float minRunRaw = 9999;
 
                 // Draw the line graph
-                int prevSectionId = 0;
+                int prevSectionId = UnknownValue;
                 int prevHeight = 0;
                 for (int thisSectionId = DroneDrawScope.FirstDrawStepId; thisSectionId <= DroneDrawScope.LastDrawStepId; thisSectionId++)
                 {
@@ -615,18 +621,20 @@ namespace SkyCombDrone.DrawSpace
 
                         var thisHeight = RawDataToHeightPixels(thisRunRaw, MaxVertRaw);
 
-                        Line(ref image,
-                            new PointF(StepToWidthBySection(prevSectionId), prevHeight),
-                            new PointF(StepToWidthBySection(thisSectionId), thisHeight),
-                            highlight ? droneBgr : DroneColors.BlackBgr,
-                            highlight ? HighlightThickness : NormalThickness);
+                        if(prevSectionId != UnknownValue)
+                            Line(ref image,
+                                new PointF(StepToWidthBySection(prevSectionId), prevHeight),
+                                new PointF(StepToWidthBySection(thisSectionId), thisHeight),
+                                highlight ? droneBgr : DroneColors.BlackBgr,
+                                highlight ? HighlightThickness : NormalThickness);
 
                         prevSectionId = thisSectionId;
                         prevHeight = thisHeight;
                     }
                 }
 
-                OverDrawVertAxis(ref image, minRunRaw, maxRunRaw, MaxVertRaw);
+                // Not needed
+                // OverDrawVertAxis(ref image, minRunRaw, maxRunRaw, MaxVertRaw);
             }
             catch (Exception ex)
             {
@@ -816,7 +824,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone leg data
     public class DrawLeg : DrawGraph
     {
-        public DrawLeg(DroneDrawScope drawScope) : base(drawScope, false)
+        public DrawLeg(DroneDrawScope drawScope) : base(drawScope, true, true)
         {
             Description =
                 "Graph of the drone legs in blue (which have near constant altitude, direction && pitch) " +
@@ -838,7 +846,7 @@ namespace SkyCombDrone.DrawSpace
             CalculateStepWidthAndStrideBySection();
 
             int lineY = 15;
-            var fromPoint = new PointF(VertAxisHorzPixels, lineY);
+            var fromPoint = new PointF(OriginPixel.X, lineY);
             var toPoint = new PointF(size.Width, lineY);
             Line(ref BaseImage, fromPoint, toPoint, outColor, NormalThickness);
 
