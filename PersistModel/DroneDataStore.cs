@@ -256,7 +256,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Prepare to add a pivot table on one tab referring to data from another tab.
-        public (ExcelWorksheet? pivotWs, ExcelWorksheet dataWs, int) PreparePivotArea(string pivotTabName, string pivotName, string dataTabName)
+        public (ExcelWorksheet? pivotWs, ExcelWorksheet? dataWs, int) PreparePivotArea(string pivotTabName, string pivotName, string dataTabName)
         {
             (var dataWs, int lastDataRow) = EndRow(dataTabName);
 

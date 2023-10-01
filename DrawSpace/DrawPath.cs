@@ -66,10 +66,9 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        public void Reset(DroneDrawScope drawScope)
+        public void Reset(DroneDrawScope? drawScope)
         {
             BaseDrawScope = drawScope;
-
             BaseImage = null;
             TransformMToPixels = null;
             TranslateM = null;
@@ -99,6 +98,16 @@ namespace SkyCombDrone.DrawSpace
         private Point FlightPath_DroneLocnMToPixelPoint(TardisSummaryModel flightSteps, int stepId)
         {
             return FlightPath_DroneLocnMToPixelPoint(flightSteps.GetTardisModel(stepId));
+        }
+
+
+        // Convert from a Point (in pixels) to a Location (in meters)
+        public DroneLocation DronePixelPointToLocnM(Point pixelLocation)
+        {
+            var eastingM = (pixelLocation.X - TransformMToPixels.XMargin ) / TransformMToPixels.Scale;
+            var northingM = - (pixelLocation.Y - TransformMToPixels.YMargin ) / TransformMToPixels.Scale;
+
+            return new DroneLocation(northingM, eastingM).Translate(TranslateM.Negate());
         }
 
 
@@ -276,12 +285,6 @@ namespace SkyCombDrone.DrawSpace
                 prevLegId = thisLegId;
             }
         }
-
-
-        public void DrawTitle(ref Image<Bgr, byte> image, string title)
-        {
-            DrawText(ref image, title, new Point(5, 15));
-        }   
 
 
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
@@ -514,80 +517,6 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        public override void Initialise(Size size)
-        {
-            Initialise(size, null, GroundType.DsmElevations);
-        }
-
-
-        // Draw drone flight path based on Drone/GroundSpace data
-        public override void CurrImage(ref Image<Bgr, byte> image)
-        {
-            try
-            {
-                if (TransformMToPixels.Scale > 0)
-                {
-                    var activeBgr = DroneColors.ActiveDroneBgr;
-                    var inScopeBgr = DroneColors.InScopeDroneBgr;
-                    var outScopeBgr = DroneColors.OutScopeDroneBgr;
-
-                    var flightStep = BaseDrawScope.CurrRunFlightStep;
-                    if (flightStep != null)
-                    {
-                        // Draw a circle to show current drone location.
-                        var dronePoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
-                        Circle(ref image, dronePoint, activeBgr);
-
-                        // PQR ToDo Draw the Block (instead of the FlightStep) InputImageSizeM
-                        // for greater accuracy (as there are 2 or 3 blocks per FlightStep)
-                        if (flightStep.InputImageSizeM != null)
-                        {
-                            // Draw lines to show the image area seen by the drone.
-                            var (corner1, corner2, corner3, corner4) =
-                                flightStep.Calculate_InputImageArea_Corners();
-
-                            var point1 = DroneLocnMToPixelPoint(corner1);
-                            var point2 = DroneLocnMToPixelPoint(corner2);
-                            var point3 = DroneLocnMToPixelPoint(corner3);
-                            var point4 = DroneLocnMToPixelPoint(corner4);
-
-                            Line(ref image, point1, point2, activeBgr, NormalThickness);
-                            Line(ref image, point2, point3, activeBgr, NormalThickness);
-                            Line(ref image, point3, point4, activeBgr, NormalThickness);
-                            Line(ref image, point4, point1, activeBgr, NormalThickness);
-
-                            // If camera is vertically down then lines from drone to image area
-                            // are unnecessary & look ugly. Suppress them for small angles.
-                            var degsToVertical = Math.Abs(flightStep.CameraToVerticalForwardDeg);
-                            if((degsToVertical > 20) && (degsToVertical < DegreesToVerticalCutoff))
-                            {
-                                // Draw lines from drone to image area to "connect" the drone location to the image area.
-                                Line(ref image, dronePoint, point1, activeBgr);
-                                Line(ref image, dronePoint, point4, activeBgr);
-                            }
-
-                            if(degsToVertical < DegreesToVerticalCutoff)
-                            {
-                                // Draw a cross at the center of the image.
-                                // If CameraDownDeg is 90, the drone circle and leg cross will overlap.
-                                // Otherwise the cross location helps visualises the impact of CameraDownDeg.
-                                Point imageCenter = new(
-                                    (point1.X + point3.X) / 2,
-                                    (point1.Y + point3.Y) / 2);
-                                int thickness = (degsToVertical < 5 ? NormalThickness : HighlightThickness);
-                                Draw.Cross(ref image, imageCenter, activeBgr, thickness);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ThrowException("DrawPath.CurrImage", ex);
-            }
-        }
-
-
         // Draw a red cross at the location of the drone flight on the country map 
         public void DrawCountryGraphLocationCross(CountryLocation currCountryLocn, ref Bitmap countryGraphBitmap)
         {
@@ -637,6 +566,79 @@ namespace SkyCombDrone.DrawSpace
             UpTriangle(ref image, center, UpTriangleLen, DroneColors.WhiteBgr, HighlightThickness);
 
             return image.Clone();
+        }
+
+        public override void Initialise(Size size)
+        {
+            Initialise(size, null, GroundType.DsmElevations);
+        }
+
+
+        // Draw drone flight path based on Drone/GroundSpace data
+        public override void CurrImage(ref Image<Bgr, byte> image)
+        {
+            try
+            {
+                if((BaseDrawScope != null) && (TransformMToPixels.Scale > 0))
+                {
+                    var activeBgr = DroneColors.ActiveDroneBgr;
+                    var inScopeBgr = DroneColors.InScopeDroneBgr;
+                    var outScopeBgr = DroneColors.OutScopeDroneBgr;
+
+                    var flightStep = BaseDrawScope.CurrRunFlightStep;
+                    if (flightStep != null)
+                    {
+                        // Draw a circle to show current drone location.
+                        var dronePoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
+                        Circle(ref image, dronePoint, activeBgr);
+
+                        // PQR ToDo Draw the Block (instead of the FlightStep) InputImageSizeM
+                        // for greater accuracy (as there are 2 or 3 blocks per FlightStep)
+                        if (flightStep.InputImageSizeM != null)
+                        {
+                            // Draw lines to show the image area seen by the drone.
+                            var (corner1, corner2, corner3, corner4) =
+                                flightStep.Calculate_InputImageArea_Corners();
+
+                            var point1 = DroneLocnMToPixelPoint(corner1);
+                            var point2 = DroneLocnMToPixelPoint(corner2);
+                            var point3 = DroneLocnMToPixelPoint(corner3);
+                            var point4 = DroneLocnMToPixelPoint(corner4);
+
+                            Line(ref image, point1, point2, activeBgr, NormalThickness);
+                            Line(ref image, point2, point3, activeBgr, NormalThickness);
+                            Line(ref image, point3, point4, activeBgr, NormalThickness);
+                            Line(ref image, point4, point1, activeBgr, NormalThickness);
+
+                            // If camera is vertically down then lines from drone to image area
+                            // are unnecessary & look ugly. Suppress them for small angles.
+                            var degsToVertical = Math.Abs(flightStep.CameraToVerticalForwardDeg);
+                            if ((degsToVertical > 20) && (degsToVertical < DegreesToVerticalCutoff))
+                            {
+                                // Draw lines from drone to image area to "connect" the drone location to the image area.
+                                Line(ref image, dronePoint, point1, activeBgr);
+                                Line(ref image, dronePoint, point4, activeBgr);
+                            }
+
+                            if (degsToVertical < DegreesToVerticalCutoff)
+                            {
+                                // Draw a cross at the center of the image.
+                                // If CameraDownDeg is 90, the drone circle and leg cross will overlap.
+                                // Otherwise the cross location helps visualises the impact of CameraDownDeg.
+                                Point imageCenter = new(
+                                    (point1.X + point3.X) / 2,
+                                    (point1.Y + point3.Y) / 2);
+                                int thickness = (degsToVertical < 5 ? NormalThickness : HighlightThickness);
+                                Draw.Cross(ref image, imageCenter, activeBgr, thickness);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ThrowException("DrawPath.CurrImage", ex);
+            }
         }
     }
 }

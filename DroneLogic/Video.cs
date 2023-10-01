@@ -341,10 +341,10 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return cached frame(s)
-        public (Mat inputMat, Mat displayMat) CurrFrames()
+        public (Mat? inputMat, Mat? displayMat) CurrFrames()
         {
-            Mat inputMat = InputVideo.CurrFrameMat;
-            Mat displayMat = (HasDisplayVideo ? DisplayVideo.CurrFrameMat : (inputMat != null ? inputMat.Clone() : null));
+            Mat? inputMat = InputVideo.CurrFrameMat;
+            Mat? displayMat = (HasDisplayVideo ? DisplayVideo.CurrFrameMat : (inputMat != null ? inputMat.Clone() : null));
             return (inputMat, displayMat);
         }
     }

@@ -261,6 +261,17 @@ namespace SkyCombDrone.DrawSpace
 
         // Generate an image of the graph as per scope settings.
         public abstract void CurrImage(ref Image<Bgr, byte> image);
+
+
+        // Generate a bitmap of the graph as per scope settings.
+        public virtual Bitmap CurrBitmap()
+        {
+            var baseImage = BaseImage.Clone();
+
+            CurrImage(ref baseImage);
+
+            return baseImage.ToBitmap();
+        }
     }
 
 
