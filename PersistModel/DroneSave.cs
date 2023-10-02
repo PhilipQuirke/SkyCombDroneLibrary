@@ -128,9 +128,7 @@ namespace SkyCombDrone.PersistModel
                 }
 
                 SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);
-
                 SaveDronePath(null, GroundType.DemElevations, 21, 7, GroundModel.DemTitle);
-
                 SaveDronePath(null, GroundType.SwatheSeen, 21, 17, GroundModel.SwatheTitle);
             }
 

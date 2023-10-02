@@ -411,7 +411,7 @@ namespace SkyCombDrone.DroneLogic
             // Fails if OutputElseInputDirectory does not exist, or user is editing the datastore.
             dataStore.Open();
 
-            GroundSave.Save(dataStore, GroundData, true);
+            GroundSave.Save(dataStore, GroundData);
 
             DroneSave datawriter = new(dataStore, this);
             datawriter.SaveData_Summary(countryBitmap);
@@ -656,8 +656,6 @@ namespace SkyCombDrone.DroneLogic
         {
             // We need to update the Drone datastore
             dataStore.Open();
-
-            GroundSave.Save(dataStore, GroundData, false);
 
             DroneSave datawriter = new(dataStore, this);
             datawriter.SaveData_Summary(countryBitmap);

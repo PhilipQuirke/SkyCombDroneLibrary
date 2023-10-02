@@ -1,6 +1,7 @@
 ﻿// Copyright SkyComb Limited 2023. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
+using System.ComponentModel.Design.Serialization;
 
 
 
@@ -30,19 +31,21 @@ namespace SkyCombDrone.DroneLogic
 
             if (this.GlobalLocation.Specified)
             {
-                northingM =
-                    (float)(sections.NorthingRangeM() *
-                        (this.GlobalLocation.Latitude - sections.MinGlobalLocation.Latitude) /
-                        (sections.MaxGlobalLocation.Latitude - sections.MinGlobalLocation.Latitude));
-                eastingM =
-                    (float)(sections.EastingRangeM() *
-                        (this.GlobalLocation.Longitude - sections.MinGlobalLocation.Longitude) /
-                        (sections.MaxGlobalLocation.Longitude - sections.MinGlobalLocation.Longitude));
+                var deltaLatitude = sections.MaxGlobalLocation.Latitude - sections.MinGlobalLocation.Latitude;
+                var deltaLongitude = sections.MaxGlobalLocation.Longitude - sections.MinGlobalLocation.Longitude;
+
+                if( Math.Abs(deltaLatitude) > Epsilon)
+                    northingM = (float)(sections.NorthingRangeM() *
+                        (this.GlobalLocation.Latitude - sections.MinGlobalLocation.Latitude) / deltaLatitude);
+
+                if (Math.Abs(deltaLongitude) > Epsilon)
+                    eastingM = (float)(sections.EastingRangeM() *
+                        (this.GlobalLocation.Longitude - sections.MinGlobalLocation.Longitude) / deltaLongitude);
 
                 // northingM / eastingM are normally in the range 0 to 5000 (5km)
                 Assert(northingM >= 0, "FlightSection.CalculateSettings_LocationM: Negative northingM");
                 Assert(eastingM >= 0, "FlightSection.CalculateSettings_LocationM: Negative eastingM");
-                // 1000km is rediculous. Likely a NZGTM2000 value has been mixed with a DroneLocation
+                // 1000km is silly. Likely a NZGTM2000 value has been mixed with a DroneLocation
                 Assert(northingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive northingM");
                 Assert(eastingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive eastingM");
             }
@@ -147,11 +150,10 @@ namespace SkyCombDrone.DroneLogic
 
         public void AssertGood_GlobalLocations()
         {
-            float epsilon = 0.000001f;
             Assert(MinGlobalLocation != null, "FlightSections.AssertGood: No MinGlobalLocation");
             Assert(MaxGlobalLocation != null, "FlightSections.AssertGood: No MaxGlobalLocation");
-            Assert(MinGlobalLocation.Longitude < MaxGlobalLocation.Longitude + epsilon, "FlightSections.AssertGood: Longitude misordered");
-            Assert(MinGlobalLocation.Latitude < MaxGlobalLocation.Latitude + epsilon, "FlightSections.AssertGood: Latitude misordered");
+            Assert(MinGlobalLocation.Longitude < MaxGlobalLocation.Longitude + Epsilon, "FlightSections.AssertGood: Longitude misordered");
+            Assert(MinGlobalLocation.Latitude < MaxGlobalLocation.Latitude + Epsilon, "FlightSections.AssertGood: Latitude misordered");
             MinGlobalLocation.AssertNZ();
             MaxGlobalLocation.AssertNZ();
         }
