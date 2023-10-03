@@ -5,10 +5,10 @@ using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundModel;
-using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
 using SkyCombDrone.CommonSpace;
+
 
 namespace SkyCombDrone.PersistModel
 {
@@ -19,6 +19,7 @@ namespace SkyCombDrone.PersistModel
         DroneSaveSections Sections { get; }
         DroneSaveSteps Steps { get; }
         DroneSaveLegs Legs { get; }
+        DroneSaveWayPoints WayPoints { get; }
 
 
         public DroneSave(DroneDataStore data, Drone drone) : base(data)
@@ -27,6 +28,7 @@ namespace SkyCombDrone.PersistModel
             Sections = new(data, drone);
             Steps = new(data, drone);
             Legs = new(data);
+            WayPoints = new(data);
         }
 
 
@@ -161,6 +163,8 @@ namespace SkyCombDrone.PersistModel
                     Sections.SaveCharts();
 
                     Legs.SaveList(Drone);
+
+                    WayPoints.SaveList(Drone);
                 }
 
                 // Changing OnGroundAt or CameraDownDeg changes the Step data values ImageCenter, ImageSizeM, etc.

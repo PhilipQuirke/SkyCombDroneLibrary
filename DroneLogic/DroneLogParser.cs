@@ -7,21 +7,14 @@ using SkyCombGround.PersistModel;
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
 namespace SkyCombDrone.DroneLogic
 {
-    // Class to load flight log information from a drone manufactured by vendor DJI
-    public class Drone_DJI
+    // Class to parse flight log information from a drone flight log
+    public class DroneLogParser
     {
-        public const string DjiPrefix = "SRT";
-        public const string DjiGeneric = "SRT (DJI)";
-        public const string DjiM2E = "SRT (DJI M2E Dual)";
-        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
-        public const string DjM300 = "SRT (DJI M300)";
-
-
-        System.IO.StreamReader? File = null;
+        protected System.IO.StreamReader? File = null;
 
 
         // Return the value of the token in the line, where token end is marked by the suffix
-        private string FindTokenString(string line, string token, int tokenPos, string suffix1, string suffix2 = "")
+        protected string FindTokenString(string line, string token, int tokenPos, string suffix1, string suffix2 = "")
         {
             var tokenValue = line.Substring(tokenPos + token.Length);
             var index1 = tokenValue.IndexOf(suffix1);
@@ -32,7 +25,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the value of the token in the line, where token end is marked by the suffix
-        private double FindTokenValue(string line, string token, int tokenPos, string suffix1, string suffix2="")
+        protected double FindTokenValue(string line, string token, int tokenPos, string suffix1, string suffix2 = "")
         {
             return double.Parse(FindTokenString(line, token, tokenPos, suffix1, suffix2));
         }
@@ -41,7 +34,7 @@ namespace SkyCombDrone.DroneLogic
         // The file has a format which repeats:
         //      A series of data (4 to 7) lines repeated to one frame
         //      One blank line
-        private List<string>? ReadParagraph()
+        protected List<string>? ReadParagraph()
         {
             List<string>? answer = new();
 
@@ -69,7 +62,7 @@ namespace SkyCombDrone.DroneLogic
         //      00:02:59,000 --> 00:03:00,000
         // The M300 has this bug edge case:
         //      00:02:59,000 --> 00:02:60,000
-        public TimeSpan ParseDuration(string line)
+        protected TimeSpan ParseDuration(string line)
         {
             TimeSpan answer;
 
@@ -80,9 +73,10 @@ namespace SkyCombDrone.DroneLogic
             try
             {
                 answer = TimeSpan.Parse(line.Substring(0, line.IndexOf(',')));
-            } catch( Exception ex)
+            }
+            catch (Exception ex)
             {
-                if(line.Contains(":60"))
+                if (line.Contains(":60"))
                 {
                     line = line.Replace(":60", ":00");
                     answer = TimeSpan.Parse(line.Substring(0, line.IndexOf(',')));
@@ -101,13 +95,13 @@ namespace SkyCombDrone.DroneLogic
             // Add milliseconds to the timespan StartTime
             answer += TimeSpan.FromMilliseconds(milliseconds);
 
-            return answer; 
+            return answer;
         }
 
 
         // Parse the line to read a DateTime
         // The time appears to be in local time (not UTC)
-        public DateTime ParseDateTime(string line)
+        protected DateTime ParseDateTime(string line)
         {
             DateTime answer;
 
@@ -125,10 +119,28 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        protected void CloseFile()
+        {
+            if (File != null)
+                File.Close();
+            File = null;
+        }
+    }
 
-        // Load the drone flight data for a DJI Mavic 2 Enterprise or DJI Mini from a SRT file
+
+    // Class to parse flight log (SRT) information from a drone manufactured by vendor DJI
+    public class DroneSrtParser : DroneLogParser
+    {
+        public const string DjiPrefix = "SRT";
+        public const string DjiGeneric = "SRT (DJI)";
+        public const string DjiM2E = "SRT (DJI M2E Dual)";
+        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
+        public const string DjM300 = "SRT (DJI M300)";
+
+
+        // Parse the drone flight data for a DJI drone from a SRT file
         public (bool success, GimbalDataEnum cameraPitchYawRoll)
-            LoadFlightLogSections(VideoData video, FlightSections sections, Drone drone )
+            ParseFlightLogSections(VideoData video, FlightSections sections, Drone drone)
         {
             GimbalDataEnum cameraPitchYawRoll = GimbalDataEnum.ManualNo;
 
@@ -179,7 +191,7 @@ namespace SkyCombDrone.DroneLogic
 
                     var paragraph = ReadParagraph();
                     // Four is the lowest number of lines seen in a drone flight log paragraph
-                    if((paragraph == null) || (paragraph.Count < 4))
+                    if ((paragraph == null) || (paragraph.Count < 4))
                         break;
 
                     // Line 0: The video frame number e.g 15
@@ -219,7 +231,7 @@ namespace SkyCombDrone.DroneLogic
                                 sections.MaxDateTime = ParseDateTime(line);
 
                             // Parse "GPS(-41.3899,174.0177,0.0M) BAROMETER:97.7M"
-                            line = paragraph[3].Replace(" ", ""); 
+                            line = paragraph[3].Replace(" ", "");
                             string token = "GPS(";
                             int tokenPos = line.IndexOf(token);
                             if (tokenPos >= 0)
@@ -245,7 +257,7 @@ namespace SkyCombDrone.DroneLogic
                             }
                         }
                         else
-                        { 
+                        {
                             // M2E Dual: "2022-04-10 18:03:55,167,480"
                             // DJI Mini: "2022-06-27 14:31:29.480"
                             line = paragraph[3];
@@ -295,7 +307,7 @@ namespace SkyCombDrone.DroneLogic
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                     thisSection.FocalLength = (float)FindTokenValue(line, token, tokenPos, "]");
-                                
+
                                 // Find the zoom (if any)
                                 token = "[dzoom_ratio:";
                                 tokenPos = line.IndexOf(token);
@@ -403,7 +415,7 @@ namespace SkyCombDrone.DroneLogic
                             }
                         }
 
-                        if(paragraph_good)
+                        if (paragraph_good)
                             // Add the FlightSection to the Flight
                             sections.AddSection(thisSection, prevSection);
 
@@ -419,13 +431,11 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                throw BaseConstants.ThrowException("Drone_DJI: Unable to load flight log from " + sections.FileName + ", Sections=" + sections.Sections.Count + ", " + ex.Message);
+                throw BaseConstants.ThrowException("Drone_DJI_SRT: Unable to parse flight log " + sections.FileName + ", Sections=" + sections.Sections.Count + ", " + ex.Message);
             }
             finally
             {
-                if (File != null)
-                    File.Close();
-                File = null;
+                CloseFile();
             }
 
             return (sections.Sections.Count > 0, cameraPitchYawRoll);
@@ -436,7 +446,7 @@ namespace SkyCombDrone.DroneLogic
         public static void SetCameraHFOV(Drone drone)
         {
             if ((drone != null) && drone.HasFlightSections &&
-                drone.FlightSections.FileType.StartsWith(Drone_DJI.DjiPrefix))
+                drone.FlightSections.FileType.StartsWith(DroneSrtParser.DjiPrefix))
             {
                 switch (drone.FlightSections.FileType)
                 {
@@ -470,6 +480,128 @@ namespace SkyCombDrone.DroneLogic
             }
         }
     }
+
+
+    // Class to parse flight waypoint (GPX) information from a drone controller
+    public class DroneGpxParser : DroneLogParser
+    {
+        public const string GpxPrefix = "GPX";
+
+
+        // Parse the drone waypoint data for a DJI drone from a GPX file.
+        public void ParseWayPoints(string rawFileName, ref WayPoints wayPoints)
+        {
+            // The file contains header lines ending in the line:
+            //      </metadata>
+            // The file contains paragraphs in the following format:
+            //      <wpt lat="-37.987751965" lon="177.043051321">
+            //      <name>90</name>
+            //      <desc>Created by lennard@lcsparkscontracting.co.nz on 2023-09-20 22:17:53</desc>
+            //      <time>2023-10-02T07:31:42Z</time>
+            //      <ele>93.8</ele>
+            //      </wpt>
+            // The <time> datum is when the log file was exported from the controller - not when the user created the waypoint
+
+            File = null;
+
+            try
+            {
+                // See if there is an SRT file with the same name as the video file, just a different extension
+                var fileName = BaseDataStore.SwapFileNameExtension(rawFileName, ".GPX");
+                if (!System.IO.File.Exists(fileName))
+                    return;
+
+
+                File = new(fileName);
+
+                bool goodFormat = false;
+                while (true)
+                {
+                    string line = File.ReadLine();
+                    if (line == null)
+                        break;
+
+                    line = line.Trim();
+                    if (line.Length == 0)
+                        break;
+
+                    goodFormat = line.Contains("</metadata>");
+                    if (goodFormat)
+                        break;
+                }
+                if (goodFormat)
+                {
+                    // Loop through all the paragraphs
+                    while (true)
+                    {
+                        var paragraph = ReadParagraph();
+
+                        // The log may end mid-paragraph giving a bad waypoint. We ignore incomplete paragraphs.
+                        // Six is the lowest number of lines seen in a waypoint log paragraph
+                        if ((paragraph == null) || (paragraph.Count < 6))
+                            break; // Bad log file
+
+                        GlobalLocation location = new();
+                        string description = "";
+                        DateTime createdAt = new();
+
+
+                        // Line 0: <wpt lat="-37.98729122" lon="177.059500681">
+                        string line = paragraph[0].Replace(" ", "");
+                        string token = "lat=\"";
+                        int tokenPos = line.IndexOf(token);
+                        if (tokenPos >= 0)
+                        {
+                            location.Latitude = FindTokenValue(line, token, tokenPos, "\"");
+
+                            token = "lon=\"";
+                            tokenPos = line.IndexOf(token);
+                            if (tokenPos >= 0)
+                                location.Longitude = FindTokenValue(line, token, tokenPos, "\"");
+                            else
+                                break; // Bad log file
+                        }
+                        else
+                            break; // Bad log file
+
+                        // Line 1: <name>92</name>
+
+                        // Line 2: <desc>Created by lennard@lcsparkscontracting.co.nz on 2023-09-20 21:54:07</desc>
+                        line = paragraph[2];
+                        token = "<desc>";
+                        tokenPos = line.IndexOf(token);
+                        if (tokenPos >= 0)
+                            description = FindTokenString(line, token, tokenPos, "</desc>");
+                        else
+                            break; // Bad log file
+
+                        // Line 2: Created by lennard@lcsparkscontracting.co.nz on 2023-09-20 21:54:07
+                        line = description;
+                        token = " on ";
+                        tokenPos = description.IndexOf(token);
+                        if (tokenPos >= 0)
+                            createdAt = ParseDateTime(description.Substring(tokenPos + token.Length));
+                        else
+                            break; // Bad log file
+
+
+                        WayPoint waypoint = new();
+                        waypoint.WayPointId = wayPoints.Points.Count + 1;
+                        waypoint.GlobalLocation = location;
+                        waypoint.Description = description;
+                        waypoint.CreatedAt = createdAt;
+                        wayPoints.Points.Add(waypoint);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw BaseConstants.ThrowException("Drone_DJI_GPX: Unable to parse waypoints in " + rawFileName + " " + ex.Message);
+            }
+            finally
+            {
+                CloseFile();
+            }
+        }
+    }
 }
-
-

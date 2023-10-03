@@ -61,6 +61,8 @@ namespace SkyCombDrone.DroneLogic
         // Covers area corresponding to the drone flight log plus a 20m buffer.
         public GroundData? GroundData { get; set; }
 
+        // List of user defined waypoints (if any)
+        public WayPoints? WayPoints { get; set; }
 
 
         public bool HasFlightSections { get { return (FlightSections != null) && FlightSections.Sections.Count > 0; } }
@@ -75,6 +77,7 @@ namespace SkyCombDrone.DroneLogic
         public bool HasDroneZoom { get { return HasFlightSteps && FlightSteps.MaxZoom != UnknownValue; } }
         public bool HasDisplaySections { get { return DisplaySections != null; } }
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemModel != null) && (GroundData.DemModel.NumElevationsStored > 0); } }
+        public bool HasWayPoints{ get { return (WayPoints != null) && WayPoints.Points.Count > 0; } }
 
 
         // Do we use the flight leg information?
@@ -113,6 +116,7 @@ namespace SkyCombDrone.DroneLogic
             FlightSteps = null;
             FlightLegs = null;
             DisplaySections = null;
+            WayPoints = null;
         }
 
 
@@ -230,6 +234,14 @@ namespace SkyCombDrone.DroneLogic
                     FlightLegs.Set_FlightStep_FlightLeg(FlightSteps);
 
 
+                    // Load WayPoints (if any)
+                    phase = 8;
+                    if (dataStore.SelectWorksheet(DataConstants.WayPointsTabName))
+                    {
+                        WayPoints = new();
+                        dataReader.WayPoints(WayPoints);
+                    }
+
                     return true;
                 }
             }
@@ -261,7 +273,7 @@ namespace SkyCombDrone.DroneLogic
                 OpticalVideo.CalculateSettings();
 
 
-            Drone_DJI.SetCameraHFOV(this);
+            DroneSrtParser.SetCameraHFOV(this);
             // Add other drone manufacturer specific SetCameraHFOV calls here. PQR TODO
         }
 
@@ -356,6 +368,20 @@ namespace SkyCombDrone.DroneLogic
 
                 Config.UseLegs = false;
             }
+        }
+
+
+        // Calculate which waypoints (if any) relate to this drone flight
+        public void CalculateSettings_WayPoints(WayPoints wayPoints)
+        {
+            WayPoints = new();
+
+            // We only add the waypoint to the drone object 
+            // if the waypoint was created during the drone flight duration.
+            foreach (var point in wayPoints.Points)
+                if ((point.CreatedAt >= FlightSections.MinDateTime) &&
+                    (point.CreatedAt <= FlightSections.MaxDateTime))
+                    WayPoints.Points.Add(point);
         }
 
 
@@ -610,7 +636,7 @@ namespace SkyCombDrone.DroneLogic
             // Try to load the flight log from an DJI SRT text file
             var flightData = new FlightSections();
             (bool success, GimbalDataEnum cameraPitchYawRoll) =
-                new Drone_DJI().LoadFlightLogSections(theVideoData, flightData, this);
+                new DroneSrtParser().ParseFlightLogSections(theVideoData, flightData, this);
 
             if (!success)
             {
