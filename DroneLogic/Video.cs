@@ -152,18 +152,7 @@ namespace SkyCombDrone.DroneLogic
             // The above call is not 100% reliable
             if (DurationMs <= 0)
                 // Fall back to the approximate method (as Fps is approximate, especially for drone videos)
-                DurationMs = FrameIdToApproxMs(FrameCount);
-        }
-
-
-        // Convert from video frame number into video frame's offset in milliseconds. No offsets applied.
-        // Approximate only (as Fps is approximate, especially for drone videos)
-        public int FrameIdToApproxMs(int videoFrameId)
-        {
-            if (videoFrameId <= 0)
-                return 0;
-
-            return (int)(1000.0 * videoFrameId / Fps);
+                CalculateApproxDurationMs();
         }
 
 

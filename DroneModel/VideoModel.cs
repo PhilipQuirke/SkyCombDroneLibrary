@@ -141,6 +141,23 @@ namespace SkyCombDrone.DroneModel
         }
 
 
+        // Convert from video frame number into video frame's offset in milliseconds. No offsets applied.
+        // Approximate only (as Fps is approximate, especially for drone videos)
+        public int FrameIdToApproxMs(int videoFrameId)
+        {
+            if (videoFrameId <= 0)
+                return 0;
+
+            return (int)(1000.0 * videoFrameId / Fps);
+        }
+
+
+        public void CalculateApproxDurationMs()
+        {
+            // Approximate method (as Fps is approximate, especially for drone videos)
+            DurationMs = FrameIdToApproxMs(FrameCount);
+        }
+
 
         // Convert the duration to a string in the format "9:45" or "9:45.33" or "45" or "45.33"
         public static string DurationSecToString(double durationSec, int ndp = 2)
