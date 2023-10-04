@@ -376,12 +376,19 @@ namespace SkyCombDrone.DroneLogic
         {
             WayPoints = new();
 
+            // The first sample waypoint file contains 1 (of 3) waypoints with a timestamp between two videos!
+            // Earliest waypoint 2023-09-20 19:55:07 occurs 36 seconds before one video/SRT 2023-09-20 19:55:43.000
+            // and 4 mins after the previous video ends 2023-09-20 19:51:29.090
+            // So allow a buffer for controller inaccuracy
+            int epsilon = 3; // Minutes
+
             // We only add the waypoint to the drone object 
             // if the waypoint was created during the drone flight duration.
-            foreach (var point in wayPoints.Points)
-                if ((point.CreatedAt >= FlightSections.MinDateTime) &&
-                    (point.CreatedAt <= FlightSections.MaxDateTime))
-                    WayPoints.Points.Add(point);
+            if(wayPoints != null)
+                foreach (var point in wayPoints.Points)
+                    if ((point.CreatedAt >= FlightSections.MinDateTime.AddMinutes(-epsilon)) &&
+                        (point.CreatedAt <= FlightSections.MaxDateTime.AddMinutes(epsilon)))
+                        WayPoints.Points.Add(point);
         }
 
 

@@ -27,9 +27,9 @@ namespace SkyCombDrone.PersistModel
             foreach (var point in drone.WayPoints.Points)
                 Data.SetDataListRowKeysAndValues(ref row, point.GetSettings());
 
-            Data.SetColumnWidth(WayPoint.IdSetting, 15);
+            Data.SetColumnWidth(WayPoint.IdSetting, 20);
             Data.SetColumnWidth(WayPoint.GlobalLocationSetting, 20);
-            Data.SetColumnWidth(WayPoint.CreatedAtSetting, 15);
+            Data.SetColumnWidth(WayPoint.CreatedAtSetting, 13);
             Data.SetColumnWidth(WayPoint.DescriptionSetting, 35);
 
             Data.SetLastUpdateDateTime(LegsTabName);
