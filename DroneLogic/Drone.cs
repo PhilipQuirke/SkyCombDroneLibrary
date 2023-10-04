@@ -7,6 +7,9 @@ using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
+using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
+using static System.Windows.Forms.AxHost;
+using System.Text.RegularExpressions;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -376,19 +379,20 @@ namespace SkyCombDrone.DroneLogic
         {
             WayPoints = new();
 
-            // The first sample waypoint file contains 1 (of 3) waypoints with a timestamp between two videos!
-            // Earliest waypoint 2023-09-20 19:55:07 occurs 36 seconds before one video/SRT 2023-09-20 19:55:43.000
-            // and 4 mins after the previous video ends 2023-09-20 19:51:29.090
-            // So allow a buffer for controller inaccuracy
-            int epsilon = 3; // Minutes
+            if (wayPoints == null)
+                return;
+
+            // Use case: Operator, flying their drone, spots possum, captures waypoint on controller,
+            // then realises that he/she is not recording and then starts recording video to capture view of possum. 
+            // So waypoint timestamp is just outside the video time range.
+            int epsilonMinutes = 3;
 
             // We only add the waypoint to the drone object 
-            // if the waypoint was created during the drone flight duration.
-            if(wayPoints != null)
-                foreach (var point in wayPoints.Points)
-                    if ((point.CreatedAt >= FlightSections.MinDateTime.AddMinutes(-epsilon)) &&
-                        (point.CreatedAt <= FlightSections.MaxDateTime.AddMinutes(epsilon)))
-                        WayPoints.Points.Add(point);
+            // if the waypoint was created during (or very near to) the drone flight time period.
+            foreach (var point in wayPoints.Points)
+                if ((point.CreatedAt >= FlightSections.MinDateTime.AddMinutes(-epsilonMinutes)) &&
+                    (point.CreatedAt <= FlightSections.MaxDateTime.AddMinutes(epsilonMinutes)))
+                    WayPoints.Points.Add(point);
         }
 
 
@@ -731,16 +735,16 @@ namespace SkyCombDrone.DroneLogic
                 var maxG = FlightSections.MaxGlobalLocation;
                 if (minG != null && maxG != null)
                 {
-                    latitude = (minG.Latitude + maxG.Latitude) / 2;
-                    longitude = (minG.Longitude + maxG.Longitude) / 2;
+                    latitude = (minG.Latitude + maxG.Latitude) / 2.0f;
+                    longitude = (minG.Longitude + maxG.Longitude) / 2.0f;
                 }
 
                 var minC = FlightSections.MinCountryLocation;
                 var maxC = FlightSections.MaxCountryLocation;
                 if ((maxC != null) && (minC != null))
                 {
-                    countryX = (minC.EastingM + maxC.EastingM)/2;
-                    countryY = (minC.NorthingM + maxC.NorthingM)/2;
+                    countryX = (minC.EastingM + maxC.EastingM)/ 2.0f;
+                    countryY = (minC.NorthingM + maxC.NorthingM)/ 2.0f;
                     eastingM = (maxC.EastingM - minC.EastingM);
                     northingM = (maxC.NorthingM - minC.NorthingM); 
                 }
@@ -748,7 +752,7 @@ namespace SkyCombDrone.DroneLogic
 
             return new DataPairList
             {
-                { "DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(ShortDateFormat) : "") },
+                { "DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "") },
                 { "Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : "") },
                 { "Latitude", latitude, LatLongNdp },
                 { "Longitude", longitude, LatLongNdp },
