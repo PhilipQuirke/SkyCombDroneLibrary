@@ -67,7 +67,7 @@ namespace SkyCombDrone.DroneModel
         {
             if (settings != null)
                 LoadSettings(settings);
-        }
+       }
 
 
         // One-based settings index values. Must align with GetSettings procedure below

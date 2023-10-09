@@ -421,7 +421,7 @@ namespace SkyCombDrone.DroneLogic
 
         public void AddStep(FlightStep step)
         {
-            BaseConstants.Assert(step.StepId > 0, "FlightStepList.AddStep: No Id");
+            BaseConstants.Assert(step.StepId >= 0, "FlightStepList.AddStep: No Id");
             Add(step.StepId, step);
         }
 
