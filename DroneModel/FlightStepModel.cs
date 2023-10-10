@@ -21,10 +21,11 @@ namespace SkyCombDrone.DroneModel
         // The ground (not drone) elevation, above sea level (meters)
         // directly below the drone
         public float DemM { get; set; } = UnknownValue;
-
         // The surface (i.e tree-top) elevation, above sea level (meters)
         // directly below the drone
         public float DsmM { get; set; } = UnknownValue;
+        // Get the best measure of the surface elevation we have available.
+        public float DsmElseDemM { get { return (DsmM != UnknownValue ? DsmM : DemM); } }
 
 
         // InputImageCenter:

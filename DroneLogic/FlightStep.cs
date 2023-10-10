@@ -366,7 +366,7 @@ namespace SkyCombDrone.DroneLogic
         // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
-        // Does not consider land contour undulations within InputImageCenter+InputImageSizeM
+        // Does NOT consider land contour undulations 
         public DroneLocation? CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
         {
             if (InputImageSizeM == null)

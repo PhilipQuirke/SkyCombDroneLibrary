@@ -235,22 +235,15 @@ namespace SkyCombDrone.DrawSpace
         public abstract void CurrImage(ref Image<Bgr, byte> image);
 
 
-        // Generate a bitmap of the graph as per scope settings.
-        public virtual Bitmap CurrBitmap()
+        protected void DrawAxes( ref Bitmap bitmap)
         {
-            var baseImage = BaseImage.Clone();
-
-            CurrImage(ref baseImage);
-
-            var answer = baseImage.ToBitmap();
-
             if (LabelVertAxis || LabelHorizAxis)
             {
                 var origin = OriginPixel;
                 const int horizEdge = 2;
                 const int vertEdge = 20;
 
-                using (Graphics graphics = Graphics.FromImage(answer))
+                using (Graphics graphics = Graphics.FromImage(bitmap))
                 {
                     // Define a font and brush for the text
                     Font font = new Font("Arial", TextFontSize);
@@ -284,8 +277,21 @@ namespace SkyCombDrone.DrawSpace
                     }
                 }
             }
+        }
 
-            return answer;
+
+        // Generate a bitmap of the graph as per scope settings.
+        public virtual Bitmap CurrBitmap()
+        {
+            var baseImage = BaseImage.Clone();
+
+            CurrImage(ref baseImage);
+
+            var bitmap = baseImage.ToBitmap();
+
+            DrawAxes(ref bitmap);
+
+            return bitmap;
         }
     }
 
