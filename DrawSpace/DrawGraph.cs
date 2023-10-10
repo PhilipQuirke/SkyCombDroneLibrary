@@ -38,6 +38,7 @@ namespace SkyCombDrone.DrawSpace
         static public readonly int VertAxisHorzPixels = 2;
         static public readonly int HorizAxisVertPixels = 2;
 
+        public int TextFontSize = 10;
 
         public Image<Bgr, byte>? BaseImage = null;
 
@@ -223,8 +224,8 @@ namespace SkyCombDrone.DrawSpace
         {
             Size = size;
 
-            LabelHorizPixels = (LabelVertAxis ? 50 : 0);
-            LabelVertPixels = (LabelHorizAxis ? 18 : 0 );
+            LabelHorizPixels = (LabelVertAxis ? (TextFontSize >= 10 ? 50 : 30 ) : 0);
+            LabelVertPixels = (LabelHorizAxis ? 18 : 0);
 
             BaseImage = Draw.NewImage(size, DroneColors.GrayBgr);
         }
@@ -252,7 +253,7 @@ namespace SkyCombDrone.DrawSpace
                 using (Graphics graphics = Graphics.FromImage(answer))
                 {
                     // Define a font and brush for the text
-                    Font font = new Font("Arial", 10);
+                    Font font = new Font("Arial", TextFontSize);
                     SolidBrush brush = new SolidBrush(Color.Black);
 
                     if (LabelVertAxis)
@@ -261,7 +262,7 @@ namespace SkyCombDrone.DrawSpace
 
                         // Vertical axis top value
                         var indent = horizEdge + (4 - VertTopLabel.Length) * charWidth;
-                        var thePoint = new Point((int)indent, 5);
+                        var thePoint = new Point((int)indent, 2);
                         graphics.DrawString(VertTopLabel, font, brush, thePoint);
 
                         // Vertical axis bottom value
@@ -277,7 +278,8 @@ namespace SkyCombDrone.DrawSpace
                         graphics.DrawString(HorizLeftLabel, font, brush, thePoint);
 
                         // Horizontal axis right value
-                        thePoint = new Point(Size.Width - 60, Size.Height - vertEdge);
+                        int chars = HorizRightLabel.Length;
+                        thePoint = new Point(Size.Width - 8 * chars, Size.Height - vertEdge);
                         graphics.DrawString(HorizRightLabel, font, brush, thePoint);
                     }
                 }
