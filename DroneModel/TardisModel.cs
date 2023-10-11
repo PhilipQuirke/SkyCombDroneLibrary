@@ -114,7 +114,7 @@ namespace SkyCombDrone.DroneModel
                 LinealM = new RelativeLocation(
                     DroneLocnM.NorthingM - prevTardis.DroneLocnM.NorthingM,
                     DroneLocnM.EastingM - prevTardis.DroneLocnM.EastingM)
-                        .DiagonalM();
+                        .DiagonalM;
                 Assert(LinealM < 1000, "CalculateSettings_LinealM: 1km step");
                 SumLinealM = prevTardis.SumLinealM + LinealM;
             }
