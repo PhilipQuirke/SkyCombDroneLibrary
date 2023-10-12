@@ -49,6 +49,7 @@ namespace SkyCombDrone.CommonSpace
 
         static public Bgr WhiteBgr { get; } = new Bgr(255, 255, 255);
         static public Bgr GrayBgr { get; } = new Bgr(240, 240, 240);
+        static public Bgr DarkGrayBgr { get; } = new Bgr(106, 102, 99);
         static public Bgr BlackBgr { get; } = new Bgr(0, 0, 0);
         static public Bgr GreenBgr { get; } = new Bgr(0, 128, 0);
         static public Bgr ErrorBgr { get; } = new Bgr(0, 0, 255);
