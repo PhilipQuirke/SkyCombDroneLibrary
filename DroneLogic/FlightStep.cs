@@ -367,17 +367,10 @@ namespace SkyCombDrone.DroneLogic
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
         // Does NOT consider land contour undulations 
-        public DroneLocation? CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction, bool initialCalc = true)
+        public DroneLocation? CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction)
         {
             if (InputImageSizeM == null)
                 return null;
-
-            if (initialCalc)
-            {
-                FailIf((horizontalFraction == 0) && (verticalFraction == 0), "CalcImageFeatureLocationM: Logic error 1");
-                FailIf((horizontalFraction < -0.02) || (verticalFraction < -0.02), "CalcImageFeatureLocationM: Logic error 2");
-                FailIf((horizontalFraction > 1.02) || (verticalFraction > 1.02), "CalcImageFeatureLocationM: Logic error 3");
-            }
 
             // Physical offset of the object within the drone field of vision InputImageSizeM.
             // This is NOT rotated to drone direction of flight.

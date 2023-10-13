@@ -371,7 +371,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
         private void DrawElevationOrSwathe(ref Image<Bgr, byte> image, GroundType backgroundType)
         {
-            if((BaseDrawScope.Drone == null) || (BaseDrawScope.Drone.GroundData == null))
+            if((BaseDrawScope == null) ||  (BaseDrawScope.Drone == null) || (BaseDrawScope.Drone.GroundData == null))
                 return;
 
             // Are we drawing surface or ground elevations or seen?
