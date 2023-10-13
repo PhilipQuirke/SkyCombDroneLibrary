@@ -48,14 +48,23 @@ namespace SkyCombDrone.DroneModel
 
 
         // On an older drone, where GimbalDataAvail == ManualNo,
-        // CameraDownDeg provides the default camera down angle (from the horizontal) for the drone.
+        // FixedCameraDownDeg provides the fixed camera down angle (from the horizontal) for the drone.
         // The setting is a positive number in degrees.
-        // So for a camera physically pointing straight down, set CameraDownDeg to 90.
+        // So for a camera physically pointing straight down, set FixedCameraDownDeg to 90.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // section Camera Down Angle for more detail.
-        public int CameraDownDeg { get; set; } = 90;
+        public int FixedCameraDownDeg { get; set; } = 80; // Min 25, Max 90
         // The actual camera area imaged depends on CameraDownDeg.
-        public int CameraToVerticalForwardDeg { get { return 90 - CameraDownDeg; } }
+        public int FixedCameraToVerticalForwardDeg { get { return 90 - FixedCameraDownDeg; } }
+
+        // On an new drone, where GimbalDataAvail == AutoYes or ManualYes,
+        // If the camera view temporarily includes the horizon, then the camera can experience "thermal bloom",
+        // giving bad thermal readings, and lots of suprious features.
+        // Manual operators of drones occassionally look at the horizon to make sure the drone is not going to run into anything.
+        // Video frames where the camera down angle is GREATER than MinCameraDownDeg are "out of scope" (not processed).
+        // Note: If MinCameraDownDeg is set to 35, and camera has vertical field of vision (VFOV) of 47.6 degrees,
+        // then the highest view the app processes is 35 +/- 24 degrees which is 11 to 49 degrees down from the horizon.
+        public int MinCameraDownDeg { get; set; } = 35; // Min 25, Max 90
 
 
         // Does the drone video / flight data start or end at ground level?
@@ -122,7 +131,8 @@ namespace SkyCombDrone.DroneModel
         // Else
         //      The gimbal camera down angle is likely consistent over legs and corners,
         //      with the gimbal compensating for changes in the drone pitch & roll,
-        //      but could be 45 degrees
+        //      but could be 45 degrees.
+        //      In this case refer MinCameraDownDeg
         // (In both cases the Gimbal yaw mirrors the drone yaw - with a lag when cornering.)
         public int MaxLegStepPitchDeg { get; set; } = 12; // Degrees
         public int MaxLegSumPitchDeg { get; set; } = 18; // Degrees
@@ -141,21 +151,32 @@ namespace SkyCombDrone.DroneModel
         public int MaxLegGapDurationMs { get; set; } = 2 * FlightSectionModel.SectionMinMs;
 
 
-        // The Camera down angle must be in range +1 to +90 degrees.
-        // Pointing at the horizon is 0 degrees, and is bad as areas imaged by the video are far away.
-        public void ValidateCameraDownDeg()
+        // The Camera down angle must be in range +25 to +90 degrees.
+        // Pointing at the horizon is 0 degrees, and is bad as 1) areas imaged by the video are far away.
+        // and 2) thermal cameras experience thermal bloom and their measurements are unreliable.
+        public void ValidateFixedCameraDownDeg()
         {
             if (GimbalDataAvail == GimbalDataEnum.ManualNo)
             {
-                if (CameraDownDeg < 1)
-                    CameraDownDeg = 1;
+                if (FixedCameraDownDeg < 25)
+                    FixedCameraDownDeg = 25;
 
-                if (CameraDownDeg > 90)
-                    CameraDownDeg = 90;
+                if (FixedCameraDownDeg > 90)
+                    FixedCameraDownDeg = 90;
             }
             else
                 // CameraDownDeg is not used if the Gimbal data is available
-                CameraDownDeg = 0;
+                FixedCameraDownDeg = 0;
+        }
+
+
+        public void ValidateMinCameraDownDeg()
+        {
+            if (MinCameraDownDeg < 25)
+                MinCameraDownDeg = 25;
+
+            if (MinCameraDownDeg > 90)
+                MinCameraDownDeg = 90;
         }
 
 
@@ -168,7 +189,8 @@ namespace SkyCombDrone.DroneModel
                 { "Run Video To S", RunVideoToS, SecondsNdp },
                 { "Thermal To Optical Video Delay S", ThermalToOpticalVideoDelayS, SecondsNdp },
                 { "Gimbal Data Available", GimbalDataAvail.ToString() },
-                { "Camera Down Degrees", CameraDownDeg },
+                { "Fixed Camera Down Degrees", FixedCameraDownDeg },
+                { "Min Camera Down Degrees", MinCameraDownDeg },
                 { "On Ground At", OnGroundAt.ToString() },
                 { "Smooth Section Size", SmoothSectionSize },
                 { "Use Legs", UseLegs },
@@ -187,14 +209,16 @@ namespace SkyCombDrone.DroneModel
             RunVideoToS = StringToFloat(settings[i++]);
             ThermalToOpticalVideoDelayS = StringToFloat(settings[i++]);
             GimbalDataAvail = (GimbalDataEnum)Enum.Parse(typeof(GimbalDataEnum), settings[i++]);
-            CameraDownDeg = StringToNonNegInt(settings[i++]);
+            FixedCameraDownDeg = StringToNonNegInt(settings[i++]);
+            MinCameraDownDeg = StringToNonNegInt(settings[i++]);
             OnGroundAt = (OnGroundAtEnum)Enum.Parse(typeof(OnGroundAtEnum), settings[i++]);
             SmoothSectionSize = StringToNonNegInt(settings[i++]);
             UseLegs = StringToBool(settings[i++]);
             ExcludeDisplayMarginRatio = StringToFloat(settings[i++]);
             Notes = settings[i++];
 
-            ValidateCameraDownDeg();
+            ValidateFixedCameraDownDeg();
+            ValidateMinCameraDownDeg();
         }
 
 
@@ -247,7 +271,7 @@ namespace SkyCombDrone.DroneModel
                (GimbalDataAvail == GimbalDataEnum.ManualYes))
                 answer += "Gimbal pitch, yaw, roll available\r\n";
             else
-                answer += "Camera down: " + CameraDownDeg + " degrees\r\n";
+                answer += "Camera down: " + FixedCameraDownDeg + " degrees\r\n";
 
             if (ThermalToOpticalVideoDelayS != 0)
                 answer += "Thermal to optical video: " + ThermalToOpticalVideoDelayS + " secs\r\n";

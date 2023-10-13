@@ -368,8 +368,7 @@ namespace SkyCombDrone.DrawSpace
                 var thisHeight = RawDataToHeightPixels(thisAltitude - MinVertRaw, VertRangeRaw);
                 var highlight =
                     (firstRunSectionId != UnknownValue) && (lastRunSectionId != UnknownValue) &&
-                    (thisStep.FlightSection.TardisId >= firstRunSectionId) &&
-                    (thisStep.FlightSection.TardisId <= lastRunSectionId);
+                    DroneDrawScope.RunStepInScope(thisStep);
                 Line(ref image, new PointF(prevWidth, prevHeight), new PointF(thisWidth, thisHeight),
                     highlight ? inScopeDroneBgr : outScopeDroneBgr,
                     highlight ? HighlightThickness : NormalThickness);
@@ -618,7 +617,7 @@ namespace SkyCombDrone.DrawSpace
                         if (thisStep == null)
                             continue;
 
-                        bool highlight = thisSectionId >= DroneDrawScope.FirstRunStepId && thisSectionId <= DroneDrawScope.LastRunStepId;
+                        bool highlight = DroneDrawScope.RunStepInScope(thisStep);
 
                         float thisRunRaw = GetVertRaw(thisStep);
                         if (highlight)

@@ -183,13 +183,10 @@ namespace SkyCombDrone.DrawSpace
 
             int firstRunStepId = BaseDrawScope.FirstRunStepId;
             int lastRunStepId = BaseDrawScope.LastRunStepId;
-            bool runScopeSet = (firstRunStepId != UnknownValue) && (lastRunStepId != UnknownValue);
 
             foreach (var leg in flightLegs.Legs)
             {
-                bool highlight = runScopeSet &&
-                    (leg.MinStepId >= firstRunStepId) &&
-                    (leg.MaxStepId <= lastRunStepId);
+                bool highlight = BaseDrawScope.RunStepIdInScope(leg.MinStepId, leg.MaxStepId);
 
                 var thisBgr = highlight ? DroneColors.InScopeDroneBgr : DroneColors.OutScopeDroneBgr;
                 var thisThickness = highlight ? HighlightThickness : NormalThickness;
@@ -252,10 +249,6 @@ namespace SkyCombDrone.DrawSpace
         {
             var hasLegs = ((BaseDrawScope.Drone != null) && BaseDrawScope.Drone.HasFlightLegs);
 
-            int firstRunStepId = BaseDrawScope.FirstRunStepId;
-            int lastRunStepId = BaseDrawScope.LastRunStepId;
-            bool runScopeSet = (firstRunStepId != UnknownValue) && (lastRunStepId != UnknownValue);
-
             Point prevPoint = new(UnknownValue, UnknownValue);
             int prevLegId = UnknownValue;
 
@@ -268,11 +261,11 @@ namespace SkyCombDrone.DrawSpace
 
                 var thisPoint = FlightPath_DroneLocnMToPixelPoint(step);
                 int thisStepId = step.TardisId;
-                int thisLegId = (step is FlightStep ? (step as FlightStep).FlightLegId : UnknownValue);
 
-                bool highlight = runScopeSet &&
-                    (thisStepId >= firstRunStepId) &&
-                    (thisStepId <= lastRunStepId);
+                var flightStep = (step is FlightStep ? (step as FlightStep) : null);
+                int thisLegId = (flightStep != null ? flightStep.FlightLegId : UnknownValue);
+
+                bool highlight = BaseDrawScope.RunStepIdInScope(thisStepId);
                 var thisColor = highlight ? DroneColors.InScopeDroneBgr : DroneColors.OutScopeDroneBgr;
 
                 if (!DrawLegs)

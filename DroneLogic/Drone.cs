@@ -511,7 +511,7 @@ namespace SkyCombDrone.DroneLogic
         // - OnGroundAt is used in CalculateSettings_OnGroundAt to calculate DroneToGroundAltStartSyncM, DroneToGroundAltEndSyncM, FlightStep.AltitudeM
         public void CalculateSettings_ConfigHasChanged()
         {
-            Config.ValidateCameraDownDeg();
+            Config.ValidateFixedCameraDownDeg();
 
             if (Config.GimbalDataAvail != GimbalDataEnum.ManualNo)
             {

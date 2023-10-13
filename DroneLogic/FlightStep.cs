@@ -205,7 +205,7 @@ namespace SkyCombDrone.DroneLogic
                 // or in between (say CameraDownDeg=72)
                 // Calculate difference between CameraDownAngle and the vertical.
                 // Assumes drone camera down angle is constant over the period image is seen. 
-                int cameraToVertDeg = FlightSection.Drone.Config.CameraToVerticalForwardDeg;
+                int cameraToVertDeg = FlightSection.Drone.Config.FixedCameraToVerticalForwardDeg;
                 Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 90, "BestCameraDownDeg: Bad cameraToVertDeg");
                 return cameraToVertDeg;
             }

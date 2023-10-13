@@ -54,7 +54,7 @@ namespace SkyCombDrone.DrawSpace
 
         public virtual float FloorMinDeltaYawDeg { get { return TardisSummary.FloorMinDeltaYawDeg; } }
         public virtual float CeilingMaxDeltaYawDeg { get { return TardisSummary.CeilingMaxDeltaYawDeg; } }
-        public virtual string DescribeDeltaYaw { get { return "";  } }
+        public virtual string DescribeDeltaYaw { get { return ""; } }
         public virtual DataPairList GetSettings_DeltaYaw { get { return TardisSummary.GetSettings_DeltaYaw(); } }
 
 
@@ -64,7 +64,7 @@ namespace SkyCombDrone.DrawSpace
         public virtual DataPairList GetSettings_Roll { get { return TardisSummary.GetSettings_Roll(); } }
 
 
-        public virtual (float, float) MinMaxVerticalAxisM { get { return (0, 0 ); } }
+        public virtual (float, float) MinMaxVerticalAxisM { get { return (0, 0); } }
         public virtual string DescribeElevation { get { return ""; } }
         public virtual DataPairList GetSettings_Altitude { get { return TardisSummary.GetSettings_Altitude(); } }
 
@@ -110,6 +110,20 @@ namespace SkyCombDrone.DrawSpace
                 thisStepId == FirstDrawStepId ||
                 thisStepId == LastDrawStepId;
         }
+
+
+        public bool RunStepIdInScope(int firstStepId, int lastStepId)
+        {
+            return
+                (FirstRunStepId != UnknownValue) &&
+                (LastRunStepId != UnknownValue) &&
+                (firstStepId >= FirstRunStepId) &&
+                (lastStepId <= LastRunStepId);
+        }
+        public bool RunStepIdInScope(int thisStepId)
+        {
+            return RunStepIdInScope(thisStepId, thisStepId);    
+        }
     }
 
 
@@ -143,6 +157,14 @@ namespace SkyCombDrone.DrawSpace
         public DroneDrawScope(TardisSummaryModel? tardisModel) : base(tardisModel)
         {
             Drone = null;
+        }
+
+
+        public bool RunStepInScope(FlightStep flightStep)
+        {
+            return
+                RunStepIdInScope(flightStep.StepId, flightStep.StepId) &&
+                ((!Drone.Config.UseGimbalData) || (-flightStep.PitchDeg >= Drone.Config.MinCameraDownDeg));
         }
     }
 }

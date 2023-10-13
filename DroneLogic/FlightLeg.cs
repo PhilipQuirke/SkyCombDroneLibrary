@@ -59,7 +59,7 @@ namespace SkyCombDrone.DroneLogic
             // PQR ToDo Increase speed of this loop by bisection of the sorted list of steps
             for (int stepId = MinStepId; stepId <= MaxStepId; stepId++)
             {
-                FlightStep thisStep;
+                FlightStep? thisStep;
                 if (steps.TryGetValue(stepId, out thisStep))
                 {
                     var thisDelta = Math.Abs(thisStep.SumTimeMs - flightMs);
@@ -149,9 +149,15 @@ namespace SkyCombDrone.DroneLogic
                         bool badStepAltitude = (prevStep != null) && (Math.Abs(prevStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegStepAltitudeDeltaM);
                         bool badYaw = (Math.Abs(thisStep.YawDegsDelta(startStep)) > config.MaxLegSumDeltaYawDeg);
                         bool badSumPitch = (Math.Abs(startStep.PitchDeg - thisStep.PitchDeg) >= config.MaxLegSumPitchDeg);
-                        bool badStepPitch = (Math.Abs(thisStep.PitchDeg) >= config.MaxLegStepPitchDeg);
                         bool badDuration = (thisStep.FlightSection.TimeMs > config.MaxLegGapDurationMs);
-                        if (badSumAltitude || badStepAltitude || badYaw || badSumPitch || badStepPitch || badDuration)
+
+                        bool badStepPitch = (! config.UseGimbalData) && 
+                            (Math.Abs(thisStep.PitchDeg) >= config.MaxLegStepPitchDeg);
+                        bool badCameraDown = config.UseGimbalData && 
+                            (Math.Abs(thisStep.PitchDeg) >= config.MinCameraDownDeg);
+
+
+                        if (badSumAltitude || badStepAltitude || badYaw || badSumPitch || badDuration || badStepPitch || badCameraDown)
                         {
                             if ((legDurationMs < config.MinLegDurationMs) ||
                                 (RelativeLocation.DistanceM(startStep.DroneLocnM, thisStep.DroneLocnM) < config.MinLegDistanceM))
@@ -172,10 +178,12 @@ namespace SkyCombDrone.DroneLogic
                                     whyEnd.Add($"Yaw change too large: {startStep.YawDegsDelta(startStep)} to {thisStep.YawDegsDelta(startStep)}");
                                 else if (badSumPitch)
                                     whyEnd.Add($"Sum pitch too large: {startStep.PitchDeg} to {thisStep.PitchDeg}");
-                                else if (badStepPitch)
-                                    whyEnd.Add($"Step pitch too large: {thisStep.PitchDeg}");
                                 else if (badDuration)
                                     whyEnd.Add($"Gap too large: {thisStep.FlightSection.TimeMs}");
+                                else if (badStepPitch)
+                                    whyEnd.Add($"Step pitch too large: {thisStep.PitchDeg}");
+                                else if (badCameraDown)
+                                    whyEnd.Add($"Step camera down too small: {thisStep.PitchDeg}");
                             }
 
                             // Do not include thisStep in this leg. Reset for next leg calcs.
