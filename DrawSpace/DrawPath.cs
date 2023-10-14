@@ -24,7 +24,7 @@ namespace SkyCombDrone.DrawSpace
         const int DegreesToVerticalCutoff = 80;
 
 
-        public DroneDrawScope? BaseDrawScope = null;
+        public DroneDrawScope? DroneDrawScope = null;
 
 
         // Do we draw the flightsteps on the image?
@@ -50,17 +50,17 @@ namespace SkyCombDrone.DrawSpace
 
         public DrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope, false, false)
         {
-            Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
+            Title = (base.DroneDrawScope != null ? base.DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
-            Metrics = (DroneDrawScope != null ? DroneDrawScope.GetSettings_Altitude : null);
+            Metrics = (base.DroneDrawScope != null ? base.DroneDrawScope.GetSettings_Altitude : null);
 
             TextNormalColor = DroneColors.OutScopeDroneBgr;
             TextHighlightColor = DroneColors.LegNameBgr;
 
             DrawLegs = drawLegs &&
-                (DroneDrawScope != null) && 
-                (DroneDrawScope.Drone != null) && 
-                (DroneDrawScope.Drone.NumLegsShown > 0);
+                (base.DroneDrawScope != null) && 
+                (base.DroneDrawScope.Drone != null) && 
+                (base.DroneDrawScope.Drone.NumLegsShown > 0);
 
             Reset(drawScope);
         }
@@ -68,7 +68,7 @@ namespace SkyCombDrone.DrawSpace
 
         public void Reset(DroneDrawScope? drawScope)
         {
-            BaseDrawScope = drawScope;
+            DroneDrawScope = drawScope;
             BaseImage = null;
             TransformMToPixels = null;
             TranslateM = null;
@@ -178,15 +178,15 @@ namespace SkyCombDrone.DrawSpace
         // Draw all flight path legs (straight lines) with a chevron in the middle.
         private void DrawFlightLegs(ref Image<Bgr, byte> image)
         {
-            var flightSteps = BaseDrawScope.Drone.FlightSteps;
-            var flightLegs = BaseDrawScope.Drone.FlightLegs;
+            var flightSteps = DroneDrawScope.Drone.FlightSteps;
+            var flightLegs = DroneDrawScope.Drone.FlightLegs;
 
-            int firstRunStepId = BaseDrawScope.FirstRunStepId;
-            int lastRunStepId = BaseDrawScope.LastRunStepId;
+            int firstRunStepId = DroneDrawScope.FirstRunStepId;
+            int lastRunStepId = DroneDrawScope.LastRunStepId;
 
             foreach (var leg in flightLegs.Legs)
             {
-                bool highlight = BaseDrawScope.RunStepIdInScope(leg.MinStepId, leg.MaxStepId);
+                bool highlight = DroneDrawScope.RunStepIdInScope(leg.MinStepId, leg.MaxStepId);
 
                 var thisBgr = highlight ? DroneColors.InScopeDroneBgr : DroneColors.OutScopeDroneBgr;
                 var thisThickness = highlight ? HighlightThickness : NormalThickness;
@@ -226,15 +226,15 @@ namespace SkyCombDrone.DrawSpace
         // Draw the waypoints (if any)
         private void DrawWaypoints(ref Image<Bgr, byte> image)
         {
-            if( DroneDrawScope == null || 
-                DroneDrawScope.Drone == null || 
-                DroneDrawScope.Drone.WayPoints == null || 
-                DroneDrawScope.Drone.WayPoints.Points.Count == 0)
+            if( base.DroneDrawScope == null || 
+                base.DroneDrawScope.Drone == null || 
+                base.DroneDrawScope.Drone.WayPoints == null || 
+                base.DroneDrawScope.Drone.WayPoints.Points.Count == 0)
                 return;
 
-            foreach (var point in DroneDrawScope.Drone.WayPoints.Points)
+            foreach (var point in base.DroneDrawScope.Drone.WayPoints.Points)
             {
-                var droneLocation = BaseDrawScope.Drone.FlightSections.GlobalToDroneLocation(point.GlobalLocation);
+                var droneLocation = DroneDrawScope.Drone.FlightSections.GlobalToDroneLocation(point.GlobalLocation);
 
                 var thisPoint = DroneLocnMToPixelPoint(droneLocation);
 
@@ -247,15 +247,15 @@ namespace SkyCombDrone.DrawSpace
         // Draw the flight path steps
         public void DrawFlightSteps(ref Image<Bgr, byte> image)
         {
-            var hasLegs = ((BaseDrawScope.Drone != null) && BaseDrawScope.Drone.HasFlightLegs);
+            var hasLegs = ((DroneDrawScope.Drone != null) && DroneDrawScope.Drone.HasFlightLegs);
 
             Point prevPoint = new(UnknownValue, UnknownValue);
             int prevLegId = UnknownValue;
 
-            int maxStepId = BaseDrawScope.TardisSummary.GetTardisMaxKey();
+            int maxStepId = DroneDrawScope.TardisSummary.GetTardisMaxKey();
             for(int theStepId = 0; theStepId <= maxStepId; theStepId++)
             {
-                var step = BaseDrawScope.TardisSummary.GetTardisModel(theStepId);
+                var step = DroneDrawScope.TardisSummary.GetTardisModel(theStepId);
                 if(step == null)
                     continue;
 
@@ -265,12 +265,12 @@ namespace SkyCombDrone.DrawSpace
                 var flightStep = (step is FlightStep ? (step as FlightStep) : null);
                 int thisLegId = (flightStep != null ? flightStep.FlightLegId : UnknownValue);
 
-                bool highlight = BaseDrawScope.RunStepIdInScope(thisStepId);
+                bool highlight = (flightStep != null ? DroneDrawScope.RunStepInScope(flightStep) : DroneDrawScope.RunStepIdInScope(thisStepId));
                 var thisColor = highlight ? DroneColors.InScopeDroneBgr : DroneColors.OutScopeDroneBgr;
 
                 if (!DrawLegs)
                 {
-                    // If drone moved less than 10M between steps, draw a line.
+                    // If drone moved less than 10 m between steps, draw a line.
                     // Useful when drawing several flights in same graph.
                     if((prevPoint.X != UnknownValue) &&
                         Math.Abs(prevPoint.X - thisPoint.X) < DrawLineMaxGapM &&
@@ -288,7 +288,7 @@ namespace SkyCombDrone.DrawSpace
                     // up the previous non-leg step.
                     if (((thisLegId <= 0) || (prevLegId <= 0)) &&
                         (thisStepId > 0) && (prevPoint.X != UnknownValue))
-                        Line(ref image, prevPoint, thisPoint, thisColor);
+                        Line(ref image, prevPoint, thisPoint, thisColor, 2);
 
                     // Draw chevrons along the path to path every so often to show direction.
                     if ((!hasLegs) && (thisStepId % 50 == 0))
@@ -364,22 +364,22 @@ namespace SkyCombDrone.DrawSpace
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
         private void DrawElevationOrSwathe(ref Image<Bgr, byte> image, GroundType backgroundType)
         {
-            if((BaseDrawScope == null) ||  (BaseDrawScope.Drone == null) || (BaseDrawScope.Drone.GroundData == null))
+            if((DroneDrawScope == null) ||  (DroneDrawScope.Drone == null) || (DroneDrawScope.Drone.GroundData == null))
                 return;
 
             // Are we drawing surface or ground elevations or seen?
-            GroundModel groundModel = BaseDrawScope.Drone.GroundData.DsmModel;
+            GroundModel groundModel = DroneDrawScope.Drone.GroundData.DsmModel;
             Color highColor = DroneColors.SurfaceHighColor;
             Color lowColor = DroneColors.SurfaceLowColor;
             if (backgroundType == GroundType.DemElevations)
             {
-                groundModel = BaseDrawScope.Drone.GroundData.DemModel;
+                groundModel = DroneDrawScope.Drone.GroundData.DemModel;
                 highColor = DroneColors.GroundHighColor;
                 lowColor = DroneColors.GroundLowColor;
             }
             else if (backgroundType == GroundType.SwatheSeen)
             {
-                groundModel = BaseDrawScope.Drone.GroundData.SwatheModel;
+                groundModel = DroneDrawScope.Drone.GroundData.SwatheModel;
                 highColor = DroneColors.SwatheHighColor;
                 lowColor = DroneColors.SwatheLowColor;
             }
@@ -446,13 +446,13 @@ namespace SkyCombDrone.DrawSpace
                 }
 
 
-                if (BaseDrawScope.TardisSummary == null)
+                if (DroneDrawScope.TardisSummary == null)
                     NoDataText(ref image, new Point(50, (int)(size.Height * 0.15)));
                 else
                 {
                     // Drone video image covers an area to either side of the drone flight path.
-                    var drone = BaseDrawScope.Drone; // Maybe null
-                    var tardisSummary = BaseDrawScope.TardisSummary;
+                    var drone = DroneDrawScope.Drone; // Maybe null
+                    var tardisSummary = DroneDrawScope.TardisSummary;
                     float pathImageWidthM = 
                         (tightFocus ? 0 : 
                             (drone != null ? drone.FlightSteps.MaxImageWidthM() : 
@@ -473,8 +473,8 @@ namespace SkyCombDrone.DrawSpace
                     }
                     else
                     {
-                        minLocation = BaseDrawScope.MinDroneLocnM;
-                        maxLocation = BaseDrawScope.MaxDroneLocnM;
+                        minLocation = DroneDrawScope.MinDroneLocnM;
+                        maxLocation = DroneDrawScope.MaxDroneLocnM;
                     }
 
                     // The Min/MaxNorthing/EastingSumM values represent the range of locations the drone flew over.
@@ -596,13 +596,13 @@ namespace SkyCombDrone.DrawSpace
         {
             try
             {
-                if((BaseDrawScope != null) && (TransformMToPixels.Scale > 0))
+                if((DroneDrawScope != null) && (TransformMToPixels.Scale > 0))
                 {
                     var activeBgr = DroneColors.ActiveDroneBgr;
                     var inScopeBgr = DroneColors.InScopeDroneBgr;
                     var outScopeBgr = DroneColors.OutScopeDroneBgr;
 
-                    var flightStep = BaseDrawScope.CurrRunFlightStep;
+                    var flightStep = DroneDrawScope.CurrRunFlightStep;
                     if (flightStep != null)
                     {
                         // Draw a circle to show current drone location.
