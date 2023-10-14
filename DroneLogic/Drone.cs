@@ -103,6 +103,13 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // Some drone steps we do not use (aka process) as the thermal camera is pointing too near the horizontal
+        public bool FlightStepInRunScope( FlightStep flightStep)
+        {
+            return ((!Config.UseGimbalData) || (-flightStep.PitchDeg >= Config.MinCameraDownDeg));
+        }
+
+
         public Drone(DroneConfigModel config)
         {
             Config = config;

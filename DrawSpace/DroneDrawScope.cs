@@ -164,7 +164,7 @@ namespace SkyCombDrone.DrawSpace
         {
             return
                 RunStepIdInScope(flightStep.StepId, flightStep.StepId) &&
-                ((!Drone.Config.UseGimbalData) || (-flightStep.PitchDeg >= Drone.Config.MinCameraDownDeg));
+                Drone.FlightStepInRunScope(flightStep);
         }
     }
 }
