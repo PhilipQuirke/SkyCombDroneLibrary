@@ -20,30 +20,41 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the percentage overlap of this leg with the RunVideoFromS / RunVideoToS range
-        public int PercentOverlapWithRunFromTo(FlightSteps steps, DroneConfigModel config)
+        public static int PercentOverlapWithRunFromTo(Drone drone, int minStepId, int maxStepid)
         {
-            if ((steps == null) || (steps.Steps.Count == 0))
-                return 0;
+            try
+            {
+                if (!drone.HasFlightSteps)
+                    return 0;
 
-            var runFromS = config.RunVideoFromS;
-            var runToS = config.RunVideoToS;
+                var runFromS = drone.Config.RunVideoFromS;
+                var runToS = drone.Config.RunVideoToS;
 
-            var legFromS = steps.Steps[MinStepId].FlightSection.StartTime.TotalSeconds;
-            var legToS = steps.Steps[MaxStepId].FlightSection.StartTime.TotalSeconds;
+                var legFromS = drone.FlightSteps.Steps[minStepId].FlightSection.StartTime.TotalSeconds;
+                var legToS = drone.FlightSteps.Steps[maxStepid].FlightSection.StartTime.TotalSeconds;
 
-            // What percentage of this leg overlaps the drone Run From / To 
-            var maxMin = Math.Max(runFromS, legFromS);
-            var minMax = (runToS < 0.01 ? legToS : Math.Min(runToS, legToS));
+                // What percentage of this leg overlaps the drone Run From / To 
+                var maxMin = Math.Max(runFromS, legFromS);
+                var minMax = (runToS < 0.01 ? legToS : Math.Min(runToS, legToS));
 
-            // If more than 2/3 rds of the leg overlaps the drone Run From / To highlight the button  
-            double legDuration = legToS - legFromS;
-            double overlap = 100.0 * (minMax - maxMin) / legDuration;
+                // If more than 2/3 rds of the leg overlaps the drone Run From / To highlight the button  
+                double legDuration = legToS - legFromS;
+                double overlap = 100.0 * (minMax - maxMin) / legDuration;
 
-            return (int)overlap;
+                return (int)overlap;
+            }
+            catch (Exception ex)
+            {
+                throw ThrowException("FlightLeg.PercentOverlapWithRunFromTo", ex);
+            }
         }
-        public bool OverlapsRunFromTo(FlightSteps steps, DroneConfigModel config)
+        public int PercentOverlapWithRunFromTo(Drone drone)
         {
-            return PercentOverlapWithRunFromTo(steps, config) >= MinOverlapPercent;
+            return PercentOverlapWithRunFromTo(drone, MinStepId, MaxStepId);
+        }
+        public bool OverlapsRunFromTo(Drone drone)
+        {
+            return PercentOverlapWithRunFromTo(drone) >= MinOverlapPercent;
         }
 
 
@@ -382,14 +393,14 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the index of the first and last leg overlap of this leg with the RunVideoFromS / RunVideoToS range
-        public (int, int) OverlappingLegsRange(FlightSteps steps, DroneConfigModel config)
+        public (int, int) OverlappingLegsRange(Drone drone)
         {
             int firstLegId = UnknownValue;
             int lastLegId = UnknownValue;
 
             foreach (var leg in Legs)
             {
-                if (leg.OverlapsRunFromTo(steps, config))
+                if (leg.OverlapsRunFromTo(drone))
                 {
                     if (firstLegId == UnknownValue)
                         firstLegId = leg.FlightLegId;

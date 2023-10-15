@@ -227,9 +227,9 @@ namespace SkyCombDrone.DroneModel
 
                 return answer;
             }
-            catch (Exception ex)
+            catch 
             {
-                throw ThrowException("VideoModel.DurationStringtoSecs", ex);
+                return UnknownValue;
             }
         }
 
