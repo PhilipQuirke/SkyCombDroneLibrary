@@ -367,25 +367,22 @@ namespace SkyCombDrone.DrawSpace
             if((DroneDrawScope == null) ||  (DroneDrawScope.Drone == null) || (DroneDrawScope.Drone.GroundData == null))
                 return;
 
-            // Are we drawing surface or ground elevations or seen?
-            GroundModel groundModel = DroneDrawScope.Drone.GroundData.DsmModel;
+            GroundModel? groundModel = DroneDrawScope.Drone.GroundData.GroundModelByType(backgroundType);
+            if ((groundModel == null) || !groundModel.HasElevationData())
+                return;
+
             Color highColor = DroneColors.SurfaceHighColor;
             Color lowColor = DroneColors.SurfaceLowColor;
             if (backgroundType == GroundType.DemElevations)
             {
-                groundModel = DroneDrawScope.Drone.GroundData.DemModel;
                 highColor = DroneColors.GroundHighColor;
                 lowColor = DroneColors.GroundLowColor;
             }
             else if (backgroundType == GroundType.SwatheSeen)
             {
-                groundModel = DroneDrawScope.Drone.GroundData.SwatheModel;
                 highColor = DroneColors.SwatheHighColor;
                 lowColor = DroneColors.SwatheLowColor;
             }
-
-            if ((groundModel == null) || !groundModel.HasElevationData())
-                return;
 
             Rectangle maxLocation = new(0, 0, 0, 0);
             
@@ -451,41 +448,55 @@ namespace SkyCombDrone.DrawSpace
                 else
                 {
                     // Drone video image covers an area to either side of the drone flight path.
-                    var drone = DroneDrawScope.Drone; // Maybe null
-                    var tardisSummary = DroneDrawScope.TardisSummary;
-                    float pathImageWidthM = 
-                        (tightFocus ? 0 : 
-                            (drone != null ? drone.FlightSteps.MaxImageWidthM() : 
-                                2 * GroundModel.GroundBufferM));
-
-                    if (pathImageWidthM > 2 * GroundModel.GroundBufferM)
-                        // We store DEM/DSM data up to GroundBufferM beyond the flight path in each direction.
-                        // A drone flying high above ground gives an image width beyond the DEM/DSM coverage.
-                        // To avoid gray boundaries on image, we reduce the pathImageWidthM.
-                        pathImageWidthM = 2 * GroundModel.GroundBufferM;
-
-                    DroneLocation minLocation = new();
-                    DroneLocation maxLocation = new();
+                    DroneLocation? minLocation = DroneDrawScope.MinDroneLocnM;
+                    DroneLocation? maxLocation = DroneDrawScope.MaxDroneLocnM;
                     if (tightFocus)
                     {
                         minLocation = processObjectLocation.Translate(new DroneLocation(-tightFocusM, -tightFocusM));
                         maxLocation = processObjectLocation.Translate(new DroneLocation(tightFocusM, tightFocusM));
                     }
-                    else
-                    {
-                        minLocation = DroneDrawScope.MinDroneLocnM;
-                        maxLocation = DroneDrawScope.MaxDroneLocnM;
-                    }
 
                     // The Min/MaxNorthing/EastingSumM values represent the range of locations the drone flew over.
                     if (maxLocation?.NorthingM > 1 && maxLocation?.EastingM > 1)
                     {
-                        var neededHorzM = pathImageWidthM
-                            + maxLocation.EastingM
-                            - minLocation.EastingM;
-                        var neededVertM = pathImageWidthM
-                            + maxLocation.NorthingM
-                            - minLocation.NorthingM;
+                        var drone = DroneDrawScope.Drone;
+                        if ((!tightFocus) && (drone != null))
+                        {
+                            // Max path width changes depending on camera down angle.
+                            float pathImageWidthM = 2;
+                            for (int stepId = DroneDrawScope.FirstDrawStepId; stepId < DroneDrawScope.LastDrawStepId; stepId++)
+                                if (drone.FlightSteps.Steps.TryGetValue(stepId, out var step))
+                                {
+                                    var thisImageWidthM = step.InputImageSizeM?.Value.X ?? 0;
+                                    if (thisImageWidthM > pathImageWidthM)
+                                        pathImageWidthM = thisImageWidthM;
+                                }
+
+                            if (drone.GroundData != null)
+                            {
+                                GroundModel? groundModel = drone.GroundData.GroundModelByType(groundType);
+                                if ((groundModel == null) || !groundModel.HasElevationData())
+                                {
+                                    minLocation.NorthingM -= pathImageWidthM;
+                                    minLocation.EastingM -= pathImageWidthM;
+                                    maxLocation.NorthingM += pathImageWidthM;
+                                    maxLocation.EastingM += pathImageWidthM;
+                                }
+                                else
+                                {
+                                    // We store DEM/DSM data up to GroundBufferM beyond the flight path in each direction.
+                                    // A drone flying high above ground gives an image width beyond the DEM/DSM coverage.
+                                    // We try to avoid gray boundaries on image
+                                    minLocation.NorthingM = Math.Max(minLocation.NorthingM - pathImageWidthM, -GroundModel.GroundBufferM);
+                                    minLocation.EastingM = Math.Max(minLocation.EastingM - pathImageWidthM, -GroundModel.GroundBufferM);
+                                    maxLocation.NorthingM = Math.Min(maxLocation.NorthingM + pathImageWidthM, drone.FlightSteps.MaxDroneLocnM.NorthingM + GroundModel.GroundBufferM);
+                                    maxLocation.EastingM = Math.Min(maxLocation.EastingM + pathImageWidthM, drone.FlightSteps.MaxDroneLocnM.EastingM + GroundModel.GroundBufferM);
+                                }
+                            }
+                        }
+
+                        var neededHorzM = maxLocation.EastingM - minLocation.EastingM;
+                        var neededVertM = maxLocation.NorthingM - minLocation.NorthingM;
 
                         // Calculate the best scale in Pixels / M for each axis independently.
                         var scaleHorzPxsPerM = size.Width / neededHorzM;
@@ -499,9 +510,7 @@ namespace SkyCombDrone.DrawSpace
                         TransformMToPixels.XMargin = 0;
 
                         // Translate image to bring the focused portion into the visible graph area.
-                        TranslateM = new(
-                            pathImageWidthM / 2 - minLocation.NorthingM,
-                            pathImageWidthM / 2 - minLocation.EastingM);
+                        TranslateM = new( - minLocation.NorthingM, - minLocation.EastingM );
 
                         // Ensure image is top aligned. 
                         var spareVertPxs = (size.Height - neededVertM * scalePxsPerM);

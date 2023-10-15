@@ -14,8 +14,8 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Drone encompassing box size in local coordinate system - NorthingM/EastingM
-        public virtual DroneLocation MinDroneLocnM { get { return TardisSummary.MinDroneLocnM; } }
-        public virtual DroneLocation MaxDroneLocnM { get { return TardisSummary.MaxDroneLocnM; } }
+        public virtual DroneLocation? MinDroneLocnM { get { return TardisSummary?.MinDroneLocnM; } }
+        public virtual DroneLocation? MaxDroneLocnM { get { return TardisSummary?.MaxDroneLocnM; } }
 
 
         // First millisecond of flight data drawn. Used on graphs with a time axis
@@ -30,13 +30,13 @@ namespace SkyCombDrone.DrawSpace
         public virtual int LastDrawStepId { get { return TardisSummary.MaxTardisId; } }
 
 
-        // First step of flight data to draw. A StepId axis approximates a time axis.
+        // First step of flight data to run. A StepId axis approximates a time axis.
         public virtual int FirstRunStepId { get { return 0; } }
-        // Last step of flight data to draw. A StepId axis approximates a time axis.
+        // Last step of flight data to run. A StepId axis approximates a time axis.
         public virtual int LastRunStepId { get { return TardisSummary.MaxTardisId; } }
 
 
-        public virtual FlightStep CurrRunFlightStep { get { return null; } }
+        public virtual FlightStep? CurrRunFlightStep { get { return null; } }
         public virtual int CurrRunStepId { get { return 1; } }
 
 
