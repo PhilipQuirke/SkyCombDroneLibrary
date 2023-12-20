@@ -24,9 +24,6 @@ namespace SkyCombDrone.DrawSpace
         const int DegreesToVerticalCutoff = 80;
 
 
-        public DroneDrawScope? DroneDrawScope = null;
-
-
         // Do we draw the flightsteps on the image?
         public bool DrawSteps = true;
         // Do we draw legs as straight lines or just draw each point?
@@ -50,17 +47,17 @@ namespace SkyCombDrone.DrawSpace
 
         public DrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope, false, false)
         {
-            Title = (base.DroneDrawScope != null ? base.DroneDrawScope.DescribePath : "");
+            Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
-            Metrics = (base.DroneDrawScope != null ? base.DroneDrawScope.GetSettings_Altitude : null);
+            Metrics = (DroneDrawScope != null ? DroneDrawScope.GetSettings_Altitude : null);
 
             TextNormalColor = DroneColors.OutScopeDroneBgr;
             TextHighlightColor = DroneColors.LegNameBgr;
 
             DrawLegs = drawLegs &&
-                (base.DroneDrawScope != null) && 
-                (base.DroneDrawScope.Drone != null) && 
-                (base.DroneDrawScope.Drone.NumLegsShown > 0);
+                (DroneDrawScope != null) && 
+                (DroneDrawScope.Drone != null) && 
+                (DroneDrawScope.Drone.NumLegsShown > 0);
 
             Reset(drawScope);
         }
