@@ -32,23 +32,40 @@ namespace SkyCombDrone.DroneLogic
 
 
         // The file has a format which repeats:
-        //      A series of data (4 to 7) lines repeated to one frame
+        //      A framecount line
+        //      A timespan line
+        //      2 to 10 data lines. Format is specific to the drone & camera. It may include a blank line!
         //      One blank line
+        // For sample drone flight log data from different types of drones and camera refer to:
+        // https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/FlightLogs.md 
         protected List<string>? ReadParagraph()
         {
             List<string>? answer = new();
 
+            // Some lines contain a "<font>" to "</font>" section that may contain a blank line!
+            bool in_font_clause = false;
             while (true)
             {
                 string line = File.ReadLine();
                 if (line == null)
-                    break;
+                {
+                    if (!in_font_clause)
+                        break;
+                }
+                else
+                {
+                    line = line.Trim();
+                    if ((line.Length == 0) && ! in_font_clause)
+                        break;
 
-                line = line.Trim();
-                if (line.Length == 0)
-                    break;
+                    if (in_font_clause)
+                        in_font_clause = !line.Contains("</font>");
+                    else
+                        in_font_clause = line.Contains("<font"); // e.g. <font size="28">
 
-                answer.Add(line);
+                    if (line.Length > 0)
+                        answer.Add(line);
+                }
             }
 
             if (answer.Count == 0)
@@ -135,8 +152,9 @@ namespace SkyCombDrone.DroneLogic
         public const string DjiGeneric = "SRT (DJI)";
         public const string DjiM2E = "SRT (DJI M2E Dual)";
         public const string DjiMavic3 = "SRT (DJI Mavic 3)";
-        public const string DjM300 = "SRT (DJI M300)";
-
+        public const string DjiM300 = "SRT (DJI M300)";
+        public const string DjiH20T = "SRT (DJI H20T)";
+        public const string DjiH20N = "SRT (DJI H20N)";
 
         // Parse the drone flight data for a DJI drone from a SRT file
         public (bool success, GimbalDataEnum cameraPitchYawRoll)
@@ -144,11 +162,13 @@ namespace SkyCombDrone.DroneLogic
         {
             GimbalDataEnum cameraPitchYawRoll = GimbalDataEnum.ManualNo;
 
-            // The file has a format which repeats:
-            //      A series of data lines repeated to one frame
+            // The drone flight log file has a repeating format per frame containing:
+            //      A framecount line
+            //      A timespan line
+            //      2 to 10 data lines. Format is specific to the drone & camera. It may include a blank line!
             //      One blank line
 
-            // The file includes the following data
+            // The repeating section may contain this data:
             //      longitude, latitude, altitude, yaw, pitch, roll,
             //      FrameCnt: Frame number
             //      DiffTime: 33.3ms = 30fps
@@ -159,7 +179,7 @@ namespace SkyCombDrone.DroneLogic
             //      ev: Exposure value
             //      ct: Color Temperature. Mid-day sun is around 5500
 
-            // For sample file data from different types of DJI drones refer 
+            // For sample drone flight log data from different types of drones and camera refer to:
             // https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/FlightLogs.md 
 
             File = null;
@@ -236,7 +256,7 @@ namespace SkyCombDrone.DroneLogic
                             int tokenPos = line.IndexOf(token);
                             if (tokenPos >= 0)
                             {
-                                sections.FileType = DjM300;
+                                sections.FileType = DjiM300;
                                 thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, ",");
 
                                 token = ",";
@@ -459,7 +479,7 @@ namespace SkyCombDrone.DroneLogic
                             drone.ThermalVideo.HFOVDeg = 38;
                         break;
 
-                    case DjM300:
+                    case DjiM300:
                         // Colin Aitchison's DJI M300 with XT2 19mm
                         // https://www.pbtech.co.nz/product/CAMDJI20219/DJI-Zenmuse-XT2-ZXT2B19FR-Camera-19mm-Lens--30-Hz says:
                         // FOV 57.12 Degrees x 42.44 Degrees
