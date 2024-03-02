@@ -84,6 +84,7 @@ namespace SkyCombDrone.DroneModel
         // we smooth by averaging over a window of flight sections, to reduce spikes and leaps.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // section Drone Location Accuracy for more detail. 
+        // Sections are recorded every SectionMinMs (250), so a SmoothSectionSize of 4 is ~1 second
         public int SmoothSectionSize { get; set; } = 4;
 
 

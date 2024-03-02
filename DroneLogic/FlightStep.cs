@@ -499,7 +499,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         public FlightSteps(Drone drone, List<string>? settings = null)
-            : base(drone.FlightSections.FileName, drone.Config.SmoothSectionSize, settings)
+            : base(drone.FlightSections.FileName, settings)
         {
             Drone = drone;
             Sections = drone.FlightSections;
@@ -627,8 +627,9 @@ namespace SkyCombDrone.DroneLogic
             {
                 FlightStep theStep = thisStep.Value;
 
-                if ((NumSmoothSteps >= 2) && (Steps.Count > NumSmoothSteps + 1))
-                    theStep.CalculateSettings_SmoothAltitude(NumSmoothSteps, Sections);
+                var smooth = Drone.Config.SmoothSectionSize;
+                if ((smooth >= 2) && (Steps.Count > smooth + 1))
+                    theStep.CalculateSettings_SmoothAltitude(smooth, Sections);
             }
         }
 
@@ -643,8 +644,9 @@ namespace SkyCombDrone.DroneLogic
 
                 // Smooth the data  
                 bool sensibleStep = true;
-                if ((NumSmoothSteps >= 2) && (Steps.Count > NumSmoothSteps + 1))
-                    sensibleStep = theStep.CalculateSettings_SmoothLocationYawPitch(NumSmoothSteps, Sections);
+                var smooth = Drone.Config.SmoothSectionSize;
+                if ((smooth >= 2) && (Steps.Count > smooth + 1))
+                    sensibleStep = theStep.CalculateSettings_SmoothLocationYawPitch(smooth, Sections);
 
                 if (sensibleStep)
                 {

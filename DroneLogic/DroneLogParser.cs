@@ -156,6 +156,7 @@ namespace SkyCombDrone.DroneLogic
         public const string DjiH20T = "SRT (DJI H20T)";
         public const string DjiH20N = "SRT (DJI H20N)";
 
+
         // Parse the drone flight data for a DJI drone from a SRT file
         public (bool success, GimbalDataEnum cameraPitchYawRoll)
             ParseFlightLogSections(VideoData video, FlightSections sections, Drone drone)
@@ -186,7 +187,6 @@ namespace SkyCombDrone.DroneLogic
 
             try
             {
-                sections.Thermal = true; // Default value - may be overridden later.
                 sections.Sections.Clear();
 
                 // See if there is an SRT file with the same name as the video file, just a different extension
@@ -296,9 +296,6 @@ namespace SkyCombDrone.DroneLogic
                                 var tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                 {
-                                    // Only optical videos have this.
-                                    sections.Thermal = false;
-
                                     var tokenValue = (int)FindTokenValue(line, token, tokenPos, "]");
                                     if (prevSection == null)
                                     {
@@ -427,6 +424,11 @@ namespace SkyCombDrone.DroneLogic
                                         thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
                                 }
 
+                                if(line == "</font>")
+                                    sections.FileType = DjiH20T;
+                                else if (line.Contains("</font>"))
+                                    sections.FileType = DjiH20N;
+
                                 // Input text not used:
                                 //      [dzoom_ratio: 10000, delta: 0]
                                 //      [dzoom_ratio: 1.00]
@@ -470,11 +472,16 @@ namespace SkyCombDrone.DroneLogic
             {
                 switch (drone.FlightSections.FileType)
                 {
+                    case DjiH20N:
+                    case DjiH20T:
+                        // PQR TBC.  Fall through
+
+                    default:
                     case DjiMavic3:
                         // Lennard Sparks' DJI Mavic 3t
                         // Thermal camera: 640×512 @ 30fps
                         // DFOV: Diagonal Field of View = 61 degrees
-                        // so HFOV = 381. degrees and VFOV = 47.6 degrees 
+                        // so HFOV = 38.1 degrees and VFOV = 47.6 degrees 
                         if (drone.HasThermalVideo)
                             drone.ThermalVideo.HFOVDeg = 38;
                         break;
@@ -487,7 +494,6 @@ namespace SkyCombDrone.DroneLogic
                             drone.ThermalVideo.HFOVDeg = 42;
                         break;
 
-                    default:
                     case DjiM2E:
                         // Philip Quirke's DJI Mavic 2 Enterprise Dual
                         // Refer https://www.dji.com/nz/mavic-2-enterprise/specs

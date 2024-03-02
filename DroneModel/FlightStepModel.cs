@@ -149,14 +149,6 @@ namespace SkyCombDrone.DroneModel
         public string FileName { get; set; }
 
 
-        // To improve location and speed data quality, we smooth Steps by averaging over a window of flight Sections.
-        // We average this Step using previous NumSmoothSteps/2 Sections & next NumSmoothSteps/2 Sections.
-        // If NumSmoothSteps=4 and SectionMinMs=250, this is smoothing over 1 seconds. 
-        // If NumSmoothSteps=0 then this setting has no effect.
-        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
-        public int NumSmoothSteps { get; set; } = 4;
-
-
         // Drone altitudes are often measured using barometic pressure, which is inaccurate, and can be negative!
         // These offsets (derived from OnGroundAt logic) are added to the drone FlightStep altitudes to give more accurate altitudes.
         protected float OnGroundAtFixStartM { get; set; } = 0;
@@ -165,10 +157,9 @@ namespace SkyCombDrone.DroneModel
         public bool HasOnGroundAtFix { get { return (OnGroundAtFixStartM != 0 || OnGroundAtFixEndM != 0); } }
 
 
-        public FlightStepsModel(string fileName, int numSmoothSteps, List<string>? settings = null)
+        public FlightStepsModel(string fileName, List<string>? settings = null)
         {
             FileName = fileName;
-            NumSmoothSteps = numSmoothSteps;
             if (settings != null)
                 LoadSettings(settings);
         }
@@ -194,7 +185,6 @@ namespace SkyCombDrone.DroneModel
             var answer = base.GetSettings();
 
             answer.Add("File Name", ShortFileName());
-            answer.Add("# Smooth Steps", NumSmoothSteps);
             answer.Add("Avg Speed Mps", AvgSpeedMps, 2);
             answer.Add("Min Dem M", MinDemM, HeightNdp);
             answer.Add("Max Dem M", MaxDemM, HeightNdp);
@@ -214,7 +204,6 @@ namespace SkyCombDrone.DroneModel
             int offset = LoadSettingsOffset(settings);
 
             FileName = settings[offset++];
-            NumSmoothSteps = StringToNonNegInt(settings[offset++]);
             AvgSpeedMps = StringToFloat(settings[offset++]);
             MinDemM = StringToFloat(settings[offset++]);
             MaxDemM = StringToFloat(settings[offset++]);

@@ -88,9 +88,6 @@ namespace SkyCombDrone.DroneModel
         // The vendor and drone type that the Flight/Video data is from.
         public string FileType { get; set; } = UnknownString;
 
-        // Is this a thermal (aka IR) flight data (and thermal video)? Else an optical (aka visible-light) video.
-        public bool Thermal { get; set; } = false;
-
 
         // Minimum local (not UTC) date/time from the flight data
         public DateTime MinDateTime { get; set; }
@@ -185,7 +182,6 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("File Name", ShortFileName());
             answer.Add("File Type", FileType);
-            answer.Add("Thermal", Thermal);
             answer.Add("Min Date Time", MinDateTime.ToString(DateFormat));
             answer.Add("Max Date Time", MaxDateTime.ToString(DateFormat));
             answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
@@ -208,7 +204,6 @@ namespace SkyCombDrone.DroneModel
 
             FileName = settings[index++];
             FileType = settings[index++];
-            Thermal = (settings[index++].ToLower() == "true");
             MinDateTime = DateTime.Parse(settings[index++]);
             MaxDateTime = DateTime.Parse(settings[index++]);
             MinGlobalLocation = new GlobalLocation(settings[index++]);
