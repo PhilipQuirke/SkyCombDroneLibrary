@@ -84,8 +84,8 @@ namespace SkyCombDrone.DroneModel
         // we smooth by averaging over a window of flight sections, to reduce spikes and leaps.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // section Drone Location Accuracy for more detail. 
-        // Sections are recorded every SectionMinMs (250), so a SmoothSectionSize of 4 is ~1 second
-        public int SmoothSectionSize { get; set; } = 4;
+        // Sections are recorded every SectionMinMs (250), so a SmoothSectionRadius of 2 spans 5 points or ~1.25 second
+        public int SmoothSectionRadius { get; set; } = 2;
 
 
         // Does this flight benefit from the use of the legs?
@@ -193,7 +193,7 @@ namespace SkyCombDrone.DroneModel
                 { "Fixed Camera Down Degrees", FixedCameraDownDeg },
                 { "Min Camera Down Degrees", MinCameraDownDeg },
                 { "On Ground At", OnGroundAt.ToString() },
-                { "Smooth Section Size", SmoothSectionSize },
+                { "Smooth Section Radius", SmoothSectionRadius },
                 { "Use Legs", UseLegs },
                 { "Exclude Margin Ratio", ExcludeDisplayMarginRatio, 3 },
                 { "Notes", ( Notes == "" ? " " : Notes ) },
@@ -213,7 +213,7 @@ namespace SkyCombDrone.DroneModel
             FixedCameraDownDeg = StringToNonNegInt(settings[i++]);
             MinCameraDownDeg = StringToNonNegInt(settings[i++]);
             OnGroundAt = (OnGroundAtEnum)Enum.Parse(typeof(OnGroundAtEnum), settings[i++]);
-            SmoothSectionSize = StringToNonNegInt(settings[i++]);
+            SmoothSectionRadius = StringToNonNegInt(settings[i++]);
             UseLegs = StringToBool(settings[i++]);
             ExcludeDisplayMarginRatio = StringToFloat(settings[i++]);
             Notes = settings[i++];

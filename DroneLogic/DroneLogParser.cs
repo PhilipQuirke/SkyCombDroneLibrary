@@ -152,7 +152,8 @@ namespace SkyCombDrone.DroneLogic
         public const string DjiGeneric = "SRT (DJI)";
         public const string DjiM2E = "SRT (DJI M2E Dual)";
         public const string DjiMavic3 = "SRT (DJI Mavic 3)";
-        public const string DjiM300 = "SRT (DJI M300)";
+        public const string DjiM3T = "SRT (DJI M3T)";
+        public const string DjiM300XT2 = "SRT (DJI M300 XT2)";  
         public const string DjiH20T = "SRT (DJI H20T)";
         public const string DjiH20N = "SRT (DJI H20N)";
 
@@ -214,6 +215,19 @@ namespace SkyCombDrone.DroneLogic
                     if ((paragraph == null) || (paragraph.Count < 4))
                         break;
 
+
+                    // Evaluate the drone type
+                    if( sections.FileType == DjiGeneric )
+                        switch(paragraph.Count() )
+                        {
+                            case 12: sections.FileType = DjiH20T; break;
+                            case 11: sections.FileType = DjiH20N; break;
+                            case 6: sections.FileType = DjiMavic3; break;
+                            case 5: sections.FileType = DjiM3T; break; // Can be a DjiM2E or a DjiM3T. Code below distinguishes difference.
+                            case 4: sections.FileType = DjiM300XT2; break;
+                        }
+
+
                     // Line 0: The video frame number e.g 15
 
                     // Line 1: The time period covered "00:00:01,595 --> 00:00:01,711"
@@ -256,7 +270,6 @@ namespace SkyCombDrone.DroneLogic
                             int tokenPos = line.IndexOf(token);
                             if (tokenPos >= 0)
                             {
-                                sections.FileType = DjiM300;
                                 thisSection.GlobalLocation.Latitude = FindTokenValue(line, token, tokenPos, ",");
 
                                 token = ",";
@@ -353,7 +366,6 @@ namespace SkyCombDrone.DroneLogic
                                     tokenPos = line.IndexOf(token);
                                     if (tokenPos >= 0)
                                     {
-                                        sections.FileType = DjiMavic3;
                                         thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
                                         paragraph_good = true;
                                     }
@@ -424,11 +436,6 @@ namespace SkyCombDrone.DroneLogic
                                         thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
                                 }
 
-                                if(line == "</font>")
-                                    sections.FileType = DjiH20T;
-                                else if (line.Contains("</font>"))
-                                    sections.FileType = DjiH20N;
-
                                 // Input text not used:
                                 //      [dzoom_ratio: 10000, delta: 0]
                                 //      [dzoom_ratio: 1.00]
@@ -486,7 +493,7 @@ namespace SkyCombDrone.DroneLogic
                             drone.ThermalVideo.HFOVDeg = 38;
                         break;
 
-                    case DjiM300:
+                    case DjiM3T:
                         // Colin Aitchison's DJI M300 with XT2 19mm
                         // https://www.pbtech.co.nz/product/CAMDJI20219/DJI-Zenmuse-XT2-ZXT2B19FR-Camera-19mm-Lens--30-Hz says:
                         // FOV 57.12 Degrees x 42.44 Degrees

@@ -32,22 +32,20 @@ namespace SkyCombDrone.DroneLogic
         // Calculates FlightStep smoothed attributes AltitudeM 
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // chapter on NumSmoothSteps for the rationale for this function.
-        public bool CalculateSettings_SmoothAltitude(int numSmoothSteps, FlightSections sections)
+        public bool CalculateSettings_SmoothAltitude(int smoothRadius, FlightSections sections)
         {
             // If flight stepId duration is too great don't try to smooth it. This happens very rarely.
             if (this.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
                 return false;
 
+            Assert(smoothRadius >= 1, "CalculateSettings_SmoothAltitudeM: No smoothing");
 
-            int halfSmoothSteps = numSmoothSteps / 2;
-            Assert(halfSmoothSteps >= 1, "CalculateSettings_SmoothAltitudeM: No smoothing");
+            float sumAltitudeWeight = 0;
+            float sumAltitudeM = 0;
 
-            int nearbyAltitudeCount = 0;
-            float nearbyAltitudeM = 0;
-
-            // Collect data from the previous and next Sections around thisStep.
+            // Collect data from the previous, this and next Sections around thisStep, weighted by their distance in time.
             var thisSectionId = FlightSection.SectionId;
-            for (int j = thisSectionId - halfSmoothSteps; j <= thisSectionId + halfSmoothSteps; j++)
+            for (int j = Math.Max(0, thisSectionId - smoothRadius); j <= thisSectionId + smoothRadius; j++)
             {
                 if (sections.Sections.TryGetValue(j, out FlightSection? nearbySection))
                 {
@@ -56,62 +54,75 @@ namespace SkyCombDrone.DroneLogic
                     if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
                         return false;
 
+                    bool middleSection = (nearbySection.SectionId == thisSectionId);
+                    var time_diff = Math.Abs(nearbySection.SumTimeMs - FlightSection.SumTimeMs);
+                    if ((!middleSection) && (time_diff == 0))
+                        continue;
+                    float weight = middleSection ? 1.0f : 1.0f * FlightSectionModel.SectionMinMs / time_diff;
+
                     if (nearbySection.AltitudeM != UnknownValue)
                     {
-                        nearbyAltitudeM += nearbySection.AltitudeM;
-                        nearbyAltitudeCount++;
+                        sumAltitudeM += nearbySection.AltitudeM * weight;
+                        sumAltitudeWeight += weight;
                     }
                 }
             }
 
-            if (nearbyAltitudeCount > 0)
-                AltitudeM = nearbyAltitudeM / nearbyAltitudeCount;
+            if (sumAltitudeWeight > 0)
+                AltitudeM = sumAltitudeM / sumAltitudeWeight;
 
             return true;
         }
 
 
-        // Smooth the Section data, based on a window of "NumSmoothSteps" Sections, to give Step data.
+        // Smooth the Section data, based on a window of "numSmoothSteps" Sections, to give Step data.
         // Calculates FlightStep smoothed attributes LocationM, YawDegs, PitchDegs.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // chapter on NumSmoothSteps for the rationale for this function.
-        public bool CalculateSettings_SmoothLocationYawPitch(int numSmoothSteps, FlightSections sections)
+        // Do not assume that each step covers the same time period.
+        public bool CalculateSettings_SmoothLocationYawPitch(int smoothRadius, FlightSections sections)
         {
             // If flight stepId duration is too great don't try to smooth it. This happens very rarely.
-            if (this.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
+            if (TimeMs > FlightSection.MaxSensibleSectionDurationMs)
                 return false;
 
-            int halfSmoothSteps = numSmoothSteps / 2;
-            Assert(halfSmoothSteps >= 1, "CalculateSettings_SmoothLocationYawPitch: No smoothing");
+            Assert(smoothRadius >= 1, "CalculateSettings_SmoothLocationYawPitch: No smoothing");
 
-            int nearbyLocationCount = 0;
-            float nearbyNorthingM = 0;
-            float nearbyEastingM = 0;
 
-            int nearbyPosYawCount = 0;
-            float nearbyPosYawDegs = 0;
-            int nearbyNegYawCount = 0;
-            float nearbyNegYawDegs = 0;
+            float sumWeight = 0;
+            float sumNorthingM = 0;
+            float sumEastingM = 0;
 
-            int nearbyPitchCount = 0;
-            float nearbyPitchDegs = 0;
+            float sumPosYawWeight = 0;
+            float sumPosYawDegs = 0;
+            float sumNegYawWeight = 0;
+            float sumNegYawDegs = 0;
 
-            // Collect data from the previous and next Sections around thisStep.
+            float sumPitchWeight = 0;
+            float sumPitchDegs = 0;
+
+            // Collect data from the previous, this and next Sections around thisStep, weighted by their distance in time.
             var thisSectionId = FlightSection.SectionId;
-            for (int j = thisSectionId - halfSmoothSteps; j <= thisSectionId + halfSmoothSteps; j++)
+            for (int j = Math.Max(0,thisSectionId - smoothRadius); j <= thisSectionId + smoothRadius; j++)
             {
                 if (sections.Sections.TryGetValue(j, out FlightSection? nearbySection))
                 {
                     // If a "large gap" stepId is nearby then don't smooth this step.
-                    // This "averging" function assumes an even number of "sensible" neighbours before AND after this step
+                    // This "averaging" function assumes an even number of "sensible" neighbours before AND after this step
                     if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
                         return false;
 
+                    bool middleSection = (nearbySection.SectionId == thisSectionId);
+                    var time_diff = Math.Abs(nearbySection.SumTimeMs - FlightSection.SumTimeMs);
+                    if ((!middleSection) && (time_diff == 0))
+                        continue;
+                    float weight = middleSection ? 1.0f : 1.0f * FlightSectionModel.SectionMinMs / time_diff;
+
                     if (nearbySection.GlobalLocation.Specified && (nearbySection.DroneLocnM != null))
                     {
-                        nearbyNorthingM += nearbySection.DroneLocnM.NorthingM;
-                        nearbyEastingM += nearbySection.DroneLocnM.EastingM;
-                        nearbyLocationCount++;
+                        sumWeight += weight;
+                        sumNorthingM += nearbySection.DroneLocnM.NorthingM * weight;
+                        sumEastingM += nearbySection.DroneLocnM.EastingM * weight;
                     }
 
                     var theYawDegs = nearbySection.YawDeg;
@@ -121,13 +132,13 @@ namespace SkyCombDrone.DroneLogic
                         // yaws due to a jump between sections gives a bad (near zero) answer.
                         if (theYawDegs > 0)
                         {
-                            nearbyPosYawDegs += theYawDegs;
-                            nearbyPosYawCount++;
+                            sumPosYawDegs += theYawDegs * weight;
+                            sumPosYawWeight += weight;
                         }
                         else
                         {
-                            nearbyNegYawDegs += theYawDegs;
-                            nearbyNegYawCount++;
+                            sumNegYawDegs += theYawDegs * weight;
+                            sumNegYawWeight += weight;
                         }
                     }
 
@@ -135,27 +146,26 @@ namespace SkyCombDrone.DroneLogic
                     if (thePitchDegs != UnknownValue)
                     {
                         // Mixing just positive and just negative rads here is fine
-                        nearbyPitchDegs += thePitchDegs;
-                        nearbyPitchCount++;
+                        sumPitchDegs += thePitchDegs * weight;
+                        sumPitchWeight += weight;
                     }
                 }
             }
 
-            if (nearbyLocationCount > 0)
-                DroneLocnM = new(nearbyNorthingM / nearbyLocationCount, nearbyEastingM / nearbyLocationCount);
+            if (sumWeight > 1)
+                DroneLocnM = new(sumNorthingM / sumWeight, sumEastingM / sumWeight);
 
-            if ((nearbyPosYawCount > 0) && (nearbyNegYawCount > 0))
+            if ((sumPosYawWeight > 0) && (sumNegYawWeight > 0))
             {
-                // Do not try to smooth the yaw
-                // PQR TODO Could do better when yaw transitions from +ve to -ve
+                // Do not try to smooth the yaw. Have a yaw transitions from +ve to -ve (or vice versa)  
             }
-            else if (nearbyNegYawCount > 0)
-                YawDeg = nearbyNegYawDegs / nearbyNegYawCount;
-            else if (nearbyPosYawCount > 0)
-                YawDeg = nearbyPosYawDegs / nearbyPosYawCount;
+            else if (sumNegYawWeight > 0)
+                YawDeg = sumNegYawDegs / sumNegYawWeight;
+            else if (sumPosYawWeight > 0)
+                YawDeg = sumPosYawDegs / sumPosYawWeight;
 
-            if (nearbyPitchCount > 0)
-                PitchDeg = nearbyPitchDegs / nearbyPitchCount;
+            if (sumPitchWeight > 0)
+                PitchDeg = sumPitchDegs / sumPitchWeight;
 
             return true;
         }
@@ -627,8 +637,8 @@ namespace SkyCombDrone.DroneLogic
             {
                 FlightStep theStep = thisStep.Value;
 
-                var smooth = Drone.Config.SmoothSectionSize;
-                if ((smooth >= 2) && (Steps.Count > smooth + 1))
+                var smooth = Drone.Config.SmoothSectionRadius;
+                if ((smooth >= 1) && (Steps.Count > smooth * 2))
                     theStep.CalculateSettings_SmoothAltitude(smooth, Sections);
             }
         }
@@ -644,8 +654,8 @@ namespace SkyCombDrone.DroneLogic
 
                 // Smooth the data  
                 bool sensibleStep = true;
-                var smooth = Drone.Config.SmoothSectionSize;
-                if ((smooth >= 2) && (Steps.Count > smooth + 1))
+                var smooth = Drone.Config.SmoothSectionRadius;
+                if ((smooth >= 1) && (Steps.Count > smooth * 2))
                     sensibleStep = theStep.CalculateSettings_SmoothLocationYawPitch(smooth, Sections);
 
                 if (sensibleStep)
@@ -654,7 +664,7 @@ namespace SkyCombDrone.DroneLogic
                     theStep.CalculateSettings_DeltaYawDeg(prevStep);
                 }
 
-                // Smoothing should not generate values outside the original envelope
+                // Smoothing should not generate values much outside the original envelope
                 float epsilon = 0.3f;
                 var theStepSpeed = theStep.SpeedMps;
                 Assert(theStep.DroneLocnM.NorthingM <= Sections.MaxDroneLocnM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
@@ -662,8 +672,11 @@ namespace SkyCombDrone.DroneLogic
                 Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
                 Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
-                Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: DeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
-                Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: PitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
+                Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
+                Assert(theStep.DeltaYawDeg >= Sections.MinDeltaYawDeg - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
+                Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
+                Assert(theStep.PitchDeg >= Sections.MinPitchDeg - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
+
 
                 prevStep = theStep;
             }

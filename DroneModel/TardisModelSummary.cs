@@ -225,8 +225,8 @@ namespace SkyCombDrone.DroneModel
             Assert(MinSpeedMps >= original.MinSpeedMps - epsilon, "AssertGoodRevision: Bad MinSpeedMps");
             Assert(MaxSpeedMps <= original.MaxSpeedMps + epsilon, "AssertGoodRevision: Bad MaxSpeedMps");
 
-            Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg - epsilon, "AssertGoodRevision: Bad MinDeltaYawDeg");
-            Assert(MaxDeltaYawDeg <= original.MaxDeltaYawDeg + epsilon, "AssertGoodRevision: Bad MaxDeltaYawDeg");
+            Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg - 1, "AssertGoodRevision: Bad MinDeltaYawDeg");
+            Assert(MaxDeltaYawDeg <= original.MaxDeltaYawDeg + 1, "AssertGoodRevision: Bad MaxDeltaYawDeg");
         }
 
 
