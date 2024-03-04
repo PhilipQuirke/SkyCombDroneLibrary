@@ -24,7 +24,7 @@ namespace SkyCombDrone.DroneLogic
         {
             try
             {
-                if (!drone.HasFlightSteps)
+                if ((!drone.HasFlightSteps) || (minStepId < 0) || (maxStepid < 0))
                     return 0;
 
                 var runFromS = drone.Config.RunVideoFromS;
