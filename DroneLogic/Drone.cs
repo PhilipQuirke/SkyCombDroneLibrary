@@ -728,9 +728,6 @@ namespace SkyCombDrone.DroneLogic
         // Get the drone settings needed to describe the flight in the SkyCombFLights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
-            double latitude = 0;
-
-            double longitude = 0;
             float countryX = 0;
             float countryY = 0;
             float eastingM = 0;
@@ -738,13 +735,6 @@ namespace SkyCombDrone.DroneLogic
 
             if (HasFlightSections)
             {
-                var minG = FlightSections.MinGlobalLocation;
-                var maxG = FlightSections.MaxGlobalLocation;
-                if (minG != null && maxG != null)
-                {
-                    latitude = (minG.Latitude + maxG.Latitude) / 2.0f;
-                    longitude = (minG.Longitude + maxG.Longitude) / 2.0f;
-                }
 
                 var minC = FlightSections.MinCountryLocation;
                 var maxC = FlightSections.MaxCountryLocation;
@@ -761,8 +751,6 @@ namespace SkyCombDrone.DroneLogic
             {
                 { "DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "") },
                 { "Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : "") },
-                { "Latitude", latitude, LatLongNdp },
-                { "Longitude", longitude, LatLongNdp },
                 { "Country X", countryX, 0 },
                 { "Country Y", countryY, 0 },
                 { "Easting M", eastingM, 0 },
