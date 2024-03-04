@@ -7,9 +7,6 @@ using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
-using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
-using static System.Windows.Forms.AxHost;
-using System.Text.RegularExpressions;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -162,7 +159,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Suppressed Drone.LoadSettings_Videos failure: " + ex.ToString());
+                Debug.WriteLine("Suppressed Drone.LoadSettings_Videos failure: " + ex.ToString());
             }
 
             ClearData_Video();
@@ -283,8 +280,7 @@ namespace SkyCombDrone.DroneLogic
                 OpticalVideo.CalculateSettings();
 
 
-            DroneSrtParser.SetCameraHFOV(this);
-            // Add other drone manufacturer specific SetCameraHFOV calls here. PQR TODO
+            DroneSrtParser.SetCameraSpecifics(this);
         }
 
 
@@ -779,7 +775,6 @@ namespace SkyCombDrone.DroneLogic
                 { "Optical Flight start", ( HasDisplaySections ? DisplaySections.MinDateTime.ToString(DateFormat) : "" )},
             };
         }
-
     }
 }
 

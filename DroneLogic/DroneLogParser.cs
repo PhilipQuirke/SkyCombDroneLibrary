@@ -148,21 +148,12 @@ namespace SkyCombDrone.DroneLogic
     // Class to parse flight log (SRT) information from a drone manufactured by vendor DJI
     public class DroneSrtParser : DroneLogParser
     {
-        public const string DjiPrefix = "SRT";
-        public const string DjiGeneric = "SRT (DJI)";
-        public const string DjiM2E = "SRT (DJI M2E Dual)";
-        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
-        public const string DjiM3T = "SRT (DJI M3T)";
-        public const string DjiM300XT2 = "SRT (DJI M300 XT2)";  
-        public const string DjiH20T = "SRT (DJI H20T)";
-        public const string DjiH20N = "SRT (DJI H20N)";
-
-
         // Parse the drone flight data for a DJI drone from a SRT file
         public (bool success, GimbalDataEnum cameraPitchYawRoll)
             ParseFlightLogSections(VideoData video, FlightSections sections, Drone drone)
         {
             GimbalDataEnum cameraPitchYawRoll = GimbalDataEnum.ManualNo;
+            video.CameraType = "";
 
             // The drone flight log file has a repeating format per frame containing:
             //      A framecount line
@@ -196,7 +187,7 @@ namespace SkyCombDrone.DroneLogic
                     return (false, cameraPitchYawRoll);
 
                 // For DJI drones, flight information is in the SRT text file 
-                sections.FileType = DjiGeneric;
+                video.CameraType = VideoModel.DjiGeneric;
 
 
                 File = new(sections.FileName);
@@ -217,14 +208,14 @@ namespace SkyCombDrone.DroneLogic
 
 
                     // Evaluate the drone type
-                    if( sections.FileType == DjiGeneric )
+                    if(video.CameraType == VideoModel.DjiGeneric)
                         switch(paragraph.Count() )
                         {
-                            case 12: sections.FileType = DjiH20T; break;
-                            case 11: sections.FileType = DjiH20N; break;
-                            case 6: sections.FileType = DjiMavic3; break;
-                            case 5: sections.FileType = DjiM3T; break; // Can be a DjiM2E or a DjiM3T. Code below distinguishes difference.
-                            case 4: sections.FileType = DjiM300XT2; break;
+                            case 12: video.CameraType = VideoModel.DjiH20T; break;
+                            case 11: video.CameraType = VideoModel.DjiH20N; break;
+                            case 6: video.CameraType = VideoModel.DjiMavic3; break;
+                            case 5: video.CameraType = VideoModel.DjiM3T; break; // Can be a DjiM2E or a DjiM3T. Code below distinguishes difference.
+                            case 4: video.CameraType = VideoModel.DjiM300XT2; break;
                         }
 
 
@@ -355,7 +346,7 @@ namespace SkyCombDrone.DroneLogic
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
                                 {
-                                    sections.FileType = DjiM2E;
+                                    video.CameraType = VideoModel.DjiM2E;
                                     thisSection.GlobalLocation.Longitude = FindTokenValue(line, token, tokenPos, "]");
 
                                     paragraph_good = true;
@@ -472,19 +463,17 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Horizontal field of view in degrees. Differs per manufacturer's camera.
-        public static void SetCameraHFOV(Drone drone)
+        public static void SetCameraSpecifics(Drone drone)
         {
-            if ((drone != null) && drone.HasFlightSections &&
-                drone.FlightSections.FileType.StartsWith(DroneSrtParser.DjiPrefix))
-            {
-                switch (drone.FlightSections.FileType)
+            if (drone != null) 
+                switch (drone.InputVideo.CameraType)
                 {
-                    case DjiH20N:
-                    case DjiH20T:
+                    case VideoModel.DjiH20N:
+                    case VideoModel.DjiH20T:
                         // PQR TBC.  Fall through
 
                     default:
-                    case DjiMavic3:
+                    case VideoModel.DjiMavic3:
                         // Lennard Sparks' DJI Mavic 3t
                         // Thermal camera: 640×512 @ 30fps
                         // DFOV: Diagonal Field of View = 61 degrees
@@ -493,7 +482,7 @@ namespace SkyCombDrone.DroneLogic
                             drone.ThermalVideo.HFOVDeg = 38;
                         break;
 
-                    case DjiM3T:
+                    case VideoModel.DjiM3T:
                         // Colin Aitchison's DJI M300 with XT2 19mm
                         // https://www.pbtech.co.nz/product/CAMDJI20219/DJI-Zenmuse-XT2-ZXT2B19FR-Camera-19mm-Lens--30-Hz says:
                         // FOV 57.12 Degrees x 42.44 Degrees
@@ -501,7 +490,7 @@ namespace SkyCombDrone.DroneLogic
                             drone.ThermalVideo.HFOVDeg = 42;
                         break;
 
-                    case DjiM2E:
+                    case VideoModel.DjiM2E:
                         // Philip Quirke's DJI Mavic 2 Enterprise Dual
                         // Refer https://www.dji.com/nz/mavic-2-enterprise/specs
                         if (drone.HasThermalVideo)
@@ -510,7 +499,6 @@ namespace SkyCombDrone.DroneLogic
                             drone.OpticalVideo.HFOVDeg = 77;
                         break;
                 }
-            }
         }
     }
 

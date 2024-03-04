@@ -85,8 +85,6 @@ namespace SkyCombDrone.DroneModel
     {
         // The file name containing the flight data
         public string FileName { get; set; } = "";
-        // The vendor and drone type that the Flight/Video data is from.
-        public string FileType { get; set; } = UnknownString;
 
 
         // Minimum local (not UTC) date/time from the flight data
@@ -181,7 +179,6 @@ namespace SkyCombDrone.DroneModel
             var answer = base.GetSettings();
 
             answer.Add("File Name", ShortFileName());
-            answer.Add("File Type", FileType);
             answer.Add("Min Date Time", MinDateTime.ToString(DateFormat));
             answer.Add("Max Date Time", MaxDateTime.ToString(DateFormat));
             answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
@@ -203,7 +200,6 @@ namespace SkyCombDrone.DroneModel
             int index = LoadSettingsOffset(settings);
 
             FileName = settings[index++];
-            FileType = settings[index++];
             MinDateTime = DateTime.Parse(settings[index++]);
             MaxDateTime = DateTime.Parse(settings[index++]);
             MinGlobalLocation = new GlobalLocation(settings[index++]);

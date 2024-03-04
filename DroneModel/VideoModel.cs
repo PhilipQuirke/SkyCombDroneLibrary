@@ -10,11 +10,24 @@ namespace SkyCombDrone.DroneModel
     // Some basic constant information about a video
     public class VideoModel : BaseConstants
     {
+        // Drone and camera combinations for which we have specific settings
+        public const string DjiPrefix = "SRT";
+        public const string DjiGeneric = "SRT (DJI)";
+        public const string DjiM2E = "SRT (DJI M2E Dual)";
+        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
+        public const string DjiM3T = "SRT (DJI M3T)";
+        public const string DjiM300XT2 = "SRT (DJI M300 XT2)";
+        public const string DjiH20T = "SRT (DJI H20T)";
+        public const string DjiH20N = "SRT (DJI H20N)";
+
+
         // THERMAL / OPTICAL CAMERA SETTINGS
 
 
         // The file name containing the video
         public string FileName { get; set; }
+        // The drone + camera type
+        public string CameraType { get; set; }
 
 
         // Frames per second. Drone physical implementation means it is not 100% accurate for each second of a drone video.
@@ -127,6 +140,7 @@ namespace SkyCombDrone.DroneModel
         public VideoModel(int imageHeight, int imageWidth)
         {
             FileName = "";
+            CameraType = "";
             Fps = 1;
             FrameCount = 1;
             ImageHeight = imageHeight;
@@ -253,6 +267,7 @@ namespace SkyCombDrone.DroneModel
             var answer = new DataPairList()
             {
                 { "File Name", ShortFileName() },
+                { "Camera Type", CameraType },
                 { "Fps", Fps, FpsNdp },
                 { "Frame Count", FrameCount },
                 { "Time Ms", DurationMs },
@@ -287,6 +302,7 @@ namespace SkyCombDrone.DroneModel
         {
             int i = 0;
             FileName = settings[i++];
+            CameraType = settings[i++];
             Fps = double.Parse(settings[i++]);
             FrameCount = ConfigBase.StringToInt(settings[i++]);
             DurationMs = ConfigBase.StringToInt(settings[i++]);
