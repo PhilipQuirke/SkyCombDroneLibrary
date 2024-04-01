@@ -133,6 +133,27 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // Remove legs that are too short
+        private void RemoveSmallLinealLegs(int min_lineal_length_m)
+        {     
+            bool removed = false;
+            for (int i = Legs.Count-1; i >= 0; i--)
+            {
+                var leg = Legs[i];
+                if (leg.MaxSumLinealM - leg.MinSumLinealM < min_lineal_length_m)
+                {
+                    removed = true;
+                    Legs.RemoveAt(i);
+                }
+            }
+
+            if (removed)
+                // Rename the remaining legs into a continuous sequence
+                for (int i = 0; i < Legs.Count; i++)
+                    Legs[i].FlightLegId = i + 1;
+        }
+
+
         // Calculate the Step.LegId values
         public List<string>? Calculate_Steps(FlightSections sections, FlightSteps steps, DroneConfigModel config)
         {
@@ -362,8 +383,25 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // If we have many legs we may be running a search grid with long legs and short legs.
+        // Remove short legs as they are less interesting.
+        public void Calculate_Pass2()
+        {
+            int optimal_num_legs = 26; // Based on UI constraints
+
+            for (int lineal_length_m = 5; lineal_length_m <= 50; lineal_length_m += 5)
+            {
+                if (Legs.Count > optimal_num_legs)
+                    RemoveSmallLinealLegs(lineal_length_m);
+
+                if (Legs.Count <= optimal_num_legs)
+                    return;
+            }
+        }
+
+
         // Update the leg objects
-        public void Calculate_Pass2(FlightSteps steps)
+        public void Calculate_Pass3(FlightSteps steps)
         {
             foreach (var leg in Legs)
             {
