@@ -107,7 +107,7 @@ namespace SkyCombDrone.DroneModel
         // of a reasonable duration and travels a reasonable distance.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
 
-        // Maximum variation in altitude allowed in a single step for leg to be considered "mostly level" i.e. leg has a constant Altitude within +/- 4 meters
+        // Maximum variation in altitude allowed in a single step for leg to be considered "smooth"
         public float MaxLegStepAltitudeDeltaM { get; set; } = 0.10f;
 
         // Maximum variation in altitude allowed in a leg for leg to be considered "mostly level" i.e. leg has a constant Altitude within +/- 4 meters

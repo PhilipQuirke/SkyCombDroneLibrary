@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+﻿// Copyright SkyComb Limited 2024. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
@@ -7,11 +7,14 @@ using SkyCombGround.CommonSpace;
 namespace SkyCombDrone.DroneLogic
 {
 
-    // A FlightLeg is a section of a drone flight path that is at a mostly constant altitude,
+    // A FlightLeg is a section of a drone flight path that is
     // in a mostly constant direction for a significant duration and travels a significant distance.
     // Main use for a FlightLeg is to limit the scope of CombProcessModel processing.
-    // Pitch, Roll and Speed are deliberately ignored (not considered) and may NOT be mostly constant. 
+    // Drone Pitch, Roll and Speed are deliberately ignored (not considered) and may NOT be mostly constant. 
     // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
+    //
+    // FlightLeg used to require constant Altitude, but the Cornerstone Conservation (Lennard Sparks)
+    // 'search grid' flight data from March 2024 has useful legs with varying altitude, so remove that requirement.
     public class FlightLeg : FlightLegModel
     {
         public FlightLeg(List<string>? settings = null) : base(settings)
@@ -156,8 +159,8 @@ namespace SkyCombDrone.DroneLogic
                     if (startKey >= 0)
                     {
                         // If this step violates a rule, then we should finish this leg
-                        bool badSumAltitude = (Math.Abs(startStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegSumAltitudeDeltaM);
-                        bool badStepAltitude = (prevStep != null) && (Math.Abs(prevStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegStepAltitudeDeltaM);
+                        //bool badSumAltitude = (Math.Abs(startStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegSumAltitudeDeltaM);
+                        //bool badStepAltitude = (prevStep != null) && (Math.Abs(prevStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegStepAltitudeDeltaM);
                         bool badYaw = (Math.Abs(thisStep.YawDegsDelta(startStep)) > config.MaxLegSumDeltaYawDeg);
                         bool badSumPitch = (Math.Abs(startStep.PitchDeg - thisStep.PitchDeg) >= config.MaxLegSumPitchDeg);
                         bool badDuration = (thisStep.FlightSection.TimeMs > config.MaxLegGapDurationMs);
@@ -165,10 +168,10 @@ namespace SkyCombDrone.DroneLogic
                         bool badStepPitch = (! config.UseGimbalData) && 
                             (Math.Abs(thisStep.PitchDeg) >= config.MaxLegStepPitchDeg);
                         bool badCameraDown = config.UseGimbalData && 
-                            (Math.Abs(thisStep.PitchDeg) >= config.MinCameraDownDeg);
+                            (Math.Abs(thisStep.PitchDeg) < config.MinCameraDownDeg);
 
 
-                        if (badSumAltitude || badStepAltitude || badYaw || badSumPitch || badDuration || badStepPitch || badCameraDown)
+                        if (badYaw || badSumPitch || badDuration || badStepPitch || badCameraDown) // badStepAltitude || badSumAltitude || 
                         {
                             if ((legDurationMs < config.MinLegDurationMs) ||
                                 (RelativeLocation.DistanceM(startStep.DroneLocnM, thisStep.DroneLocnM) < config.MinLegDistanceM))
@@ -181,11 +184,11 @@ namespace SkyCombDrone.DroneLogic
                             else
                             {
                                 // End this (good) leg.
-                                if (badSumAltitude)
-                                    whyEnd.Add($"Sum altitude change too large: {startStep.AltitudeM} to {thisStep.AltitudeM}");
-                                else if (badStepAltitude)
-                                    whyEnd.Add($"Step altitude change too large: {prevStep.AltitudeM} to {thisStep.AltitudeM}");
-                                else if (badYaw)
+                                // if (badSumAltitude)
+                                //    whyEnd.Add($"Sum altitude change too large: {startStep.AltitudeM} to {thisStep.AltitudeM}");
+                                //if (badStepAltitude)
+                                //    whyEnd.Add($"Step altitude change too large: {prevStep.AltitudeM} to {thisStep.AltitudeM}");
+                                if (badYaw)
                                     whyEnd.Add($"Yaw change too large: {startStep.YawDegsDelta(startStep)} to {thisStep.YawDegsDelta(startStep)}");
                                 else if (badSumPitch)
                                     whyEnd.Add($"Sum pitch too large: {startStep.PitchDeg} to {thisStep.PitchDeg}");
@@ -216,9 +219,13 @@ namespace SkyCombDrone.DroneLogic
                     }
                     else
                     {
-                        // See if we should start a new leg
+                        // Should we start a new leg?
+
+                        bool badStepPitch = (!config.UseGimbalData) &&
+                            (Math.Abs(thisStep.PitchDeg) >= config.MaxLegStepPitchDeg);
+
                         if ((Math.Abs(thisStep.DeltaYawDeg) < config.MaxLegStepDeltaYawDeg) &&
-                           (Math.Abs(thisStep.PitchDeg) < config.MaxLegStepPitchDeg))
+                           (!badStepPitch))
                         {
                             maxLegId++;
                             thisStep.FlightLegId = maxLegId;
