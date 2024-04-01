@@ -278,13 +278,10 @@ namespace SkyCombDrone.DroneLogic
                 ThermalVideo.CalculateSettings();
             if (HasOpticalVideo)
                 OpticalVideo.CalculateSettings();
-
-
-            DroneSrtParser.SetCameraSpecifics(this);
         }
 
 
-        // Calculate FlightSections settings by parsing the flight logs (if any)
+        // Calculate FlightSections settings by parsing the flight logs (if any). Updates Drone.CameraType
         public void CalculateSettings_FlightSections()
         {
             FlightSections = null;
