@@ -14,7 +14,7 @@ using System.Drawing;
 namespace SkyCombDrone.DrawSpace
 {
     // Code to draw images related to drone flight path data
-    public class DrawPath : DrawGraph
+    public class DroneDrawPath : DroneDrawGraph // : Draw
     {
         // Number of shades of green or brown to use in the background
         const int NumShades = 20;
@@ -45,7 +45,7 @@ namespace SkyCombDrone.DrawSpace
         private Transform? TransformMToPixels;
 
 
-        public DrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope, false, false)
+        public DroneDrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope, false, false)
         {
             Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";
@@ -445,7 +445,7 @@ namespace SkyCombDrone.DrawSpace
                 else
                 {
                     // Drone video image covers an area to either side of the drone flight path.
-                    DroneLocation? minLocation = DroneDrawScope.MinDroneLocnM;
+                    DroneLocation? minLocation = DroneDrawScope.MinDroneLocnM; // pqr This differs!
                     DroneLocation? maxLocation = DroneDrawScope.MaxDroneLocnM;
                     if (tightFocus)
                     {
@@ -590,6 +590,7 @@ namespace SkyCombDrone.DrawSpace
 
             return image.Clone();
         }
+
 
         public override void Initialise(Size size)
         {

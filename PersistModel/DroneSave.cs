@@ -34,7 +34,7 @@ namespace SkyCombDrone.PersistModel
 
         // Generate a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
         public static (string title, DataPairList? metrics, string bitmapName, Emgu.CV.Image<Bgr,byte> pathImage) 
-            CreateDronePath( DrawPath drawPath, GroundType type, int pixels )
+            CreateDronePath( DroneDrawPath drawPath, GroundType type, int pixels )
         {
             drawPath.Initialise(new Size(pixels, pixels), null, type);
 
@@ -63,7 +63,7 @@ namespace SkyCombDrone.PersistModel
 
             // Generate a bitmap of the land overlaid with the drone path 
             var drawScope = (Drone != null ? new DroneDrawScope(Drone) : new DroneDrawScope(tardisModel));
-            var drawPath = new DrawPath(drawScope, false);
+            var drawPath = new DroneDrawPath(drawScope, false);
             drawPath.BackgroundColor = DroneColors.WhiteBgr; // So we dont paint under-necessary area.
 
             (var _, var _, var bitmapName, var pathImage) = 
@@ -124,7 +124,7 @@ namespace SkyCombDrone.PersistModel
                     var col = 10;
                     Data.SetTitle(ref row, col, FlightLocationTitle);
                     var localBitmap = (Bitmap)countryBitmap.Clone();
-                    new DrawPath(null, false).DrawCountryGraphLocationCross(
+                    new DroneDrawPath(null, false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
                     Data.SaveBitmap(localBitmap, "Country", row-1, col-1, 45);
                 }

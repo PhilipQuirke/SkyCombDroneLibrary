@@ -11,7 +11,7 @@ namespace SkyCombDrone.DrawSpace
 {
     // Draw a horizontal line graph of the drone's attributes.
     // Horizontal axis is either ElapsedFlightDurationMs or SumLinealM.
-    public abstract class DrawGraph : Draw
+    public abstract class DroneDrawGraph : Draw
     {
         public DroneDrawScope? DroneDrawScope = null;
 
@@ -53,7 +53,7 @@ namespace SkyCombDrone.DrawSpace
         public float VertFraction = 1;
 
 
-        public DrawGraph(DroneDrawScope? drawScope, bool labelVertAxis, bool labelHorizAxis)
+        public DroneDrawGraph(DroneDrawScope? drawScope, bool labelVertAxis, bool labelHorizAxis)
         {
             DroneDrawScope = drawScope;
             LabelVertAxis = labelVertAxis;
@@ -297,7 +297,7 @@ namespace SkyCombDrone.DrawSpace
 
 
     // Code to draw drone / ground altitude data. Horizontal axis is time.
-    public abstract class DrawVertRange : DrawGraph
+    public abstract class DrawVertRange : DroneDrawGraph
     {
         // Minimum and maximum values to graph on the vertical axis
         protected float MinVertRaw = UnknownValue;
@@ -829,7 +829,7 @@ namespace SkyCombDrone.DrawSpace
 
 
     // Code to draw drone leg data
-    public class DrawLeg : DrawGraph
+    public class DrawLeg : DroneDrawGraph
     {
         public DrawLeg(DroneDrawScope drawScope) : base(drawScope, true, true)
         {
