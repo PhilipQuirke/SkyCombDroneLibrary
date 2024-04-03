@@ -445,8 +445,10 @@ namespace SkyCombDrone.DrawSpace
                 else
                 {
                     // Drone video image covers an area to either side of the drone flight path.
-                    DroneLocation? minLocation = DroneDrawScope.ScopeMinDroneLocnM; // pqr This differs!
-                    DroneLocation? maxLocation = DroneDrawScope.ScopeMaxDroneLocnM;
+                    DroneLocation? scopeMinLocnM = DroneDrawScope.TardisSummary.MinDroneLocnM;
+                    DroneLocation? scopeMaxLocnM = DroneDrawScope.TardisSummary.MaxDroneLocnM;
+                    DroneLocation? minLocation = (scopeMinLocnM == null ? null : scopeMinLocnM.Clone());
+                    DroneLocation? maxLocation = (scopeMaxLocnM == null ? null : scopeMaxLocnM.Clone());
                     if (tightFocus)
                     {
                         minLocation = processObjectLocation.Translate(new DroneLocation(-tightFocusM, -tightFocusM));
