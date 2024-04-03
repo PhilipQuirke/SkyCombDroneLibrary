@@ -449,6 +449,8 @@ namespace SkyCombDrone.DroneLogic
                     }
                 }
 
+                sections.SetTardisMaxKey();
+
                 // The M2E has a published thermal frame rate of 8fps, implying a thermal TimeDelta of 113 to 116 ms.
                 // But on rare occasions, the TimeDelta is much higher than that - closer to 2 seconds!
                 // For example, the DJI_0050 SRT data contains 3 long pauses: 1821ms at frame 357, 1824ms at frame 1255, 1824ms at frame 2844.

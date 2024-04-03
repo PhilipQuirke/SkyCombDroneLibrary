@@ -1,6 +1,7 @@
 ﻿using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
+using static System.Collections.Specialized.BitVector32;
 
 
 
@@ -96,6 +97,8 @@ namespace SkyCombDrone.PersistModel
                         cell = Data.Worksheet.Cells[row, 1];
                         prevSection = thisSection;
                     }
+
+                    flightInput.SetTardisMaxKey();
                 }
             }
             catch (Exception ex)

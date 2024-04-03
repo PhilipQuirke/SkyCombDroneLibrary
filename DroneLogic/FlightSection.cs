@@ -59,12 +59,11 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public override int GetTardisMaxKey() 
-        { 
-            if (Sections.Count == 0)
-                return 0;
-
-            return Sections.Keys[Sections.Count - 1];
+        public void SetTardisMaxKey() 
+        {
+            TardisMaxKey = 0;
+            if (Sections.Count > 0)
+                TardisMaxKey = Sections.Keys[Sections.Count - 1];
         }
 
 
@@ -82,6 +81,7 @@ namespace SkyCombDrone.DroneLogic
         {
             thisSection.CalculateSettings_TimeMs(prevSection);
             Sections.Add(thisSection.TardisId, thisSection);
+            SetTardisMaxKey();
         }
 
 

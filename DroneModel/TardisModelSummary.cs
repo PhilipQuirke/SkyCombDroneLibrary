@@ -310,8 +310,8 @@ namespace SkyCombDrone.DroneModel
 
 
         // This class is used with classes that own a list of TardisModels
-        // This child accessor allows us to write more abstracted code e.g. in DrawPath
-        public virtual int GetTardisMaxKey() { return 0; }
+        // These allows us to write more abstracted code e.g. in DrawPath
+        public int TardisMaxKey = 0;
         public virtual TardisModel? GetTardisModel(int index) { return null; }
 
 

@@ -13,11 +13,6 @@ namespace SkyCombDrone.DrawSpace
         public TardisSummaryModel? TardisSummary = null;
 
 
-        // Drone encompassing box size in local coordinate system - NorthingM/EastingM
-        //public virtual DroneLocation? ScopeMinDroneLocnM { get { return TardisSummary?.MinDroneLocnM; } }
-        //public virtual DroneLocation? ScopeMaxDroneLocnM { get { return TardisSummary?.MaxDroneLocnM; } }
-
-
         // First millisecond of flight data drawn. Used on graphs with a time axis
         public virtual int FirstDrawMs { get { return 0; } }
         // Last millisecond of flight data drawn. Used on graphs with a time axis

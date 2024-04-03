@@ -517,12 +517,11 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public override int GetTardisMaxKey()
+        public void SetTardisMaxKey()
         {
-            if (Steps.Count == 0)
-                return 0;
-
-            return Steps.Keys[Steps.Count - 1];
+            TardisMaxKey = 0;
+            if (Steps.Count > 0)
+                TardisMaxKey = Steps.Keys[Steps.Count - 1];
         }
 
 
@@ -737,6 +736,7 @@ namespace SkyCombDrone.DroneLogic
                 CalculateSettings_CameraDownDeg(videoData, groundData);
 
                 Steps.CalculateSettings_Summarise(this, Sections);
+                SetTardisMaxKey();
             }
             catch (Exception ex)
             {
@@ -896,6 +896,7 @@ namespace SkyCombDrone.DroneLogic
         public void AddStep(FlightStep theSection)
         {
             Steps.Add(theSection.FlightSection.TardisId, theSection);
+            SetTardisMaxKey();
         }
 
 

@@ -89,11 +89,6 @@ namespace SkyCombDrone.DroneLogic
 
             return nearestStep;
         }
-
-
-        // This class does not own any FlightSteps or FlightSections
-        public override int GetTardisMaxKey() { return 0; }
-        public override TardisModel? GetTardisModel(int index) { return null; }
     };
 
 

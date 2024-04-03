@@ -63,7 +63,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        public void Reset(DroneDrawScope? drawScope)
+        public void Reset(DroneDrawScope drawScope)
         {
             DroneDrawScope = drawScope;
             BaseImage = null;
@@ -177,6 +177,8 @@ namespace SkyCombDrone.DrawSpace
         {
             var flightSteps = DroneDrawScope.Drone.FlightSteps;
             var flightLegs = DroneDrawScope.Drone.FlightLegs;
+            if((flightSteps == null) || (flightLegs == null))
+                return;
 
             int firstRunStepId = DroneDrawScope.FirstRunStepId;
             int lastRunStepId = DroneDrawScope.LastRunStepId;
@@ -249,7 +251,7 @@ namespace SkyCombDrone.DrawSpace
             Point prevPoint = new(UnknownValue, UnknownValue);
             int prevLegId = UnknownValue;
 
-            int maxStepId = DroneDrawScope.TardisSummary.GetTardisMaxKey();
+            int maxStepId = DroneDrawScope.TardisSummary.TardisMaxKey;
             for(int theStepId = 0; theStepId <= maxStepId; theStepId++)
             {
                 var step = DroneDrawScope.TardisSummary.GetTardisModel(theStepId);
@@ -285,7 +287,7 @@ namespace SkyCombDrone.DrawSpace
                     // up the previous non-leg step.
                     if (((thisLegId <= 0) || (prevLegId <= 0)) &&
                         (thisStepId > 0) && (prevPoint.X != UnknownValue))
-                        Line(ref image, prevPoint, thisPoint, thisColor, 2);
+                        Line(ref image, prevPoint, thisPoint, thisColor);
 
                     // Draw chevrons along the path to path every so often to show direction.
                     if ((!hasLegs) && (thisStepId % 50 == 0))
