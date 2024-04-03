@@ -45,7 +45,7 @@ namespace SkyCombDrone.DrawSpace
         private Transform? TransformMToPixels;
 
 
-        public DroneDrawPath(DroneDrawScope? drawScope, bool drawLegs) : base(drawScope, false, false)
+        public DroneDrawPath(DroneDrawScope drawScope, bool drawLegs) : base(drawScope, false, false)
         {
             Title = (DroneDrawScope != null ? DroneDrawScope.DescribePath : "");
             Description = "Vertical axis is Northing (in meters). Horizontal axis is Easting (in meters)";

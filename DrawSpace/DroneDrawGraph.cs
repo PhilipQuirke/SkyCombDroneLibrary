@@ -13,7 +13,7 @@ namespace SkyCombDrone.DrawSpace
     // Horizontal axis is either ElapsedFlightDurationMs or SumLinealM.
     public abstract class DroneDrawGraph : Draw
     {
-        public DroneDrawScope? DroneDrawScope = null;
+        public DroneDrawScope DroneDrawScope;
 
         // The size of the image we are drawing on.
         public Size Size;
@@ -53,7 +53,7 @@ namespace SkyCombDrone.DrawSpace
         public float VertFraction = 1;
 
 
-        public DroneDrawGraph(DroneDrawScope? drawScope, bool labelVertAxis, bool labelHorizAxis)
+        public DroneDrawGraph(DroneDrawScope drawScope, bool labelVertAxis, bool labelHorizAxis)
         {
             DroneDrawScope = drawScope;
             LabelVertAxis = labelVertAxis;

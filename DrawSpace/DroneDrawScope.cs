@@ -21,57 +21,57 @@ namespace SkyCombDrone.DrawSpace
         // First millisecond of flight data drawn. Used on graphs with a time axis
         public virtual int FirstDrawMs { get { return 0; } }
         // Last millisecond of flight data drawn. Used on graphs with a time axis
-        public virtual int LastDrawMs { get { return TardisSummary.MaxTimeMs; } }
+        public virtual int LastDrawMs { get { return TardisSummary == null ? 0 : TardisSummary.MaxTimeMs; } }
 
 
         // First step of flight data to draw. A StepId axis approximates a time axis.
         public virtual int FirstDrawStepId { get { return 0; } }
         // Last step of flight data to draw. A StepId axis approximates a time axis.
-        public virtual int LastDrawStepId { get { return TardisSummary.MaxTardisId; } }
+        public virtual int LastDrawStepId { get { return TardisSummary == null ? 0 : TardisSummary.MaxTardisId; } }
 
 
         // First step of flight data to run. A StepId axis approximates a time axis.
         public virtual int FirstRunStepId { get { return 0; } }
         // Last step of flight data to run. A StepId axis approximates a time axis.
-        public virtual int LastRunStepId { get { return TardisSummary.MaxTardisId; } }
+        public virtual int LastRunStepId { get { return TardisSummary == null ? 0 : TardisSummary.MaxTardisId; } }
 
 
         public virtual FlightStep? CurrRunFlightStep { get { return null; } }
         public virtual int CurrRunStepId { get { return 1; } }
 
 
-        public virtual float FloorMinSumLinealM { get { return TardisSummary.FloorMinSumLinealM; } }
-        public virtual float CeilingMaxSumLinealM { get { return TardisSummary.CeilingMaxSumLinealM; } }
+        public virtual float FloorMinSumLinealM { get { return TardisSummary == null ? 0 : TardisSummary.FloorMinSumLinealM; } }
+        public virtual float CeilingMaxSumLinealM { get { return TardisSummary == null ? 0 : TardisSummary.CeilingMaxSumLinealM; } }
         public virtual string DescribePath { get { return ""; } }
         public virtual DataPairList GetSettings_FlightPath { get { return null; } }
 
 
-        public virtual float FloorMinPitchDeg { get { return TardisSummary.FloorMinPitchDeg; } }
-        public virtual float CeilingMaxPitchDeg { get { return TardisSummary.CeilingMaxPitchDeg; } }
+        public virtual float FloorMinPitchDeg { get { return TardisSummary == null ? 0 : TardisSummary.FloorMinPitchDeg; } }
+        public virtual float CeilingMaxPitchDeg { get { return TardisSummary == null ? 0 : TardisSummary.CeilingMaxPitchDeg; } }
         public virtual string DescribePitch { get { return ""; } }
-        public virtual DataPairList GetSettings_Pitch { get { return TardisSummary.GetSettings_Pitch(); } }
+        public virtual DataPairList GetSettings_Pitch { get { return TardisSummary == null ? null : TardisSummary.GetSettings_Pitch(); } }
 
 
-        public virtual float FloorMinDeltaYawDeg { get { return TardisSummary.FloorMinDeltaYawDeg; } }
-        public virtual float CeilingMaxDeltaYawDeg { get { return TardisSummary.CeilingMaxDeltaYawDeg; } }
+        public virtual float FloorMinDeltaYawDeg { get { return TardisSummary == null ? 0 : TardisSummary.FloorMinDeltaYawDeg; } }
+        public virtual float CeilingMaxDeltaYawDeg { get { return TardisSummary == null ? 0 : TardisSummary.CeilingMaxDeltaYawDeg; } }
         public virtual string DescribeDeltaYaw { get { return ""; } }
-        public virtual DataPairList GetSettings_DeltaYaw { get { return TardisSummary.GetSettings_DeltaYaw(); } }
+        public virtual DataPairList GetSettings_DeltaYaw { get { return TardisSummary == null ? null : TardisSummary.GetSettings_DeltaYaw(); } }
 
 
-        public virtual float FloorMinRollDeg { get { return TardisSummary.FloorMinRollDeg; } }
-        public virtual float CeilingMaxRollDeg { get { return TardisSummary.CeilingMaxRollDeg; } }
+        public virtual float FloorMinRollDeg { get { return TardisSummary == null ? 0 : TardisSummary.FloorMinRollDeg; } }
+        public virtual float CeilingMaxRollDeg { get { return TardisSummary == null ? 0 : TardisSummary.CeilingMaxRollDeg; } }
         public virtual string DescribeRoll { get { return ""; } }
-        public virtual DataPairList GetSettings_Roll { get { return TardisSummary.GetSettings_Roll(); } }
+        public virtual DataPairList GetSettings_Roll { get { return TardisSummary == null ? null : TardisSummary.GetSettings_Roll(); } }
 
 
         public virtual (float, float) MinMaxVerticalAxisM { get { return (0, 0); } }
         public virtual string DescribeElevation { get { return ""; } }
-        public virtual DataPairList GetSettings_Altitude { get { return TardisSummary.GetSettings_Altitude(); } }
+        public virtual DataPairList GetSettings_Altitude { get { return TardisSummary == null ? null : TardisSummary.GetSettings_Altitude(); } }
 
 
         public virtual string DescribeSpeed { get { return ""; } }
-        public virtual DataPairList GetSettings_Speed { get { return TardisSummary.GetSettings_Speed(); } }
-        public virtual float MaxSpeedMps { get { return TardisSummary.MaxSpeedMps; } }
+        public virtual DataPairList GetSettings_Speed { get { return TardisSummary == null ? null : TardisSummary.GetSettings_Speed(); } }
+        public virtual float MaxSpeedMps { get { return TardisSummary == null ? 0 : TardisSummary.MaxSpeedMps; } }
 
 
         // The ObjectForm only wants to draw features up to a certain BlockId
@@ -131,7 +131,7 @@ namespace SkyCombDrone.DrawSpace
     public class DroneDrawScope : TardisDrawScope
     {
         // The drone data (if any) to draw
-        public Drone? Drone = null;
+        public Drone? Drone;
 
 
         public override string DescribePath { get { return ( Drone == null ? "" : Drone.DescribeFlightPath ); } }
@@ -149,7 +149,12 @@ namespace SkyCombDrone.DrawSpace
         public override string DescribeSpeed { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeSpeed ); } }
 
 
-        public DroneDrawScope(Drone drone) : base (drone == null ? null : drone.FlightSteps)
+        public DroneDrawScope() : base(null)
+        {
+            Drone = null;
+        }
+
+        public DroneDrawScope(Drone drone) : base(drone == null ? null : drone.FlightSteps)
         {
             Drone = drone;
         }

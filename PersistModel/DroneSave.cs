@@ -124,7 +124,7 @@ namespace SkyCombDrone.PersistModel
                     var col = 10;
                     Data.SetTitle(ref row, col, FlightLocationTitle);
                     var localBitmap = (Bitmap)countryBitmap.Clone();
-                    new DroneDrawPath(null, false).DrawCountryGraphLocationCross(
+                    new DroneDrawPath(new DroneDrawScope(Drone), false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
                     Data.SaveBitmap(localBitmap, "Country", row-1, col-1, 45);
                 }
