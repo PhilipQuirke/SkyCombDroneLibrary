@@ -357,8 +357,6 @@ namespace SkyCombDrone.DroneLogic
                     var sectionsLinealM = FlightSections.Sections.Last().Value.SumLinealM;
                     Config.UseLegs = (legsLinealM / sectionsLinealM > 0.33f);
                 }
-                if (Config.UseLegs)
-                    FlightLegs.Calculate_Pass2();
 
                 // Refine the flight steps settings using leg information
                 FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs, GroundData);

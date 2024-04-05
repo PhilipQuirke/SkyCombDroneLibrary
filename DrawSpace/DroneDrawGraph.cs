@@ -77,13 +77,13 @@ namespace SkyCombDrone.DrawSpace
 
         // Calculate the width of a FlightStep on the graph.
         // For long flight durations, multiple steps can be compacted into one graph pixel (stepsPerStride).
-        protected void CalculateStepWidthAndStride(float minHorizRaw, float maxHorizRaw)
+        protected void CalculateStepWidthAndStride(float minHorizRaw, float maxHorizRaw, int scale = 1)
         {
             MinHorizRaw = minHorizRaw;
             MaxHorizRaw = maxHorizRaw;
 
             // Calculate the step distance on the horizontal axis.
-            StepWidthPxs = 1.0F * (Size.Width - OriginPixel.X) / (MaxHorizRaw - MinHorizRaw);
+            StepWidthPxs = 1.0F * (Size.Width - OriginPixel.X) / ((MaxHorizRaw - MinHorizRaw)/scale);
 
             // Calculate the number of steps between drawing.
             // Ranges from 1 (short video) to say 52.8 (long video). 

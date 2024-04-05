@@ -64,8 +64,8 @@ namespace SkyCombDrone.DroneModel
         // Video frames where the camera down angle is GREATER than MinCameraDownDeg are "out of scope" (not processed).
         // Note: If MinCameraDownDeg is set to 35, and camera has vertical field of vision (VFOV) of 47.6 degrees,
         // then the highest view the app processes is 35 +/- 24 degrees which is 11 to 49 degrees down from the horizon.
-        // But the drone operator knows best. So we allowa wide range
-        public int MinCameraDownDeg { get; set; } = 15; // Min 15, Max 90
+        // But the drone operator knows best. So we allow a wide range
+        public int MinCameraDownDeg { get; set; } = 15; // Min 25, Max 90
 
 
         // Does the drone video / flight data start or end at ground level?
@@ -278,8 +278,8 @@ namespace SkyCombDrone.DroneModel
             if (ThermalToOpticalVideoDelayS != 0)
                 answer += "Thermal to optical video: " + ThermalToOpticalVideoDelayS + " secs\r\n";
 
-            if (Notes != "")
-                answer += "Notes: " + Notes;
+            if (Notes.Trim() != "")
+                answer += "Notes: " + Notes.Trim();
 
             return answer;
         }
