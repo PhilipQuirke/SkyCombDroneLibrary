@@ -672,7 +672,7 @@ namespace SkyCombDrone.DroneLogic
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
                 Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
                 Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + 1 + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
-                Assert(theStep.DeltaYawDeg >= Sections.MinDeltaYawDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
+                Assert(theStep.DeltaYawDeg >= Sections.MinDeltaYawDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MinDeltaYawDeg);
                 Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + 1 + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
                 Assert(theStep.PitchDeg >= Sections.MinPitchDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
 
