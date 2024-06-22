@@ -126,7 +126,7 @@ namespace SkyCombDrone.DrawSpace
     public class DroneDrawScope : TardisDrawScope
     {
         // The drone data (if any) to draw
-        public Drone? Drone;
+        public Drone Drone;
 
 
         public override string DescribePath { get { return ( Drone == null ? "" : Drone.DescribeFlightPath ); } }
@@ -143,11 +143,6 @@ namespace SkyCombDrone.DrawSpace
 
         public override string DescribeSpeed { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeSpeed ); } }
 
-
-        public DroneDrawScope() : base(null)
-        {
-            Drone = null;
-        }
 
         public DroneDrawScope(Drone drone) : base(drone == null ? null : drone.FlightSteps)
         {
