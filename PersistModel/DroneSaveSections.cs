@@ -9,8 +9,8 @@ namespace SkyCombDrone.PersistModel
     // Save meta-data about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations to a datastore, including graphs
     public class DroneSaveSections : TardisSaveGraph
     {
-        Drone Drone = null;
-        FlightSections Sections = null;
+        Drone Drone;
+        FlightSections Sections;
 
 
         public DroneSaveSections(DroneDataStore data, Drone drone)
