@@ -93,8 +93,8 @@ namespace SkyCombDrone.PersistModel
             Data.SetTitles(DroneSummaryTitle);
 
             // Show User Input settings & Leg data on LHS
-            Data.SetTitleAndDataListColumn(UserInputTitle, Chapter1TitleRow, LhsColOffset, Drone.Config.GetSettings());
-            Data.SetTitleAndDataListColumn(LegTitle, Chapter2TitleRow, LhsColOffset, Drone.Config.GetLegSettings());
+            Data.SetTitleAndDataListColumn(UserInputTitle, Chapter1TitleRow, LhsColOffset, Drone.DroneConfig.GetSettings());
+            Data.SetTitleAndDataListColumn(LegTitle, Chapter2TitleRow, LhsColOffset, Drone.DroneConfig.GetLegSettings());
 
             // Show Thermal to Optical comparison data on far RHS
             if (Drone.HasInputVideo && Drone.HasDisplayVideo)

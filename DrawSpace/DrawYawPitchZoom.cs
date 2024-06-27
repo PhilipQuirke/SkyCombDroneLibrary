@@ -116,7 +116,7 @@ namespace SkyCombDrone.DrawSpace
 
 
                 // Draw the pitch (if any & it is variable) on the LHS
-                if (drone.Config.UseGimbalData && (flightStep.PitchDeg >= -100))
+                if (drone.DroneConfig.UseGimbalData && (flightStep.PitchDeg >= -100))
                 {
                     // We show the true pitchdeg in text 
                     // but locate it based on a 0 to 90 range (in case of weird values).

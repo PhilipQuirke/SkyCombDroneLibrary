@@ -38,7 +38,7 @@ namespace SkyCombDrone.DroneLogic
     //      DJI_0120.srt - a DJI-specific SRT file with basic data (location, orientation, etc)
     public class Drone : TwoVideos
     {
-        public DroneConfigModel Config;
+        public DroneConfigModel DroneConfig;
 
 
         // Time to load / calculate this object 
@@ -81,7 +81,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Do we use the flight leg information?
-        public bool UseFlightLegs { get { return HasFlightLegs && Config.UseLegs && FlightLegs.Legs.Count > 0; } }
+        public bool UseFlightLegs { get { return HasFlightLegs && DroneConfig.UseLegs && FlightLegs.Legs.Count > 0; } }
         // How many legs to show in the UI
         public int NumLegsShown { get { return UseFlightLegs ? FlightLegs.Legs.Count : 0; } }
 
@@ -93,7 +93,7 @@ namespace SkyCombDrone.DroneLogic
         // Refer ExcludeMarginRatio.md section Camera Down Angle for more detail.
         public float ExcludeDisplayMarginRatio { get {
                 if(HasTwoVideos)
-                    return Config.ExcludeDisplayMarginRatio;  
+                    return DroneConfig.ExcludeDisplayMarginRatio;  
                 
                 return 0;
             }
@@ -103,13 +103,13 @@ namespace SkyCombDrone.DroneLogic
         // Some drone steps we do not use (aka process) as the thermal camera is pointing too near the horizontal
         public bool FlightStepInRunScope( FlightStep flightStep)
         {
-            return ((!Config.UseGimbalData) || (-flightStep.PitchDeg >= Config.MinCameraDownDeg));
+            return ((!DroneConfig.UseGimbalData) || (-flightStep.PitchDeg >= DroneConfig.MinCameraDownDeg));
         }
 
 
         public Drone(DroneConfigModel config)
         {
-            Config = config;
+            DroneConfig = config;
             EffortDurations = new();
             ClearData_Flight();
             ClearData_Video();
@@ -179,8 +179,8 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load the summary (settings) data 
                     phase = 1;
-                    dataReader.UserInputSettings(Config);
-                    dataReader.LegSettings(Config);
+                    dataReader.UserInputSettings(DroneConfig);
+                    dataReader.LegSettings(DroneConfig);
                     dataReader.EffortSettings();
 
                     phase = 2;
@@ -308,8 +308,8 @@ namespace SkyCombDrone.DroneLogic
         // Validate the OnGroundAt setting
         public bool CalculateSettings_OnGroundAt_IsValid()
         {
-            if ((Config.OnGroundAt == OnGroundAtEnum.Neither) ||
-                (Config.OnGroundAt == OnGroundAtEnum.Auto))
+            if ((DroneConfig.OnGroundAt == OnGroundAtEnum.Neither) ||
+                (DroneConfig.OnGroundAt == OnGroundAtEnum.Auto))
                 return true;
 
             // The Config.OnGroundAt value is either Start, End or Both. Is this reasonable?
@@ -344,18 +344,18 @@ namespace SkyCombDrone.DroneLogic
 
                 // Calculate the flight legs Min/MaxStepIds
                 FlightLegs = new();
-                FlightLegs.Calculate_Pass1(FlightSections, FlightSteps, Config);
+                FlightLegs.Calculate_Pass1(FlightSections, FlightSteps, DroneConfig);
 
                 // Do we default to using legs? User can override in UI.
                 // We use legs if the total leg distance is > 33% of the total flight distance
-                Config.UseLegs =
+                DroneConfig.UseLegs =
                     (FlightSections.Sections.Count > 200) &&
                     (FlightLegs.Legs.Count > 2);
-                if (Config.UseLegs)
+                if (DroneConfig.UseLegs)
                 {
                     var legsLinealM = FlightLegs.SumLinealM();
                     var sectionsLinealM = FlightSections.Sections.Last().Value.SumLinealM;
-                    Config.UseLegs = (legsLinealM / sectionsLinealM > 0.33f);
+                    DroneConfig.UseLegs = (legsLinealM / sectionsLinealM > 0.33f);
                 }
 
                 // Refine the flight steps settings using leg information
@@ -367,9 +367,9 @@ namespace SkyCombDrone.DroneLogic
             else
             {
                 FlightLegs = new();
-                FlightLegs.Calculate_NoFlightData(Config);
+                FlightLegs.Calculate_NoFlightData(DroneConfig);
 
-                Config.UseLegs = false;
+                DroneConfig.UseLegs = false;
             }
         }
 
@@ -511,13 +511,13 @@ namespace SkyCombDrone.DroneLogic
         // - OnGroundAt is used in CalculateSettings_OnGroundAt to calculate DroneToGroundAltStartSyncM, DroneToGroundAltEndSyncM, FlightStep.AltitudeM
         public void CalculateSettings_ConfigHasChanged()
         {
-            Config.ValidateFixedCameraDownDeg();
+            DroneConfig.ValidateFixedCameraDownDeg();
 
-            if (Config.GimbalDataAvail != GimbalDataEnum.ManualNo)
+            if (DroneConfig.GimbalDataAvail != GimbalDataEnum.ManualNo)
             {
                 // These "sanity checks" are only needed if we do not have gimbal data
-                Config.MaxLegStepPitchDeg = 95; // Degrees
-                Config.MaxLegSumPitchDeg = 95; // Degrees
+                DroneConfig.MaxLegStepPitchDeg = 95; // Degrees
+                DroneConfig.MaxLegSumPitchDeg = 95; // Degrees
             }
 
             if (HasFlightSteps)
@@ -539,8 +539,8 @@ namespace SkyCombDrone.DroneLogic
         // Set the RunFromS and RunToS config values to specified values
         public void SetConfigRunFromTo(int startMs, int endMs)
         {
-            Config.RunVideoFromS = startMs / 1000.0f;
-            Config.RunVideoToS = endMs / 1000.0f;
+            DroneConfig.RunVideoFromS = startMs / 1000.0f;
+            DroneConfig.RunVideoToS = endMs / 1000.0f;
         }
 
 
@@ -581,7 +581,7 @@ namespace SkyCombDrone.DroneLogic
         // Default the RunFromS and RunToS config values 
         public void DefaultConfigRunFromTo()
         {
-            if (HasFlightLegs && Config.UseLegs)
+            if (HasFlightLegs && DroneConfig.UseLegs)
                 // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
                 // This is the "interesting" part of the flight that the Flow and Comb processes are best applied to.
                 SetConfigRunFromToBySection(
@@ -596,8 +596,8 @@ namespace SkyCombDrone.DroneLogic
             else if (HasInputVideo)
             {
                 // Default the RunFrom/To to the full video length
-                Config.RunVideoFromS = 0;
-                Config.RunVideoToS = InputVideo.DurationMs / 1000.0f;
+                DroneConfig.RunVideoFromS = 0;
+                DroneConfig.RunVideoToS = InputVideo.DurationMs / 1000.0f;
 
                 CalculateSettings_SwatheSeen(1, 9999);
             }
@@ -607,14 +607,14 @@ namespace SkyCombDrone.DroneLogic
         // Reset input AND display video frame position & load image(s)
         public void SetAndGetCurrFrames(int inputFrameId)
         {
-            SetAndGetCurrFrames(inputFrameId, (int)(Config.ThermalToOpticalVideoDelayS * 1000));
+            SetAndGetCurrFrames(inputFrameId, (int)(DroneConfig.ThermalToOpticalVideoDelayS * 1000));
         }
 
 
         // Get (advance to) the next frame of the video(s)
         public bool GetNextFrames()
         {
-            return GetNextFrames((int)(Config.ThermalToOpticalVideoDelayS * 1000));
+            return GetNextFrames((int)(DroneConfig.ThermalToOpticalVideoDelayS * 1000));
         }
 
 
@@ -659,7 +659,7 @@ namespace SkyCombDrone.DroneLogic
             if (!success)
                 return;
 
-            Config.GimbalDataAvail = cameraPitchYawRoll;
+            DroneConfig.GimbalDataAvail = cameraPitchYawRoll;
             flightData.CalculateSettings();
             flightData.AssertGood();
 

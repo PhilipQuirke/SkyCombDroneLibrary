@@ -60,14 +60,14 @@ namespace SkyCombDrone.PersistModel
                 Data.SetColumnWidth(FlightSectionModel.LatitudeSetting, 12);
 
                 // Highlight in red any section where the TimeMs exceeds FlightConfig.MaxLegGapDurationMs. This implies not part of a leg.
-                Data.AddConditionalRuleBad(TardisModel.TimeMsSetting, sectionRow, Drone.Config.MaxLegGapDurationMs);
+                Data.AddConditionalRuleBad(TardisModel.TimeMsSetting, sectionRow, Drone.DroneConfig.MaxLegGapDurationMs);
 
-                if (Drone.Config.GimbalDataAvail == GimbalDataEnum.ManualNo)
+                if (Drone.DroneConfig.GimbalDataAvail == GimbalDataEnum.ManualNo)
                     // Highlight in red any step where the PitchRad exceeds FlightConfig.MaxLegPitchDeg. This implies not part of a leg.
-                    Data.AddConditionalRuleBad(TardisModel.PitchDegSetting, sectionRow, Drone.Config.MaxLegStepPitchDeg);
+                    Data.AddConditionalRuleBad(TardisModel.PitchDegSetting, sectionRow, Drone.DroneConfig.MaxLegStepPitchDeg);
 
                 // Highlight in red any cells where the DeltaYaw exceeds FlightConfig.MaxLegStepDeltaYawDeg. This implies not part of a leg.
-                Data.AddConditionalRuleBad(TardisModel.DeltaYawDegSetting, sectionRow, Drone.Config.MaxLegStepDeltaYawDeg);
+                Data.AddConditionalRuleBad(TardisModel.DeltaYawDegSetting, sectionRow, Drone.DroneConfig.MaxLegStepDeltaYawDeg);
 
                 Data.SetLastUpdateDateTime(Sections1TabName);
             }

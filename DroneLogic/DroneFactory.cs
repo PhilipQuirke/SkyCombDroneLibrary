@@ -189,7 +189,7 @@ namespace SkyCombDrone.DroneLogic
                         answer.CalculateSettings_StepsAndLegs();
                         if (!answer.CalculateSettings_OnGroundAt_IsValid())
                         {
-                            answer.Config.OnGroundAt = OnGroundAtEnum.Neither;
+                            answer.DroneConfig.OnGroundAt = OnGroundAtEnum.Neither;
                             answer.CalculateSettings_ConfigHasChanged();
                         }
                         answer.EffortDurations.CalcStepsMs = EffortMs();

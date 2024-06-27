@@ -131,11 +131,11 @@ namespace SkyCombDrone.DrawSpace
 
         public override string DescribePath { get { return ( Drone == null ? "" : Drone.DescribeFlightPath ); } }
 
-        public override string DescribePitch { get { return (Drone == null ? "" : Drone.FlightSteps.DescribePitch(Drone.Config) ); } }
+        public override string DescribePitch { get { return (Drone == null ? "" : Drone.FlightSteps.DescribePitch(Drone.DroneConfig) ); } }
 
-        public override string DescribeDeltaYaw { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeDeltaYaw(Drone.Config) ); } }
+        public override string DescribeDeltaYaw { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeDeltaYaw(Drone.DroneConfig) ); } }
 
-        public override string DescribeRoll { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeRoll(Drone.Config) ); } }
+        public override string DescribeRoll { get { return (Drone == null ? "" : Drone.FlightSteps.DescribeRoll(Drone.DroneConfig) ); } }
 
         public override (float, float) MinMaxVerticalAxisM { get { return Drone == null ? (0,0) : Drone.FlightSteps.MinMaxVerticalAxisM; } }
 

@@ -208,14 +208,14 @@ namespace SkyCombDrone.DroneLogic
 
         // How do we best calculate the camera down angle?
         public float CameraToVerticalForwardDeg { get {
-            if (FlightSection.Drone.Config.GimbalDataAvail == GimbalDataEnum.ManualNo)
+            if (FlightSection.Drone.DroneConfig.GimbalDataAvail == GimbalDataEnum.ManualNo)
             {
                 // Camera may be pointing straight down (CameraDownDeg=90)
                 // or forward in direction of flight (CameraDownDeg=0)
                 // or in between (say CameraDownDeg=72)
                 // Calculate difference between CameraDownAngle and the vertical.
                 // Assumes drone camera down angle is constant over the period image is seen. 
-                int cameraToVertDeg = FlightSection.Drone.Config.FixedCameraToVerticalForwardDeg;
+                int cameraToVertDeg = FlightSection.Drone.DroneConfig.FixedCameraToVerticalForwardDeg;
                 Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 90, "BestCameraDownDeg: Bad cameraToVertDeg");
                 return cameraToVertDeg;
             }
@@ -563,7 +563,7 @@ namespace SkyCombDrone.DroneLogic
                 // If the drone flight video record started &/or ended when the drone was on the ground
                 // then the ground DEM and drone Altitude should match (within the ground.ElevationAccuracyM error).
                 // If they don't we assume the ground DEM us more accurate, and correct the drone altitude.
-                switch (Drone.Config.OnGroundAt)
+                switch (Drone.DroneConfig.OnGroundAt)
                 {
                     case OnGroundAtEnum.Start:
                         // Drone was on ground at start of the flight
@@ -636,7 +636,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 FlightStep theStep = thisStep.Value;
 
-                var smooth = Drone.Config.SmoothSectionRadius;
+                var smooth = Drone.DroneConfig.SmoothSectionRadius;
                 if ((smooth >= 1) && (Steps.Count > smooth * 2))
                     theStep.CalculateSettings_SmoothAltitude(smooth, Sections);
             }
@@ -653,7 +653,7 @@ namespace SkyCombDrone.DroneLogic
 
                 // Smooth the data  
                 bool sensibleStep = true;
-                var smooth = Drone.Config.SmoothSectionRadius;
+                var smooth = Drone.DroneConfig.SmoothSectionRadius;
                 if ((smooth >= 1) && (Steps.Count > smooth * 2))
                     sensibleStep = theStep.CalculateSettings_SmoothLocationYawPitch(smooth, Sections);
 

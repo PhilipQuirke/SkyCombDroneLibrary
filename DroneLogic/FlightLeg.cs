@@ -30,8 +30,8 @@ namespace SkyCombDrone.DroneLogic
                 if ((!drone.HasFlightSteps) || (minStepId < 0) || (maxStepid < 0))
                     return 0;
 
-                var runFromS = drone.Config.RunVideoFromS;
-                var runToS = drone.Config.RunVideoToS;
+                var runFromS = drone.DroneConfig.RunVideoFromS;
+                var runToS = drone.DroneConfig.RunVideoToS;
 
                 var legFromS = drone.FlightSteps.Steps[minStepId].FlightSection.StartTime.TotalSeconds;
                 var legToS = drone.FlightSteps.Steps[maxStepid].FlightSection.StartTime.TotalSeconds;
