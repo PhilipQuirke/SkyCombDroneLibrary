@@ -1,8 +1,7 @@
-﻿using SkyCombDrone.DroneLogic;
+﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using static System.Collections.Specialized.BitVector32;
-
 
 
 namespace SkyCombDrone.PersistModel
