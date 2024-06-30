@@ -225,8 +225,9 @@ namespace SkyCombDrone.DroneModel
             Assert(MinSpeedMps >= original.MinSpeedMps - epsilon, "AssertGoodRevision: Bad MinSpeedMps");
             Assert(MaxSpeedMps <= original.MaxSpeedMps + epsilon, "AssertGoodRevision: Bad MaxSpeedMps");
 
-            Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg - 1, "AssertGoodRevision: Bad MinDeltaYawDeg");
-            Assert(MaxDeltaYawDeg <= original.MaxDeltaYawDeg + 1, "AssertGoodRevision: Bad MaxDeltaYawDeg");
+            float delta_yaw_epsilon = 3; // For example refer DJI_0120 step 207 where drone turns 80 degrees in ~1s and we have 5 sections
+            Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg - delta_yaw_epsilon, "AssertGoodRevision: Bad MinDeltaYawDeg");
+            Assert(MaxDeltaYawDeg <= original.MaxDeltaYawDeg + delta_yaw_epsilon, "AssertGoodRevision: Bad MaxDeltaYawDeg");
         }
 
 

@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+﻿// Copyright SkyComb Limited 2024. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
@@ -17,9 +17,6 @@ namespace SkyCombDrone.DroneLogic
         {
             Drone = drone;
         }
-
-
- 
 
 
         // Calculate location of drone at this flight section in local NorthingM/EastingM.
@@ -177,6 +174,77 @@ namespace SkyCombDrone.DroneLogic
             }
 
             return new(northingM, eastingM);
+        }
+
+
+        public (bool, float, float, float, float, float, float, float, float, float) Smooth(int thisSectionId, int smoothRadius)
+        {
+            float sumLocnWeight = 0;
+            float sumNorthingM = 0;
+            float sumEastingM = 0;
+
+            float sumPosYawWeight = 0;
+            float sumPosYawDegs = 0;
+            float sumNegYawWeight = 0;
+            float sumNegYawDegs = 0;
+
+            float sumPitchWeight = 0;
+            float sumPitchDegs = 0;
+
+            FlightSection focus_section = Sections[thisSectionId];
+
+            // Collect data from the Sections around thisSectionId, weighted by their distance in time.
+            for (int j = Math.Max(0, thisSectionId - smoothRadius); j <= thisSectionId + smoothRadius; j++)
+            {
+                if (Sections.TryGetValue(j, out FlightSection? nearbySection))
+                {
+                    // If a "large gap" stepId is nearby then don't smooth this step.
+                    // This "averaging" function assumes an even number of "sensible" neighbours before AND after this step
+                    if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
+                        return (false, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+                    bool middleSection = (nearbySection.SectionId == thisSectionId);
+                    var time_diff = Math.Abs(nearbySection.SumTimeMs - focus_section.SumTimeMs);
+                    if ((!middleSection) && (time_diff == 0))
+                        continue;
+                    // Give most weight to the middle section, less weight to other sections, depending on their distance.
+                    float weight = middleSection ? 1.0f : Math.Min(0.9f, 1.0f * FlightSectionModel.SectionMinMs / time_diff);
+
+                    if (nearbySection.GlobalLocation.Specified && (nearbySection.DroneLocnM != null))
+                    {
+                        sumLocnWeight += weight;
+                        sumNorthingM += nearbySection.DroneLocnM.NorthingM * weight;
+                        sumEastingM += nearbySection.DroneLocnM.EastingM * weight;
+                    }
+
+                    var theYawDegs = nearbySection.YawDeg;
+                    if (theYawDegs != UnknownValue)
+                    {
+                        // Summing then averaging positive (-166) degrees with negative (+174) degree
+                        // yaws due to a jump between sections gives a bad (near zero) answer.
+                        if (theYawDegs > 0)
+                        {
+                            sumPosYawDegs += theYawDegs * weight;
+                            sumPosYawWeight += weight;
+                        }
+                        else
+                        {
+                            sumNegYawDegs += theYawDegs * weight;
+                            sumNegYawWeight += weight;
+                        }
+                    }
+
+                    var thePitchDegs = nearbySection.PitchDeg;
+                    if (thePitchDegs != UnknownValue)
+                    {
+                        // Mixing just positive and just negative rads here is fine
+                        sumPitchDegs += thePitchDegs * weight;
+                        sumPitchWeight += weight;
+                    }
+                }
+            }
+
+            return (true, sumLocnWeight, sumNorthingM, sumEastingM, sumPosYawDegs, sumNegYawDegs, sumPosYawWeight, sumNegYawWeight, sumPitchDegs, sumPitchWeight);
         }
 
 

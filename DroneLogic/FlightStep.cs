@@ -86,74 +86,18 @@ namespace SkyCombDrone.DroneLogic
             if (TimeMs > FlightSection.MaxSensibleSectionDurationMs)
                 return false;
 
+            var thisSectionId = FlightSection.SectionId;
             Assert(smoothRadius >= 1, "CalculateSettings_SmoothLocationYawPitch: No smoothing");
 
 
-            float sumWeight = 0;
-            float sumNorthingM = 0;
-            float sumEastingM = 0;
+            (bool success, float sumLocnWeight, float sumNorthingM, float sumEastingM, float sumPosYawDegs, float sumNegYawDegs, float sumPosYawWeight, float sumNegYawWeight, float sumPitchDegs, float sumPitchWeight)
+                = sections.Smooth(thisSectionId, smoothRadius);
+            if(!success)
+                return false;
 
-            float sumPosYawWeight = 0;
-            float sumPosYawDegs = 0;
-            float sumNegYawWeight = 0;
-            float sumNegYawDegs = 0;
 
-            float sumPitchWeight = 0;
-            float sumPitchDegs = 0;
-
-            // Collect data from the previous, this and next Sections around thisStep, weighted by their distance in time.
-            var thisSectionId = FlightSection.SectionId;
-            for (int j = Math.Max(0,thisSectionId - smoothRadius); j <= thisSectionId + smoothRadius; j++)
-            {
-                if (sections.Sections.TryGetValue(j, out FlightSection? nearbySection))
-                {
-                    // If a "large gap" stepId is nearby then don't smooth this step.
-                    // This "averaging" function assumes an even number of "sensible" neighbours before AND after this step
-                    if (nearbySection.TimeMs > FlightSection.MaxSensibleSectionDurationMs)
-                        return false;
-
-                    bool middleSection = (nearbySection.SectionId == thisSectionId);
-                    var time_diff = Math.Abs(nearbySection.SumTimeMs - FlightSection.SumTimeMs);
-                    if ((!middleSection) && (time_diff == 0))
-                        continue;
-                    float weight = middleSection ? 1.0f : 1.0f * FlightSectionModel.SectionMinMs / time_diff;
-
-                    if (nearbySection.GlobalLocation.Specified && (nearbySection.DroneLocnM != null))
-                    {
-                        sumWeight += weight;
-                        sumNorthingM += nearbySection.DroneLocnM.NorthingM * weight;
-                        sumEastingM += nearbySection.DroneLocnM.EastingM * weight;
-                    }
-
-                    var theYawDegs = nearbySection.YawDeg;
-                    if (theYawDegs != UnknownValue)
-                    {
-                        // Summing then averaging positive (-166) degrees with negative (+174) degree
-                        // yaws due to a jump between sections gives a bad (near zero) answer.
-                        if (theYawDegs > 0)
-                        {
-                            sumPosYawDegs += theYawDegs * weight;
-                            sumPosYawWeight += weight;
-                        }
-                        else
-                        {
-                            sumNegYawDegs += theYawDegs * weight;
-                            sumNegYawWeight += weight;
-                        }
-                    }
-
-                    var thePitchDegs = nearbySection.PitchDeg;
-                    if (thePitchDegs != UnknownValue)
-                    {
-                        // Mixing just positive and just negative rads here is fine
-                        sumPitchDegs += thePitchDegs * weight;
-                        sumPitchWeight += weight;
-                    }
-                }
-            }
-
-            if (sumWeight > 1)
-                DroneLocnM = new(sumNorthingM / sumWeight, sumEastingM / sumWeight);
+            if (sumLocnWeight > 1)
+                DroneLocnM = new(sumNorthingM / sumLocnWeight, sumEastingM / sumLocnWeight);
 
             if ((sumPosYawWeight > 0) && (sumNegYawWeight > 0))
             {
@@ -671,11 +615,12 @@ namespace SkyCombDrone.DroneLogic
                 Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
                 Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
-                Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + 1 + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
-                Assert(theStep.DeltaYawDeg >= Sections.MinDeltaYawDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinDeltaYawDeg " + theStep.DeltaYawDeg + " < " + Sections.MinDeltaYawDeg);
                 Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + 1 + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
                 Assert(theStep.PitchDeg >= Sections.MinPitchDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinPitchDeg " + theStep.PitchDeg + " < " + Sections.MinPitchDeg);
-
+                
+                float delta_yaw_epsilon = 3; // For example refer DJI_0120 step 207 where drone turns 80 degrees in ~1s and we have 5 sections
+                Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + delta_yaw_epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
+                Assert(theStep.DeltaYawDeg >= Sections.MinDeltaYawDeg - delta_yaw_epsilon, "CalculateSettings_SmoothLocationYawPitch: MinDeltaYawDeg " + theStep.DeltaYawDeg + " < " + Sections.MinDeltaYawDeg);
 
                 prevStep = theStep;
             }
