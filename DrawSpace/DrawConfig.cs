@@ -16,7 +16,6 @@ namespace SkyCombDrone.DrawSpace
         public int AreaPadding { get; set; } = 2;
         // Bounding rectangle persistance in frames. For example, 1
         public int AreaPersistence { get; set; } = 10;
-        public int FlowHotPixels { get; set; } = 100;
 
 
         public Color DrawPixelColor = DroneColors.PixelColor;
@@ -63,7 +62,6 @@ namespace SkyCombDrone.DrawSpace
             answer.Palette = Palette;
             answer.AreaPadding = AreaPadding;
             answer.AreaPersistence = AreaPersistence;
-            answer.FlowHotPixels = FlowHotPixels;
 
             answer.DrawPixelColor = DrawPixelColor;
             answer.DrawRealFeatureColor = DrawRealFeatureColor;
@@ -80,8 +78,6 @@ namespace SkyCombDrone.DrawSpace
                 { "Draw Palette", Palette },
                 { "Draw Area Padding", AreaPadding },
                 { "Draw Area Persistence", AreaPersistence },
-                { "Draw Flow Hot Pixels", FlowHotPixels },
-
             };
         }
 
@@ -94,7 +90,6 @@ namespace SkyCombDrone.DrawSpace
             Palette = CleanString(settings[i++]);
             AreaPadding = StringToNonNegInt(settings[i++]);
             AreaPersistence = StringToNonNegInt(settings[i++]);
-            FlowHotPixels = StringToNonNegInt(settings[i++]);
         }
     };
 

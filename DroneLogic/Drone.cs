@@ -583,7 +583,7 @@ namespace SkyCombDrone.DroneLogic
         {
             if (HasFlightLegs && DroneConfig.UseLegs)
                 // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
-                // This is the "interesting" part of the flight that the Flow and Comb processes are best applied to.
+                // This is the "interesting" part of the flight that the Yolo and Comb processes are best applied to.
                 SetConfigRunFromToBySection(
                     FlightLegs.Legs[0].MinStepId,
                     FlightLegs.Legs[^1].MaxStepId);
