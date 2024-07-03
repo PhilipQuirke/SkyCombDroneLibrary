@@ -422,7 +422,8 @@ namespace SkyCombDrone.PersistModel
         public void Save()
         {
             Data.SelectWorksheet(IndexTabName);
-            Data.Worksheet.View.SetTabSelected();
+            if (Data.Worksheet != null)
+                Data.Worksheet.View.SetTabSelected();
             Data.Save();
         }
     }
