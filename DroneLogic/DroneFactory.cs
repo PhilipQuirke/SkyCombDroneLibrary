@@ -127,8 +127,7 @@ namespace SkyCombDrone.DroneLogic
             Func<string, DateTime> readDateEncodedUtc,
             DroneDataStore droneDataStore, DroneConfigModel config, 
             string groundDirectory, 
-            Bitmap? countryBitmap,
-            WayPoints wayPoints)
+            Bitmap? countryBitmap)
         {
             Drone answer;
             string phase = "";
@@ -198,9 +197,6 @@ namespace SkyCombDrone.DroneLogic
                         showDroneSettings(phase);
                         answer.DefaultConfigRunFromTo();
                         answer.EffortDurations.CalcSwatheMs = EffortMs();
-
-                        phase = "Calculating waypoints...";
-                        answer.CalculateSettings_WayPoints(wayPoints);
 
                         phase = "Saving drone datastore...";
                         showDroneSettings(phase);

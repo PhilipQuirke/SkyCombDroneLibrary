@@ -172,33 +172,6 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        // Load all WayPoints from a XLS file 
-        public void WayPoints(WayPoints wayPoints)
-        {
-            int row = 2;
-            try
-            {
-                if (Data.SelectWorksheet(WayPointsTabName))
-                {
-                    var cell = Data.Worksheet.Cells[row, 1];
-                    while (cell != null && cell.Value != null && cell.Value.ToString() != "")
-                    {
-                        // Load the non-blank cells in this row into a FlightStep object
-                        var wayPoint = new WayPoint(Data.GetRowSettings(row, 1));
-                        wayPoints.Points.Add(wayPoint);
-
-                        row++;
-                        cell = Data.Worksheet.Cells[row, 1];
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ThrowException("DroneLoad.WayPoints: Row=" + row, ex);
-            }
-        }
-
-
         public FlightSections LoadSettings(string videoName, VideoData video, string logName, int col)
         {
             video.LoadSettings(VideoSettings(col));

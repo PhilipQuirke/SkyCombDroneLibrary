@@ -222,27 +222,6 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // Draw the waypoints (if any)
-        private void DrawWaypoints(ref Image<Bgr, byte> image)
-        {
-            if( base.DroneDrawScope == null || 
-                base.DroneDrawScope.Drone == null || 
-                base.DroneDrawScope.Drone.WayPoints == null || 
-                base.DroneDrawScope.Drone.WayPoints.Points.Count == 0)
-                return;
-
-            foreach (var point in base.DroneDrawScope.Drone.WayPoints.Points)
-            {
-                var droneLocation = DroneDrawScope.Drone.FlightSections.GlobalToDroneLocation(point.GlobalLocation);
-
-                var thisPoint = DroneLocnMToPixelPoint(droneLocation);
-
-                // Draw a circle to show the waypoint location.
-                Circle(ref image, thisPoint, DroneColors.ErrorBgr, 2);
-            }
-        }
-
-
         // Draw the flight path steps
         public void DrawFlightSteps(ref Image<Bgr, byte> image)
         {
@@ -529,9 +508,6 @@ namespace SkyCombDrone.DrawSpace
                         // Draw the flight path steps
                         if(DrawSteps)
                             DrawFlightSteps(ref image);
-
-                        // Draw the waypoints (if any)
-                        DrawWaypoints(ref image);
                     }
                 }
 

@@ -61,9 +61,6 @@ namespace SkyCombDrone.DroneLogic
         // Covers area corresponding to the drone flight log plus a 20m buffer.
         public GroundData? GroundData { get; set; }
 
-        // List of user defined waypoints (if any)
-        public WayPoints? WayPoints { get; set; }
-
 
         public bool HasFlightSections { get { return (FlightSections != null) && FlightSections.Sections.Count > 0; } }
         public bool HasFlightSteps { get { return (FlightSteps != null) && FlightSteps.Steps.Count > 0; } }
@@ -77,7 +74,6 @@ namespace SkyCombDrone.DroneLogic
         public bool HasDroneZoom { get { return HasFlightSteps && FlightSteps.MaxZoom != UnknownValue; } }
         public bool HasDisplaySections { get { return DisplaySections != null; } }
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemModel != null) && (GroundData.DemModel.NumElevationsStored > 0); } }
-        public bool HasWayPoints{ get { return (WayPoints != null) && WayPoints.Points.Count > 0; } }
 
 
         // Do we use the flight leg information?
@@ -123,7 +119,6 @@ namespace SkyCombDrone.DroneLogic
             FlightSteps = null;
             FlightLegs = null;
             DisplaySections = null;
-            WayPoints = null;
         }
 
 
@@ -239,15 +234,6 @@ namespace SkyCombDrone.DroneLogic
                     }
                     phase = 7;
                     FlightLegs.Set_FlightStep_FlightLeg(FlightSteps);
-
-
-                    // Load WayPoints (if any)
-                    phase = 8;
-                    if (dataStore.SelectWorksheet(DataConstants.WayPointsTabName))
-                    {
-                        WayPoints = new();
-                        dataReader.WayPoints(WayPoints);
-                    }
 
                     return true;
                 }
@@ -371,28 +357,6 @@ namespace SkyCombDrone.DroneLogic
 
                 DroneConfig.UseLegs = false;
             }
-        }
-
-
-        // Calculate which waypoints (if any) relate to this drone flight
-        public void CalculateSettings_WayPoints(WayPoints wayPoints)
-        {
-            WayPoints = new();
-
-            if (wayPoints == null)
-                return;
-
-            // Use case: Operator, flying their drone, spots possum, captures waypoint on controller,
-            // then realises that he/she is not recording and then starts recording video to capture view of possum. 
-            // So waypoint timestamp is just outside the video time range.
-            int epsilonMinutes = 3;
-
-            // We only add the waypoint to the drone object 
-            // if the waypoint was created during (or very near to) the drone flight time period.
-            foreach (var point in wayPoints.Points)
-                if ((point.CreatedAt >= FlightSections.MinDateTime.AddMinutes(-epsilonMinutes)) &&
-                    (point.CreatedAt <= FlightSections.MaxDateTime.AddMinutes(epsilonMinutes)))
-                    WayPoints.Points.Add(point);
         }
 
 
@@ -750,7 +714,6 @@ namespace SkyCombDrone.DroneLogic
                 { "Northing M", northingM, 0 },
                 { "DEM %", (HasGroundData && (GroundData.DemModel != null) ? GroundData.DemModel.PercentDatumElevationsAvailable.ToString() : "") },
                 { "DSM %", (HasGroundData && (GroundData.DsmModel != null) ? GroundData.DsmModel.PercentDatumElevationsAvailable.ToString() : "") },
-                { "WayPoints", (HasWayPoints ? WayPoints.Points.Count : 0) },
                 { "File name", InputVideo.ShortFileName() },
                 { "Google Maps", GoogleMapsLink() },
             };

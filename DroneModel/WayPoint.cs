@@ -60,18 +60,4 @@ namespace SkyCombDrone.DroneModel
                 Description = settings[DescriptionSetting - 1];
         }
     }
-
-
-    // WayPoints is a time-ordered list of (zero to many) WayPoint objects
-    public class WayPoints : ConfigBase
-    {
-        // The list of flight legs in time order.
-        public List<WayPoint> Points = new();
-
-
-        public WayPoints()
-        {
-        }
-
-    }
 }
