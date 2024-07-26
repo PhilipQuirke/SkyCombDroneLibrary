@@ -247,7 +247,7 @@ namespace SkyCombDrone.DroneModel
                 { "Delta Yaw", DeltaYawDeg == UnknownValue ? UnknownLinealValue : DeltaYawDeg, DegreesNdp },
                 { "Pitch", PitchDeg == UnknownValue ? UnknownLinealValue : PitchDeg, DegreesNdp },
                 { "Roll", RollDeg == UnknownValue ? UnknownLinealValue : RollDeg, DegreesNdp },
-                { "Altitude M", AltitudeM, HeightNdp },
+                { "Altitude M", AltitudeM, ElevationNdp },
                 { "Focal Len", FocalLength, 2 },
                 { "Zoom", Zoom, 2 },
             };

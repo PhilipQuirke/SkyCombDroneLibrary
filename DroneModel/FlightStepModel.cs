@@ -96,8 +96,8 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("Leg Id", FlightLegId);
             answer.Add("Leg Name", FlightLegName);
-            answer.Add("DSM", DsmM, HeightNdp); // Graphs depend on this name (TBC)
-            answer.Add("DEM", DemM, HeightNdp); // Graphs depend on this name (TBC)
+            answer.Add("DSM", DsmM, ElevationNdp); // Graphs depend on this name (TBC)
+            answer.Add("DEM", DemM, ElevationNdp); // Graphs depend on this name (TBC)
             answer.Add("Img Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
             answer.Add("Img Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
             answer.Add("Img Dem M", InputImageDemM, ElevationNdp);
@@ -135,8 +135,8 @@ namespace SkyCombDrone.DroneModel
         // Add FlightStep settings to the "Block" settings for saving to Datastore to aid debugging/charting.
         public void AppendStepToBlockSettings(ref DataPairList answer)
         {
-            answer.Add("Dsm M", DsmM, HeightNdp);
-            answer.Add("Dem M", DemM, HeightNdp);
+            answer.Add("Dsm M", DsmM, ElevationNdp);
+            answer.Add("Dem M", DemM, ElevationNdp);
         }
 
     };
@@ -186,12 +186,12 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("File Name", ShortFileName());
             answer.Add("Avg Speed Mps", AvgSpeedMps, 2);
-            answer.Add("Min Dem M", MinDemM, HeightNdp);
-            answer.Add("Max Dem M", MaxDemM, HeightNdp);
-            answer.Add("Min Dsm M", MinDsmM, HeightNdp);
-            answer.Add("Max Dsm M", MaxDsmM, HeightNdp);
-            answer.Add("OnGroundAt Fix Start M", OnGroundAtFixStartM, HeightNdp);
-            answer.Add("OnGroundAt Fix End M", OnGroundAtFixEndM, HeightNdp);
+            answer.Add("Min Dem M", MinDemM, ElevationNdp);
+            answer.Add("Max Dem M", MaxDemM, ElevationNdp);
+            answer.Add("Min Dsm M", MinDsmM, ElevationNdp);
+            answer.Add("Max Dsm M", MaxDsmM, ElevationNdp);
+            answer.Add("OnGroundAt Fix Start M", OnGroundAtFixStartM, ElevationNdp);
+            answer.Add("OnGroundAt Fix End M", OnGroundAtFixEndM, ElevationNdp);
 
             return answer;
         }

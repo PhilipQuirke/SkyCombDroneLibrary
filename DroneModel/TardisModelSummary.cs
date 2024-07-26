@@ -430,9 +430,9 @@ namespace SkyCombDrone.DroneModel
         {
             return new DataPairList
             {
-                { "Max Drone Altitude M", MaxAltitudeM, HeightNdp },
-                { "Min Drone Altitude M", MinAltitudeM, HeightNdp },
-                { "Range Drone Altitude M", MaxAltitudeM - MinAltitudeM, HeightNdp },
+                { "Max Drone Altitude M", MaxAltitudeM, ElevationNdp },
+                { "Min Drone Altitude M", MinAltitudeM, ElevationNdp },
+                { "Range Drone Altitude M", MaxAltitudeM - MinAltitudeM, ElevationNdp },
             };
         }
 
@@ -496,8 +496,8 @@ namespace SkyCombDrone.DroneModel
                 { "Max Sum Lineal M", MaxSumLinealM, LocationNdp },
                 { "Min Speed Mps", MinSpeedMps, LocationNdp  },
                 { "Max Speed Mps", MaxSpeedMps, LocationNdp  },
-                { "Min Altitude M", MinAltitudeM, HeightNdp },
-                { "Max Altitude M", MaxAltitudeM, HeightNdp },
+                { "Min Altitude M", MinAltitudeM, ElevationNdp },
+                { "Max Altitude M", MaxAltitudeM, ElevationNdp },
                 { "Min Delta Yaw Deg", MinDeltaYawDeg, DegreesNdp },
                 { "Max Delta Yaw Deg", MaxDeltaYawDeg, DegreesNdp },
                 { "Min Pitch Deg", MinPitchDeg, DegreesNdp },
