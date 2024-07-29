@@ -699,17 +699,21 @@ namespace SkyCombDrone.DroneLogic
                 eastingM = (maxC.EastingM - minC.EastingM);
                 northingM = (maxC.NorthingM - minC.NorthingM); 
             }
-            
+
+            var dateTime = (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "");
+            var demPerc = GroundData.DemModel?.PercentDatumElevationsAvailable;
+            var dsmPerc = GroundData.DsmModel?.PercentDatumElevationsAvailable;
+
             return new DataPairList
             {
-                { "DateTime", (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "") },
+                { "DateTime", dateTime },
                 { "Duration", InputVideo.DurationMsToString(0) },
                 { "Country X", countryX, 0 },
                 { "Country Y", countryY, 0 },
                 { "Easting M", eastingM, 0 },
                 { "Northing M", northingM, 0 },
-                { "DEM %", GroundData.DemModel?.PercentDatumElevationsAvailable.ToString() },
-                { "DSM %", GroundData.DsmModel?.PercentDatumElevationsAvailable.ToString() },
+                { "DEM %", demPerc.ToString() },
+                { "DSM %", dsmPerc.ToString() },
                 { "File name", InputVideo.ShortFileName() },
                 { "Google Maps", GoogleMapsLink() },
             };
