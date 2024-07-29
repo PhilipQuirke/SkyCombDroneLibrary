@@ -36,17 +36,17 @@ namespace SkyCombDrone.DroneModel
 
 
         // Total number of frames in video
-        public int FrameCount { get; set; }
+        public int FrameCount { get; set; } = UnknownValue;
 
 
         // Duration of video in milliseconds
-        public int DurationMs { get; set; }
+        public int DurationMs { get; set; } = UnknownValue;
 
 
         // Height of video frame in pixels
-        public int ImageHeight { get; set; }
+        public int ImageHeight { get; set; } = UnknownValue;
         // Width of video frame in pixels
-        public int ImageWidth { get; set; }
+        public int ImageWidth { get; set; } = UnknownValue;
         // Size of the video frame in pixels
         public Size ImageSize { get { return new Size(ImageWidth, ImageHeight); } }
         // Size of the video frame in pixels
@@ -203,6 +203,9 @@ namespace SkyCombDrone.DroneModel
         }
         public static string DurationMsToString(double durationMs, int ndp)
         {
+            if( durationMs < 0 )
+                return "";
+
             return DurationSecToString(durationMs / 1000.0, ndp);
         }
         public string DurationMsToString(int ndp)

@@ -143,12 +143,13 @@ namespace SkyCombDrone.PersistModel
 
 
         // From a video file name, locate all applicable input files, ensure that a DataStore exists. 
-        public static DroneDataStore Create(
+        public static DroneDataStore? OpenOrCreate(
             Func<string, DateTime> readDateEncodedUtc,
             string videoFileName, 
-            string outputElseInputDirectory)
+            string outputElseInputDirectory,
+            bool canCreate)
         {
-            DroneDataStore answer = null;
+            DroneDataStore? answer = null;
 
             try
             {
@@ -184,7 +185,7 @@ namespace SkyCombDrone.PersistModel
                             throw BaseConstants.ThrowException("DataStoreFactory.Create: Failed to open existing DataStore " + dataStoreName);
                         }
                     }
-                    else
+                    else if (canCreate)
                         // Create a new datastore.
                         // One failure mode is if the outputElseInputDirectory does not exist.                        
                         answer = new(dataStoreName,

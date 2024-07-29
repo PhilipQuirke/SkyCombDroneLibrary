@@ -127,7 +127,8 @@ namespace SkyCombDrone.DroneLogic
             Func<string, DateTime> readDateEncodedUtc,
             DroneDataStore droneDataStore, DroneConfigModel config, 
             string groundDirectory, 
-            Bitmap? countryBitmap)
+            Bitmap? countryBitmap,
+            bool fullLoad = true)
         {
             Drone answer;
             string phase = "";
@@ -148,12 +149,12 @@ namespace SkyCombDrone.DroneLogic
 
                     phase = "Loading flight log...";
                     showDroneSettings(phase);
-                    var loadedFlight = answer.LoadSettings_Flight(droneDataStore);
+                    var loadedFlight = answer.LoadSettings_Flight(droneDataStore, fullLoad);
                     answer.EffortDurations.LoadFlightLogMs = EffortMs();
 
                     phase = "Loading ground elevations...";
                     showDroneSettings(phase);
-                    var loadedGround = answer.LoadSettings_Ground(droneDataStore);
+                    var loadedGround = answer.LoadSettings_Ground(droneDataStore, fullLoad);
                     answer.EffortDurations.LoadGroundMs = EffortMs();
 
                     if (!(loadedFlight && loadedGround))
@@ -170,37 +171,39 @@ namespace SkyCombDrone.DroneLogic
                         answer.CalculateSettings_Video();
                         answer.EffortDurations.CalcVideosMs = EffortMs();
 
-
-                        phase = "Calculating flight sections...";
-                        showDroneSettings(phase);
-                        answer.CalculateSettings_FlightSections();
-                        answer.EffortDurations.CalcSectionsMs = EffortMs();
-
-                        SetCameraSpecifics(answer);
-
-                        phase = "Calculating ground elevations...";
-                        showDroneSettings(phase);
-                        answer.CalculateSettings_Ground(groundDirectory);
-                        answer.EffortDurations.CalcGroundMs = EffortMs();
-
-                        phase = "Calculating flight steps and legs...";
-                        showDroneSettings(phase);
-                        answer.CalculateSettings_StepsAndLegs();
-                        if (!answer.CalculateSettings_OnGroundAt_IsValid())
+                        if (fullLoad)
                         {
-                            answer.DroneConfig.OnGroundAt = OnGroundAtEnum.Neither;
-                            answer.CalculateSettings_ConfigHasChanged();
+                            phase = "Calculating flight sections...";
+                            showDroneSettings(phase);
+                            answer.CalculateSettings_FlightSections();
+                            answer.EffortDurations.CalcSectionsMs = EffortMs();
+
+                            SetCameraSpecifics(answer);
+
+                            phase = "Calculating ground elevations...";
+                            showDroneSettings(phase);
+                            answer.CalculateSettings_Ground(groundDirectory);
+                            answer.EffortDurations.CalcGroundMs = EffortMs();
+
+                            phase = "Calculating flight steps and legs...";
+                            showDroneSettings(phase);
+                            answer.CalculateSettings_StepsAndLegs();
+                            if (!answer.CalculateSettings_OnGroundAt_IsValid())
+                            {
+                                answer.DroneConfig.OnGroundAt = OnGroundAtEnum.Neither;
+                                answer.CalculateSettings_ConfigHasChanged();
+                            }
+                            answer.EffortDurations.CalcStepsMs = EffortMs();
+
+                            phase = "Calculating swathe seen...";
+                            showDroneSettings(phase);
+                            answer.DefaultConfigRunFromTo();
+                            answer.EffortDurations.CalcSwatheMs = EffortMs();
+
+                            phase = "Saving drone datastore...";
+                            showDroneSettings(phase);
+                            answer.SaveSettings(droneDataStore, countryBitmap);
                         }
-                        answer.EffortDurations.CalcStepsMs = EffortMs();
-
-                        phase = "Calculating swathe seen...";
-                        showDroneSettings(phase);
-                        answer.DefaultConfigRunFromTo();
-                        answer.EffortDurations.CalcSwatheMs = EffortMs();
-
-                        phase = "Saving drone datastore...";
-                        showDroneSettings(phase);
-                        answer.SaveSettings(droneDataStore, countryBitmap);
                     }
                 }
 

@@ -88,16 +88,16 @@ namespace SkyCombDrone.DroneModel
 
 
         // Minimum local (not UTC) date/time from the flight data
-        public DateTime MinDateTime { get; set; }
+        public DateTime MinDateTime { get; set; } = DateTime.MinValue;
         // Maximum local (not UTC) date/time from the flight data
-        public DateTime MaxDateTime { get; set; }
+        public DateTime MaxDateTime { get; set; } = DateTime.MinValue;
 
 
         // The Min/MaxGlobalLocation values represent a box encompassing the locations the drone flew over.
         // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
         // so the Min/MaxGlobalLocation box is commonly a larger area than the area the drone flew over.
-        public GlobalLocation? MinGlobalLocation { get; set; }
-        public GlobalLocation? MaxGlobalLocation { get; set; } // Value is always very similar to MinGlobalLocation
+        public GlobalLocation? MinGlobalLocation { get; set; } = null;
+        public GlobalLocation? MaxGlobalLocation { get; set; } = null; // Value is always very similar to MinGlobalLocation
 
 
         // The Min/MaxCountryLocation values represent a box encompassing the locations the drone flew over.

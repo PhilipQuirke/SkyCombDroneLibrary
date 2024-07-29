@@ -163,7 +163,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Load existing drone flight (if any) from the DataStore 
-        public bool LoadSettings_Flight(DroneDataStore dataStore)
+        public bool LoadSettings_Flight(DroneDataStore dataStore, bool fullLoad = true)
         {
             int phase = 0;
             try
@@ -207,7 +207,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load the FlightSections (if any)
                     phase = 4;
-                    if (dataStore.SelectWorksheet(DataConstants.Sections1TabName))
+                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.Sections1TabName))
                     {
                         dataReader.FlightSections(FlightSections);
 
@@ -218,7 +218,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load FlightSteps (if any)
                     phase = 5;
-                    if (dataStore.SelectWorksheet(DataConstants.Steps1TabName))
+                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.Steps1TabName))
                     {
                         dataReader.FlightSteps(FlightSections, FlightSteps);
                         FlightSteps.AssertGood();
@@ -227,7 +227,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load FlightLegs (if any)
                     phase = 6;
-                    if (dataStore.SelectWorksheet(DataConstants.LegsTabName))
+                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.LegsTabName))
                     {
                         dataReader.FlightLegs(FlightLegs, HasFlightSteps);
                         FlightLegs.AssertGood(HasFlightSteps);
@@ -249,9 +249,9 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Load ground data (if any) from the DataStore 
-        public bool LoadSettings_Ground(DroneDataStore droneDataStore)
+        public bool LoadSettings_Ground(DroneDataStore droneDataStore, bool fullLoad)
         {
-            GroundData = GroundLoad.Load(droneDataStore);
+            GroundData = GroundLoad.Load(droneDataStore, fullLoad);
 
             return HasGroundData;
         }
@@ -682,7 +682,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Get the drone settings needed to describe the flight in the SkyCombFLights app
+        // Get the drone settings needed to describe the flight in the SkyCombFlights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
             float countryX = 0;
@@ -690,30 +690,26 @@ namespace SkyCombDrone.DroneLogic
             float eastingM = 0;
             float northingM = 0;
 
-            if (HasFlightSections)
+            var minC = FlightSections.MinCountryLocation;
+            var maxC = FlightSections.MaxCountryLocation;
+            if ((maxC != null) && (minC != null))
             {
-
-                var minC = FlightSections.MinCountryLocation;
-                var maxC = FlightSections.MaxCountryLocation;
-                if ((maxC != null) && (minC != null))
-                {
-                    countryX = (minC.EastingM + maxC.EastingM)/ 2.0f;
-                    countryY = (minC.NorthingM + maxC.NorthingM)/ 2.0f;
-                    eastingM = (maxC.EastingM - minC.EastingM);
-                    northingM = (maxC.NorthingM - minC.NorthingM); 
-                }
+                countryX = (minC.EastingM + maxC.EastingM)/ 2.0f;
+                countryY = (minC.NorthingM + maxC.NorthingM)/ 2.0f;
+                eastingM = (maxC.EastingM - minC.EastingM);
+                northingM = (maxC.NorthingM - minC.NorthingM); 
             }
-
+            
             return new DataPairList
             {
-                { "DateTime", (HasFlightSections ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "") },
-                { "Duration", (HasInputVideo ? InputVideo.DurationMsToString(0) : "") },
+                { "DateTime", (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "") },
+                { "Duration", InputVideo.DurationMsToString(0) },
                 { "Country X", countryX, 0 },
                 { "Country Y", countryY, 0 },
                 { "Easting M", eastingM, 0 },
                 { "Northing M", northingM, 0 },
-                { "DEM %", (HasGroundData && (GroundData.DemModel != null) ? GroundData.DemModel.PercentDatumElevationsAvailable.ToString() : "") },
-                { "DSM %", (HasGroundData && (GroundData.DsmModel != null) ? GroundData.DsmModel.PercentDatumElevationsAvailable.ToString() : "") },
+                { "DEM %", GroundData.DemModel?.PercentDatumElevationsAvailable.ToString() },
+                { "DSM %", GroundData.DsmModel?.PercentDatumElevationsAvailable.ToString() },
                 { "File name", InputVideo.ShortFileName() },
                 { "Google Maps", GoogleMapsLink() },
             };
