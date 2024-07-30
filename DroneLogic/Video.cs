@@ -11,12 +11,12 @@ namespace SkyCombDrone.DroneLogic
     public class VideoData : VideoModel
     {
         // The current video FrameID position as at the last GetFrameInternal call
-        public int CurrFrameId { get; set; }
+        public int CurrFrameId { get; set; } = UnknownValue;
 
         // The current video position (in milliseconds) as at the last GetFrameInternal call
-        public int CurrFrameMs { get; set; }
+        public int CurrFrameMs { get; set; } = UnknownValue;
         // The current video frame as at the last GetFrameInternal call
-        public Mat? CurrFrameMat { get; set; }
+        public Mat? CurrFrameMat { get; set; } = null;
 
 
         // Do we have a frame cached?
@@ -40,18 +40,11 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Used for processing a single frame
-        public VideoData(int imageHeight, int imageWidth) :
-            base(imageHeight, imageWidth)
-        {
-            ResetCurrFrame();
-        }
-
-
         public void ResetCurrFrame()
         {
             CurrFrameId = UnknownValue;
             CurrFrameMs = UnknownValue;
+            CurrFrameMat?.Dispose();
             CurrFrameMat = null;
         }
 
@@ -62,6 +55,8 @@ namespace SkyCombDrone.DroneLogic
         {
             try
             {
+                ResetCurrFrame();
+
                 CurrFrameMat = DataAccess.QueryFrame();
 
                 // Get the current position in the video in frames
