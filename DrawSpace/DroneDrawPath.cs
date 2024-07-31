@@ -512,6 +512,7 @@ namespace SkyCombDrone.DrawSpace
                 }
 
                 BaseImage = image.Clone();
+                image.Dispose();
             }
             catch (Exception ex)
             {

@@ -328,7 +328,7 @@ namespace SkyCombDrone.DroneLogic
         public (Mat? inputMat, Mat? displayMat) CurrFrames()
         {
             Mat? inputMat = InputVideo.CurrFrameMat;
-            Mat? displayMat = (HasDisplayVideo ? DisplayVideo.CurrFrameMat : (inputMat != null ? inputMat.Clone() : null));
+            Mat? displayMat = (HasDisplayVideo ? DisplayVideo.CurrFrameMat : null);
             return (inputMat, displayMat);
         }
     }
