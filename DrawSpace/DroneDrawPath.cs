@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2023. All rights reserved.
+﻿// Copyright SkyComb Limited 2024. All rights reserved.
 using Emgu.CV;
 using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
@@ -14,7 +14,7 @@ using System.Drawing;
 namespace SkyCombDrone.DrawSpace
 {
     // Code to draw images related to drone flight path data
-    public class DroneDrawPath : DroneDrawGraph // : Draw
+    public class DroneDrawPath : DroneDrawGraph  
     {
         // Number of shades of green or brown to use in the background
         const int NumShades = 20;
