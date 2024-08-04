@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2023. All rights reserved. 
+﻿// Copyright SkyComb Limited 2024. All rights reserved. 
 using SkyCombGround.CommonSpace;
 
 
@@ -12,6 +12,24 @@ namespace SkyCombDrone.DroneModel
 
 
     // Configuration settings related to flight data.  
+    public class DroneIntervalModel : ConfigBase
+    {
+        // Start the video processing from this point (if specified) in seconds
+        public float RunVideoFromS { get; set; }
+
+        // Stop the video processing at this point (if specified) in seconds
+        public float RunVideoToS { get; set; }
+
+
+        public DroneIntervalModel(float runVideoFromS = 5, float runVideoToS = 10)
+        {
+            RunVideoFromS = runVideoFromS;
+            RunVideoToS = runVideoToS;
+        }
+    };
+
+
+    // Configuration settings related to flight data.  
     //
     // When processing new drone flight data for the first time:
     //      - the below member data default values are used, with a few override default values loaded from App.Config
@@ -20,16 +38,8 @@ namespace SkyCombDrone.DroneModel
     //      - ALL member data values are loaded from the DataStore specific to this drone flight. 
     //      - So if you want to trial different values for the same drone flight, alter the setting in the DATASTORE.
     //      - WARNING: Changing the values below will have no effect.
-    public class DroneConfigModel : ConfigBase
+    public class DroneConfigModel : DroneIntervalModel
     {
-        // Start the video processing from this point (if specified) in seconds
-        public float RunVideoFromS { get; set; } = 5;
-
-
-        // Stop the video processing at this point (if specified) in seconds
-        public float RunVideoToS { get; set; } = 10;
-
-
         // Sometimes the thermal and optical videos are out of sync by a few frames. 
         // A ThermalToOpticalVideoDelayS value of 0.5 means the optical video starts 0.5 seconds after the thermal video.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
