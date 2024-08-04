@@ -339,7 +339,13 @@ namespace SkyCombDrone.DroneLogic
                                 token = "[dzoom_ratio:";
                                 tokenPos = line.IndexOf(token);
                                 if (tokenPos >= 0)
-                                    thisSection.Zoom = (float)FindTokenValue(line, token, tokenPos, "]", ",");
+                                {
+                                    var zoom = (float)FindTokenValue(line, token, tokenPos, "]", ",");
+                                    // Files like DJI_20240717213841_0002_T.SRT contain [dzoom_ratio: 10000, delta:0]
+                                    // Sensible zooms are 2, 4, 8, etc. A zoom of greater than 100 is not sensible.
+                                    if (zoom < 100)
+                                        thisSection.Zoom = zoom;
+                                }
 
                                 // Find the latitude
                                 token = "[latitude:";
@@ -432,10 +438,6 @@ namespace SkyCombDrone.DroneLogic
                                     if (tokenPos >= 0)
                                         thisSection.RollDeg = (float)FindTokenValue(line, token, tokenPos, "]");
                                 }
-
-                                // Input text not used:
-                                //      [dzoom_ratio: 10000, delta: 0]
-                                //      [dzoom_ratio: 1.00]
 
                                 lineNum++;
                             }

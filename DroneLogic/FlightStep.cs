@@ -817,19 +817,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Maximum width of the image in meters
-        public float MaxImageWidthM()
-        {
-            float answer = 0;
-
-            foreach (var step in Steps.Values)
-                if (step.InputImageSizeM != null)
-                    answer = Math.Max(answer, step.InputImageSizeM.Value.X);
-
-            return answer;
-        }
-
-
         public void AssertGood()
         {
             Assert(FileName != "", "FlightSteps.AssertGood: No FileName");
