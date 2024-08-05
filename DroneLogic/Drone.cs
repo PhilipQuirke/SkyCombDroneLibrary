@@ -682,6 +682,20 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        public const int DateTimeIndex = 0;
+        public const int  DurationIndex = 1;
+        public const int  CountryXIndex = 2;
+        public const int  CountryYIndex = 3;
+        public const int  EastingMIndex = 4;
+        public const int  NorthingMIndex = 5;
+        public const int  DemPercIndex = 6;
+        public const int  DsmPercIndex = 7;
+        public const int  AvgHtOverDemIndex = 8;
+        public const int  MinHtOverDsmIndex = 9;
+        public const int  FileNameIndex = 10;
+        public const int  GoogleMapsIndex = 11;
+
+
         // Get the drone settings needed to describe the flight in the SkyCombFlights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
@@ -703,6 +717,8 @@ namespace SkyCombDrone.DroneLogic
             var dateTime = (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "");
             var demPerc = GroundData.DemModel?.PercentDatumElevationsAvailable;
             var dsmPerc = GroundData.DsmModel?.PercentDatumElevationsAvailable;
+            var avgHt = Math.Round(FlightSteps.AvgHeightOverDemM,0);
+            var minHt = Math.Round(FlightSteps.MinHeightOverDsmM,0);
 
             return new DataPairList
             {
@@ -714,6 +730,8 @@ namespace SkyCombDrone.DroneLogic
                 { "Northing M", northingM, 0 },
                 { "DEM %", demPerc.ToString() },
                 { "DSM %", dsmPerc.ToString() },
+                { "Avg Ht over DEM", (avgHt > 0 ? avgHt.ToString() : "") },
+                { "Min Ht over DSM", (minHt > 0 ? minHt.ToString() : "") },
                 { "File name", InputVideo.ShortFileName() },
                 { "Google Maps", GoogleMapsLink() },
             };
