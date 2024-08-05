@@ -161,5 +161,22 @@ namespace SkyCombDrone.DrawSpace
                 RunStepIdInScope(flightStep.StepId, flightStep.StepId) &&
                 Drone.FlightStepInRunScope(flightStep);
         }
+
+
+        public override DataPairList GetSettings_Altitude { get {
+                if( TardisSummary == null)
+                    return null;
+                
+                var answer = TardisSummary.GetSettings_Altitude();
+
+                if ((Drone != null) && Drone.HasFlightSteps)
+                {
+                    answer.Add( new DataPair("Avg Ht above DEM", Drone.FlightSteps.AvgHeightOverDemM, ElevationNdp));
+                    answer.Add( new DataPair("Min Ht above DSM", Drone.FlightSteps.MinHeightOverDsmM, ElevationNdp));
+                }
+
+                return answer;
+            } }
+
     }
 }
