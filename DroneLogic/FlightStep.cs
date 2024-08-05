@@ -479,19 +479,60 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return FlightStep.DemM minus FlightStep.AltitudeM
-        private float CalcDemLessInputAltitude(GroundData ground, int stepId)
+        private (float altLessDem, float altLessDsm) CalcAltitudeLessDemDsm(GroundData ground, FlightStep? theStep)
         {
-            var theCalc = Steps[stepId];
-            if ((theCalc != null) &&
-                (theCalc.AltitudeM != UnknownValue) &&
-                (theCalc.DemM != UnknownValue))
+            if ((theStep != null) &&
+                (theStep.AltitudeM != UnknownValue) &&
+                (theStep.DemM != UnknownValue))
             {
-                var droneToGroundDeltaM = theCalc.DemM - theCalc.AltitudeM;
-                if (Math.Abs(droneToGroundDeltaM) > ground.DemModel.ElevationAccuracyM)
-                    return droneToGroundDeltaM;
+                var altLessDem = theStep.AltitudeM - theStep.DemM; // Generally positive
+                if (Math.Abs(altLessDem) > ground.DemModel.ElevationAccuracyM)
+                {
+                    var altLessDsm = (theStep.DsmM != UnknownValue ? theStep.AltitudeM - theStep.DsmM : UnknownValue); // Generally positive
+                    return (altLessDem, altLessDsm);
+                }
             }
 
-            return 0;
+            return (UnknownValue, UnknownValue);
+        }
+        private float CalcDemLessInputAltitude(GroundData ground, int stepId)
+        {
+            (var altLessDem, var altLessDsm) = CalcAltitudeLessDemDsm(ground, Steps[stepId]);
+
+            if (altLessDem == UnknownValue)
+                return 0;
+
+            return - altLessDem;
+        }
+
+
+        // Calculate the average height of the drone above the DEM
+        // Calculate the minimum height of the drone above the DSM
+        public void CalculateSettings_AvgAndMinHeightM(GroundData ground)
+        {
+            AvgHeightOverDemM = UnknownValue;
+            MinHeightOverDsmM = UnknownValue;
+
+            int numSteps = 0;
+            float sumAltLessDem = 0;
+            float minAltLessDsm = 10000;
+            foreach (var thisStep in Steps)
+            {
+                (float altLessDem, float altLessDsm) = CalcAltitudeLessDemDsm(ground, thisStep.Value);
+                if (altLessDem > 0)
+                {
+                    numSteps++;
+                    sumAltLessDem += altLessDem;
+                    if(altLessDsm > 0)
+                        minAltLessDsm = Math.Min(minAltLessDsm, altLessDsm);
+                }
+            }
+
+            if (numSteps > 0)
+            {
+                AvgHeightOverDemM = (float)Math.Round(sumAltLessDem / numSteps, ElevationNdp);
+                MinHeightOverDsmM = (float)Math.Round(minAltLessDsm, ElevationNdp);
+            }
         }
 
 
@@ -682,6 +723,8 @@ namespace SkyCombDrone.DroneLogic
 
                 Steps.CalculateSettings_Summarise(this, Sections);
                 SetTardisMaxKey();
+
+                CalculateSettings_AvgAndMinHeightM(groundData);
             }
             catch (Exception ex)
             {

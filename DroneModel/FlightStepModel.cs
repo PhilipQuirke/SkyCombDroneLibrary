@@ -156,6 +156,11 @@ namespace SkyCombDrone.DroneModel
         // Do we have DroneOnGroundAtFix offsets?
         public bool HasOnGroundAtFix { get { return (OnGroundAtFixStartM != 0 || OnGroundAtFixEndM != 0); } }
 
+        // The average height of the drone above the DEM over these steps
+        public float AvgHeightOverDemM { get; set; } = BaseConstants.UnknownValue;
+        // The min height of the drone above the DSM over these steps
+        public float MinHeightOverDsmM { get; set; } = BaseConstants.UnknownValue;
+
 
         public FlightStepsModel(string fileName, List<string>? settings = null)
         {
@@ -192,6 +197,8 @@ namespace SkyCombDrone.DroneModel
             answer.Add("Max Dsm M", MaxDsmM, ElevationNdp);
             answer.Add("OnGroundAt Fix Start M", OnGroundAtFixStartM, ElevationNdp);
             answer.Add("OnGroundAt Fix End M", OnGroundAtFixEndM, ElevationNdp);
+            answer.Add("Avg Ht over Dem M", AvgHeightOverDemM, ElevationNdp);
+            answer.Add("Min Ht over Dsm M", MinHeightOverDsmM, ElevationNdp);
 
             return answer;
         }
@@ -211,6 +218,8 @@ namespace SkyCombDrone.DroneModel
             MaxDsmM = StringToFloat(settings[offset++]);
             OnGroundAtFixStartM = StringToFloat(settings[offset++]);
             OnGroundAtFixEndM = StringToFloat(settings[offset++]);
+            AvgHeightOverDemM = StringToFloat(settings[offset++]);
+            MinHeightOverDsmM = StringToFloat(settings[offset++]);
         }
     }
 
