@@ -285,7 +285,8 @@ namespace SkyCombDrone.DrawSpace
             ref Rectangle maxLocation,
             GroundModel groundModel, 
             Color highColor, Color lowColor, 
-            double minValue, double maxValue)
+            double minValue, double maxValue,
+            int drawOverlap = 5)
         {
             // Generate a list of shades (of green, brown, or blue) to use for the background.
             List<Color> theShades = GetColorShades(lowColor, highColor, NumShades);
@@ -308,8 +309,8 @@ namespace SkyCombDrone.DrawSpace
                     // - int rounding
                     // - edge between data from two ASC files (as shown by vertical gap in DJI_0094 in large mode (popup window))
                     // Most of this extension will be overdrawn by other (successive) squares.
-                    locationRect.Width += 5;
-                    locationRect.Height += 5;
+                    locationRect.Width += drawOverlap;
+                    locationRect.Height += drawOverlap;
 
                     // Check that the datum is within the image
                     if ((locationRect.X + locationRect.Width > 0) &&
