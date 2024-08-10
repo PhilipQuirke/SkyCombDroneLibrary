@@ -703,22 +703,39 @@ namespace SkyCombDrone.DroneLogic
             float countryY = 0;
             float eastingM = 0;
             float northingM = 0;
+            string dateTime = "";
+            int demPerc = 0;
+            int dsmPerc = 0;
+            double avgHt = 0;
+            double minHt = 0;
 
-            var minC = FlightSections.MinCountryLocation;
-            var maxC = FlightSections.MaxCountryLocation;
-            if ((maxC != null) && (minC != null))
+            if (FlightSections == null)
             {
-                countryX = (minC.EastingM + maxC.EastingM)/ 2.0f;
-                countryY = (minC.NorthingM + maxC.NorthingM)/ 2.0f;
-                eastingM = (maxC.EastingM - minC.EastingM);
-                northingM = (maxC.NorthingM - minC.NorthingM); 
+                dateTime = (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "");
+
+                var minC = FlightSections.MinCountryLocation;
+                var maxC = FlightSections.MaxCountryLocation;
+                if ((maxC != null) && (minC != null))
+                {
+                    countryX = (minC.EastingM + maxC.EastingM) / 2.0f;
+                    countryY = (minC.NorthingM + maxC.NorthingM) / 2.0f;
+                    eastingM = (maxC.EastingM - minC.EastingM);
+                    northingM = (maxC.NorthingM - minC.NorthingM);
+                }
             }
 
-            var dateTime = (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "");
-            var demPerc = GroundData.DemModel?.PercentDatumElevationsAvailable;
-            var dsmPerc = GroundData.DsmModel?.PercentDatumElevationsAvailable;
-            var avgHt = Math.Round(FlightSteps.AvgHeightOverDemM,0);
-            var minHt = Math.Round(FlightSteps.MinHeightOverDsmM,0);
+            if (GroundData != null)
+            {
+                demPerc = (int)GroundData.DemModel?.PercentDatumElevationsAvailable;
+                dsmPerc = (int)GroundData.DsmModel?.PercentDatumElevationsAvailable;
+
+            }
+
+            if (FlightSteps == null)
+            {
+                avgHt = Math.Round(FlightSteps.AvgHeightOverDemM, 0);
+                minHt = Math.Round(FlightSteps.MinHeightOverDsmM, 0);
+            }
 
             return new DataPairList
             {
@@ -728,8 +745,8 @@ namespace SkyCombDrone.DroneLogic
                 { "Country Y", countryY, 0 },
                 { "Easting M", eastingM, 0 },
                 { "Northing M", northingM, 0 },
-                { "DEM %", (int)demPerc, 0 },
-                { "DSM %", (int)dsmPerc, 0 },
+                { "DEM %", demPerc, 0 },
+                { "DSM %", dsmPerc, 0 },
                 { "Avg Ht over DEM", (avgHt > 0 ? avgHt : 0), 0 },
                 { "Min Ht over DSM", (minHt > 0 ? minHt : 0), 0 },
                 { "File name", InputVideo.ShortFileName() },
