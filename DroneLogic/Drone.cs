@@ -709,7 +709,7 @@ namespace SkyCombDrone.DroneLogic
             double avgHt = 0;
             double minHt = 0;
 
-            if (FlightSections == null)
+            if (FlightSections != null)
             {
                 dateTime = (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "");
 
@@ -731,7 +731,7 @@ namespace SkyCombDrone.DroneLogic
 
             }
 
-            if (FlightSteps == null)
+            if (FlightSteps != null)
             {
                 avgHt = Math.Round(FlightSteps.AvgHeightOverDemM, 0);
                 minHt = Math.Round(FlightSteps.MinHeightOverDsmM, 0);
