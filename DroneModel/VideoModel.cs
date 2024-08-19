@@ -78,7 +78,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // The video capture object providing access to the video contents
-        protected VideoCapture DataAccess { get; set; } = null;
+        protected VideoCapture? DataAccess { get; set; } = null;
 
 
         // THERMAL CAMERA SETTINGS
@@ -111,7 +111,6 @@ namespace SkyCombDrone.DroneModel
         public int FontScale { get { return ImageWidth < 1000 ? 1 : 2; } }
         
 
-
         public VideoModel(string fileName, bool thermal, Func<string,DateTime> readDateEncodedUtc)
         {
             FileName = fileName;
@@ -133,25 +132,6 @@ namespace SkyCombDrone.DroneModel
 
             if(readDateEncodedUtc!= null)
                 DateEncodedUtc = readDateEncodedUtc(FileName);
-        }
-
-
-        // Used for processing a single frame
-        public VideoModel(int imageHeight, int imageWidth)
-        {
-            FileName = "";
-            CameraType = "";
-            Fps = 1;
-            FrameCount = 1;
-            ImageHeight = imageHeight;
-            ImageWidth = imageWidth;
-            DateEncodedUtc = DateTime.MinValue;
-            DateEncoded = DateTime.MinValue;
-
-            // Slow to calculate so left uncalculated here
-            DurationMs = UnknownValue;
-
-            DataAccess = new VideoCapture(FileName);
         }
 
 
@@ -344,14 +324,11 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        // Ensure we are not holding a file handle open
+        // Clear video file handle. More immediate than waiting for garbage collection
         public void Close()
         {
-            if (DataAccess != null)
-            {
-                DataAccess.Dispose();
-                DataAccess = null;
-            }
+            DataAccess?.Dispose();
+            DataAccess = null;
         }
 
 

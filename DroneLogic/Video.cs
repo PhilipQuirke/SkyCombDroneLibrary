@@ -238,15 +238,13 @@ namespace SkyCombDrone.DroneLogic
         public int PercentVideoOverlap { get { return VideoData.PercentOverlap(InputVideo, DisplayVideo); } }
 
 
-        public virtual void ClearData_Video()
+        // Clear video file handles. More immediate than waiting for garbage collection
+        public void ClearData_Video()
         {
-            // These objects may be holding open file handles or similar resources.
-            if (HasInputVideo)
-                InputVideo.Close();
+            InputVideo?.Close();
             InputVideo = null;
 
-            if (HasDisplayVideo)
-                DisplayVideo.Close();
+            DisplayVideo?.Close();
             DisplayVideo = null;
         }
 

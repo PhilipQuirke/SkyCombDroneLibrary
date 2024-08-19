@@ -107,8 +107,15 @@ namespace SkyCombDrone.DroneLogic
         {
             DroneConfig = config;
             EffortDurations = new();
-            ClearData_Flight();
+            ClearData();
+        }
+
+
+        // Clear video file handles etc. More immediate than waiting for garbage collection
+        public void ClearData()
+        {
             ClearData_Video();
+            ClearData_Flight();
             ClearData_Ground();
         }
 

@@ -38,17 +38,19 @@ namespace SkyCombDrone.PersistModel
         {
             string thermalVideoName = "", opticalVideoName = "", thermalFlightName = "", opticalFlightName = "";
 
+            VideoModel? secondVideoData = null;
+            VideoModel? firstVideoData = null;
+
             try
             {
                 // Without at least one video we can't do anything
                 var firstVideoName = FindVideo(firstFileName);
                 if (firstVideoName.Length > 0)
                 {
-                    var firstVideoData = new VideoModel(firstVideoName, true, readDateEncodedUtc); // guess at thermal
+                    firstVideoData = new VideoModel(firstVideoName, true, readDateEncodedUtc); // guess at thermal
 
                     // Do we have a second video (in a thermal/optical pair) that overlaps the first video timewise closely?
                     var secondVideoName = "";
-                    VideoModel? secondVideoData = null;
 
                     // First guess + 1
                     secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, +1));
@@ -60,6 +62,7 @@ namespace SkyCombDrone.PersistModel
                         if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
                         {
                             secondVideoName = "";
+                            secondVideoData.Close();
                             secondVideoData = null;
                         }
                     }
@@ -76,6 +79,7 @@ namespace SkyCombDrone.PersistModel
                             if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
                             {
                                 secondVideoName = "";
+                                secondVideoData.Close();
                                 secondVideoData = null;
                             }
                         }
@@ -130,6 +134,11 @@ namespace SkyCombDrone.PersistModel
                 opticalVideoName = "";
                 thermalFlightName = "";
                 opticalFlightName = "";
+            }
+            finally
+            {
+                firstVideoData?.Close();
+                secondVideoData?.Close();
             }
 
             return (thermalVideoName, opticalVideoName, thermalFlightName, opticalFlightName);
