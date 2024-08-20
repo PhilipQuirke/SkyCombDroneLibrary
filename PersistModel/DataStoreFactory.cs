@@ -62,7 +62,7 @@ namespace SkyCombDrone.PersistModel
                         if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
                         {
                             secondVideoName = "";
-                            secondVideoData.Close();
+                            secondVideoData.FreeResources();
                             secondVideoData = null;
                         }
                     }
@@ -79,7 +79,7 @@ namespace SkyCombDrone.PersistModel
                             if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
                             {
                                 secondVideoName = "";
-                                secondVideoData.Close();
+                                secondVideoData.FreeResources();
                                 secondVideoData = null;
                             }
                         }
@@ -137,8 +137,8 @@ namespace SkyCombDrone.PersistModel
             }
             finally
             {
-                firstVideoData?.Close();
-                secondVideoData?.Close();
+                firstVideoData?.FreeResources();
+                secondVideoData?.FreeResources();
             }
 
             return (thermalVideoName, opticalVideoName, thermalFlightName, opticalFlightName);

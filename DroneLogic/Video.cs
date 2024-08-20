@@ -239,12 +239,12 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Clear video file handles. More immediate than waiting for garbage collection
-        public void ClearData_Video()
+        public void FreeResources_Video()
         {
-            InputVideo?.Close();
+            InputVideo?.FreeResources();
             InputVideo = null;
 
-            DisplayVideo?.Close();
+            DisplayVideo?.FreeResources();
             DisplayVideo = null;
         }
 

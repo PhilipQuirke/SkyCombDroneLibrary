@@ -142,10 +142,9 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        protected void CloseFile()
+        protected void FreeResources()
         {
-            if (File != null)
-                File.Close();
+            File?.Close();
             File = null;
         }
     }
@@ -465,7 +464,7 @@ namespace SkyCombDrone.DroneLogic
             }
             finally
             {
-                CloseFile();
+                FreeResources();
             }
 
             return (sections.Sections.Count > 0, cameraPitchYawRoll);

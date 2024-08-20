@@ -325,7 +325,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // Clear video file handle. More immediate than waiting for garbage collection
-        public void Close()
+        public void FreeResources()
         {
             DataAccess?.Dispose();
             DataAccess = null;

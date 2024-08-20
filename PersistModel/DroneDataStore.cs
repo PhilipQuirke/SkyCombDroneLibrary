@@ -135,7 +135,7 @@ namespace SkyCombDrone.PersistModel
             SaveFiles();
 
             Store.SaveAs(DataStoreFileName);
-            Close();
+            FreeResources();
         }
 
 

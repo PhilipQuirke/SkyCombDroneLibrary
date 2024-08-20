@@ -107,20 +107,20 @@ namespace SkyCombDrone.DroneLogic
         {
             DroneConfig = config;
             EffortDurations = new();
-            ClearData();
+            FreeResources();
         }
 
 
         // Clear video file handles etc. More immediate than waiting for garbage collection
-        public void ClearData()
+        public void FreeResources()
         {
-            ClearData_Video();
-            ClearData_Flight();
-            ClearData_Ground();
+            FreeResources_Video();
+            FreeResources_Flight();
+            FreeResources_Ground();
         }
 
 
-        public void ClearData_Flight()
+        public void FreeResources_Flight()
         {
             FlightSections = null;
             FlightSteps = null;
@@ -129,7 +129,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void ClearData_Ground()
+        public void FreeResources_Ground()
         {
             GroundData = null;
         }
@@ -164,7 +164,7 @@ namespace SkyCombDrone.DroneLogic
                 Debug.WriteLine("Suppressed Drone.LoadSettings_Videos failure: " + ex.ToString());
             }
 
-            ClearData_Video();
+            FreeResources_Video();
             return false;
         }
 
@@ -250,7 +250,7 @@ namespace SkyCombDrone.DroneLogic
                 System.Diagnostics.Debug.WriteLine("Suppressed Drone.LoadSettings_Flight failure (Phase =" + phase + "):" + ex.ToString());
             }
 
-            ClearData_Flight();
+            FreeResources_Flight();
             return false;
         }
 
@@ -425,7 +425,7 @@ namespace SkyCombDrone.DroneLogic
             datawriter.SaveData_Summary(countryBitmap);
             datawriter.SaveData_Detail(true, effort);
 
-            dataStore.Close();
+            dataStore.FreeResources();
         }
 
 
@@ -668,7 +668,7 @@ namespace SkyCombDrone.DroneLogic
             DroneSave datawriter = new(dataStore, this);
             datawriter.SaveData_Summary(countryBitmap);
             datawriter.SaveData_Detail(false);
-            dataStore.Close();
+            dataStore.FreeResources();
         }
 
 
