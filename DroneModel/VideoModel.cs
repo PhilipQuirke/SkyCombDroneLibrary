@@ -8,7 +8,7 @@ using System.Drawing;
 namespace SkyCombDrone.DroneModel
 {
     // Some basic constant information about a video
-    public class VideoModel : BaseConstants
+    public class VideoModel : BaseConstants, IDisposable
     {
         // Drone and camera combinations for which we have specific settings
         public const string DjiPrefix = "SRT";
@@ -27,7 +27,7 @@ namespace SkyCombDrone.DroneModel
         // The file name containing the video
         public string FileName { get; set; }
         // The drone + camera type
-        public string CameraType { get; set; }
+        public string CameraType { get; set; } = "";
 
 
         // Frames per second. Drone physical implementation means it is not 100% accurate for each second of a drone video.
@@ -113,25 +113,33 @@ namespace SkyCombDrone.DroneModel
 
         public VideoModel(string fileName, bool thermal, Func<string,DateTime> readDateEncodedUtc)
         {
-            FileName = fileName;
+            try
+            {
+                FileName = fileName;
 
-            DataAccess = new VideoCapture(FileName);
+                DataAccess = new VideoCapture(FileName);
 
-            Fps = DataAccess.Get(CapProp.Fps); // e.g. 29.97 or 8.7151550960118165
-            // Round to defined NDP so first run and second run (after reloading data from DataStore) use the same value.
-            Fps = Math.Round(Fps, FpsNdp);
+                Fps = DataAccess.Get(CapProp.Fps); // e.g. 29.97 or 8.7151550960118165
+                                                   // Round to defined NDP so first run and second run (after reloading data from DataStore) use the same value.
+                Fps = Math.Round(Fps, FpsNdp);
 
-            FrameCount = (int)DataAccess.Get(CapProp.FrameCount);
-            ImageWidth = (int)DataAccess.Get(CapProp.FrameWidth);
-            ImageHeight = (int)DataAccess.Get(CapProp.FrameHeight);
+                FrameCount = (int)DataAccess.Get(CapProp.FrameCount);
+                ImageWidth = (int)DataAccess.Get(CapProp.FrameWidth);
+                ImageHeight = (int)DataAccess.Get(CapProp.FrameHeight);
 
-            Thermal = thermal;
+                Thermal = thermal;
 
-            // Slow to calculate so left uncalculated here
-            DurationMs = UnknownValue;
+                // Slow to calculate so left uncalculated here
+                DurationMs = UnknownValue;
 
-            if(readDateEncodedUtc!= null)
-                DateEncodedUtc = readDateEncodedUtc(FileName);
+                if (readDateEncodedUtc != null)
+                    DateEncodedUtc = readDateEncodedUtc(FileName);
+            }
+            catch
+            {
+                FreeResources();
+                throw;
+            }
         }
 
 
@@ -327,8 +335,11 @@ namespace SkyCombDrone.DroneModel
         // Clear video file handle. More immediate than waiting for garbage collection
         public void FreeResources()
         {
-            DataAccess?.Dispose();
-            DataAccess = null;
+            if (DataAccess != null)
+            {
+                DataAccess.Dispose();
+                DataAccess = null;
+            }
         }
 
 
@@ -390,6 +401,39 @@ namespace SkyCombDrone.DroneModel
         public string ShortFilePrefix()
         {
             return RemoveFileNameSuffix(ShortFileName());
+        }
+
+
+
+        private bool disposed = false;
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    // Dispose managed resources
+                }
+
+                // Dispose unmanaged resources
+                FreeResources();
+
+                disposed = true;
+            }
+        }
+
+        ~VideoModel()
+        {
+            Dispose(false);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Drawing;
 
 namespace SkyCombDrone.DroneLogic
 {
-    public class VideoData : VideoModel
+    public class VideoData : VideoModel, IDisposable
     {
         // The current video FrameID position as at the last GetFrameInternal call
         public int CurrFrameId { get; set; } = UnknownValue;
@@ -74,6 +74,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
+                ResetCurrFrame();
                 throw ThrowException("VideoData.GetFrameInternal", ex);
             }
         }
@@ -208,10 +209,27 @@ namespace SkyCombDrone.DroneLogic
 
             return (videoWriter, outputFilename);
         }
+
+
+        private bool disposed = false;
+
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    ResetCurrFrame();
+                }
+                base.Dispose(disposing);
+                disposed = true;
+            }
+        }
     }
 
 
-    public abstract class TwoVideos : BaseConstants
+    public abstract class TwoVideos : BaseConstants, IDisposable
     {
         // The primary input video to analyse. Prefer thermal to optical video.
         public VideoData? InputVideo { get; set; } = null;
@@ -241,11 +259,17 @@ namespace SkyCombDrone.DroneLogic
         // Clear video file handles. More immediate than waiting for garbage collection
         public void FreeResources_Video()
         {
-            InputVideo?.FreeResources();
-            InputVideo = null;
+            if (InputVideo != null)
+            {
+                InputVideo.Dispose();
+                InputVideo = null;
+            }
 
-            DisplayVideo?.FreeResources();
-            DisplayVideo = null;
+            if (DisplayVideo != null)
+            {
+                DisplayVideo.Dispose();
+                DisplayVideo = null;
+            }
         }
 
 
@@ -328,6 +352,35 @@ namespace SkyCombDrone.DroneLogic
             Mat? inputMat = InputVideo.CurrFrameMat;
             Mat? displayMat = (HasDisplayVideo ? DisplayVideo.CurrFrameMat : null);
             return (inputMat, displayMat);
+        }
+
+
+        private bool disposed = false;
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    FreeResources_Video();
+                }
+                disposed = true;
+            }
+        }
+
+
+        ~TwoVideos()
+        {
+            Dispose(false);
         }
     }
 }

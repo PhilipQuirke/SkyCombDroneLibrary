@@ -36,7 +36,7 @@ namespace SkyCombDrone.DroneLogic
     //      DJI_0119.srt - a DJI-specific SRT file with basic data and extra optical-camera settings
     //      DJI_0120.mp4 - the thermal video
     //      DJI_0120.srt - a DJI-specific SRT file with basic data (location, orientation, etc)
-    public class Drone : TwoVideos
+    public class Drone : TwoVideos, IDisposable
     {
         public DroneConfigModel DroneConfig;
 
@@ -131,6 +131,7 @@ namespace SkyCombDrone.DroneLogic
 
         public void FreeResources_Ground()
         {
+            GroundData?.Dispose();
             GroundData = null;
         }
 
@@ -776,6 +777,29 @@ namespace SkyCombDrone.DroneLogic
                 { "Optical Video start", ( HasOpticalVideo ? OpticalVideo.DateEncoded.ToString(DateFormat) : "" ) },
                 { "Optical Flight start", ( HasDisplaySections ? DisplaySections.MinDateTime.ToString(DateFormat) : "" )},
             };
+        }
+
+
+        private bool disposed = false;
+
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    FreeResources();
+                }
+                base.Dispose(disposing);
+                disposed = true;
+            }
+        }
+
+
+        ~Drone()
+        {
+            Dispose(false);
         }
     }
 }
