@@ -57,6 +57,8 @@ namespace SkyCombDrone.DroneLogic
             {
                 ResetCurrFrame();
 
+                Assert(DataAccess != null, "GetFrameInternal: DataAccess is null");
+
                 CurrFrameMat = DataAccess.QueryFrame();
 
                 // Get the current position in the video in frames
@@ -85,6 +87,8 @@ namespace SkyCombDrone.DroneLogic
         // This function is slow. Try to avoid using it.
         public void SetAndGetCurrFrameId(int frameId)
         {
+            Assert(DataAccess != null, "SetCurrFrameId: DataAccess is null");
+
             // Calling SetCurrFrameId(14) then GetFrameInternal() will give you frame 15 (not 14).
             DataAccess.Set(CapProp.PosFrames, frameId - 1);
 
