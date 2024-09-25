@@ -57,7 +57,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 ResetCurrFrame();
 
-                Assert(DataAccess != null, "GetFrameInternal: DataAccess is null");
+                AssertDataAccess();
 
                 CurrFrameMat = DataAccess.QueryFrame();
 
@@ -77,7 +77,7 @@ namespace SkyCombDrone.DroneLogic
             catch (Exception ex)
             {
                 ResetCurrFrame();
-                throw ThrowException("VideoData.GetFrameInternal", ex);
+                throw ThrowException("GetFrameInternal", ex);
             }
         }
 
@@ -87,7 +87,7 @@ namespace SkyCombDrone.DroneLogic
         // This function is slow. Try to avoid using it.
         public void SetAndGetCurrFrameId(int frameId)
         {
-            Assert(DataAccess != null, "SetCurrFrameId: DataAccess is null");
+            AssertDataAccess();
 
             // Calling SetCurrFrameId(14) then GetFrameInternal() will give you frame 15 (not 14).
             DataAccess.Set(CapProp.PosFrames, frameId - 1);
@@ -100,6 +100,8 @@ namespace SkyCombDrone.DroneLogic
         // This function is slow. Try to avoid using it.
         public void SetAndGetCurrFrameMs(int posMsec)
         {
+            AssertDataAccess();
+
             DataAccess.Set(CapProp.PosMsec, posMsec);
 
             GetFrameInternal(UnknownValue);
@@ -160,6 +162,9 @@ namespace SkyCombDrone.DroneLogic
         public (int firstVideoFrameId, int lastVideoFrameId, int firstVideoFrameMs, int lastVideoFrameMs)
             CalculateFromToS(float fromVideoS, float toVideoS)
         {
+            AssertDataAccess();
+            Assert(fromVideoS <= toVideoS, "CalculateFromToS: Bad from/to sec");
+
             int firstVideoFrameId = 1;
             int lastVideoFrameId = FrameCount;
             int firstVideoFrameMs = 0;
@@ -181,6 +186,9 @@ namespace SkyCombDrone.DroneLogic
                 SetAndGetCurrFrameMs(firstVideoFrameMs);
                 firstVideoFrameId = CurrFrameId;
             }
+
+            if(fromVideoS < toVideoS + 1)
+                Assert(firstVideoFrameId < lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
 
             return (firstVideoFrameId, lastVideoFrameId, firstVideoFrameMs, lastVideoFrameMs);
         }

@@ -23,6 +23,7 @@ namespace SkyCombDrone.DroneModel
 
         public DroneIntervalModel(float runVideoFromS = 5, float runVideoToS = 10)
         {
+            Assert(runVideoFromS <= runVideoToS, "DroneIntervalModel: Bad range");
             RunVideoFromS = runVideoFromS;
             RunVideoToS = runVideoToS;
         }

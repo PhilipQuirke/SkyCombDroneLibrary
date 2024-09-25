@@ -109,7 +109,13 @@ namespace SkyCombDrone.DroneModel
 
         // When drawing text on video images, the best font size depends on the image resolution.
         public int FontScale { get { return ImageWidth < 1000 ? 1 : 2; } }
-        
+
+
+        public void AssertDataAccess()
+        {
+            Assert(DataAccess != null, "DataAccess is null");
+        }
+
 
         public VideoModel(string fileName, bool thermal, Func<string,DateTime> readDateEncodedUtc)
         {
@@ -118,9 +124,10 @@ namespace SkyCombDrone.DroneModel
                 FileName = fileName;
 
                 DataAccess = new VideoCapture(FileName);
+                AssertDataAccess();
 
                 Fps = DataAccess.Get(CapProp.Fps); // e.g. 29.97 or 8.7151550960118165
-                                                   // Round to defined NDP so first run and second run (after reloading data from DataStore) use the same value.
+                // Round to defined NDP so first run and second run (after reloading data from DataStore) use the same value.
                 Fps = Math.Round(Fps, FpsNdp);
 
                 FrameCount = (int)DataAccess.Get(CapProp.FrameCount);

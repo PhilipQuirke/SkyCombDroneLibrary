@@ -210,7 +210,16 @@ namespace SkyCombDrone.PersistModel
                             {
                                 var cell = worksheet.Cells[1, 1];
                                 if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.Main1Title))
+                                {
                                     answer = new(store, dataStoreName);
+                                    
+                                    // Spreadsheet may have ben copied from say C: to D:
+                                    // Reset the file names to the new locations
+                                    answer.ThermalVideoName = thermalVideoName; 
+                                    answer.ThermalFlightName = thermalFlightName;
+                                    answer.OpticalVideoName = opticalVideoName;
+                                    answer.OpticalFlightName = opticalFlightName;
+                                }
                             }
                         }
                         else
