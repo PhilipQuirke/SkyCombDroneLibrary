@@ -26,7 +26,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Open an existing DataStore & load Files tab settings
-        public DroneDataStore(ExcelPackage store, string fileName) : base(store, fileName)
+        public DroneDataStore(string fileName) : base(fileName, false)
         {
             SelectWorksheet(FilesTabName);
             LoadSettings(GetColumnSettings(3, LhsColOffset, LhsColOffset + LabelToValueCellOffset));
@@ -122,7 +122,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Create a DataStore on disk & store the Files settings.
-        public DroneDataStore(string selectedFileName, string thermalVideoName, string opticalVideoName, string thermalFlightName, string opticalFlightName, string outputVideoName) : base(selectedFileName)
+        public DroneDataStore(string selectedFileName, string thermalVideoName, string opticalVideoName, string thermalFlightName, string opticalFlightName, string outputVideoName) : base(selectedFileName, true)
         {
             ThermalVideoName = thermalVideoName;
             OpticalVideoName = opticalVideoName;

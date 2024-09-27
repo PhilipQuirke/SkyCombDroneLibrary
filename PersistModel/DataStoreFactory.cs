@@ -200,32 +200,23 @@ namespace SkyCombDrone.PersistModel
                     if (System.IO.File.Exists(dataStoreName))
                     {
                         // Open the existing datastore. Will fail if the user has the datastore open for editing.
-                        // Assume it contains data matching the files found already.
-                        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                        ExcelPackage store = new(dataStoreName);
-                        if (store != null)
+                        answer = new DroneDataStore(dataStoreName);
+                        answer.Open();
+                        if (answer.IsOpen && answer.SelectWorksheet(DroneDataStore.FilesTabName))
                         {
-                            var worksheet = store.Workbook.Worksheets[DroneDataStore.FilesTabName];
-                            if (worksheet != null)
+                            var cell = answer.Worksheet.Cells[1, 1];
+                            if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.Main1Title))
                             {
-                                var cell = worksheet.Cells[1, 1];
-                                if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.Main1Title))
-                                {
-                                    answer = new(store, dataStoreName);
-                                    
-                                    // Spreadsheet may have ben copied from say C: to D:
-                                    // Reset the file names to the new locations
-                                    answer.ThermalVideoName = thermalVideoName; 
-                                    answer.ThermalFlightName = thermalFlightName;
-                                    answer.OpticalVideoName = opticalVideoName;
-                                    answer.OpticalFlightName = opticalFlightName;
-                                }
+                                // Spreadsheet may have ben copied from say C: to D:
+                                // Reset the file names to the new locations
+                                answer.ThermalVideoName = thermalVideoName;
+                                answer.ThermalFlightName = thermalFlightName;
+                                answer.OpticalVideoName = opticalVideoName;
+                                answer.OpticalFlightName = opticalFlightName;
                             }
                         }
                         else
-                        {
                             throw BaseConstants.ThrowException("DataStoreFactory.OpenOrCreateDataStore: Failed to open existing DataStore " + dataStoreName);
-                        }
                     }
                     else if (canCreate)
                         // Create a new datastore.
