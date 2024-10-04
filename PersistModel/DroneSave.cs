@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
@@ -7,7 +8,6 @@ using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundModel;
 using System.Diagnostics;
 using System.Drawing;
-using SkyCombDrone.CommonSpace;
 
 
 namespace SkyCombDrone.PersistModel
@@ -31,8 +31,8 @@ namespace SkyCombDrone.PersistModel
 
 
         // Generate a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
-        public static (string title, DataPairList? metrics, string bitmapName, Emgu.CV.Image<Bgr,byte> pathImage) 
-            CreateDronePath( DroneDrawPath drawPath, GroundType type, int pixels )
+        public static (string title, DataPairList? metrics, string bitmapName, Emgu.CV.Image<Bgr, byte> pathImage)
+            CreateDronePath(DroneDrawPath drawPath, GroundType type, int pixels)
         {
             drawPath.Initialise(new Size(pixels, pixels), null, type);
 
@@ -40,7 +40,7 @@ namespace SkyCombDrone.PersistModel
             drawPath.CurrImage(ref pathImage);
 
             var bitmapName = "UNKNOWN";
-            switch(type)
+            switch (type)
             {
                 case GroundType.DsmElevations: bitmapName = "DSM"; break;
                 case GroundType.DemElevations: bitmapName = "DEM"; break;
@@ -64,10 +64,10 @@ namespace SkyCombDrone.PersistModel
             var drawPath = new DroneDrawPath(drawScope, false);
             drawPath.BackgroundColor = DroneColors.WhiteBgr; // So we dont paint under-necessary area.
 
-            (var _, var _, var bitmapName, var pathImage) = 
-                CreateDronePath( drawPath, groundType, pixels);
+            (var _, var _, var bitmapName, var pathImage) =
+                CreateDronePath(drawPath, groundType, pixels);
 
-            Data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col-1);
+            Data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col - 1);
         }
 
 
@@ -85,7 +85,7 @@ namespace SkyCombDrone.PersistModel
         // This includes settings the user can edit in the UI: RunFrom/ToS, CameraDownDeg, OnGroundAt
         public void SaveData_Summary(Bitmap? countryBitmap)
         {
-            (var newDroneTab, var _ ) = Data.SelectOrAddWorksheet(DroneTabName);
+            (var newDroneTab, var _) = Data.SelectOrAddWorksheet(DroneTabName);
             Data.ClearWorksheet();
 
             Data.SetTitles(DroneSummaryTitle);
@@ -116,7 +116,7 @@ namespace SkyCombDrone.PersistModel
                 // We draw DEM, DSM and Country graphs on the GROUND summary tab
                 // These plots combine ground and drone data.
 
-                if((countryBitmap != null) && (Drone.FlightSections != null))
+                if ((countryBitmap != null) && (Drone.FlightSections != null))
                 {
                     var row = Chapter1TitleRow;
                     var col = 10;
@@ -124,7 +124,7 @@ namespace SkyCombDrone.PersistModel
                     var localBitmap = (Bitmap)countryBitmap.Clone();
                     new DroneDrawPath(new DroneDrawScope(Drone), false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
-                    Data.SaveBitmap(localBitmap, "Country", row-1, col-1, 45);
+                    Data.SaveBitmap(localBitmap, "Country", row - 1, col - 1, 45);
                 }
 
                 SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);

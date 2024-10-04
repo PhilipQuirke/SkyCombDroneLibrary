@@ -117,7 +117,7 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public VideoModel(string fileName, bool thermal, Func<string,DateTime> readDateEncodedUtc)
+        public VideoModel(string fileName, bool thermal, Func<string, DateTime> readDateEncodedUtc)
         {
             try
             {
@@ -198,7 +198,7 @@ namespace SkyCombDrone.DroneModel
         }
         public static string DurationMsToString(double durationMs, int ndp)
         {
-            if( durationMs < 0 )
+            if (durationMs < 0)
                 return "";
 
             return DurationSecToString(durationMs / 1000.0, ndp);
@@ -227,7 +227,7 @@ namespace SkyCombDrone.DroneModel
                         answer += float.Parse(minutes) * 60;
 
                         // Could see string "2:" or "2:25" or "2:25.12"
-                        if(durationStr.Length>pos)
+                        if (durationStr.Length > pos)
                             durationStr = durationStr.Substring(pos + 1);
                         else
                             durationStr = "";
@@ -239,7 +239,7 @@ namespace SkyCombDrone.DroneModel
 
                 return answer;
             }
-            catch 
+            catch
             {
                 return UnknownValue;
             }

@@ -17,7 +17,7 @@ namespace SkyCombDrone.DroneLogic
         // There is a 1 to 1 relationship between Sections and Steps.
         public FlightSection FlightSection { get; }
 
-        public FlightLeg? FlightLeg { get; set; } 
+        public FlightLeg? FlightLeg { get; set; }
 
 
 
@@ -92,7 +92,7 @@ namespace SkyCombDrone.DroneLogic
 
             (bool success, float sumLocnWeight, float sumNorthingM, float sumEastingM, float sumPosYawDegs, float sumNegYawDegs, float sumPosYawWeight, float sumNegYawWeight, float sumPitchDegs, float sumPitchWeight)
                 = sections.Smooth(thisSectionId, smoothRadius);
-            if(!success)
+            if (!success)
                 return false;
 
 
@@ -145,37 +145,41 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Best estimate of drone altitude (height) above sea level in metres e.g. 61.241 m. Aka absolute altitude.
-        public float FixedAltitudeM { get { return ( AltitudeM == UnknownValue ? UnknownValue : AltitudeM + FixAltM ); } }
+        public float FixedAltitudeM { get { return (AltitudeM == UnknownValue ? UnknownValue : AltitudeM + FixAltM); } }
         // Vertical distance from drone to ground
         public float FixedDistanceDown { get { return FixedAltitudeM - DemM; } }
 
 
         // How do we best calculate the camera down angle?
-        public float CameraToVerticalForwardDeg { get {
-            if (FlightSection.Drone.DroneConfig.GimbalDataAvail == GimbalDataEnum.ManualNo)
+        public float CameraToVerticalForwardDeg
+        {
+            get
             {
-                // Camera may be pointing straight down (CameraDownDeg=90)
-                // or forward in direction of flight (CameraDownDeg=0)
-                // or in between (say CameraDownDeg=72)
-                // Calculate difference between CameraDownAngle and the vertical.
-                // Assumes drone camera down angle is constant over the period image is seen. 
-                int cameraToVertDeg = FlightSection.Drone.DroneConfig.FixedCameraToVerticalForwardDeg;
-                Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 90, "BestCameraDownDeg: Bad cameraToVertDeg");
-                return cameraToVertDeg;
-            }
-            else
-            {
-                // Gimbal pitch is available!
-                // Use it to calculate the angle to the vertical.
-                // This may differ for the first and last feature.
-                var cameraToVertDeg = 90 + PitchDeg;
+                if (FlightSection.Drone.DroneConfig.GimbalDataAvail == GimbalDataEnum.ManualNo)
+                {
+                    // Camera may be pointing straight down (CameraDownDeg=90)
+                    // or forward in direction of flight (CameraDownDeg=0)
+                    // or in between (say CameraDownDeg=72)
+                    // Calculate difference between CameraDownAngle and the vertical.
+                    // Assumes drone camera down angle is constant over the period image is seen. 
+                    int cameraToVertDeg = FlightSection.Drone.DroneConfig.FixedCameraToVerticalForwardDeg;
+                    Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 90, "BestCameraDownDeg: Bad cameraToVertDeg");
+                    return cameraToVertDeg;
+                }
+                else
+                {
+                    // Gimbal pitch is available!
+                    // Use it to calculate the angle to the vertical.
+                    // This may differ for the first and last feature.
+                    var cameraToVertDeg = 90 + PitchDeg;
 
-                // Pitch is normally -45 to -90. Rarely can be +35 (looking up) or -125 (looking backwards).
-                // Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 135, "BestCameraDownDeg: Bad firstCameraToVertDeg");
+                    // Pitch is normally -45 to -90. Rarely can be +35 (looking up) or -125 (looking backwards).
+                    // Assert(cameraToVertDeg >= 0 && cameraToVertDeg <= 135, "BestCameraDownDeg: Bad firstCameraToVertDeg");
 
-                return cameraToVertDeg;
+                    return cameraToVertDeg;
+                }
             }
-        } }
+        }
 
 
         // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
@@ -186,7 +190,7 @@ namespace SkyCombDrone.DroneLogic
             InputImageCenter = new();
 
             // Can only calculate this if we can compare the ground elevation & drone altitude.
-            if((DsmM == UnknownValue) || (DroneLocnM == null))
+            if ((DsmM == UnknownValue) || (DroneLocnM == null))
                 return;
 
             // If the camera is pointing at the horizon, then the 
@@ -196,7 +200,7 @@ namespace SkyCombDrone.DroneLogic
             // thermal bloom with causes over estimates of temperature.)
             var vfovDeg = videoData.VFOVDeg;
             float degreesToVerticalForward = CameraToVerticalForwardDeg;
-            if(degreesToVerticalForward >= 90 - vfovDeg / 2)
+            if (degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
             // Vertical distance from drone to ground (including FixAltM)
@@ -225,7 +229,7 @@ namespace SkyCombDrone.DroneLogic
             // distortion is small enough to ignore.
             InputImageCenter = null;
             if ((groundForwardM > 3) && (AltitudeM > DsmM + 3) &&
-                (groundData!=null) && (groundData.DsmModel!=null))
+                (groundData != null) && (groundData.DsmModel != null))
             {
                 // Walk from DroneLocnM towards the flatEarthLocn, evaluating the
                 // earth DSM every 2 metres, until the DSM elevation is higher than
@@ -253,7 +257,7 @@ namespace SkyCombDrone.DroneLogic
                 InputImageDemM = DemM;
                 InputImageDsmM = DsmM;
             }
-            else if(groundData.DemModel != null)
+            else if (groundData.DemModel != null)
                 InputImageDemM = groundData.DemModel.GetElevationByDroneLocn(InputImageCenter);
 
 
@@ -502,7 +506,7 @@ namespace SkyCombDrone.DroneLogic
             if (altLessDem == UnknownValue)
                 return 0;
 
-            return - altLessDem;
+            return -altLessDem;
         }
 
 
@@ -523,7 +527,7 @@ namespace SkyCombDrone.DroneLogic
                 {
                     numSteps++;
                     sumAltLessDem += altLessDem;
-                    if(altLessDsm > 0)
+                    if (altLessDsm > 0)
                         minAltLessDsm = Math.Min(minAltLessDsm, altLessDsm);
                 }
             }
@@ -658,7 +662,7 @@ namespace SkyCombDrone.DroneLogic
                 Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
                 Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + 1 + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
                 Assert(theStep.PitchDeg >= Sections.MinPitchDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinPitchDeg " + theStep.PitchDeg + " < " + Sections.MinPitchDeg);
-                
+
                 float delta_yaw_epsilon = 3; // For example refer DJI_0120 step 207 where drone turns 80 degrees in ~1s and we have 5 sections
                 Assert(theStep.DeltaYawDeg <= Sections.MaxDeltaYawDeg + delta_yaw_epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxDeltaYawDeg " + theStep.DeltaYawDeg + " > " + Sections.MaxDeltaYawDeg);
                 Assert(theStep.DeltaYawDeg >= Sections.MinDeltaYawDeg - delta_yaw_epsilon, "CalculateSettings_SmoothLocationYawPitch: MinDeltaYawDeg " + theStep.DeltaYawDeg + " < " + Sections.MinDeltaYawDeg);

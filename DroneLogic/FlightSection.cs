@@ -56,7 +56,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void SetTardisMaxKey() 
+        public void SetTardisMaxKey()
         {
             TardisMaxKey = 0;
             if (Sections.Count > 0)
@@ -65,11 +65,11 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the child FlightStep
-        public override TardisModel? GetTardisModel(int index) 
+        public override TardisModel? GetTardisModel(int index)
         {
             FlightSection? answer = null;
             Sections.TryGetValue(index, out answer);
-            return answer;    
+            return answer;
         }
 
 

@@ -74,7 +74,7 @@ namespace SkyCombDrone.DroneModel
         // For a drone video, this is a rough approximation. Try to avoid using this function.
         public static int MsToRoughFlightSectionID(int milliseconds)
         {
-            return (int)(milliseconds / SectionMinMs);
+            return milliseconds / SectionMinMs;
         }
     }
 
@@ -104,16 +104,25 @@ namespace SkyCombDrone.DroneModel
         // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
         // so the Min/MaxCountryLocation box is commonly a larger area than the area the drone flew over.
         // The location is in country coordinates. In NZ, using NZTM, example has Northing=5916626 Easting=1751330 
-        public CountryLocation? MinCountryLocation { get {
+        public CountryLocation? MinCountryLocation
+        {
+            get
+            {
                 return (MinGlobalLocation == null ? null : NztmProjection.WgsToNztm(MinGlobalLocation));
             }
         }
-        public CountryLocation? MaxCountryLocation { get {
+        public CountryLocation? MaxCountryLocation
+        {
+            get
+            {
                 return (MaxGlobalLocation == null ? null : NztmProjection.WgsToNztm(MaxGlobalLocation));
             }
         }
         // The centre of flight locations in country coordinate system
-        public CountryLocation? CountryCentroid { get {
+        public CountryLocation? CountryCentroid
+        {
+            get
+            {
                 var min = MinCountryLocation;
                 var max = MaxCountryLocation;
                 if (min == null || max == null)
@@ -166,11 +175,15 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public string DescribePath { get { 
-            return string.Format("Drone Path: {0} x {1}m",
-                NorthingRangeM().ToString("0"),
-                EastingRangeM().ToString("0"));
-        } }
+        public string DescribePath
+        {
+            get
+            {
+                return string.Format("Drone Path: {0} x {1}m",
+                    NorthingRangeM().ToString("0"),
+                    EastingRangeM().ToString("0"));
+            }
+        }
 
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore)

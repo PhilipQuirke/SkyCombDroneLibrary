@@ -53,7 +53,7 @@ namespace SkyCombDrone.DroneModel
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Flight.md 
         public GimbalDataEnum GimbalDataAvail { get; set; } = GimbalDataEnum.ManualNo;
         // Can we use the gimbal data?
-        public bool UseGimbalData { get { return GimbalDataAvail != GimbalDataEnum.ManualNo;  } }
+        public bool UseGimbalData { get { return GimbalDataAvail != GimbalDataEnum.ManualNo; } }
         // Used to display "Gimbal Pitch" versus "Drone Pitch" etc in the UI.
         public string PitchYawRollPrefix { get { return UseGimbalData ? "Gimbal" : "Drone"; } }
 

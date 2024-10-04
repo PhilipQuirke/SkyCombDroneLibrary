@@ -125,8 +125,8 @@ namespace SkyCombDrone.DroneLogic
         public static Drone Create(
             Action<string> showDroneSettings,
             Func<string, DateTime> readDateEncodedUtc,
-            DroneDataStore droneDataStore, DroneConfigModel config, 
-            string groundDirectory, 
+            DroneDataStore droneDataStore, DroneConfigModel config,
+            string groundDirectory,
             Bitmap? countryBitmap,
             bool fullLoad = true)
         {
@@ -212,7 +212,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                throw BaseConstants.ThrowException("DroneDataFactory.Create(Phase=" + phase +")", ex);
+                throw BaseConstants.ThrowException("DroneDataFactory.Create(Phase=" + phase + ")", ex);
             }
 
             return answer;

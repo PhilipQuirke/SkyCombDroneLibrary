@@ -85,91 +85,107 @@ namespace SkyCombDrone.DroneModel
 
 
         // Calculate the Max/Min values to show on the vertical (altitude) axis.
-        public (float, float) MinMaxVerticalAxisM { get {
-            float minAltitudeM = (float)Math.Floor(
-                // Drone may start on a hillside, then flight horizontally, while land falls away.
-                // So MinDemM may be lower than the drone's MinVertRaw
-                Math.Min(MinDemM, MinAltitudeM));
+        public (float, float) MinMaxVerticalAxisM
+        {
+            get
+            {
+                float minAltitudeM = (float)Math.Floor(
+                    // Drone may start on a hillside, then flight horizontally, while land falls away.
+                    // So MinDemM may be lower than the drone's MinVertRaw
+                    Math.Min(MinDemM, MinAltitudeM));
 
-            float maxAltitudeM = (float)Math.Ceiling(
-                Math.Max(MaxDemM, MaxAltitudeM));
+                float maxAltitudeM = (float)Math.Ceiling(
+                    Math.Max(MaxDemM, MaxAltitudeM));
 
-            return (minAltitudeM, maxAltitudeM);
-        } }
+                return (minAltitudeM, maxAltitudeM);
+            }
+        }
 
 
         // Return a string like "Ground: 42-47m, Surface: 44-49m, Drone: 42-84m" 
-        public string DescribeElevation { get { 
-            string answer = "";
-
-            if (MinDemM != UnknownValue)
+        public string DescribeElevation
+        {
+            get
             {
-                string minStr = MinDemM.ToString("0");
-                string maxStr = MaxDemM.ToString("0");
+                string answer = "";
 
-                answer = "Ground " + minStr;
-
-                if((minStr != maxStr) && (MaxDemM > 0))
-                    answer += "-" + maxStr;
-
-                answer += "m";
-
-                if (MinDsmM != UnknownValue)
+                if (MinDemM != UnknownValue)
                 {
-                    string minStr2 = MinDsmM.ToString("0");
-                    string maxStr2 = MaxDsmM.ToString("0");
+                    string minStr = MinDemM.ToString("0");
+                    string maxStr = MaxDemM.ToString("0");
 
-                    answer += ", Surface " + minStr2;
+                    answer = "Ground " + minStr;
 
-                    if((minStr2 != maxStr2) && (MaxDsmM > 0))
-                        answer += "-" + maxStr2;
+                    if ((minStr != maxStr) && (MaxDemM > 0))
+                        answer += "-" + maxStr;
+
+                    answer += "m";
+
+                    if (MinDsmM != UnknownValue)
+                    {
+                        string minStr2 = MinDsmM.ToString("0");
+                        string maxStr2 = MaxDsmM.ToString("0");
+
+                        answer += ", Surface " + minStr2;
+
+                        if ((minStr2 != maxStr2) && (MaxDsmM > 0))
+                            answer += "-" + maxStr2;
+
+                        answer += "m";
+                    }
+                }
+
+                if (MinAltitudeM != UnknownValue)
+                {
+                    if (answer != "")
+                        answer += ", ";
+
+                    string minStr = MinAltitudeM.ToString("0");
+                    string maxStr = MaxAltitudeM.ToString("0");
+
+                    answer += "Drone " + minStr;
+
+                    if ((minStr != maxStr) && (MaxAltitudeM > 0))
+                        answer += "-" + maxStr;
 
                     answer += "m";
                 }
+
+                return answer;
             }
-
-            if (MinAltitudeM != UnknownValue)
-            {
-                if (answer != "")
-                    answer += ", ";
-
-                string minStr = MinAltitudeM.ToString("0");
-                string maxStr = MaxAltitudeM.ToString("0");
-
-                answer += "Drone " + minStr;
-
-                if((minStr != maxStr) && (MaxAltitudeM > 0))
-                    answer += "-" + maxStr;
-
-                answer += "m";
-            }
-
-            return answer;
-        } }
+        }
 
 
         // Describe the drone path lineal meters
-        public string DescribeLinealM { get { 
-            string answer = "";
+        public string DescribeLinealM
+        {
+            get
+            {
+                string answer = "";
 
-            if (MaxSumLinealM > 0)
-                answer += ", flew " + MaxSumLinealM.ToString("0") + "m";
+                if (MaxSumLinealM > 0)
+                    answer += ", flew " + MaxSumLinealM.ToString("0") + "m";
 
-            return answer;
-        } }
+                return answer;
+            }
+        }
 
 
         // Describe the drone max/avg speed
-        public string DescribeSpeed { get { 
-            string answer = "Drone Speed";
+        public string DescribeSpeed
+        {
+            get
+            {
+                string answer = "Drone Speed";
 
-            if (MaxSpeedMps != UnknownValue)
-                answer += string.Format(": avg {0}m/s, max {1}m/s",
-                    AvgSpeedMps.ToString("0.0"),
-                    MaxSpeedMps.ToString("0.0"));
+                if (MaxSpeedMps != UnknownValue)
+                    answer += string.Format(": avg {0}m/s, max {1}m/s",
+                        AvgSpeedMps.ToString("0.0"),
+                        MaxSpeedMps.ToString("0.0"));
 
-            return answer;
-        } }
+                return answer;
+            }
+        }
 
 
         // Get object's settings related to altitude (e.g. for use in graph labeling)

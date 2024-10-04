@@ -87,17 +87,20 @@ namespace SkyCombDrone.DroneLogic
         // So it needs to know the difference between the HFOV of the thermal and optical videos
         // ExcludeMarginRatio is the "margin" of the optical video that is not displayed in the thermal video, as a ratio between 0.0 and 0.5.
         // Refer ExcludeMarginRatio.md section Camera Down Angle for more detail.
-        public float ExcludeDisplayMarginRatio { get {
-                if(HasTwoVideos)
-                    return DroneConfig.ExcludeDisplayMarginRatio;  
-                
+        public float ExcludeDisplayMarginRatio
+        {
+            get
+            {
+                if (HasTwoVideos)
+                    return DroneConfig.ExcludeDisplayMarginRatio;
+
                 return 0;
             }
         }
 
 
         // Some drone steps we do not use (aka process) as the thermal camera is pointing too near the horizontal
-        public bool FlightStepInRunScope( FlightStep flightStep)
+        public bool FlightStepInRunScope(FlightStep flightStep)
         {
             return ((!DroneConfig.UseGimbalData) || (-flightStep.PitchDeg >= DroneConfig.MinCameraDownDeg));
         }
@@ -292,7 +295,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 GroundData = GroundDataFactory.Create();
                 GroundData.GlobalCalculateElevations(
-                    FlightSections.MinGlobalLocation, 
+                    FlightSections.MinGlobalLocation,
                     FlightSections.MaxGlobalLocation,
                     groundDirectory);
             }
@@ -373,9 +376,9 @@ namespace SkyCombDrone.DroneLogic
         {
             try
             {
-                if ((GroundData == null) || 
-                    (GroundData.DemModel == null) || 
-                    (! GroundData.DemModel.HasElevationData()) ||
+                if ((GroundData == null) ||
+                    (GroundData.DemModel == null) ||
+                    (!GroundData.DemModel.HasElevationData()) ||
                     (!HasInputVideo) ||
                     (!HasFlightSections) ||
                     (!HasGroundData))
@@ -430,20 +433,24 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public string DescribeFlightPath { get { 
-            string answer = "";
+        public string DescribeFlightPath
+        {
+            get
+            {
+                string answer = "";
 
-            if (HasFlightSections)
-                answer += FlightSections.DescribePath;
+                if (HasFlightSections)
+                    answer += FlightSections.DescribePath;
 
-            if (HasFlightLegs)
-                answer += FlightLegs.DescribeLegs;
+                if (HasFlightLegs)
+                    answer += FlightLegs.DescribeLegs;
 
-            if (HasFlightSteps)
-                answer += FlightSteps.DescribeLinealM;
+                if (HasFlightSteps)
+                    answer += FlightSteps.DescribeLinealM;
 
-            return answer;
-        } }
+                return answer;
+            }
+        }
 
 
         // Return the FlightStep that is closest to the specified flightMs 
@@ -530,25 +537,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Default the RunFromS and RunToS config values 
-        // This code mirrors the Drone.DefaultConfigRunFromTo() code
-        public (int startMs, int endMs) CalculateDefaultConfigRunFromToMs( bool useLegs )
-        {
-            if (HasFlightLegs)
-            {
-                if (useLegs)
-                    return (SectionIdToVideoMs(FlightLegs.Legs[0].MinStepId),
-                            SectionIdToVideoMs(FlightLegs.Legs[^1].MaxStepId));
-                else
-                    return (SectionIdToVideoMs(FlightSteps.MinStepId),
-                            SectionIdToVideoMs(FlightSteps.MaxStepId));
-            }
-            else if (HasInputVideo)
-                return (0, InputVideo.DurationMs);
-
-            return (0, 0);
-        }
-
 
         // Default the RunFromS and RunToS config values 
         public void DefaultConfigRunFromTo()
@@ -625,7 +613,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 // Try to load the flight log from a second drone manufacturer's flight log file. PQR TODO
                 flightData = new FlightSections();
-                success = false; 
+                success = false;
             }
 
             if (!success)
@@ -691,17 +679,17 @@ namespace SkyCombDrone.DroneLogic
 
 
         public const int DateTimeIndex = 0;
-        public const int  DurationIndex = 1;
-        public const int  CountryXIndex = 2;
-        public const int  CountryYIndex = 3;
-        public const int  EastingMIndex = 4;
-        public const int  NorthingMIndex = 5;
-        public const int  DemPercIndex = 6;
-        public const int  DsmPercIndex = 7;
-        public const int  AvgHtOverDemIndex = 8;
-        public const int  MinHtOverDsmIndex = 9;
-        public const int  FileNameIndex = 10;
-        public const int  GoogleMapsIndex = 11;
+        public const int DurationIndex = 1;
+        public const int CountryXIndex = 2;
+        public const int CountryYIndex = 3;
+        public const int EastingMIndex = 4;
+        public const int NorthingMIndex = 5;
+        public const int DemPercIndex = 6;
+        public const int DsmPercIndex = 7;
+        public const int AvgHtOverDemIndex = 8;
+        public const int MinHtOverDsmIndex = 9;
+        public const int FileNameIndex = 10;
+        public const int GoogleMapsIndex = 11;
 
 
         // Get the drone settings needed to describe the flight in the SkyCombFlights app

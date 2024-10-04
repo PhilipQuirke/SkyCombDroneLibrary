@@ -1,8 +1,7 @@
-﻿using OfficeOpenXml;
+﻿using SkyCombDrone.DroneLogic;
+using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
-using SkyCombDrone.DroneLogic;
-using SkyCombDrone.DroneModel;
 
 
 namespace SkyCombDrone.PersistModel
@@ -194,7 +193,8 @@ namespace SkyCombDrone.PersistModel
         {
             DroneDataStore? answer = null;
 
-            try {
+            try
+            {
                 if (dataStoreName != "")
                 {
                     if (System.IO.File.Exists(dataStoreName))
@@ -240,7 +240,7 @@ namespace SkyCombDrone.PersistModel
         // Handles case where there is both a thermal and an optical video file.
         public static DroneDataStore? OpenOrCreate_TwoVideos(
             Func<string, DateTime> readDateEncodedUtc,
-            string videoFileName, 
+            string videoFileName,
             string outputElseInputDirectory,
             bool canCreate)
         {

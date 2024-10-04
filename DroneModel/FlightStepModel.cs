@@ -46,10 +46,15 @@ namespace SkyCombDrone.DroneModel
         // then Yaw is in camera direction and may differ from drone direction to travel.
         // else Yaw is the drone direction of travel.
         // Either way we use yaw to determine the InputImageCenter.
-        public VelocityF InputImageUnitVector { get { 
+        public VelocityF InputImageUnitVector
+        {
+            get
+            {
                 return new VelocityF(
-                    - (float)Math.Cos( YawRad + Math.PI / 2 ), 
-                    + (float)Math.Sin( YawRad + Math.PI / 2 )); } }
+                    -(float)Math.Cos(YawRad + Math.PI / 2),
+                    +(float)Math.Sin(YawRad + Math.PI / 2));
+            }
+        }
 
         // The ground (not drone) elevation, above sea level (meters)
         // at the centre of the imaged area
@@ -68,7 +73,7 @@ namespace SkyCombDrone.DroneModel
         {
             if (settings != null)
                 LoadSettings(settings);
-       }
+        }
 
 
         // One-based settings index values. Must align with GetSettings procedure below
@@ -86,7 +91,7 @@ namespace SkyCombDrone.DroneModel
         // Get this FlightStep object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
         public override DataPairList GetSettings()
         {
-            if(InputImageCenter != null)
+            if (InputImageCenter != null)
                 InputImageCenter.AssertGood();
             if (InputImageSizeM != null)
                 InputImageSizeM.AssertGood();

@@ -76,7 +76,7 @@ namespace SkyCombDrone.DroneModel
             TardisId = other.TardisId;
             StartTime = other.StartTime;
             TimeMs = other.TimeMs;
-            DroneLocnM = ( other.DroneLocnM != null ? other.DroneLocnM.Clone() : null);
+            DroneLocnM = (other.DroneLocnM != null ? other.DroneLocnM.Clone() : null);
             LinealM = other.LinealM;
             SumLinealM = other.SumLinealM;
             YawDeg = other.YawDeg;
@@ -122,12 +122,16 @@ namespace SkyCombDrone.DroneModel
 
 
         // Calculate the speed of this Tardis in meters per second
-        public float SpeedMps { get { 
-            if (TimeMs <= 0 || LinealM <= 0)
-                return 0;
+        public float SpeedMps
+        {
+            get
+            {
+                if (TimeMs <= 0 || LinealM <= 0)
+                    return 0;
 
-            return 1000.0f * LinealM / TimeMs;
-        } }
+                return 1000.0f * LinealM / TimeMs;
+            }
+        }
 
 
         // Return the difference in Yaw between two steps (with minimal Yaw value)

@@ -17,29 +17,29 @@ namespace SkyCombDrone.DrawSpace
         {
             try
             {
-                if((image == null) || (flightStep==null) || (drone==null) || (drone.InputVideo==null))
+                if ((image == null) || (flightStep == null) || (drone == null) || (drone.InputVideo == null))
                     return;
 
                 var activeBgr = DroneColors.WhiteBgr; //  InScopeDroneBgr;
                 var fontScale = drone.InputVideo.FontScale;
-                var halfFontScale = fontScale/2.0f;
+                var halfFontScale = fontScale / 2.0f;
                 var lineThick = 1 + fontScale;
 
                 // We want the small lines to be the same length whether vert or horiz
                 int smallPerc = 2;
-                int smallPixels = (int)Math.Min(
+                int smallPixels = Math.Min(
                     image.Width * smallPerc / 100,
                     image.Height * smallPerc / 100);
 
                 int leftPerc = 10;
                 int rightPerc = 90;
-                int leftX = (int)(image.Width * leftPerc / 100); // pixels
-                int rightX = (int)(image.Width * rightPerc / 100); // pixels
+                int leftX = image.Width * leftPerc / 100; // pixels
+                int rightX = image.Width * rightPerc / 100; // pixels
 
                 int fromYperc = 10;
                 int toYperc = 90;
-                int fromY = (int)(image.Height * fromYperc / 100); // pixels
-                int toY = (int)(image.Height * toYperc / 100); // pixels
+                int fromY = image.Height * fromYperc / 100; // pixels
+                int toY = image.Height * toYperc / 100; // pixels
 
 
                 // Draw the zoom (if any) at top left. Seen 1 to 6.07.
@@ -53,7 +53,7 @@ namespace SkyCombDrone.DrawSpace
                 // Draw the drone direction (yaw) at the bottom few % of the image  
                 if (flightStep.YawDeg > -180)
                 {
-                    var middleDeg = (int) flightStep.YawDeg;
+                    var middleDeg = (int)flightStep.YawDeg;
                     if (middleDeg < 0)
                         middleDeg += 360;
 
@@ -83,8 +83,8 @@ namespace SkyCombDrone.DrawSpace
                     int[] degrees = { 0, 45, 90, 135, 180, 225, 270, 315, 360, 405 };
 
                     var HFOVDeg = drone.InputVideo.HFOVDeg;
-                    var leftDeg = middleDeg - HFOVDeg/2;
-                    var rightDeg = middleDeg + HFOVDeg/2;
+                    var leftDeg = middleDeg - HFOVDeg / 2;
+                    var rightDeg = middleDeg + HFOVDeg / 2;
 
                     // We should draw the direction as "127"in the middle
                     // unless we are heading almost straight say north
@@ -99,7 +99,7 @@ namespace SkyCombDrone.DrawSpace
                             drawDirectionDigits = drawDirectionDigits && (Math.Abs(distDeg) > 5);
                             var deltaX = distDeg * (topRightPt.X - topLeftPt.X) / HFOVDeg;
 
-                            var pt = new Point(bottomMiddlePt.X + (int)deltaX, bottomMiddlePt.Y);
+                            var pt = new Point(bottomMiddlePt.X + deltaX, bottomMiddlePt.Y);
                             image.Draw(new LineSegment2D(new Point(pt.X, topY), new Point(pt.X, bottomY)), activeBgr, lineThick);
 
                             var textPt = new Point(pt.X - 5 * fontScale * compassDirections[i].Length, bottomMiddlePt.Y);
@@ -120,7 +120,7 @@ namespace SkyCombDrone.DrawSpace
                 {
                     // We show the true pitchdeg in text 
                     // but locate it based on a 0 to 90 range (in case of weird values).
-                    int pitchDeg = - (int)flightStep.PitchDeg;
+                    int pitchDeg = -(int)flightStep.PitchDeg;
                     string pitchStr = pitchDeg.ToString();
                     pitchDeg = Math.Max(0, Math.Min(90, pitchDeg));
 

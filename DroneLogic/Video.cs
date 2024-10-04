@@ -187,7 +187,7 @@ namespace SkyCombDrone.DroneLogic
                 firstVideoFrameId = CurrFrameId;
             }
 
-            if(fromVideoS < toVideoS + 1)
+            if (fromVideoS < toVideoS + 1)
                 Assert(firstVideoFrameId < lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
 
             return (firstVideoFrameId, lastVideoFrameId, firstVideoFrameMs, lastVideoFrameMs);
@@ -327,7 +327,7 @@ namespace SkyCombDrone.DroneLogic
                 // Reset display video (if any) frame position to start displaying from
                 if (HasDisplayVideo)
                 {
-                    int displayFrameMs = (int)(InputVideo.CurrFrameMs + delayMs);
+                    int displayFrameMs = InputVideo.CurrFrameMs + delayMs;
                     if ((displayFrameMs > 0) && (displayFrameMs < DisplayVideo.DurationMs))
                         // Refer https://github.com/opencv/opencv/issues/15749
                         DisplayVideo.SetAndGetCurrFrameMs(displayFrameMs);
@@ -350,7 +350,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 if (InputVideo.HaveFrame)
                     DisplayVideo.SetOrGetNextFramebyMs(
-                        (int)(InputVideo.CurrFrameMs + delayMs));
+                        InputVideo.CurrFrameMs + delayMs);
                 else
                     DisplayVideo.ResetCurrFrame();
             }

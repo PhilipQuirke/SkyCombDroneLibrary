@@ -35,7 +35,7 @@ namespace SkyCombDrone.CommonSpace
 
 
         // Some libraries need BGR colors
-        static public Bgr ColorToBgr(Color theColor) { return new Bgr(theColor.B, theColor.G, theColor.R); }
+        public static Bgr ColorToBgr(Color theColor) { return new Bgr(theColor.B, theColor.G, theColor.R); }
         public static Bgr ActiveDroneBgr { get { return ColorToBgr(ActiveDroneColor); } }
         public static Bgr InScopeDroneBgr { get { return ColorToBgr(InScopeDroneColor); } }
         public static Bgr OutScopeDroneBgr { get { return ColorToBgr(OutScopeDroneColor); } }
@@ -47,11 +47,11 @@ namespace SkyCombDrone.CommonSpace
         public static Bgr PixelBgr { get { return ColorToBgr(PixelColor); } }
 
 
-        static public Bgr WhiteBgr { get; } = new Bgr(255, 255, 255);
-        static public Bgr GrayBgr { get; } = new Bgr(240, 240, 240);
-        static public Bgr DarkGrayBgr { get; } = new Bgr(106, 102, 99);
-        static public Bgr BlackBgr { get; } = new Bgr(0, 0, 0);
-        static public Bgr GreenBgr { get; } = new Bgr(0, 128, 0);
-        static public Bgr ErrorBgr { get; } = new Bgr(0, 0, 255);
+        public static Bgr WhiteBgr { get; } = new Bgr(255, 255, 255);
+        public static Bgr GrayBgr { get; } = new Bgr(240, 240, 240);
+        public static Bgr DarkGrayBgr { get; } = new Bgr(106, 102, 99);
+        public static Bgr BlackBgr { get; } = new Bgr(0, 0, 0);
+        public static Bgr GreenBgr { get; } = new Bgr(0, 128, 0);
+        public static Bgr ErrorBgr { get; } = new Bgr(0, 0, 255);
     }
 }

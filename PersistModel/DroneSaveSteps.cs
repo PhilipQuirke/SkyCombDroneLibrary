@@ -1,5 +1,4 @@
-﻿using Emgu.CV;
-using OfficeOpenXml.Drawing.Chart;
+﻿using OfficeOpenXml.Drawing.Chart;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
@@ -62,7 +61,7 @@ namespace SkyCombDrone.PersistModel
                 // Highlight in red any section where the TimeMs exceeds FlightConfig.MaxLegGapDurationMs. This implies not part of a leg.
                 Data.AddConditionalRuleBad(TardisModel.TimeMsSetting, stepRow, Drone.DroneConfig.MaxLegGapDurationMs);
 
-                if( Drone.DroneConfig.GimbalDataAvail == GimbalDataEnum.ManualNo)
+                if (Drone.DroneConfig.GimbalDataAvail == GimbalDataEnum.ManualNo)
                     // Highlight in red any step where the PitchRad exceeds FlightConfig.MaxLegPitchDeg. This implies not part of a leg.
                     Data.AddConditionalRuleBad(TardisModel.PitchDegSetting, stepRow, Drone.DroneConfig.MaxLegStepPitchDeg);
 

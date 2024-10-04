@@ -1,9 +1,9 @@
 ﻿// Copyright SkyComb Limited 2024. All rights reserved.
 using Emgu.CV;
 using Emgu.CV.Structure;
+using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
-using SkyCombDrone.CommonSpace;
 using System.Drawing;
 
 
@@ -35,8 +35,8 @@ namespace SkyCombDrone.DrawSpace
         protected int LabelHorizPixels { get; set; } = 0;
         protected int LabelVertPixels { get; set; } = 0;
         // Pixel space needed to draw the axises in
-        static public readonly int VertAxisHorzPixels = 2;
-        static public readonly int HorizAxisVertPixels = 2;
+        public static readonly int VertAxisHorzPixels = 2;
+        public static readonly int HorizAxisVertPixels = 2;
 
         public int TextFontSize = 10;
 
@@ -83,7 +83,7 @@ namespace SkyCombDrone.DrawSpace
             MaxHorizRaw = maxHorizRaw;
 
             // Calculate the step distance on the horizontal axis.
-            StepWidthPxs = 1.0F * (Size.Width - OriginPixel.X) / ((MaxHorizRaw - MinHorizRaw)/scale);
+            StepWidthPxs = 1.0F * (Size.Width - OriginPixel.X) / ((MaxHorizRaw - MinHorizRaw) / scale);
 
             // Calculate the number of steps between drawing.
             // Ranges from 1 (short video) to say 52.8 (long video). 
@@ -141,18 +141,22 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Origin of axises in pixels
-        protected Point OriginPixel { get {
-            return new Point(
-                VertAxisHorzPixels + LabelHorizPixels, 
-                Size.Height - HorizAxisVertPixels - LabelVertPixels);
-        } }
+        protected Point OriginPixel
+        {
+            get
+            {
+                return new Point(
+                    VertAxisHorzPixels + LabelHorizPixels,
+                    Size.Height - HorizAxisVertPixels - LabelVertPixels);
+            }
+        }
 
 
         // Draw vertical and horizontal axis
         protected void DrawAxisesAndLabels(ref Image<Bgr, byte> image)
         {
             var black = DroneColors.BlackBgr;
-  
+
             // Vertical axis
             Line(ref image, new Point(OriginPixel.X, 0), OriginPixel, black);
 
@@ -224,7 +228,7 @@ namespace SkyCombDrone.DrawSpace
         {
             Size = size;
 
-            LabelHorizPixels = (LabelVertAxis ? (TextFontSize >= 10 ? 50 : 30 ) : 0);
+            LabelHorizPixels = (LabelVertAxis ? (TextFontSize >= 10 ? 50 : 30) : 0);
             LabelVertPixels = (LabelHorizAxis ? 18 : 0);
 
             BaseImage = Draw.NewImage(size, DroneColors.GrayBgr);
@@ -235,7 +239,7 @@ namespace SkyCombDrone.DrawSpace
         public abstract void CurrImage(ref Image<Bgr, byte> image);
 
 
-        protected void DrawAxes( ref Bitmap bitmap)
+        protected void DrawAxes(ref Bitmap bitmap)
         {
             if (LabelVertAxis || LabelHorizAxis)
             {
@@ -306,7 +310,7 @@ namespace SkyCombDrone.DrawSpace
 
         protected float VertRangeRaw { get { return MaxVertRaw - MinVertRaw; } }
 
-        abstract public float GetVertRaw(FlightStep step);
+        public abstract float GetVertRaw(FlightStep step);
 
 
         protected DrawVertRange(DroneDrawScope drawScope, bool labelVertAxis, bool labelHorizAxis) : base(drawScope, labelVertAxis, labelHorizAxis)
@@ -330,7 +334,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.FixedAltitudeM; }
+        public override float GetVertRaw(FlightStep step) { return step.FixedAltitudeM; }
 
 
         protected void DrawAltitudeStep(
@@ -481,7 +485,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw altitude data based on Drone/GroundSpace data
         public override void CurrImage(ref Image<Bgr, byte> image)
         {
-            if ((VertRangeRaw > 0) && (DroneDrawScope.CurrRunFlightStep!=null))
+            if ((VertRangeRaw > 0) && (DroneDrawScope.CurrRunFlightStep != null))
                 DrawDroneCircle(ref image,
                     StepToWidth(DroneDrawScope.CurrRunFlightStep.SumLinealM),
                     RawDataToHeightPixels(GetVertRaw(DroneDrawScope.CurrRunFlightStep) - MinVertRaw, VertRangeRaw));
@@ -592,7 +596,7 @@ namespace SkyCombDrone.DrawSpace
         {
             try
             {
-                VertFraction = (float)(MaxVertRaw / (MaxVertRaw - MinVertRaw));
+                VertFraction = MaxVertRaw / (MaxVertRaw - MinVertRaw);
                 DrawAxisesAndLabels(ref image);
 
                 SetHorizLabelsByTime();
@@ -628,7 +632,7 @@ namespace SkyCombDrone.DrawSpace
 
                         var thisHeight = RawDataToHeightPixels(thisRunRaw, MaxVertRaw);
 
-                        if(prevSectionId != UnknownValue)
+                        if (prevSectionId != UnknownValue)
                             Line(ref image,
                                 new PointF(StepToWidthBySection(prevSectionId), prevHeight),
                                 new PointF(StepToWidthBySection(thisSectionId), thisHeight),
@@ -671,7 +675,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.SpeedMps; }
+        public override float GetVertRaw(FlightStep step) { return step.SpeedMps; }
 
 
         // Show drone (aka ground) speed as a graph.
@@ -715,7 +719,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.PitchDeg; }
+        public override float GetVertRaw(FlightStep step) { return step.PitchDeg; }
 
 
         // Show drone pitch as a graph.
@@ -757,7 +761,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.DeltaYawDeg; }
+        public override float GetVertRaw(FlightStep step) { return step.DeltaYawDeg; }
 
 
         // Show drone Delta Yaw as a graph.
@@ -798,7 +802,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        override public float GetVertRaw(FlightStep step) { return step.RollDeg; }
+        public override float GetVertRaw(FlightStep step) { return step.RollDeg; }
 
 
         // Show drone roll as a graph.

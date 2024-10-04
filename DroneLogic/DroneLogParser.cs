@@ -61,7 +61,7 @@ namespace SkyCombDrone.DroneLogic
                 else
                 {
                     line = line.Trim();
-                    if ((line.Length == 0) && ! in_font_clause)
+                    if ((line.Length == 0) && !in_font_clause)
                         break;
 
                     if (in_font_clause)
@@ -213,8 +213,8 @@ namespace SkyCombDrone.DroneLogic
 
 
                     // Evaluate the drone type
-                    if(video.CameraType == VideoModel.DjiGeneric)
-                        switch(paragraph.Count() )
+                    if (video.CameraType == VideoModel.DjiGeneric)
+                        switch (paragraph.Count())
                         {
                             case 12: video.CameraType = VideoModel.DjiH20T; break;
                             case 11: video.CameraType = VideoModel.DjiH20N; break;

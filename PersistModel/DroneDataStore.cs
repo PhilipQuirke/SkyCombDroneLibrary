@@ -66,7 +66,7 @@ namespace SkyCombDrone.PersistModel
                 var cell = Worksheet.Cells[row, 1];
                 if (index.Key != "")
                 {
-                    if ((index.Key == DemTabName) || 
+                    if ((index.Key == DemTabName) ||
                         (index.Key == DsmTabName) ||
                         (index.Key == SwatheTabName) ||
                         (index.Key == Sections1TabName) ||
@@ -90,7 +90,7 @@ namespace SkyCombDrone.PersistModel
             SetTitle(ref row, 1, "Help resources");
             Worksheet.Cells[row, 1].Value = "Introduction and index";
             Worksheet.Cells[row, 2].Value = @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md";
-            SetExternalHyperLink( Worksheet.Cells[row, 2], @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md");
+            SetExternalHyperLink(Worksheet.Cells[row, 2], @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md");
             row++;
             Worksheet.Cells[row, 1].Value = "DataStore-specific help";
             Worksheet.Cells[row, 2].Value = @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/DataStore.md";
@@ -261,7 +261,7 @@ namespace SkyCombDrone.PersistModel
             (var dataWs, int lastDataRow) = EndRow(dataTabName);
 
             (_, var pivotWs) = SelectOrAddWorksheet(pivotTabName);
-            if((pivotWs != null) && (pivotWs.PivotTables[pivotName] != null))
+            if ((pivotWs != null) && (pivotWs.PivotTables[pivotName] != null))
                 pivotWs.PivotTables.Delete(pivotName);
 
             return (pivotWs, dataWs, lastDataRow);

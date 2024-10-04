@@ -109,7 +109,7 @@ namespace SkyCombDrone.DroneLogic
         {
             float linealM = 0;
             foreach (var leg in Legs)
-                if((leg.MaxSumLinealM >=0) && (leg.MinSumLinealM >= 0))
+                if ((leg.MaxSumLinealM >= 0) && (leg.MinSumLinealM >= 0))
                     linealM += leg.MaxSumLinealM - leg.MinSumLinealM;
             return linealM;
         }
@@ -130,9 +130,9 @@ namespace SkyCombDrone.DroneLogic
 
         // Remove legs that are too short
         private void RemoveSmallLinealLegs(int min_lineal_length_m)
-        {     
+        {
             bool removed = false;
-            for (int i = Legs.Count-1; i >= 0; i--)
+            for (int i = Legs.Count - 1; i >= 0; i--)
             {
                 var leg = Legs[i];
                 if (leg.MaxSumLinealM - leg.MinSumLinealM < min_lineal_length_m)
@@ -181,9 +181,9 @@ namespace SkyCombDrone.DroneLogic
                         bool badSumPitch = (Math.Abs(startStep.PitchDeg - thisStep.PitchDeg) >= config.MaxLegSumPitchDeg);
                         bool badDuration = (thisStep.FlightSection.TimeMs > config.MaxLegGapDurationMs);
 
-                        bool badStepPitch = (! config.UseGimbalData) && 
+                        bool badStepPitch = (!config.UseGimbalData) &&
                             (Math.Abs(thisStep.PitchDeg) >= config.MaxLegStepPitchDeg);
-                        bool badCameraDown = config.UseGimbalData && 
+                        bool badCameraDown = config.UseGimbalData &&
                             (Math.Abs(thisStep.PitchDeg) < config.MinCameraDownDeg);
 
 
@@ -457,12 +457,16 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public string DescribeLegs { get {      
-            if (Legs.Count == 0)
-                return "";
+        public string DescribeLegs
+        {
+            get
+            {
+                if (Legs.Count == 0)
+                    return "";
 
-            return string.Format(", {0} legs", Legs.Count);
-        } }
+                return string.Format(", {0} legs", Legs.Count);
+            }
+        }
 
 
         public void AssertGood(bool hasFlightSteps)

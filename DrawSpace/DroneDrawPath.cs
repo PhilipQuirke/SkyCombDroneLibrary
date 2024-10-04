@@ -5,8 +5,8 @@ using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundModel;
 using SkyCombGround.GroundLogic;
+using SkyCombGround.GroundModel;
 using System.Drawing;
 
 
@@ -14,7 +14,7 @@ using System.Drawing;
 namespace SkyCombDrone.DrawSpace
 {
     // Code to draw images related to drone flight path data
-    public class DroneDrawPath : DroneDrawGraph  
+    public class DroneDrawPath : DroneDrawGraph
     {
         // Number of shades of green or brown to use in the background
         const int NumShades = 20;
@@ -55,8 +55,8 @@ namespace SkyCombDrone.DrawSpace
             TextHighlightColor = DroneColors.LegNameBgr;
 
             DrawLegs = drawLegs &&
-                (DroneDrawScope != null) && 
-                (DroneDrawScope.Drone != null) && 
+                (DroneDrawScope != null) &&
+                (DroneDrawScope.Drone != null) &&
                 (DroneDrawScope.Drone.NumLegsShown > 0);
 
             Reset(drawScope);
@@ -101,8 +101,8 @@ namespace SkyCombDrone.DrawSpace
         // Convert from a Point (in pixels) to a Location (in meters)
         public DroneLocation DronePixelPointToLocnM(Point pixelLocation)
         {
-            var eastingM = (pixelLocation.X - TransformMToPixels.XMargin ) / TransformMToPixels.Scale;
-            var northingM = - (pixelLocation.Y - TransformMToPixels.YMargin ) / TransformMToPixels.Scale;
+            var eastingM = (pixelLocation.X - TransformMToPixels.XMargin) / TransformMToPixels.Scale;
+            var northingM = -(pixelLocation.Y - TransformMToPixels.YMargin) / TransformMToPixels.Scale;
 
             return new DroneLocation(northingM, eastingM).Translate(TranslateM.Negate());
         }
@@ -141,9 +141,9 @@ namespace SkyCombDrone.DrawSpace
 
 
         public void DrawText(ref Image<Bgr, byte> image, string text, Point thisPoint, bool highlight = true)
-        { 
+        {
             Text(ref image, text, thisPoint, TextFontScale,
-                highlight? TextHighlightColor : TextNormalColor, TextThickness);
+                highlight ? TextHighlightColor : TextNormalColor, TextThickness);
         }
 
 
@@ -154,7 +154,7 @@ namespace SkyCombDrone.DrawSpace
                 return;
 
             var thisPoint = DroneLocnMToPixelPoint(flightStep.DroneLocnM);
-            var legname = (flightStep is FlightStep ? (flightStep as FlightStep).FlightLegName : "" );
+            var legname = (flightStep is FlightStep ? (flightStep as FlightStep).FlightLegName : "");
 
             // Using flightStep.YawDeg, decide where to draw the text relative to thisPoint.
             if (flightStep.YawDeg < 45)
@@ -177,7 +177,7 @@ namespace SkyCombDrone.DrawSpace
         {
             var flightSteps = DroneDrawScope.Drone.FlightSteps;
             var flightLegs = DroneDrawScope.Drone.FlightLegs;
-            if((flightSteps == null) || (flightLegs == null))
+            if ((flightSteps == null) || (flightLegs == null))
                 return;
 
             int firstRunStepId = DroneDrawScope.FirstRunStepId;
@@ -231,10 +231,10 @@ namespace SkyCombDrone.DrawSpace
             int prevLegId = UnknownValue;
 
             int maxStepId = DroneDrawScope.TardisSummary.TardisMaxKey;
-            for(int theStepId = 0; theStepId <= maxStepId; theStepId++)
+            for (int theStepId = 0; theStepId <= maxStepId; theStepId++)
             {
                 var step = DroneDrawScope.TardisSummary.GetTardisModel(theStepId);
-                if(step == null)
+                if (step == null)
                     continue;
 
                 var thisPoint = FlightPath_DroneLocnMToPixelPoint(step);
@@ -250,7 +250,7 @@ namespace SkyCombDrone.DrawSpace
                 {
                     // If drone moved less than 10 m between steps, draw a line.
                     // Useful when drawing several flights in same graph.
-                    if((prevPoint.X != UnknownValue) &&
+                    if ((prevPoint.X != UnknownValue) &&
                         Math.Abs(prevPoint.X - thisPoint.X) < DrawLineMaxGapM &&
                         Math.Abs(prevPoint.Y - thisPoint.Y) < DrawLineMaxGapM)
                         Line(ref image, prevPoint, thisPoint, thisColor);
@@ -281,10 +281,10 @@ namespace SkyCombDrone.DrawSpace
 
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
         public void DrawGroundModel(
-            ref Image<Bgr, byte> image, 
+            ref Image<Bgr, byte> image,
             ref Rectangle maxLocation,
-            GroundModel groundModel, 
-            Color highColor, Color lowColor, 
+            GroundModel groundModel,
+            Color highColor, Color lowColor,
             double minValue, double maxValue,
             int drawOverlap = 5)
         {
@@ -299,7 +299,7 @@ namespace SkyCombDrone.DrawSpace
                 for (int col = 1; col < groundModel.NumCols + 1; col++)
                 {
                     var droneLocnM = new DroneLocation(
-                        row - GroundModel.GroundBufferM + LocationOffset.NorthingM, 
+                        row - GroundModel.GroundBufferM + LocationOffset.NorthingM,
                         col - GroundModel.GroundBufferM + LocationOffset.EastingM);
 
 
@@ -323,13 +323,13 @@ namespace SkyCombDrone.DrawSpace
                         // Calculate the shade of the square based on its elevation
                         int shadeIndex = (int)Math.Max(0, Math.Min(NumShades - 1,
                             1.0f * NumShades * (elevationM - minValue) / (maxValue - minValue)));
-                        if((maxValue==1) && (minValue==0))
+                        if ((maxValue == 1) && (minValue == 0))
                             shadeIndex = (elevationM > 0 ? NumShades - 1 : 0);
 
                         image.Draw(locationRect, DroneColors.ColorToBgr(theShades[shadeIndex]),
                             -1); // If thickness is less than 1, the rectangle is filled up
 
-                        if((elevationM > 0) && (elevationM > maxElevationM))
+                        if ((elevationM > 0) && (elevationM > maxElevationM))
                         {
                             maxElevationM = elevationM;
                             maxLocation = locationRect;
@@ -343,7 +343,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
         private void DrawElevationOrSwathe(ref Image<Bgr, byte> image, GroundType backgroundType)
         {
-            if((DroneDrawScope == null) ||  (DroneDrawScope.Drone == null) || (DroneDrawScope.Drone.GroundData == null))
+            if ((DroneDrawScope == null) || (DroneDrawScope.Drone == null) || (DroneDrawScope.Drone.GroundData == null))
                 return;
 
             GroundModel? groundModel = DroneDrawScope.Drone.GroundData.GroundModelByType(backgroundType);
@@ -364,7 +364,7 @@ namespace SkyCombDrone.DrawSpace
             }
 
             Rectangle maxLocation = new(0, 0, 0, 0);
-            
+
             // Calculate the range of surface elevations
             (double minValue, double maxValue) = groundModel.GetMinMaxElevationM();
             if (backgroundType == GroundType.SwatheSeen)
@@ -382,7 +382,7 @@ namespace SkyCombDrone.DrawSpace
 
 
             // Overdraw the highest elevation with a white triangle
-            if((maxLocation.Width > 0) && (backgroundType != GroundType.SwatheSeen))
+            if ((maxLocation.Width > 0) && (backgroundType != GroundType.SwatheSeen))
             {
                 var where = new Point(maxLocation.X + maxLocation.Width / 2, maxLocation.Y + maxLocation.Height / 2);
 
@@ -491,7 +491,7 @@ namespace SkyCombDrone.DrawSpace
                         TransformMToPixels.XMargin = 0;
 
                         // Translate image to bring the focused portion into the visible graph area.
-                        TranslateM = new( - minLocation.NorthingM, - minLocation.EastingM );
+                        TranslateM = new(-minLocation.NorthingM, -minLocation.EastingM);
 
                         // Ensure image is top aligned. 
                         var spareVertPxs = (size.Height - neededVertM * scalePxsPerM);
@@ -503,11 +503,11 @@ namespace SkyCombDrone.DrawSpace
                             DrawElevationOrSwathe(ref image, groundType);
 
                         // Draw all flight path legs (as straight lines)
-                        if (DrawLegs) 
+                        if (DrawLegs)
                             DrawFlightLegs(ref image);
 
                         // Draw the flight path steps
-                        if(DrawSteps)
+                        if (DrawSteps)
                             DrawFlightSteps(ref image);
                     }
                 }
@@ -585,7 +585,7 @@ namespace SkyCombDrone.DrawSpace
         {
             try
             {
-                if((DroneDrawScope != null) && (TransformMToPixels.Scale > 0))
+                if ((DroneDrawScope != null) && (TransformMToPixels.Scale > 0))
                 {
                     var activeBgr = DroneColors.ActiveDroneBgr;
                     var inScopeBgr = DroneColors.InScopeDroneBgr;
