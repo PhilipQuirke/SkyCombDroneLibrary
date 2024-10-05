@@ -205,15 +205,15 @@ namespace SkyCombDrone.DroneLogic
                                 //if (badStepAltitude)
                                 //    whyEnd.Add($"Step altitude change too large: {prevStep.AltitudeM} to {thisStep.AltitudeM}");
                                 if (badYaw)
-                                    whyEnd.Add($"Yaw change too large: {startStep.YawDegsDelta(startStep)} to {thisStep.YawDegsDelta(startStep)}");
+                                    whyEnd.Add($"Large yaw change: {startStep.YawDegsDelta(startStep)} to {thisStep.YawDegsDelta(startStep)}");
                                 else if (badSumPitch)
-                                    whyEnd.Add($"Sum pitch too large: {startStep.PitchDeg} to {thisStep.PitchDeg}");
+                                    whyEnd.Add($"Large pitch sum: {startStep.PitchDeg} to {thisStep.PitchDeg}");
                                 else if (badDuration)
-                                    whyEnd.Add($"Gap too large: {thisStep.FlightSection.TimeMs}");
+                                    whyEnd.Add($"Large gap: {thisStep.FlightSection.TimeMs}");
                                 else if (badStepPitch)
-                                    whyEnd.Add($"Step pitch too large: {thisStep.PitchDeg}");
+                                    whyEnd.Add($"Large pitch: {thisStep.PitchDeg}");
                                 else if (badCameraDown)
-                                    whyEnd.Add($"Step camera down too small: {thisStep.PitchDeg}");
+                                    whyEnd.Add($"Small camera: {thisStep.PitchDeg}");
                             }
 
                             // Do not include thisStep in this leg. Reset for next leg calcs.
