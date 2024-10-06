@@ -138,44 +138,6 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // Draw contours and bounding rectangles
-        public static int ContoursAndPixels(DrawImageConfig config, double ModelContourMinArea, ref Image<Bgr, byte> image, VectorOfVectorOfPoint contours)
-        {
-            Contours(config, ref image, contours);
-
-            // Select contours with a minimum area
-            VectorOfVectorOfPoint filteredContours;
-            if (ModelContourMinArea > 0)
-            {
-                filteredContours = new VectorOfVectorOfPoint();
-                for (int i = 0; i < contours.Size; i++)
-                {
-                    // https://answers.opencv.org/question/178108/arclength-vs-contourarea/ says:
-                    // If contours are not closed, the contour area is calculated as a line.
-                    // By the way: the arc length of a 1px wide line is around twice as long as it should be.
-                    // This is because of the algorithm used in findContours.
-                    var area = CvInvoke.ContourArea(contours[i], false);
-                    if (area >= ModelContourMinArea)
-                    {
-                        filteredContours.Push(contours[i]);
-                    }
-                }
-            }
-            else
-                filteredContours = contours;
-
-            // Draw padded bounding rectangles
-            for (int i = 0; i < filteredContours.Size; i++)
-                BoundingRectangle(
-                    config,
-                    ref image,
-                    CvInvoke.BoundingRectangle(contours[i]),
-                    config.DrawRealFeatureColor);
-
-            return filteredContours.Size;
-        }
-
-
         // Return a range of colour shades 
         public static List<Color> GetColorShades(Color startColor, Color endColor, int numShades = 20)
         {
