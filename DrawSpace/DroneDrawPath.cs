@@ -410,9 +410,9 @@ namespace SkyCombDrone.DrawSpace
 
                 Image<Bgr, byte> image = NewImage(size, BackgroundColor);
 
-                // Do we want to just show a 1m by 1m area of the flight path?
+                // Do we want to just show a 4m by 4m area of the flight path?
                 bool tightFocus = (processObjectLocation != null);
-                var tightFocusM = 0.5f;
+                var tightFocusM = 2f;
 
                 if (tightFocus)
                 {
