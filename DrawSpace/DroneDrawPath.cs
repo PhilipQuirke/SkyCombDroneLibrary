@@ -539,7 +539,7 @@ namespace SkyCombDrone.DrawSpace
 
             var countryGraphImage = countryGraphBitmap.ToImage<Bgr, byte>();
 
-            Point crossCenter = new Point(
+            Point crossCenter = new(
                 (int)(crossXFraction * countryGraphImage.Width),
                 countryGraphImage.Height - (int)(crossYFraction * countryGraphImage.Height));
 
@@ -560,7 +560,7 @@ namespace SkyCombDrone.DrawSpace
 
             for (int i = 0; i < NumShades; i++)
             {
-                Rectangle thisRect = new Rectangle(0, 0, size.Width, (int)inc);
+                Rectangle thisRect = new(0, 0, size.Width, (int)inc);
                 thisRect.Y = (int)(i * inc);
                 image.Draw(thisRect, DroneColors.ColorToBgr(theShades[i]),
                     -1); // If thickness is less than 1, the rectangle is filled up
