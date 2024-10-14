@@ -79,6 +79,7 @@ namespace SkyCombDrone.DroneModel
 
         // The video capture object providing access to the video contents
         protected VideoCapture? DataAccess { get; set; } = null;
+        public bool IsOpen { get { return DataAccess != null; } }
 
 
         // THERMAL CAMERA SETTINGS
