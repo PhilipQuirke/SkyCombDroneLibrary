@@ -244,7 +244,7 @@ namespace SkyCombDrone.DroneModel
                 { "Sum Time Ms", SumTimeMs, MillisecondsNdp },
                 { "Northing M", DroneLocnM!=null ? DroneLocnM.NorthingM : UnknownValue , LocationNdp },
                 { "Easting M", DroneLocnM!=null ? DroneLocnM.EastingM : UnknownValue , LocationNdp },
-                { "Lineal M", LinealM == UnknownValue ? UnknownLinealValue : LinealM, LocationNdp }, // Improve graphing
+                { "Lineal CM", LinealM == UnknownValue ? UnknownLinealValue : (int)(LinealM * 100), LocationNdp }, // Improve graphing
                 { "Sum Lineal M", SumLinealM == UnknownValue ? UnknownLinealValue : SumLinealM, LocationNdp }, // Improve graphing
                 { "Speed Mps", SpeedMps, LocationNdp },
                 { "Yaw", YawDeg == UnknownValue ? UnknownLinealValue : YawDeg, DegreesNdp },
@@ -267,7 +267,7 @@ namespace SkyCombDrone.DroneModel
             TimeMs = StringToNonNegInt(settings[2]);
             // SumTimeMs = StringToNonNegInt(settings[3]);
             DroneLocnM = new DroneLocation(settings[4], settings[5]);
-            LinealM = StringToFloat(settings[6]);
+            LinealM = StringToFloat(settings[6]) / 100;
             SumLinealM = StringToFloat(settings[7]);
             // SpeedMps = settings[8]
             YawDeg = StringToFloat(settings[9]);
