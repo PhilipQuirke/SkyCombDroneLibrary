@@ -34,6 +34,6 @@ namespace SkyCombDrone.CommonSpace
         public const int ResultsTitleRow = 9;
         public const int EffortTitleRow = 18;
         public const int OutputTitleRow = 24;
-        public const int DrawTitleRow = 35;
+        public const int DrawTitleRow = 31;
     }
 }
