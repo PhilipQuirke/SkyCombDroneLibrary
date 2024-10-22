@@ -29,8 +29,8 @@ namespace SkyCombDrone.DrawSpace
 
         // Do we draw and label the vertical and horizontal axises?
         // Shrinks the data area but makes the image more self-contained.
-        protected bool LabelVertAxis { get; } = false;
-        protected bool LabelHorizAxis { get; } = false;
+        public bool LabelVertAxis { get; } = false;
+        public bool LabelHorizAxis { get; } = false;
         // If we label the axises, how many pixels we need for the labels
         protected int LabelHorizPixels { get; set; } = 0;
         protected int LabelVertPixels { get; set; } = 0;
