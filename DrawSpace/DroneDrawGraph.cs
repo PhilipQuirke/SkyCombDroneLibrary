@@ -63,7 +63,7 @@ namespace SkyCombDrone.DrawSpace
 
         protected void DrawNoData(ref Image<Bgr, byte> image)
         {
-            DrawAxisesAndLabels(ref image);
+            DrawAxises(ref image);
 
             NoDataText(ref image, new Point(90, (int)(Size.Height * 0.48)));
 
@@ -153,7 +153,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw vertical and horizontal axis
-        protected void DrawAxisesAndLabels(ref Image<Bgr, byte> image)
+        protected void DrawAxises(ref Image<Bgr, byte> image)
         {
             var black = DroneColors.BlackBgr;
 
@@ -162,21 +162,6 @@ namespace SkyCombDrone.DrawSpace
 
             // Horizontal axis
             Line(ref image, OriginPixel, new Point(Size.Width, OriginPixel.Y), black);
-        }
-
-
-        // Overdraw the vertical axis in FocusColor
-        protected void OverDrawVertAxis(ref Image<Bgr, byte> image, float runMin, float runMax, float axisMax)
-        {
-            var droneBgr = DroneColors.InScopeDroneBgr;
-            var minProcHeight = RawDataToHeightPixels(runMin, axisMax);
-            var maxProcHeight = RawDataToHeightPixels(runMax, axisMax);
-
-            var indent = OriginPixel.X;
-
-            Line(ref image, new PointF(indent, minProcHeight), new PointF(indent, maxProcHeight), droneBgr, HighlightThickness);
-            Line(ref image, new PointF(indent, minProcHeight), new PointF(indent - HighlightThickness * 3, minProcHeight), droneBgr, HighlightThickness);
-            Line(ref image, new PointF(indent, maxProcHeight), new PointF(indent - HighlightThickness * 3, maxProcHeight), droneBgr, HighlightThickness);
         }
 
 
@@ -276,7 +261,7 @@ namespace SkyCombDrone.DrawSpace
 
                         // Horizontal axis right value
                         int chars = HorizRightLabel.Length;
-                        thePoint = new Point(Size.Width - 8 * chars, Size.Height - vertEdge);
+                        thePoint = new Point(Size.Width - 12 * chars, Size.Height - vertEdge);
                         graphics.DrawString(HorizRightLabel, font, brush, thePoint);
                     }
                 }
@@ -440,7 +425,7 @@ namespace SkyCombDrone.DrawSpace
                     (MinVertRaw, MaxVertRaw) = DroneDrawScope.MinMaxVerticalAxisM;
 
                     SetVerticalLabels("m");
-                    DrawAxisesAndLabels(ref BaseImage);
+                    DrawAxises(ref BaseImage);
 
                     if (VertRangeRaw > 0)
                     {
@@ -525,7 +510,7 @@ namespace SkyCombDrone.DrawSpace
 
                     SetVerticalLabels("m");
                     SetHorizLabelsByTime();
-                    DrawAxisesAndLabels(ref BaseImage);
+                    DrawAxises(ref BaseImage);
 
                     CalculateStepWidthAndStrideBySection();
 
@@ -597,7 +582,7 @@ namespace SkyCombDrone.DrawSpace
             try
             {
                 VertFraction = MaxVertRaw / (MaxVertRaw - MinVertRaw);
-                DrawAxisesAndLabels(ref image);
+                DrawAxises(ref image);
 
                 SetHorizLabelsByTime();
 
@@ -643,9 +628,6 @@ namespace SkyCombDrone.DrawSpace
                         prevHeight = thisHeight;
                     }
                 }
-
-                // Not needed
-                // OverDrawVertAxis(ref image, minRunRaw, maxRunRaw, MaxVertRaw);
             }
             catch (Exception ex)
             {
