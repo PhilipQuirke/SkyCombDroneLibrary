@@ -393,10 +393,6 @@ namespace SkyCombDrone.DrawSpace
     {
         public DrawAltitudeByLinealM(DroneDrawScope drawScope) : base(drawScope)
         {
-            Description =
-                "Ground elevation (brown), Surface elevation (green), and " +
-                "Drone altitude (blue) on vertical axis, " +
-                "against drone distance flown. ";
         }
 
 
