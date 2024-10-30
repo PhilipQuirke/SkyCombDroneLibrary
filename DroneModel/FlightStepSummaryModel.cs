@@ -119,7 +119,7 @@ namespace SkyCombDrone.DroneModel
                     if ((minStr != maxStr) && (MaxDemM > 0))
                         answer += "-" + maxStr;
 
-                    answer += "m";
+                    answer += " m";
 
                     if (MinDsmM != UnknownValue)
                     {
@@ -131,7 +131,7 @@ namespace SkyCombDrone.DroneModel
                         if ((minStr2 != maxStr2) && (MaxDsmM > 0))
                             answer += "-" + maxStr2;
 
-                        answer += "m";
+                        answer += " m";
                     }
                 }
 
@@ -148,7 +148,7 @@ namespace SkyCombDrone.DroneModel
                     if ((minStr != maxStr) && (MaxAltitudeM > 0))
                         answer += "-" + maxStr;
 
-                    answer += "m";
+                    answer += " m";
                 }
 
                 return answer;
@@ -164,7 +164,7 @@ namespace SkyCombDrone.DroneModel
                 string answer = "";
 
                 if (MaxSumLinealM > 0)
-                    answer += ", flew " + MaxSumLinealM.ToString("0") + "m";
+                    answer += ", flew " + MaxSumLinealM.ToString("0") + " m";
 
                 return answer;
             }

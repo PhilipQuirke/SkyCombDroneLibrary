@@ -155,7 +155,7 @@ namespace SkyCombDrone.DroneModel
             if (minStr != maxStr)
                 answer += "-" + maxStr;
 
-            answer += "m";
+            answer += " m";
 
             return answer;
         }

@@ -415,8 +415,8 @@ namespace SkyCombDrone.DrawSpace
                 else
                 {
                     Title = "Elevations: " + DroneDrawScope.DescribeElevation;
-                    HorizLeftLabel = SafeFloatToStr(MinHorizRaw, "0") + "m";
-                    HorizRightLabel = SafeFloatToStr(MaxHorizRaw, "0") + "m";
+                    HorizLeftLabel = SafeFloatToStr(MinHorizRaw, "0") + " m";
+                    HorizRightLabel = SafeFloatToStr(MaxHorizRaw, "0") + " m";
                     Metrics = DroneDrawScope.GetSettings_Altitude;
                     (MinVertRaw, MaxVertRaw) = DroneDrawScope.MinMaxVerticalAxisM;
 
