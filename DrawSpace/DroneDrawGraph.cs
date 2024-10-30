@@ -84,9 +84,11 @@ namespace SkyCombDrone.DrawSpace
 
             // Calculate the step distance on the horizontal axis.
             StepWidthPxs = 1.0F * (Size.Width - OriginPixel.X) / ((MaxHorizRaw - MinHorizRaw) / scale);
+            if (StepWidthPxs < 0)
+                // Occurs in ObjectCategoryForm
+                StepWidthPxs = 1;
 
             // Calculate the number of steps between drawing.
-            // Ranges from 1 (short video) to say 52.8 (long video). 
             StepsPerStride = 1;
             if (StepWidthPxs < 1)
                 StepsPerStride = 1 / StepWidthPxs;
@@ -477,6 +479,9 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone / ground altitude data. Horizontal axis is time
     public class DrawAltitudeByTime : DrawAltitude
     {
+        protected bool NormalCase = true;
+
+
         public DrawAltitudeByTime(DroneDrawScope drawScope) : base(drawScope)
         {
             Description =
@@ -492,58 +497,70 @@ namespace SkyCombDrone.DrawSpace
             try
             {
                 base.Initialise(size);
+                if (!NormalCase)
+                {
+                    LabelHorizPixels = 2;
+                    LabelVertPixels = 1;
+                }
 
                 if (DroneDrawScope.Drone == null)
                 {
                     Title = "Drone Altitude";
                     DrawNoData(ref BaseImage);
                 }
-                else
+                else 
                 {
-                    Title = DroneDrawScope.DescribeElevation;
-                    Metrics = DroneDrawScope.GetSettings_Altitude;
-                    (MinVertRaw, MaxVertRaw) = DroneDrawScope.MinMaxVerticalAxisM;
+                    if (NormalCase)
+                    {
+                        Title = DroneDrawScope.DescribeElevation;
+                        Metrics = DroneDrawScope.GetSettings_Altitude;
+                        (MinVertRaw, MaxVertRaw) = DroneDrawScope.MinMaxVerticalAxisM;
+                    }
 
                     SetVerticalLabels("m");
                     SetHorizLabelsByTime();
+
                     DrawAxises(ref BaseImage);
 
                     CalculateStepWidthAndStrideBySection();
 
-                    if (VertRangeRaw > 0)
+                    if (NormalCase)
                     {
-                        var firstRunSectionId = DroneDrawScope.FirstRunStepId;
-                        var lastRunSectionId = DroneDrawScope.LastRunStepId;
-                        var inScopeDroneBgr = DroneColors.InScopeDroneBgr;
-                        var outScopeDroneBgr = DroneColors.OutScopeDroneBgr;
-
-                        int prevSectionId = 0;
-                        FlightStep prevStep = null;
-                        for (int thisSectionId = DroneDrawScope.FirstDrawStepId; thisSectionId <= DroneDrawScope.LastDrawStepId; thisSectionId++)
+                        if (VertRangeRaw > 0)
                         {
-                            // Draw the first/last frames, first/last frames processed & a frame every stepsPerStride
-                            if (DroneDrawScope.DrawStepId(thisSectionId) ||
-                                thisSectionId - prevSectionId > StepsPerStride)
+                            var firstRunSectionId = DroneDrawScope.FirstRunStepId;
+                            var lastRunSectionId = DroneDrawScope.LastRunStepId;
+                            var inScopeDroneBgr = DroneColors.InScopeDroneBgr;
+                            var outScopeDroneBgr = DroneColors.OutScopeDroneBgr;
+
+                            int prevSectionId = 0;
+                            FlightStep prevStep = null;
+                            for (int thisSectionId = DroneDrawScope.FirstDrawStepId; thisSectionId <= DroneDrawScope.LastDrawStepId; thisSectionId++)
                             {
-                                var thisStep = DroneDrawScope.Drone.FlightSteps.StepIdToNearestFlightStep(thisSectionId);
-                                if (thisStep == null)
-                                    continue;
-
-                                if (prevStep != null)
+                                // Draw the first/last frames, first/last frames processed & a frame every stepsPerStride
+                                if (DroneDrawScope.DrawStepId(thisSectionId) ||
+                                    thisSectionId - prevSectionId > StepsPerStride)
                                 {
-                                    var thisWidth = StepToWidthBySection(thisStep.FlightSection.TardisId);
-                                    var prevWidth = thisWidth - StepWidthPxs;
+                                    var thisStep = DroneDrawScope.Drone.FlightSteps.StepIdToNearestFlightStep(thisSectionId);
+                                    if (thisStep == null)
+                                        continue;
 
-                                    DrawAltitudeStep(ref BaseImage, prevStep, thisStep, prevWidth, thisWidth);
+                                    if (prevStep != null)
+                                    {
+                                        var thisWidth = StepToWidthBySection(thisStep.FlightSection.TardisId);
+                                        var prevWidth = thisWidth - StepWidthPxs;
+
+                                        DrawAltitudeStep(ref BaseImage, prevStep, thisStep, prevWidth, thisWidth);
+                                    }
+
+                                    prevStep = thisStep;
                                 }
-
-                                prevStep = thisStep;
                             }
-                        }
 
-                        // Overdraw the horizontal axis in FocusColor to show the frame range processed.
-                        if ((firstRunSectionId != UnknownValue) && (lastRunSectionId != UnknownValue))
-                            OverDrawHorzAxis(ref BaseImage);
+                            // Overdraw the horizontal axis in FocusColor to show the frame range processed.
+                            if ((firstRunSectionId != UnknownValue) && (lastRunSectionId != UnknownValue))
+                                OverDrawHorzAxis(ref BaseImage);
+                        }
                     }
                 }
             }
