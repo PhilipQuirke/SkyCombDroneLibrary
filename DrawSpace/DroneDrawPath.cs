@@ -408,6 +408,12 @@ namespace SkyCombDrone.DrawSpace
                 TransformMToPixels = new();
                 TranslateM = new();
 
+                if ((size.Width < 100) || (size.Height < 100))
+                {
+                    BaseImage = NewImage(new Size(100,100), BackgroundColor);
+                    return;
+                }
+
                 Image<Bgr, byte> image = NewImage(size, BackgroundColor);
 
                 // Do we want to just show a 4m by 4m area of the flight path?
