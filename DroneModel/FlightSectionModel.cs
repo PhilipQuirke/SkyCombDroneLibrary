@@ -179,7 +179,7 @@ namespace SkyCombDrone.DroneModel
         {
             get
             {
-                return string.Format("Drone Path: {0} x {1}m",
+                return string.Format("Drone Path: {0} x {1} m",
                     NorthingRangeM().ToString("0"),
                     EastingRangeM().ToString("0"));
             }
