@@ -391,9 +391,9 @@ namespace SkyCombDrone.DrawSpace
 
 
     // Code to draw drone / ground altitude data. Horizontal axis is lineal distance travelled.
-    public class DrawAltitudeByLinealM : DrawAltitude
+    public class DrawElevations : DrawAltitude
     {
-        public DrawAltitudeByLinealM(DroneDrawScope drawScope) : base(drawScope)
+        public DrawElevations(DroneDrawScope drawScope) : base(drawScope)
         {
         }
 
@@ -460,7 +460,7 @@ namespace SkyCombDrone.DrawSpace
             }
             catch (Exception ex)
             {
-                throw ThrowException("DrawAltitudeByLinealM.Initialise", ex);
+                throw ThrowException("DrawElevations.Initialise", ex);
             }
         }
 

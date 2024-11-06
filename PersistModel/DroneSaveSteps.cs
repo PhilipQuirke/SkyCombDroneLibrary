@@ -122,7 +122,7 @@ namespace SkyCombDrone.PersistModel
 
                 // Generate a bitmap of the DSM land overlaid with the drone path 
                 var drawScope = new DroneDrawScope(Drone);
-                var drawAltitudes = new DrawAltitudeByLinealM(drawScope);
+                var drawAltitudes = new DrawElevations(drawScope);
                 drawAltitudes.Initialise(new Size(1650, 300));
                 var pathBitmap = drawAltitudes.CurrBitmap();
 
