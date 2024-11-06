@@ -72,8 +72,10 @@ namespace SkyCombDrone.PersistModel
                         (index.Key == DroneTabName) ||
                         (index.Key == Sections1TabName) ||
                         (index.Key == Sections2TabName) ||
+                        (index.Key == LegsTabName) ||
                         (index.Key == Steps1TabName) ||
                         (index.Key == FeaturesTabName) ||
+                        (index.Key == Blocks1TabName) ||
                         (index.Key == SpanTabName))
                         cell.Value = index.Key + " (Hidden)";
                     else
