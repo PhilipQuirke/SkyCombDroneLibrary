@@ -174,10 +174,12 @@ namespace SkyCombDrone.PersistModel
                     Drone.EffortDurations.SaveDataStoreMs = (int)effort.Elapsed.TotalMilliseconds;
                 SaveData_Effort();
 
-                Data.SelectWorksheet(DroneTabName);
+                Data.SelectWorksheet(Steps2TabName);
 
+                Data.HideWorksheet(DroneTabName);
                 Data.HideWorksheet(Sections1TabName);
                 Data.HideWorksheet(Sections2TabName);
+                Data.HideWorksheet(Steps1TabName);
 
                 Save();
             }

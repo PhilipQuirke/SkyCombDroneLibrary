@@ -27,52 +27,19 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-
-        // Add a graph of the drone & ground elevations  
-        public void AddElevationsGraph(
-            int chartRowOffset,
-            string chartName,
-            string chartTitle,
-            FlightStepSummaryModel summary,
-            int theDsmSetting,
-            int theDemSetting)
-        {
-            (var chartWs, var lastRow) = Data.PrepareChartArea(GraphTabName, chartName, TardisTabName);
-            if ((lastRow > 0) && (MaxDatumId > 0) && (summary != null))
-            {
-                (float minAltitude, float maxAltitude) = summary.MinMaxVerticalAxisM;
-
-                var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
-                Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                Data.SetAxises(chart, "", "", "0", "0.0");
-                chart.Legend.Position = eLegendPosition.Left;
-                chart.YAxis.MinValue = minAltitude;
-                chart.YAxis.MaxValue = maxAltitude;
-                chart.XAxis.MinValue = MinDatumId;
-                chart.XAxis.MaxValue = MaxDatumId;
-
-                Data.AddScatterSerie(chart, TardisTabName, "Altitude", TardisModel.AltitudeMSetting, TardisModel.TardisIdSetting, DroneColors.InScopeDroneColor, 2);
-                Data.AddScatterSerie(chart, TardisTabName, "DSM", theDsmSetting, TardisModel.TardisIdSetting, DroneColors.SurfaceLineColor, 2);
-                Data.AddScatterSerie(chart, TardisTabName, "DEM", theDemSetting, TardisModel.TardisIdSetting, DroneColors.GroundLineColor, 2);
-
-                Data.SetTitleAndDataListColumn("Metrics", 2 * StandardChartRows + 1, ChartWidth + 1, summary.GetSettings_Altitude(), true, 1);
-            }
-        }
-
-
         // Add a graph of the drone travel distance in lineal meters per step  
         public void AddTravelDistGraph(
             int chartRowOffset,
             string chartName,
             string chartTitle,
-            DataPairList metrics = null)
+            DataPairList metrics)
         {
             (var chartWs, var lastRow) = Data.PrepareChartArea(GraphTabName, chartName, TardisTabName);
             if ((lastRow > 0) && (MaxDatumId > 0))
             {
                 var chart = chartWs.Drawings.AddScatterChart(chartName, eScatterChartType.XYScatter);
                 Data.SetChart(chart, chartTitle, chartRowOffset, 0, StandardChartRows, ChartWidth);
-                Data.SetAxises(chart, "", "Distance", "0", "0.00");
+                Data.SetAxises(chart, "", "Distance", "0", "0.0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = MinDatumId;
                 chart.XAxis.MaxValue = MaxDatumId;
@@ -90,7 +57,7 @@ namespace SkyCombDrone.PersistModel
             int chartRowOffset,
             string chartName,
             string chartTitle,
-            DataPairList metrics = null)
+            DataPairList metrics)
         {
             (var chartWs, var lastRow) = Data.PrepareChartArea(GraphTabName, chartName, TardisTabName);
             if ((lastRow > 0) && (MaxDatumId > 0))
