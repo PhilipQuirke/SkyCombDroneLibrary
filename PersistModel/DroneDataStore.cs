@@ -69,8 +69,14 @@ namespace SkyCombDrone.PersistModel
                     if ((index.Key == DemTabName) ||
                         (index.Key == DsmTabName) ||
                         (index.Key == SwatheTabName) ||
+                        (index.Key == DroneTabName) ||
                         (index.Key == Sections1TabName) ||
-                        (index.Key == Sections2TabName))
+                        (index.Key == Sections2TabName) ||
+                        (index.Key == LegsTabName) ||
+                        (index.Key == Steps1TabName) ||
+                        (index.Key == FeaturesTabName) ||
+                        (index.Key == Blocks1TabName) ||
+                        (index.Key == SpanTabName))
                         cell.Value = index.Key + " (Hidden)";
                     else
                     {
@@ -98,7 +104,7 @@ namespace SkyCombDrone.PersistModel
 
             // Copyright
             row += 3;
-            Worksheet.Cells[row, 2].Value = "Copyright 2023 SkyComb Limited. All rights reserved.";
+            Worksheet.Cells[row, 2].Value = "Copyright 2024 SkyComb Limited. All rights reserved.";
 
 
             SetLastUpdateDateTime(IndexTabName);
