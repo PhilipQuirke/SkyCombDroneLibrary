@@ -19,6 +19,7 @@ namespace SkyCombDrone.DroneModel
         public const string DjiM300XT2 = "SRT (DJI M300 XT2)";
         public const string DjiH20T = "SRT (DJI H20T)";
         public const string DjiH20N = "SRT (DJI H20N)";
+        public const string DjiH30T = "SRT (DJI H30T)";
 
 
         // THERMAL / OPTICAL CAMERA SETTINGS

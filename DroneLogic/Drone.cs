@@ -608,6 +608,12 @@ namespace SkyCombDrone.DroneLogic
             var flightData = new FlightSections();
             (bool success, GimbalDataEnum cameraPitchYawRoll) =
                 new DroneSrtParser().ParseFlightLogSections(theVideoData, flightData, this);
+            // If theVideoData.FileName contains text H20T then set the CameraType
+            if (theVideoData.Thermal && theVideoData.FileName.ToUpper().Contains("H20T"))
+                theVideoData.CameraType = VideoModel.DjiH20T;
+            else if (theVideoData.Thermal && theVideoData.FileName.ToUpper().Contains("H30T"))
+                theVideoData.CameraType = VideoModel.DjiH30T;
+
 
             if (!success)
             {
