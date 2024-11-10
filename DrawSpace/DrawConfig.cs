@@ -14,11 +14,13 @@ namespace SkyCombDrone.DrawSpace
         // Bounding rectangle persistance in frames. For example, 1
         public int AreaPersistence { get; set; } = 10;
 
-
         public Color DrawPixelColor = DroneColors.PixelColor;
         public Color DrawRealFeatureColor = DroneColors.RealFeatureColor;
         public Color DrawUnrealFeatureColor = DroneColors.UnrealFeatureColor;
 
+        // In the ObjectCategoryForm we may expand the object name text and bounding box
+        public int TextExtraScale = 1; // Expand the object name text 
+        public int BoxExtraScale = 1; // Expand the object bounding box
 
         public DrawImageConfig Clone()
         {
@@ -30,6 +32,9 @@ namespace SkyCombDrone.DrawSpace
             answer.DrawPixelColor = DrawPixelColor;
             answer.DrawRealFeatureColor = DrawRealFeatureColor;
             answer.DrawUnrealFeatureColor = DrawUnrealFeatureColor;
+
+            answer.TextExtraScale = TextExtraScale;
+            answer.BoxExtraScale = BoxExtraScale;
 
             return answer;
         }

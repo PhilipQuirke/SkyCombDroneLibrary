@@ -106,12 +106,14 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw a bounding rectangle. If thickness is less than 1, the rectangle is filled up 
-        public static void BoundingRectangle(DrawImageConfig config, ref Image<Bgr, byte> image, Rectangle boundingRect, Color color, int thickness = 1)
+        public static void BoundingRectangle(DrawImageConfig config, ref Image<Bgr, byte> image, Rectangle boundingRect, Color color, int thickness, int inflate)
         {
             if (color == Color.White)
                 return;
 
-            boundingRect.Inflate(config.AreaPadding, config.AreaPadding);
+            if (inflate>0)
+                boundingRect.Inflate(inflate, inflate);
+            
             image.Draw(boundingRect, DroneColors.ColorToBgr(color), thickness);
         }
 

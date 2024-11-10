@@ -58,8 +58,8 @@ namespace SkyCombDrone.DroneModel
         {
             var answer = new DataPairList
             {
-                { "Flight Leg Id", FlightLegId },
-                { "Leg Name", Name },
+                { "Leg Id", FlightLegId },
+                { "Name", Name },
                 { "Why Leg Ended", WhyLegEnded },
             };
 
