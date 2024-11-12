@@ -202,7 +202,7 @@ namespace SkyCombDrone.PersistModel
                         // Open the existing datastore. Will fail if the user has the datastore open for editing.
                         answer = new DroneDataStore(dataStoreName);
                         answer.Open();
-                        if (answer.IsOpen && answer.SelectWorksheet(DroneDataStore.FilesTabName))
+                        if (answer.IsOpen && answer.SelectWorksheet(DroneDataStore.FileSettingsTabName))
                         {
                             var cell = answer.Worksheet.Cells[1, 1];
                             if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.Main1Title))

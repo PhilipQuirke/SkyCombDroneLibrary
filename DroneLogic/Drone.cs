@@ -145,7 +145,7 @@ namespace SkyCombDrone.DroneLogic
             try
             {
                 DroneLoad dataReader = new(dataStore, this);
-                dataStore.SelectWorksheet(DroneDataStore.FilesTabName);
+                dataStore.SelectWorksheet(DroneDataStore.FileSettingsTabName);
 
                 // Without at least one video we can't do anything
                 if (dataStore.ThermalVideoName != "")
@@ -179,7 +179,7 @@ namespace SkyCombDrone.DroneLogic
             int phase = 0;
             try
             {
-                if (dataStore.SelectWorksheet(DroneDataStore.DroneTabName))
+                if (dataStore.SelectWorksheet(DroneDataStore.DroneSettingsTabName))
                 {
                     DroneLoad dataReader = new(dataStore, this);
 
@@ -218,7 +218,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load the FlightSections (if any)
                     phase = 4;
-                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.Sections1TabName))
+                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.SectionDataTabName))
                     {
                         dataReader.FlightSections(FlightSections);
 
@@ -229,7 +229,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load FlightSteps (if any)
                     phase = 5;
-                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.Steps1TabName))
+                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.StepDataTabName))
                     {
                         dataReader.FlightSteps(FlightSections, FlightSteps);
                         FlightSteps.AssertGood();
@@ -238,7 +238,7 @@ namespace SkyCombDrone.DroneLogic
 
                     // Load FlightLegs (if any)
                     phase = 6;
-                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.LegsTabName))
+                    if (fullLoad && dataStore.SelectWorksheet(DataConstants.LegDataTabName))
                     {
                         dataReader.FlightLegs(FlightLegs, HasFlightSteps);
                         FlightLegs.AssertGood(HasFlightSteps);

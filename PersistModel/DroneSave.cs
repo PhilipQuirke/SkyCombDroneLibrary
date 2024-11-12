@@ -85,7 +85,7 @@ namespace SkyCombDrone.PersistModel
         // This includes settings the user can edit in the UI: RunFrom/ToS, CameraDownDeg, OnGroundAt
         public void SaveData_Summary(Bitmap? countryBitmap)
         {
-            (var newDroneTab, var _) = Data.SelectOrAddWorksheet(DroneTabName);
+            (var newDroneTab, var _) = Data.SelectOrAddWorksheet(DroneSettingsTabName);
             Data.ClearWorksheet();
 
             Data.SetTitles(DroneSummaryTitle);
@@ -111,7 +111,7 @@ namespace SkyCombDrone.PersistModel
 
             Data.FormatSummaryPage();
 
-            if (newDroneTab && Data.SelectWorksheet(GroundTabName))
+            if (newDroneTab && Data.SelectWorksheet(GroundReportTabName))
             {
                 // We draw DEM, DSM and Country graphs on the GROUND summary tab
                 // These plots combine ground and drone data.
@@ -131,16 +131,13 @@ namespace SkyCombDrone.PersistModel
                 SaveDronePath(null, GroundType.DemElevations, 21, 7, GroundModel.DemTitle);
                 SaveDronePath(null, GroundType.SwatheSeen, 21, 17, GroundModel.SwatheTitle);
             }
-
-            // Update the Index tab with the current date/time
-            Data.SetLastUpdateDateTime(DroneTabName);
         }
 
 
         // Save the effort data into the DroneSummaryTab
         public void SaveData_Effort()
         {
-            Data.SelectOrAddWorksheet(DroneTabName);
+            Data.SelectOrAddWorksheet(DroneSettingsTabName);
 
             Data.SetTitleAndDataListColumn(EffortTitle, Chapter3TitleRow, LhsColOffset, Drone.EffortDurations.GetSettings());
         }
@@ -158,8 +155,6 @@ namespace SkyCombDrone.PersistModel
                 {
                     Sections.SaveList();
 
-                    Sections.SaveCharts();
-
                     Legs.SaveList(Drone);
                 }
 
@@ -174,13 +169,11 @@ namespace SkyCombDrone.PersistModel
                     Drone.EffortDurations.SaveDataStoreMs = (int)effort.Elapsed.TotalMilliseconds;
                 SaveData_Effort();
 
-                Data.SelectWorksheet(Steps2TabName);
+                Data.SelectWorksheet(DroneReportTabName);
 
-                Data.HideWorksheet(DroneTabName);
-                Data.HideWorksheet(Sections1TabName);
-                Data.HideWorksheet(Sections2TabName);
-                Data.HideWorksheet(LegsTabName);
-                Data.HideWorksheet(Steps1TabName);
+                Data.HideWorksheet(SectionDataTabName);
+                Data.HideWorksheet(LegDataTabName);
+                Data.HideWorksheet(StepDataTabName);
 
                 Save();
             }

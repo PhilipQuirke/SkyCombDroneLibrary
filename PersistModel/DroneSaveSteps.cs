@@ -16,7 +16,7 @@ namespace SkyCombDrone.PersistModel
 
 
         public DroneSaveSteps(DroneDataStore data, Drone drone)
-            : base(data, Steps1TabName, Steps2TabName)
+            : base(data, StepDataTabName, DroneReportTabName)
         {
             Drone = drone;
             Steps = drone.FlightSteps;
@@ -41,7 +41,7 @@ namespace SkyCombDrone.PersistModel
         // Save smoothed and calculated "step" flight data list
         public void SaveList()
         {
-            if (Data.SelectWorksheet(Steps1TabName))
+            if (Data.SelectWorksheet(StepDataTabName))
                 Data.ClearWorksheet();
 
             if (Steps == null)
@@ -49,7 +49,7 @@ namespace SkyCombDrone.PersistModel
 
             if (Steps.Steps.Count > 0)
             {
-                Data.SelectOrAddWorksheet(Steps1TabName);
+                Data.SelectOrAddWorksheet(StepDataTabName);
                 int stepRow = 0;
                 foreach (var step in Steps.Steps)
                     Data.SetDataListRowKeysAndValues(ref stepRow, step.Value.GetSettings());
@@ -68,8 +68,6 @@ namespace SkyCombDrone.PersistModel
                 // Highlight in red any cells where the DeltaYaw exceeds FlightConfig.MaxLegStepDeltaYawDeg. This implies not part of a leg.
                 Data.AddConditionalRuleBad(TardisModel.DeltaYawDegSetting, stepRow, Drone.DroneConfig.MaxLegStepDeltaYawDeg);
             }
-
-            Data.SetLastUpdateDateTime(Steps1TabName);
         }
 
 
@@ -79,7 +77,7 @@ namespace SkyCombDrone.PersistModel
             const string ChartName = "StepsNorthingEasting";
             const string ChartTitle = "Smoothed drone flight path (Northing / Easting)";
 
-            (var chartWs, var lastRow) = Data.PrepareChartArea(Steps2TabName, ChartName, Steps1TabName);
+            (var chartWs, var lastRow) = Data.PrepareChartArea(DroneReportTabName, ChartName, StepDataTabName);
             if ((lastRow > 0) && (Steps.Steps.Count > 0))
             {
                 // Make sure
@@ -96,7 +94,7 @@ namespace SkyCombDrone.PersistModel
                 chart.YAxis.MinValue = 0;
                 chart.YAxis.MaxValue = axisLength;
 
-                Data.AddScatterSerie(chart, Steps1TabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, DroneColors.InScopeDroneColor);
+                Data.AddScatterSerie(chart, StepDataTabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, DroneColors.InScopeDroneColor);
             }
         }
 
@@ -104,17 +102,6 @@ namespace SkyCombDrone.PersistModel
         // Add a graph of the drone & ground elevations as per smoothed Steps data
         public void AddElevationsGraph()
         {
-            /*
-            AddElevationsGraph(
-                2,
-                "StepsElevations",
-                "Ground/Surface Elevations & smoothed Drone Altitude (in M) vs Step",
-                Steps,
-                FlightStep.DsmSetting,
-                FlightStep.DemSetting);
-            */
-
-
             (var _, var lastRow) = Data.PrepareChartArea(GraphTabName, "StepsElevations", TardisTabName);
             if ((lastRow > 0) && (MaxDatumId > 0) && (Steps != null))
             {
@@ -201,13 +188,13 @@ namespace SkyCombDrone.PersistModel
 
         public void SaveCharts()
         {
-            if (Data.SelectWorksheet(Steps2TabName))
+            if (Data.SelectWorksheet(DroneReportTabName))
                 Data.ClearWorksheet();
 
             if (Steps == null)
                 return;
 
-            Data.SelectOrAddWorksheet(Steps2TabName);
+            Data.SelectOrAddWorksheet(DroneReportTabName);
 
             AddNorthingEastingPathGraph();
 
@@ -225,8 +212,6 @@ namespace SkyCombDrone.PersistModel
                 AddRollGraph();
                 AddLegGraph();
             }
-
-            Data.SetLastUpdateDateTime(Steps2TabName);
         }
     }
 }

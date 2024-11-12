@@ -21,14 +21,14 @@ namespace SkyCombDrone.PersistModel
         // Load video config data from a XLS file 
         public List<string> VideoSettings(int col)
         {
-            return Data.GetColumnSettingsIfAvailable(DroneTabName, VideoInputTitleSuffix, Chapter1TitleRow, col);
+            return Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, VideoInputTitleSuffix, Chapter1TitleRow, col);
         }
 
 
         // Load input config data from a XLS file 
         public void UserInputSettings(DroneConfigModel flightConfig)
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, UserInputTitle, Chapter1TitleRow, LhsColOffset);
+            var settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, UserInputTitle, Chapter1TitleRow, LhsColOffset);
             if (settings != null)
                 flightConfig.LoadSettings(settings);
         }
@@ -37,7 +37,7 @@ namespace SkyCombDrone.PersistModel
         // Load input leg config data from a XLS file 
         public void LegSettings(DroneConfigModel flightConfig)
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, LegTitle, Chapter2TitleRow, LhsColOffset);
+            var settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, LegTitle, Chapter2TitleRow, LhsColOffset);
             if (settings != null)
                 flightConfig.LoadLegSettings(settings);
         }
@@ -47,16 +47,16 @@ namespace SkyCombDrone.PersistModel
         public FlightSections FlightInputSettings(int titleCol)
         {
             return new FlightSections(
-                Data.GetColumnSettingsIfAvailable(DroneTabName, FlightSectionTitleSuffix, Chapter2TitleRow, titleCol));
+                Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, FlightSectionTitleSuffix, Chapter2TitleRow, titleCol));
         }
 
 
         // Load flight steps data from a XLS file 
         public List<string> FlightStepsSettings()
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, FlightStepTitle, Chapter2TitleRow, FarRhsColOffset);
+            var settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, FlightStepTitle, Chapter2TitleRow, FarRhsColOffset);
             if (settings == null)
-                settings = Data.GetColumnSettingsIfAvailable(DroneTabName, FlightStepTitle, Chapter2TitleRow, RhsColOffset);
+                settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, FlightStepTitle, Chapter2TitleRow, RhsColOffset);
             return settings;
         }
 
@@ -64,7 +64,7 @@ namespace SkyCombDrone.PersistModel
         // Load effort data from a XLS file 
         public void EffortSettings()
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneTabName, EffortTitle, Chapter3TitleRow, LhsColOffset);
+            var settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, EffortTitle, Chapter3TitleRow, LhsColOffset);
             if (settings != null)
                 Drone.EffortDurations.LoadSettings(settings);
         }
@@ -75,7 +75,7 @@ namespace SkyCombDrone.PersistModel
         {
             try
             {
-                if (Data.SelectWorksheet(Sections1TabName))
+                if (Data.SelectWorksheet(SectionDataTabName))
                 {
                     int row = 2;
                     FlightSection prevSection = null;
@@ -113,7 +113,7 @@ namespace SkyCombDrone.PersistModel
             int row = 2;
             try
             {
-                if (Data.SelectWorksheet(Steps1TabName))
+                if (Data.SelectWorksheet(StepDataTabName))
                 {
                     var cell = Data.Worksheet.Cells[row, 1];
                     while (cell != null && cell.Value != null)
@@ -150,7 +150,7 @@ namespace SkyCombDrone.PersistModel
             int row = 2;
             try
             {
-                if (Data.SelectWorksheet(LegsTabName))
+                if (Data.SelectWorksheet(LegDataTabName))
                 {
                     var cell = Data.Worksheet.Cells[row, 1];
                     while (cell != null && cell.Value != null && cell.Value.ToString() != "")

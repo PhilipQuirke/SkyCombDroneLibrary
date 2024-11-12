@@ -28,7 +28,7 @@ namespace SkyCombDrone.PersistModel
         // Open an existing DataStore & load Files tab settings
         public DroneDataStore(string fileName) : base(fileName, false)
         {
-            SelectWorksheet(FilesTabName);
+            SelectWorksheet(FileSettingsTabName);
             LoadSettings(GetColumnSettings(3, LhsColOffset, LhsColOffset + LabelToValueCellOffset));
         }
 
@@ -41,80 +41,47 @@ namespace SkyCombDrone.PersistModel
             SetTitles("");
 
             SetColumnWidth(1, 25);
-            SetColumnWidth(2, 90);
-            SetColumnWidth(3, 22);
-            SetColumnWidth(4, 12);
+            SetColumnWidth(2, 55);
+            SetColumnWidth(3, 20);
 
             // Create an index of tab names and purposes 
-            int row = 3;
-            SetTitle(ref row, 1, "Index of tabs");
-
             if (Worksheet == null)
                 return;
 
-            Worksheet.Cells[row, 1].Value = "Tab";
-            Worksheet.Cells[row, 2].Value = "Purpose";
-            Worksheet.Cells[row, 3].Value = "Last updated";
-            Worksheet.Cells[row, 4].Value = "Using version";
-            for (int col = 1; col <= 4; col++)
-                Worksheet.Cells[row, col].Style.Font.Bold = true;
-
             var indexData = GetIndex();
-            row = IndexContentRow;
-            foreach (var index in indexData)
+            int row = IndexContentRow;
+            foreach ((string title, string description, bool do_internal_link, string external_link) in indexData)
             {
-                var cell = Worksheet.Cells[row, 1];
-                if (index.Key != "")
-                {
-                    if ((index.Key == DemTabName) ||
-                        (index.Key == DsmTabName) ||
-                        (index.Key == SwatheTabName) ||
-                        (index.Key == DroneTabName) ||
-                        (index.Key == Sections1TabName) ||
-                        (index.Key == Sections2TabName) ||
-                        (index.Key == LegsTabName) ||
-                        (index.Key == Steps1TabName) ||
-                        (index.Key == FeaturesTabName) ||
-                        (index.Key == Blocks1TabName) ||
-                        (index.Key == SpanTabName))
-                        cell.Value = index.Key + " (Hidden)";
-                    else
-                    {
-                        cell.Value = index.Key;
-                        SetInternalHyperLink(cell, index.Key);
-                    }
+                var title_cell = Worksheet.Cells[row, 1];
+                var desc_cell = Worksheet.Cells[row, 2];
+                var link_cell = Worksheet.Cells[row, 3];
 
-                    Worksheet.Cells[row, 2].Value = index.Value;
+                bool do_external = (external_link != "");
+
+                title_cell.Value = title;
+
+                desc_cell.Value = description;
+                if ((title == "") && !(do_external || do_internal_link))
+                {
+                    desc_cell.Style.Font.Bold = (title == "") && !(do_external || do_internal_link);
+                    desc_cell.Style.Font.Size += 2;
                 }
 
+                link_cell.Value = (do_external ? "Help" : (do_internal_link ? "Link" : (title != "" ? "Hidden" : "")));
+                if (do_external)
+                    SetExternalHyperLink(link_cell, external_link);
+                else if (do_internal_link)
+                    SetInternalHyperLink(link_cell, "Link");
+ 
                 row++;
             }
-
-
-            // Help resources
-            row += 2;
-            SetTitle(ref row, 1, "Help resources");
-            Worksheet.Cells[row, 1].Value = "Introduction and index";
-            Worksheet.Cells[row, 2].Value = @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md";
-            SetExternalHyperLink(Worksheet.Cells[row, 2], @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/README.md");
-            row++;
-            Worksheet.Cells[row, 1].Value = "DataStore-specific help";
-            Worksheet.Cells[row, 2].Value = @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/DataStore.md";
-            SetExternalHyperLink(Worksheet.Cells[row, 2], @"https://github.com/PhilipQuirke/SkyCombAnalystHelp/blob/main/DataStore.md");
-
-            // Copyright
-            row += 3;
-            Worksheet.Cells[row, 2].Value = "Copyright 2024 SkyComb Limited. All rights reserved.";
-
-
-            SetLastUpdateDateTime(IndexTabName);
         }
 
 
         // Save the settings to the Files tab
         public void SaveFiles()
         {
-            AddWorksheet(FilesTabName);
+            AddWorksheet(FileSettingsTabName);
 
             SetTitles(FilesTitle);
 
@@ -122,8 +89,6 @@ namespace SkyCombDrone.PersistModel
             SetDataListColumn(ref row, 1, GetSettings());
 
             SetColumnWidth(1, 25);
-
-            SetLastUpdateDateTime(FilesTabName);
         }
 
 
@@ -150,7 +115,7 @@ namespace SkyCombDrone.PersistModel
         {
             base.Open();
 
-            SelectWorksheet(FilesTabName);
+            SelectWorksheet(FileSettingsTabName);
         }
 
 

@@ -17,13 +17,13 @@ namespace SkyCombDrone.PersistModel
         // Save calculated "leg" flight data
         public void SaveList(Drone drone)
         {
-            if (Data.SelectWorksheet(LegsTabName))
+            if (Data.SelectWorksheet(LegDataTabName))
                 Data.ClearWorksheet();
 
             if (!drone.HasFlightLegs)
                 return;
 
-            Data.SelectOrAddWorksheet(LegsTabName);
+            Data.SelectOrAddWorksheet(LegDataTabName);
             int row = 0;
             foreach (var leg in drone.FlightLegs.Legs)
                 Data.SetDataListRowKeysAndValues(ref row, leg.GetSettings());
@@ -32,8 +32,6 @@ namespace SkyCombDrone.PersistModel
 
             Data.SetColumnColor(FlightLegModel.LegIdSetting, row, Color.Blue);
             Data.SetColumnColor(FlightLegModel.LegNameSetting, row, Color.Blue);
-
-            Data.SetLastUpdateDateTime(LegsTabName);
         }
     }
 }

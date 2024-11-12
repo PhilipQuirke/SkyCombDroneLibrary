@@ -1,6 +1,4 @@
-﻿using OfficeOpenXml.Drawing.Chart;
-using SkyCombDrone.CommonSpace;
-using SkyCombDrone.DroneLogic;
+﻿using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 
 
@@ -14,7 +12,7 @@ namespace SkyCombDrone.PersistModel
 
 
         public DroneSaveSections(DroneDataStore data, Drone drone)
-            : base(data, Sections1TabName, Sections2TabName)
+            : base(data, SectionDataTabName, "")
         {
             SetSections(drone);
         }
@@ -38,7 +36,7 @@ namespace SkyCombDrone.PersistModel
         // Save raw flight "section" data list
         public void SaveList()
         {
-            if (Data.SelectWorksheet(Sections1TabName))
+            if (Data.SelectWorksheet(SectionDataTabName))
                 Data.ClearWorksheet();
 
             if (Sections == null)
@@ -46,7 +44,7 @@ namespace SkyCombDrone.PersistModel
 
             if (Sections.Sections.Count > 0)
             {
-                Data.SelectOrAddWorksheet(Sections1TabName);
+                Data.SelectOrAddWorksheet(SectionDataTabName);
 
                 int sectionRow = 0;
                 foreach (var section in Sections.Sections)
@@ -68,139 +66,7 @@ namespace SkyCombDrone.PersistModel
 
                 // Highlight in red any cells where the DeltaYaw exceeds FlightConfig.MaxLegStepDeltaYawDeg. This implies not part of a leg.
                 Data.AddConditionalRuleBad(TardisModel.DeltaYawDegSetting, sectionRow, Drone.DroneConfig.MaxLegStepDeltaYawDeg);
-
-                Data.SetLastUpdateDateTime(Sections1TabName);
             }
-        }
-
-
-        // Add a graph of the drone flight path using (unsmoothed) Section data
-        public void AddLongLatPathGraph()
-        {
-            const string ChartName = "SectionLongLat";
-            const string ChartTitle = "Raw drone flight path (Longitude / Latitude) - axis scales differ";
-
-            (var chartWs, var lastRow) = Data.PrepareChartArea(Sections2TabName, ChartName, Sections1TabName);
-            if ((lastRow > 0) && (Sections.Sections.Count > 0))
-            {
-                var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                Data.SetChart(chart, ChartTitle, 0, 1, LargeChartRows);
-                Data.SetAxises(chart, "Long", "Lat", "0.000000", "0.000000");
-                chart.Legend.Remove();
-                chart.XAxis.MinValue = Sections.MinGlobalLocation.Longitude;
-                chart.XAxis.MaxValue = Sections.MaxGlobalLocation.Longitude;
-                chart.YAxis.MinValue = Sections.MinGlobalLocation.Latitude;
-                chart.YAxis.MaxValue = Sections.MaxGlobalLocation.Latitude;
-
-                Data.AddScatterSerie(chart, Sections1TabName, "Section", FlightSection.LatitudeSetting, FlightSection.LongitudeSetting, DroneColors.InScopeDroneColor);
-            }
-        }
-
-
-        // Add a graph of the drone flight path using unsmoothed Sections data
-        public void AddNorthingEastingPathGraph()
-        {
-            const string ChartName = "SectionsNorthingEasting";
-            const string ChartTitle = "Raw drone flight path (Northing / Easting)";
-
-            (var chartWs, var lastRow) = Data.PrepareChartArea(Sections2TabName, ChartName, Sections1TabName);
-            if ((lastRow > 0) && (Sections.Sections.Count > 0))
-            {
-                var axisLength = Math.Ceiling(Math.Max(
-                    Sections.NorthingRangeM(),
-                    Sections.EastingRangeM()));
-
-                var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                Data.SetChart(chart, ChartTitle, 0, 0, LargeChartRows);
-                Data.SetAxises(chart, "Easting", "Northing", "0.0", "0.0");
-                chart.Legend.Remove();
-                chart.XAxis.MinValue = 0;
-                chart.XAxis.MaxValue = axisLength;
-                chart.YAxis.MinValue = 0;
-                chart.YAxis.MaxValue = axisLength;
-
-                Data.AddScatterSerie(chart, Sections1TabName, "Flight path", TardisModel.NorthingMSetting, TardisModel.EastingMSetting, DroneColors.InScopeDroneColor);
-            }
-        }
-
-
-        // Add a graph of the drone travel distance in meters per section using unsmoothed Sections data
-        public void AddTravelDistGraph()
-        {
-            AddTravelDistGraph(
-                2,
-                "SectionsTravelDist",
-                "Raw drone travel distance (in lineal M) vs Section",
-                Sections.GetSettings_Lineal());
-        }
-
-
-        // Add a graph of the drone flight speed using unsmoothed Sections data
-        public void AddSpeedGraph()
-        {
-            AddSpeedGraph(
-                3,
-                "SectionsSpeed",
-                "Raw drone flight travel speed (meters / second) vs section",
-                Sections.GetSettings_Speed());
-        }
-
-
-        // Add a graph of the drone delta yaw (change of direction) using raw Sections data
-        public void AddDeltaYawGraph()
-        {
-            AddDeltaYawGraph(
-                4,
-                "SectionsDeltaYaw",
-                "Raw drone change in direction (aka Delta Yaw) in Degrees vs Section",
-                Sections.GetSettings_DeltaYaw());
-        }
-
-
-        // Add a pitch graph  
-        public void AddPitchGraph()
-        {
-            AddPitchGraph(
-                5,
-                "SectionPitch",
-                "Drone Pitch (in degrees) vs Section",
-                Sections.GetSettings_Pitch());
-        }
-
-
-        // Add a roll graph  
-        public void AddRollGraph()
-        {
-            AddRollGraph(
-                6,
-                "SectionRoll",
-                "Drone Roll (in degrees) vs Section",
-                Sections.GetSettings_Roll());
-        }
-
-
-        public void SaveCharts()
-        {
-            if (Data.SelectWorksheet(Sections2TabName))
-                Data.ClearWorksheet();
-
-            if (Sections == null)
-                return;
-
-            Data.SelectOrAddWorksheet(Sections2TabName);
-
-            MinDatumId = 0;
-            MaxDatumId = Sections.Sections.Count;
-
-            AddLongLatPathGraph();
-            AddNorthingEastingPathGraph();
-            AddTravelDistGraph();
-            AddSpeedGraph();
-            AddDeltaYawGraph();
-            AddPitchGraph();
-            AddRollGraph();
-
-            Data.SetLastUpdateDateTime(Sections2TabName);
         }
     }
 }
