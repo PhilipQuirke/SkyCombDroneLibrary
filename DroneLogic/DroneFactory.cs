@@ -202,7 +202,7 @@ namespace SkyCombDrone.DroneLogic
 
                             phase = "Saving drone datastore...";
                             showDroneSettings(phase);
-                            answer.SaveSettings(droneDataStore, countryBitmap);
+                            answer.SaveSettings(droneDataStore, countryBitmap, true);
                         }
                     }
                 }

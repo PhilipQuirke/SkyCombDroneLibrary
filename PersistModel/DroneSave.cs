@@ -81,14 +81,13 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        // Save the Drone Summary tab data. 
-        // This includes settings the user can edit in the UI: RunFrom/ToS, CameraDownDeg, OnGroundAt
-        public void SaveData_Summary(Bitmap? countryBitmap)
+        // Save the Drone Settings data 
+        public void SaveDroneSettings(Bitmap? countryBitmap, bool firstSave)
         {
-            (var newDroneTab, var _) = Data.SelectOrAddWorksheet(DroneSettingsTabName);
+            Data.SelectOrAddWorksheet(DroneSettingsTabName);
             Data.ClearWorksheet();
 
-            Data.SetTitles(DroneSummaryTitle);
+            Data.SetLargeTitle(DroneSummaryTitle);
 
             // Show User Input settings & Leg data on LHS
             Data.SetTitleAndDataListColumn(UserInputTitle, Chapter1TitleRow, LhsColOffset, Drone.DroneConfig.GetSettings());
@@ -111,7 +110,7 @@ namespace SkyCombDrone.PersistModel
 
             Data.FormatSummaryPage();
 
-            if (newDroneTab && Data.SelectWorksheet(GroundReportTabName))
+            if (firstSave && Data.SelectWorksheet(GroundReportTabName))
             {
                 // We draw DEM, DSM and Country graphs on the GROUND summary tab
                 // These plots combine ground and drone data.
@@ -128,8 +127,8 @@ namespace SkyCombDrone.PersistModel
                 }
 
                 SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);
-                SaveDronePath(null, GroundType.DemElevations, 21, 7, GroundModel.DemTitle);
-                SaveDronePath(null, GroundType.SwatheSeen, 21, 17, GroundModel.SwatheTitle);
+                SaveDronePath(null, GroundType.DemElevations, 21, 6, GroundModel.DemTitle);
+                SaveDronePath(null, GroundType.SwatheSeen, 21, 15, GroundModel.SwatheTitle);
             }
         }
 
@@ -162,7 +161,7 @@ namespace SkyCombDrone.PersistModel
                 Steps.SaveList();
 
                 if (full)
-                    Steps.SaveCharts();
+                    Steps.SaveDroneReport();
 
                 if (effort != null)
                     // Record how long it took to save the data

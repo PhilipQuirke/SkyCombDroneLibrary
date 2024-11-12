@@ -205,7 +205,7 @@ namespace SkyCombDrone.PersistModel
                         if (answer.IsOpen && answer.SelectWorksheet(DroneDataStore.FileSettingsTabName))
                         {
                             var cell = answer.Worksheet.Cells[1, 1];
-                            if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.Main1Title))
+                            if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.PrefixTitle))
                             {
                                 // Spreadsheet may have ben copied from say C: to D:
                                 // Reset the file names to the new locations

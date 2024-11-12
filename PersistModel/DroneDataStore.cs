@@ -38,7 +38,7 @@ namespace SkyCombDrone.PersistModel
         {
             AddWorksheet(IndexTabName);
 
-            SetTitles("");
+            SetLargeTitle(IndexTitle);
 
             SetColumnWidth(1, 25);
             SetColumnWidth(2, 55);
@@ -71,7 +71,7 @@ namespace SkyCombDrone.PersistModel
                 if (do_external)
                     SetExternalHyperLink(link_cell, external_link);
                 else if (do_internal_link)
-                    SetInternalHyperLink(link_cell, "Link");
+                    SetInternalHyperLink(link_cell, title);
  
                 row++;
             }
@@ -83,7 +83,7 @@ namespace SkyCombDrone.PersistModel
         {
             SelectOrAddWorksheet(FileSettingsTabName);
 
-            SetTitles(FilesTitle);
+            SetLargeTitle(FilesTitle);
 
             int row = 3;
             SetDataListColumn(ref row, 1, GetSettings());

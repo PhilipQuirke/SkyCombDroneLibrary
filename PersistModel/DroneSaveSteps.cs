@@ -186,7 +186,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void SaveCharts()
+        public void SaveDroneReport()
         {
             if (Data.SelectWorksheet(DroneReportTabName))
                 Data.ClearWorksheet();
@@ -195,6 +195,8 @@ namespace SkyCombDrone.PersistModel
                 return;
 
             Data.SelectOrAddWorksheet(DroneReportTabName);
+
+            Data.SetLargeTitle(DroneReportTitle);
 
             AddNorthingEastingPathGraph();
 
