@@ -79,9 +79,9 @@ namespace SkyCombDrone.PersistModel
 
 
         // Save the settings to the Files tab
-        public void SaveFiles()
+        public void SaveFileSettings()
         {
-            AddWorksheet(FileSettingsTabName);
+            SelectOrAddWorksheet(FileSettingsTabName);
 
             SetTitles(FilesTitle);
 
@@ -103,7 +103,17 @@ namespace SkyCombDrone.PersistModel
 
             SetWorkbookAnalystProperties();
             SaveIndex();
-            SaveFiles();
+
+            // Add worksheets for ensure desired tab ordering 
+            AddWorksheet(ObjectsReportTabName);
+            AddWorksheet(ProcessReportTabName);
+            AddWorksheet(DroneReportTabName);
+            AddWorksheet(GroundReportTabName);
+            AddWorksheet(FileSettingsTabName);
+            AddWorksheet(DroneSettingsTabName);
+            AddWorksheet(ProcessSettingsTabName);
+
+            SaveFileSettings();
 
             Store.SaveAs(DataStoreFileName);
             FreeResources();
