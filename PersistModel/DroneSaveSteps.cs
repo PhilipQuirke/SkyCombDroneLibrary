@@ -75,7 +75,7 @@ namespace SkyCombDrone.PersistModel
         public void AddNorthingEastingPathGraph()
         {
             const string ChartName = "StepsNorthingEasting";
-            const string ChartTitle = "Smoothed drone flight path (Northing / Easting)";
+            const string ChartTitle = "Drone flight path (Northing / Easting)";
 
             (var chartWs, var lastRow) = Data.PrepareChartArea(DroneReportTabName, ChartName, StepDataTabName);
             if ((lastRow > 0) && (Steps.Steps.Count > 0))
@@ -86,8 +86,8 @@ namespace SkyCombDrone.PersistModel
                     Steps.EastingRangeM()));
 
                 var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                Data.SetChart(chart, ChartTitle, 0, 0, LargeChartRows);
-                Data.SetAxises(chart, "Easting", "Northing", "0.0", "0.0");
+                Data.SetChart(chart, ChartTitle, 0.14f, 0, LargeChartRows);
+                Data.SetAxises(chart, "Easting", "Northing", "0", "0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = 0;
                 chart.XAxis.MaxValue = axisLength;
@@ -105,12 +105,12 @@ namespace SkyCombDrone.PersistModel
             (var _, var lastRow) = Data.PrepareChartArea(GraphTabName, "StepsElevations", TardisTabName);
             if ((lastRow > 0) && (MaxDatumId > 0) && (Steps != null))
             {
-                var FirstGraphRow = 2 * StandardChartRows;
+                var FirstGraphRow = 2 * StandardChartRows + 3;
 
                 // Generate a bitmap of the DSM land overlaid with the drone path 
                 var drawScope = new DroneDrawScope(Drone);
                 var drawAltitudes = new DrawElevations(drawScope);
-                drawAltitudes.Initialise(new Size(1650, 300));
+                drawAltitudes.Initialise(new Size(ChartFullWidthPixels, 300));
                 var pathBitmap = drawAltitudes.CurrBitmap();
 
                 Data.SaveBitmap(pathBitmap, "StepsElevations", FirstGraphRow, 0);
