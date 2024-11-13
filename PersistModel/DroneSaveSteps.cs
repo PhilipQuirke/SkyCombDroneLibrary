@@ -3,16 +3,25 @@ using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
+using SkyCombGround.CommonSpace;
 using System.Drawing;
 
 
 namespace SkyCombDrone.PersistModel
 {
+    public class SaveDroneDrawScope(Drone drone) : DroneDrawScope(drone)
+    {
+        public override FlightStep? CurrRunFlightStep { get { return Drone.FlightSteps.Steps[CurrRunStepId]; } }
+    };
+
+
+
     // Save meta-data about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations to a datastore, including graphs
     public class DroneSaveSteps : TardisSaveGraph
     {
         Drone Drone;
         FlightSteps Steps;
+        SaveDroneDrawScope DrawScope;
 
 
         public DroneSaveSteps(DroneDataStore data, Drone drone)
@@ -20,6 +29,7 @@ namespace SkyCombDrone.PersistModel
         {
             Drone = drone;
             Steps = drone.FlightSteps;
+            DrawScope = new(Drone);
         }
 
 
@@ -27,6 +37,7 @@ namespace SkyCombDrone.PersistModel
         {
             Drone = drone;
             Steps = drone.FlightSteps;
+            DrawScope = new(Drone);
         }
 
 
@@ -99,90 +110,76 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        // Add a graph of the drone & ground elevations as per smoothed Steps data
+        private void AddGraph(int row_offset, string title, DroneDrawGraph drawer, string imageName, DataPairList? metrics, int depth = 300)
+        {
+            var firstGraphRow = 8 + row_offset * 13;
+            int metricsCol = ChartWidth - 3;
+
+            drawer.Initialise(new Size(ChartFullWidthPixels, depth));
+            var theBitmap = drawer.CurrBitmap();
+
+            Data.SetTitle(ref firstGraphRow, 1, title);
+            Data.SaveBitmap(theBitmap, imageName, firstGraphRow - 1, 0);           
+            if (metrics != null)
+                Data.SetTitleAndDataListColumn("Metrics", firstGraphRow, metricsCol, metrics, true, 1);
+        }
+
+
+        // Add a graph of the drone & ground elevations as per Steps data
         public void AddElevationsGraph()
         {
-            (var _, var lastRow) = Data.PrepareChartArea(GraphTabName, "StepsElevations", TardisTabName);
-            if ((lastRow > 0) && (MaxDatumId > 0) && (Steps != null))
-            {
-                var FirstGraphRow = 2 * StandardChartRows + 3;
-
-                // Generate a bitmap of the DSM land overlaid with the drone path 
-                var drawScope = new DroneDrawScope(Drone);
-                var drawAltitudes = new DrawElevations(drawScope);
-                drawAltitudes.Initialise(new Size(ChartFullWidthPixels, 300));
-                var pathBitmap = drawAltitudes.CurrBitmap();
-
-                Data.SaveBitmap(pathBitmap, "StepsElevations", FirstGraphRow, 0);
-
-                Data.SetTitleAndDataListColumn("Metrics", FirstGraphRow + 1, ChartWidth + 1, Steps.GetSettings_Altitude(), true, 1);
-            }
+            AddGraph(2, 
+                "Drone, Surface and Ground elevations",
+                new DrawElevations(DrawScope), 
+                "StepsElevations", Steps.GetSettings_Altitude());
         }
 
 
-        // Add a graph of the drone travel distance in meters per step using smoothed Steps data
-        public void AddTravelDistGraph()
-        {
-            AddTravelDistGraph(
-                3,
-                "StepsTravelDist",
-                "Smoothed drone travel distance (in lineal M) vs Step",
-                Steps.GetSettings_Lineal());
-        }
-
-
-        // Add a graph of the drone speed as per smoothed Steps data 
+        // Add a graph of the drone speed as per Steps data 
         public void AddSpeedGraph()
         {
-            AddSpeedGraph(
-                4,
-                "StepsSpeed",
-                "Smoothed drone flight speed (in Mps) vs Step",
-                Steps.GetSettings_Speed());
+            AddGraph(3, 
+                "Drone flight speed (in Mps) vs Step",
+                new DrawSpeed(DrawScope), 
+                "StepsSpeed", Steps.GetSettings_Speed());
         }
 
 
         // Add a graph of the drone delta yaw (change of direction) using smoothed Steps data
         public void AddDeltaYawGraph()
         {
-            AddDeltaYawGraph(
-                5,
-                "StepsDeltaYaw",
-                "Smoothed drone change in direction (aka Delta Yaw) in Degrees vs Step",
-                Steps.GetSettings_DeltaYaw());
+            AddGraph(4, 
+                "Drone change in direction (aka Delta Yaw) in Degrees vs Step",
+                new DrawDeltaYaw(DrawScope), 
+                "StepsDeltaYaw", Steps.GetSettings_DeltaYaw());
         }
 
 
-        // Add a pitch graph  
         public void AddPitchGraph()
         {
-            AddPitchGraph(
-                6,
-                "StepPitch",
+            AddGraph(5, 
                 "Drone Pitch (in degrees) vs Step",
-                Steps.GetSettings_Pitch());
+                new DrawPitch(DrawScope), 
+                "StepPitch", Steps.GetSettings_Pitch());
         }
 
 
-        // Add a roll graph  
         public void AddRollGraph()
         {
-            AddRollGraph(
-                7,
-                "StepRoll",
-                "Drone Roll (in degrees) vs Step",
-                Steps.GetSettings_Roll());
+            AddGraph(6, 
+                "Drone flight speed (in Mps) vs Step",
+                new DrawRoll(DrawScope), 
+                "StepRoll", Steps.GetSettings_Roll());
         }
 
 
         // Add a graph of whether the drone step is part of a leg or not using Step data
         public void AddLegGraph()
         {
-            AddLegGraph(
-                8,
-                "StepsLegs",
+            AddGraph(7, 
                 "Drone Step is part of a flight Leg",
-                FlightStep.HasLegSetting);
+                new DrawLeg(DrawScope), 
+                "StepsLegs", null, 100);
         }
 
 
@@ -207,7 +204,6 @@ namespace SkyCombDrone.PersistModel
             if (MaxDatumId > 0)
             {
                 AddElevationsGraph();
-                AddTravelDistGraph();
                 AddSpeedGraph();
                 AddDeltaYawGraph();
                 AddPitchGraph();
