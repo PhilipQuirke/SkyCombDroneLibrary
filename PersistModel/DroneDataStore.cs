@@ -106,7 +106,6 @@ namespace SkyCombDrone.PersistModel
 
             // Add worksheets for ensure desired tab ordering 
             AddWorksheet(ObjectsReportTabName);
-            AddWorksheet(ProcessReportTabName);
             AddWorksheet(DroneReportTabName);
             AddWorksheet(GroundReportTabName);
             AddWorksheet(FileSettingsTabName);
