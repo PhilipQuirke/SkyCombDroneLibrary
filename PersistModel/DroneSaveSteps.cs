@@ -112,7 +112,7 @@ namespace SkyCombDrone.PersistModel
 
         private void AddGraph(int row_offset, string title, DroneDrawGraph drawer, string imageName, DataPairList? metrics, int depth = 300)
         {
-            var firstGraphRow = 8 + row_offset * 13;
+            var firstGraphRow = 9 + row_offset * 13;
             int metricsCol = ChartWidth - 3;
 
             drawer.Initialise(new Size(ChartFullWidthPixels, depth));
