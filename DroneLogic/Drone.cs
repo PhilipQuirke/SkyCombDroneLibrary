@@ -757,23 +757,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Get the object's settings as datapairs (e.g. for saving to a datastore)
-        public DataPairList GetSettings()
-        {
-            return new DataPairList
-            {
-                { "% Flight overlap", PercentFlightOverlap },
-                { "% Video overlap", PercentVideoOverlap },
-                { "Flight start diff (ms)", FlightStartOffsetMs() },
-                { "Video start diff (ms)", VideoStartOffsetMs() },
-                { "Thermal Video start", ( HasThermalVideo ? ThermalVideo.DateEncoded.ToString(DateFormat) : "" )},
-                { "Thermal Flight start", ( HasFlightSections ? FlightSections.MinDateTime.ToString(DateFormat) : "" )},
-                { "Optical Video start", ( HasOpticalVideo ? OpticalVideo.DateEncoded.ToString(DateFormat) : "" ) },
-                { "Optical Flight start", ( HasDisplaySections ? DisplaySections.MinDateTime.ToString(DateFormat) : "" )},
-            };
-        }
-
-
         private bool disposed = false;
 
 

@@ -43,7 +43,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        // Load flight input data from a XLS file 
+        // Load flight section data
         public FlightSections FlightInputSettings(int titleCol)
         {
             return new FlightSections(
@@ -51,13 +51,10 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        // Load flight steps data from a XLS file 
+        // Load flight step data
         public List<string> FlightStepsSettings()
         {
-            var settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, FlightStepTitle, Chapter2TitleRow, FarRhsColOffset);
-            if (settings == null)
-                settings = Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, FlightStepTitle, Chapter2TitleRow, RhsColOffset);
-            return settings;
+            return Data.GetColumnSettingsIfAvailable(DroneSettingsTabName, FlightStepTitle, Chapter2TitleRow, RhsColOffset);
         }
 
 

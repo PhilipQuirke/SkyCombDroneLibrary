@@ -93,22 +93,18 @@ namespace SkyCombDrone.PersistModel
             Data.SetTitleAndDataListColumn(UserInputTitle, Chapter1TitleRow, LhsColOffset, Drone.DroneConfig.GetSettings());
             Data.SetTitleAndDataListColumn(LegTitle, Chapter2TitleRow, LhsColOffset, Drone.DroneConfig.GetLegSettings());
 
-            // Show Thermal to Optical comparison data on far RHS
-            if (Drone.HasInputVideo && Drone.HasDisplayVideo)
-                Data.SetTitleAndDataListColumn("Thermal versus Optical:", Chapter1TitleRow, FarRhsColOffset, Drone.GetSettings());
-
             if (Drone.HasInputVideo)
                 // Show prime input Video, Flight summary data in middle
                 SetVideoFlightSectionData(MidColOffset, "Prime", Drone.InputVideo);
 
             if (Drone.HasDisplayVideo)
                 // Show secondary display Video, Flight summary data on RHS
-                SetVideoFlightSectionData(RhsColOffset, "Secondary", Drone.DisplayVideo);
+                SetVideoFlightSectionData(FarRhsColOffset, "Secondary", Drone.DisplayVideo);
 
             Steps.SetSteps(Drone);
-            Steps.SaveSummary(Chapter2TitleRow, FarRhsColOffset);
+            Steps.SaveSummary(Chapter2TitleRow, RhsColOffset);
 
-            Data.FormatSummaryPage();
+            Data.FormatSummaryPage(30, 30, 30);
 
             if (firstSave && Data.SelectWorksheet(GroundReportTabName))
             {

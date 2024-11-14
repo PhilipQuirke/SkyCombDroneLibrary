@@ -36,13 +36,14 @@ namespace SkyCombDrone.PersistModel
         // Save the Index tab
         public void SaveIndex()
         {
-            AddWorksheet(IndexTabName);
+            AddWorksheet(HomeTabName);
 
             SetLargeTitle(IndexTitle);
 
-            SetColumnWidth(1, 25);
+            SetColumnWidth(1, 10);
             SetColumnWidth(2, 55);
             SetColumnWidth(3, 20);
+            SetColumnWidth(4, 20);
 
             // Create an index of tab names and purposes 
             if (Worksheet == null)
@@ -52,20 +53,23 @@ namespace SkyCombDrone.PersistModel
             int row = IndexContentRow;
             foreach ((string title, string description, bool do_internal_link, string external_link) in indexData)
             {
-                var title_cell = Worksheet.Cells[row, 1];
+                var area_cell = Worksheet.Cells[row, 1];
                 var desc_cell = Worksheet.Cells[row, 2];
                 var link_cell = Worksheet.Cells[row, 3];
+                var title_cell = Worksheet.Cells[row, 4];
 
                 bool do_external = (external_link != "");
 
                 title_cell.Value = title;
 
-                desc_cell.Value = description;
                 if ((title == "") && !(do_external || do_internal_link))
                 {
-                    desc_cell.Style.Font.Bold = (title == "") && !(do_external || do_internal_link);
-                    desc_cell.Style.Font.Size += 2;
+                    area_cell.Style.Font.Bold = (title == "") && !(do_external || do_internal_link);
+                    area_cell.Style.Font.Size += 2;
+                    area_cell.Value = description;
                 }
+                else
+                    desc_cell.Value = description;
 
                 link_cell.Value = (do_external ? "Help" : (do_internal_link ? "Link" : (title != "" ? "Hidden" : "")));
                 if (do_external)
@@ -105,7 +109,7 @@ namespace SkyCombDrone.PersistModel
             SaveIndex();
 
             // Add worksheets for ensure desired tab ordering 
-            AddWorksheet(ObjectsReportTabName);
+            AddWorksheet(AnimalReportTabName);
             AddWorksheet(DroneReportTabName);
             AddWorksheet(GroundReportTabName);
             AddWorksheet(FileSettingsTabName);
@@ -362,14 +366,14 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void FormatSummaryPage()
+        public void FormatSummaryPage( int dataWidth1 = 15, int dataWidth2 = 15, int dataWidth3 = 15)
         {
             SetColumnWidth(LhsColOffset, 25);
-            SetColumnWidth(LhsColOffset + LabelToValueCellOffset, 30);
+            SetColumnWidth(LhsColOffset + LabelToValueCellOffset, dataWidth1);
             SetColumnWidth(MidColOffset, 25);
-            SetColumnWidth(MidColOffset + LabelToValueCellOffset, 30);
+            SetColumnWidth(MidColOffset + LabelToValueCellOffset, dataWidth2);
             SetColumnWidth(RhsColOffset, 25);
-            SetColumnWidth(RhsColOffset + LabelToValueCellOffset, 30);
+            SetColumnWidth(RhsColOffset + LabelToValueCellOffset, dataWidth3);
 
             Worksheet.Column(LhsColOffset + LabelToValueCellOffset).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
             Worksheet.Column(MidColOffset + LabelToValueCellOffset).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
@@ -401,7 +405,7 @@ namespace SkyCombDrone.PersistModel
 
         public void Save()
         {
-            Data.SelectWorksheet(IndexTabName);
+            Data.SelectWorksheet(HomeTabName);
             if (Data.Worksheet != null)
                 Data.Worksheet.View.SetTabSelected();
             Data.Save();
