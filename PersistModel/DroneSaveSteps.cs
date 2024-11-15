@@ -110,7 +110,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        private void AddGraph(int row_offset, string title, DroneDrawGraph drawer, string imageName, DataPairList? metrics, int depth = 300)
+        private void AddGraph(int row_offset, string title, DroneDrawGraph drawer, string imageName, DataPairList? metrics, bool show_legend = false, int depth = 300)
         {
             var firstGraphRow = 9 + row_offset * 13;
             int metricsCol = ChartWidth - 3;
@@ -119,7 +119,9 @@ namespace SkyCombDrone.PersistModel
             var theBitmap = drawer.CurrBitmap();
 
             Data.SetTitle(ref firstGraphRow, 1, title);
-            Data.SaveBitmap(theBitmap, imageName, firstGraphRow - 1, 0);           
+            Data.SaveBitmap(theBitmap, imageName, firstGraphRow - 1, 0);
+            if (show_legend)
+                DroneSave.SaveElevationLegend(Data, firstGraphRow+1, metricsCol - 1);
             if (metrics != null)
                 Data.SetTitleAndDataListColumn("Metrics", firstGraphRow, metricsCol, metrics, true, 1);
         }
@@ -131,7 +133,7 @@ namespace SkyCombDrone.PersistModel
             AddGraph(2, 
                 "Drone, Surface and Ground elevations",
                 new DrawElevations(DrawScope), 
-                "StepsElevations", Steps.GetSettings_Altitude());
+                "StepsElevations", Steps.GetSettings_Altitude(), true);
         }
 
 
@@ -179,7 +181,7 @@ namespace SkyCombDrone.PersistModel
             AddGraph(7, 
                 "Drone Step is part of a flight Leg",
                 new DrawLeg(DrawScope), 
-                "StepsLegs", null, 100);
+                "StepsLegs", null, false, 100);
         }
 
 

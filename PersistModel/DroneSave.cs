@@ -6,6 +6,7 @@ using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundModel;
+using SkyCombGround.PersistModel;
 using System.Diagnostics;
 using System.Drawing;
 
@@ -176,6 +177,18 @@ namespace SkyCombDrone.PersistModel
             {
                 throw BaseConstants.ThrowException("SaveDrone.SaveData_Detail", ex);
             }
+        }
+
+
+        // Show elevation legend coloured cells
+        public static void SaveElevationLegend(BaseDataStore dataStore, int startRow = 4, int startCol = 6, int droneReps = 3, int otherReps = 2)
+        {
+            for( int i = 0; i < droneReps; i++ )
+                dataStore.Worksheet.Cells[startRow++, startCol].Style.Fill.SetBackground(DroneColors.InScopeDroneColor);
+            for (int i = 0; i < otherReps; i++)
+                dataStore.Worksheet.Cells[startRow++, startCol].Style.Fill.SetBackground(SurfaceLowColor);
+            for (int i = 0; i < otherReps; i++)
+                dataStore.Worksheet.Cells[startRow++, startCol].Style.Fill.SetBackground(GroundLineColor);
         }
     }
 }
