@@ -272,13 +272,13 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Generate a bitmap of the graph as per scope settings.
-        public virtual Bitmap CurrBitmap()
+        public virtual Bitmap CurrBitmap(bool dpiIndependent = false)
         {
             var baseImage = BaseImage.Clone();
 
             CurrImage(ref baseImage);
 
-            var bitmap = baseImage.ToBitmap();
+            Bitmap bitmap = dpiIndependent? BitmapGenerator.CreateDpiIndependentBitmap(baseImage) : baseImage.ToBitmap();
 
             DrawAxes(ref bitmap);
 

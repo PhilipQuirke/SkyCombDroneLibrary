@@ -389,6 +389,16 @@ namespace SkyCombDrone.PersistModel
             catch { }
         }
 
+
+        // Save the bitmap to the datastore
+        public void SaveBitmap(Bitmap? theBitmap, string chartName, int row, int col = 0, int percent = 100)
+        {
+            if (theBitmap == null || Worksheet == null)
+                return;
+
+            var imageHandler = new ExcelImageHandler(Worksheet);
+            imageHandler.SaveBitmap(theBitmap, chartName, row, col, percent);
+        }
     }
 
 

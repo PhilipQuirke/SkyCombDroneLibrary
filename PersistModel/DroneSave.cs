@@ -55,7 +55,7 @@ namespace SkyCombDrone.PersistModel
         // Generate and save a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
         public void SaveDronePath(
              TardisSummaryModel? tardisModel, GroundType groundType,
-             int row, int col, string title, int pixels = 700)
+             int row, int col, string title)
         {
             var titleRow = row;
             Data.SetTitle(ref titleRow, col, title);
@@ -66,9 +66,11 @@ namespace SkyCombDrone.PersistModel
             drawPath.BackgroundColor = DroneColors.WhiteBgr; // So we dont paint under-necessary area.
 
             (var _, var _, var bitmapName, var pathImage) =
-                CreateDronePath(drawPath, groundType, pixels);
+                CreateDronePath(drawPath, groundType, 650);
 
-            Data.SaveBitmap(pathImage.ToBitmap(), bitmapName, row, col - 1);
+            var theBitmap = BitmapGenerator.CreateDpiIndependentBitmap(pathImage);
+
+            Data.SaveBitmap(theBitmap, bitmapName, row, col - 1);
         }
 
 
@@ -109,8 +111,7 @@ namespace SkyCombDrone.PersistModel
 
             if (firstSave && Data.SelectWorksheet(GroundReportTabName))
             {
-                // We draw DEM, DSM and Country graphs on the GROUND summary tab
-                // These plots combine ground and drone data.
+                // We draw DEM, DSM and Country graphs on the Ground Summary tab
 
                 if ((countryBitmap != null) && (Drone.FlightSections != null))
                 {
@@ -120,7 +121,9 @@ namespace SkyCombDrone.PersistModel
                     var localBitmap = (Bitmap)countryBitmap.Clone();
                     new DroneDrawPath(new DroneDrawScope(Drone), false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
-                    Data.SaveBitmap(localBitmap, "Country", row - 1, col - 1, 45);
+
+                    var theBitmap = BitmapGenerator.CreateDpiIndependentBitmap(localBitmap.ToImage<Bgr, byte>());
+                    Data.SaveBitmap(theBitmap, "Country", row - 1, col - 1, 45);
                 }
 
                 SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);

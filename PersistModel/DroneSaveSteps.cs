@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml.Drawing.Chart;
+﻿using Emgu.CV.Structure;
+using OfficeOpenXml.Drawing.Chart;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
@@ -110,13 +111,13 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        private void AddGraph(int row_offset, string title, DroneDrawGraph drawer, string imageName, DataPairList? metrics, bool show_legend = false, int depth = 300)
+        private void AddGraph(int row_offset, string title, DroneDrawGraph drawer, string imageName, DataPairList? metrics, bool show_legend = false, int depth = 225)
         {
             var firstGraphRow = 9 + row_offset * 13;
             int metricsCol = ChartWidth - 3;
 
             drawer.Initialise(new Size(ChartFullWidthPixels, depth));
-            var theBitmap = drawer.CurrBitmap();
+            var theBitmap = drawer.CurrBitmap(true);
 
             Data.SetTitle(ref firstGraphRow, 1, title);
             Data.SaveBitmap(theBitmap, imageName, firstGraphRow - 1, 0);
