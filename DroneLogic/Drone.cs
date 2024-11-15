@@ -690,12 +690,8 @@ namespace SkyCombDrone.DroneLogic
         public const int CountryYIndex = 3;
         public const int EastingMIndex = 4;
         public const int NorthingMIndex = 5;
-        public const int DemPercIndex = 6;
-        public const int DsmPercIndex = 7;
-        public const int AvgHtOverDemIndex = 8;
-        public const int MinHtOverDsmIndex = 9;
-        public const int FileNameIndex = 10;
-        public const int GoogleMapsIndex = 11;
+        public const int FileNameIndex = 6;
+        public const int GoogleMapsIndex = 7;
 
 
         // Get the drone settings needed to describe the flight in the SkyCombFlights app
@@ -706,10 +702,6 @@ namespace SkyCombDrone.DroneLogic
             float eastingM = 0;
             float northingM = 0;
             string dateTime = "";
-            int demPerc = 0;
-            int dsmPerc = 0;
-            double avgHt = 0;
-            double minHt = 0;
 
             if (FlightSections != null)
             {
@@ -726,19 +718,6 @@ namespace SkyCombDrone.DroneLogic
                 }
             }
 
-            if (GroundData != null)
-            {
-                demPerc = (int)GroundData.DemModel?.PercentDatumElevationsAvailable;
-                dsmPerc = (int)GroundData.DsmModel?.PercentDatumElevationsAvailable;
-
-            }
-
-            if (FlightSteps != null)
-            {
-                avgHt = Math.Round(FlightSteps.AvgHeightOverDemM, 0);
-                minHt = Math.Round(FlightSteps.MinHeightOverDsmM, 0);
-            }
-
             return new DataPairList
             {
                 { "DateTime", dateTime },
@@ -747,10 +726,6 @@ namespace SkyCombDrone.DroneLogic
                 { "Country Y", countryY, 0 },
                 { "Easting M", eastingM, 0 },
                 { "Northing M", northingM, 0 },
-                { "DEM %", demPerc, 0 },
-                { "DSM %", dsmPerc, 0 },
-                { "Avg Ht over DEM", (avgHt > 0 ? avgHt : 0), 0 },
-                { "Min Ht over DSM", (minHt > 0 ? minHt : 0), 0 },
                 { "File name", InputVideo.ShortFileName() },
                 { "Google Maps", GoogleMapsLink() },
             };

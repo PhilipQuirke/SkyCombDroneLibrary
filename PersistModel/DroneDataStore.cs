@@ -155,6 +155,9 @@ namespace SkyCombDrone.PersistModel
         // This function must align to the above GetSettings function.
         private void LoadSettings(List<string> settings)
         {
+            if (settings == null)
+                return;
+
             ThermalVideoName = settings[0];
             OpticalVideoName = settings[1];
             ThermalFlightName = settings[2];
