@@ -5,6 +5,7 @@ using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 
@@ -622,28 +623,34 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public const int DateTimeIndex = 0;
-        public const int DurationIndex = 1;
-        public const int CountryXIndex = 2;
-        public const int CountryYIndex = 3;
-        public const int EastingMIndex = 4;
-        public const int NorthingMIndex = 5;
-        public const int FileNameIndex = 6;
-        public const int GoogleMapsIndex = 7;
+        public const int DateIndex = 0;
+        public const int TimeIndex = 1;
+        public const int DurationIndex = 2;
+        public const int CountryXIndex = 3;
+        public const int CountryYIndex = 4;
+        public const int EastingMIndex = 5;
+        public const int NorthingMIndex = 6;
+        public const int FileNameIndex = 7;
+        public const int GoogleMapsIndex = 8;
 
 
         // Get the drone settings needed to describe the flight in the SkyCombFlights app
         public DataPairList GetSettingsForSkyCombFlights()
         {
+            string date = "";
+            string time = "";
             float countryX = 0;
             float countryY = 0;
             float eastingM = 0;
             float northingM = 0;
-            string dateTime = "";
 
             if (FlightSections != null)
             {
-                dateTime = (FlightSections.MinDateTime != DateTime.MinValue ? FlightSections.MinDateTime.ToString(MediumDateFormat) : "");
+                if (FlightSections.MinDateTime != DateTime.MinValue)
+                {
+                    date = FlightSections.MinDateTime.ToString("dd-MM-yyyy");
+                    time = FlightSections.MinDateTime.ToString("HH:mm:ss");
+                }
 
                 var minC = FlightSections.MinCountryLocation;
                 var maxC = FlightSections.MaxCountryLocation;
@@ -658,7 +665,8 @@ namespace SkyCombDrone.DroneLogic
 
             return new DataPairList
             {
-                { "DateTime", dateTime },
+                { "Date", date },
+                { "Time", time },
                 { "Duration", InputVideo.DurationMsToString(0) },
                 { "Country X", countryX, 0 },
                 { "Country Y", countryY, 0 },

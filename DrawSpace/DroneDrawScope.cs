@@ -170,15 +170,7 @@ namespace SkyCombDrone.DrawSpace
                 if (TardisSummary == null)
                     return null;
 
-                var answer = TardisSummary.GetSettings_Altitude();
-
-                if ((Drone != null) && Drone.HasFlightSteps)
-                {
-                    answer.Add(new DataPair("Avg Ht above DEM", Drone.FlightSteps.AvgHeightOverDemM, ElevationNdp));
-                    answer.Add(new DataPair("Min Ht above DSM", Drone.FlightSteps.MinHeightOverDsmM, ElevationNdp));
-                }
-
-                return answer;
+                return TardisSummary.GetSettings_Altitude();
             }
         }
 
