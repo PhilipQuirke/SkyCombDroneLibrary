@@ -115,8 +115,6 @@ namespace SkyCombDrone.DroneLogic
                         // Refer https://www.dji.com/nz/mavic-2-enterprise/specs
                         if (drone.HasThermalVideo)
                             drone.ThermalVideo.HFOVDeg = 57;
-                        if (drone.HasOpticalVideo)
-                            drone.OpticalVideo.HFOVDeg = 77;
                         break;
                 }
         }

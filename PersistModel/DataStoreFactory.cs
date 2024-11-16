@@ -31,97 +31,20 @@ namespace SkyCombDrone.PersistModel
 
 
         // Calculate the names of the input files we have available.
-        public static (string, string, string, string) LocateInputFiles_TwoVideos(
-            Func<string, DateTime> readDateEncodedUtc,
-            string firstFileName)
+        public static (string, string) LocateInputFiles_TwoVideos(string firstFileName)
         {
-            string thermalVideoName = "", opticalVideoName = "", thermalFlightName = "", opticalFlightName = "";
-
-            VideoModel? secondVideoData = null;
-            VideoModel? firstVideoData = null;
+            string thermalVideoName = "", thermalFlightName = "";
 
             try
             {
-                // Without at least one video we can't do anything
-                var firstVideoName = FindVideo(firstFileName);
-                if (firstVideoName.Length > 0)
+                // Without a video we can't do anything
+                thermalVideoName = FindVideo(firstFileName);
+                if (thermalVideoName != "")
                 {
-                    firstVideoData = new VideoModel(firstVideoName, true, readDateEncodedUtc); // guess at thermal
-
-                    // Do we have a second video (in a thermal/optical pair) that overlaps the first video timewise closely?
-                    var secondVideoName = "";
-
-                    // First guess + 1
-                    secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, +1));
-                    if (secondVideoName.Length > 0)
-                    {
-                        secondVideoData = new VideoModel(secondVideoName, true, readDateEncodedUtc); // guess at thermal
-
-                        // Based on video DateEncodedUtc datetime and durationMs this is an accurate match mechanism
-                        if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
-                        {
-                            secondVideoName = "";
-                            secondVideoData.FreeResources();
-                            secondVideoData = null;
-                        }
-                    }
-
-                    // Second guess - 1
-                    if (secondVideoName == "")
-                    {
-                        secondVideoName = FindVideo(DroneDataStore.DeltaNumericString(firstVideoName, -1));
-                        if (secondVideoName.Length > 0)
-                        {
-                            secondVideoData = new VideoModel(secondVideoName, true, readDateEncodedUtc); // guess at thermal
-
-                            // Based on video DateEncodedUtc datetime and durationMs this is an accurate match mechanism
-                            if (VideoModel.PercentOverlap(firstVideoData, secondVideoData) < 95)
-                            {
-                                secondVideoName = "";
-                                secondVideoData.FreeResources();
-                                secondVideoData = null;
-                            }
-                        }
-                    }
-
-                    if (secondVideoName.Length > 0)
-                    {
-                        // We have two videos. Assume the one with more pixels is the optical video
-                        if (firstVideoData.ImagePixels > secondVideoData.ImagePixels)
-                        {
-                            thermalVideoName = secondVideoName;
-                            opticalVideoName = firstVideoName;
-                        }
-                        else
-                        {
-                            thermalVideoName = firstVideoName;
-                            opticalVideoName = secondVideoName;
-                        }
-                    }
-                    else
-                    {
-                        // We have one video.
-                        // Given the purpose/focus of SkyComb Analyst, we assume it is thermal. 
-                        thermalVideoName = firstVideoName;
-                        opticalVideoName = "";
-                    }
-
-
-                    if (thermalVideoName != "")
-                    {
-                        // See if there is an SRT file with the same name as the video file, just a different extension
-                        thermalFlightName = BaseDataStore.SwapFileNameExtension(thermalVideoName, ".SRT");
-                        if (!System.IO.File.Exists(thermalFlightName))
-                            thermalFlightName = "";
-                    }
-
-                    if (opticalVideoName != "")
-                    {
-                        // See if there is an SRT file with the same name as the video file, just a different extension
-                        opticalFlightName = BaseDataStore.SwapFileNameExtension(opticalVideoName, ".SRT");
-                        if (!System.IO.File.Exists(opticalFlightName))
-                            opticalFlightName = "";
-                    }
+                    // See if there is an SRT file with the same name as the video file, just a different extension
+                    thermalFlightName = BaseDataStore.SwapFileNameExtension(thermalVideoName, ".SRT");
+                    if (!System.IO.File.Exists(thermalFlightName))
+                        thermalFlightName = "";
                 }
             }
             catch (Exception ex)
@@ -130,17 +53,10 @@ namespace SkyCombDrone.PersistModel
                 Console.WriteLine("DataStoreFactory.LocateInputFiles_TwoVideos: " + ex.Message);
 
                 thermalVideoName = "";
-                opticalVideoName = "";
                 thermalFlightName = "";
-                opticalFlightName = "";
-            }
-            finally
-            {
-                firstVideoData?.FreeResources();
-                secondVideoData?.FreeResources();
             }
 
-            return (thermalVideoName, opticalVideoName, thermalFlightName, opticalFlightName);
+            return (thermalVideoName, thermalFlightName);
         }
 
 
@@ -186,8 +102,8 @@ namespace SkyCombDrone.PersistModel
 
         private static DroneDataStore? OpenOrCreateDataStore(
             string dataStoreName,
-            string thermalVideoName, string opticalVideoName,
-            string thermalFlightName, string opticalFlightName,
+            string thermalVideoName, 
+            string thermalFlightName, 
             string outputElseInputDirectory,
             bool canCreate)
         {
@@ -211,8 +127,6 @@ namespace SkyCombDrone.PersistModel
                                 // Reset the file names to the new locations
                                 answer.ThermalVideoName = thermalVideoName;
                                 answer.ThermalFlightName = thermalFlightName;
-                                answer.OpticalVideoName = opticalVideoName;
-                                answer.OpticalFlightName = opticalFlightName;
                             }
                         }
                         else
@@ -222,8 +136,8 @@ namespace SkyCombDrone.PersistModel
                         // Create a new datastore.
                         // One failure mode is if the outputElseInputDirectory does not exist.                        
                         answer = new(dataStoreName,
-                            thermalVideoName, opticalVideoName,
-                            thermalFlightName, opticalFlightName,
+                            thermalVideoName, 
+                            thermalFlightName, 
                             VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory));
                 }
             }
@@ -239,24 +153,21 @@ namespace SkyCombDrone.PersistModel
         // From a video file name, locate all applicable input files, ensure that a DataStore exists. 
         // Handles case where there is both a thermal and an optical video file.
         public static DroneDataStore? OpenOrCreate_TwoVideos(
-            Func<string, DateTime> readDateEncodedUtc,
             string videoFileName,
             string outputElseInputDirectory,
             bool canCreate)
         {
-            (var thermalVideoName, var opticalVideoName, var thermalFlightName, var opticalFlightName) =
-                LocateInputFiles_TwoVideos(readDateEncodedUtc, videoFileName);
+            (var thermalVideoName, var thermalFlightName) =
+                LocateInputFiles_TwoVideos(videoFileName);
 
             var dataStoreName = "";
             if (thermalVideoName != "")
                 dataStoreName = DataStoreName(thermalVideoName, outputElseInputDirectory);
-            else if (opticalVideoName != "")
-                dataStoreName = DataStoreName(opticalVideoName, outputElseInputDirectory);
 
             return DataStoreFactory.OpenOrCreateDataStore(
                 dataStoreName,
-                thermalVideoName, opticalVideoName,
-                thermalFlightName, opticalFlightName,
+                thermalVideoName, 
+                thermalFlightName, 
                 outputElseInputDirectory,
                 canCreate);
         }
@@ -277,8 +188,8 @@ namespace SkyCombDrone.PersistModel
 
             return DataStoreFactory.OpenOrCreateDataStore(
                 dataStoreName,
-                thermalVideoName, "",
-                thermalFlightName, "",
+                thermalVideoName, 
+                thermalFlightName, 
                 outputElseInputDirectory,
                 canCreate);
         }

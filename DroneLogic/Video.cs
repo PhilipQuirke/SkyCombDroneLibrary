@@ -246,26 +246,12 @@ namespace SkyCombDrone.DroneLogic
         // The primary input video to analyse. Prefer thermal to optical video.
         public VideoData? InputVideo { get; set; } = null;
 
-        // The secondary video data (if any) to display analysis results on. Prefer optical to thermal. 
-        public VideoData? DisplayVideo { get; set; } = null;
-
-
         public bool HasInputVideo { get { return InputVideo != null; } }
-        public bool HasDisplayVideo { get { return DisplayVideo != null; } }
-        public bool HasTwoVideos { get { return HasInputVideo && HasDisplayVideo; } }
-
 
         // The thermal camera video (if any)
         public VideoData ThermalVideo { get { return HasInputVideo && InputVideo.Thermal ? InputVideo : null; } }
-        // The optical (aka visible-light) camera video (if any)
-        public VideoData OpticalVideo { get { return HasInputVideo && !InputVideo.Thermal ? InputVideo : (HasDisplayVideo && !DisplayVideo.Thermal ? DisplayVideo : null); } }
-
 
         public bool HasThermalVideo { get { return ThermalVideo != null; } }
-        public bool HasOpticalVideo { get { return OpticalVideo != null; } }
-
-
-        public int PercentVideoOverlap { get { return VideoData.PercentOverlap(InputVideo, DisplayVideo); } }
 
 
         // Clear video file handles. More immediate than waiting for garbage collection
@@ -276,22 +262,6 @@ namespace SkyCombDrone.DroneLogic
                 InputVideo.Dispose();
                 InputVideo = null;
             }
-
-            if (DisplayVideo != null)
-            {
-                DisplayVideo.Dispose();
-                DisplayVideo = null;
-            }
-        }
-
-
-        // The thermal and optical video files may not start at the same millisecond.
-        public int VideoStartOffsetMs()
-        {
-            if (PercentVideoOverlap <= 0)
-                return UnknownValue;
-
-            return (int)InputVideo.DateEncodedUtc.Subtract(DisplayVideo.DateEncodedUtc).TotalMilliseconds;
         }
 
 
@@ -300,70 +270,36 @@ namespace SkyCombDrone.DroneLogic
         {
             if (HasInputVideo)
                 InputVideo.ResetCurrFrame();
-
-            if (HasDisplayVideo)
-                DisplayVideo.ResetCurrFrame();
         }
 
 
-        // Do we have good video frame(s) data
+        // Do we have good video frame data
         public bool HaveFrames()
         {
-            bool haveFrames = HasInputVideo && InputVideo.HaveFrame;
-
-            if (HasDisplayVideo)
-                haveFrames = haveFrames && DisplayVideo.HaveFrame;
-
-            return haveFrames;
+            return HasInputVideo && InputVideo.HaveFrame;
         }
 
 
-        // Reset input AND display video frame position & load image(s)
+        // Reset input AND display video frame position & load image
         public void SetAndGetCurrFrames(int inputFrameId, int delayMs)
         {
             InputVideo.SetAndGetCurrFrameId(inputFrameId);
-
-            if (InputVideo.HaveFrame)
-                // Reset display video (if any) frame position to start displaying from
-                if (HasDisplayVideo)
-                {
-                    int displayFrameMs = InputVideo.CurrFrameMs + delayMs;
-                    if ((displayFrameMs > 0) && (displayFrameMs < DisplayVideo.DurationMs))
-                        // Refer https://github.com/opencv/opencv/issues/15749
-                        DisplayVideo.SetAndGetCurrFrameMs(displayFrameMs);
-                    else
-                        DisplayVideo.SetAndGetCurrFrameId(0);
-                }
         }
 
 
-        // Get (advance to) the next frame of the video(s)
+        // Get (advance to) the next frame of the video
         public bool GetNextFrames(int delayMs)
         {
             // For the "input" video, we efficiently get the next frame. This is fast.
             // Sets InputVideo member data CurrFrameID & CurrFrameMs
-            if (!InputVideo.GetNextFrame())
-                return false;
-
-            // Does the Drone have a separate video for displaying (normally optical)
-            if (HasDisplayVideo)
-            {
-                if (InputVideo.HaveFrame)
-                    DisplayVideo.SetOrGetNextFramebyMs(
-                        InputVideo.CurrFrameMs + delayMs);
-                else
-                    DisplayVideo.ResetCurrFrame();
-            }
-            return true;
+            return InputVideo.GetNextFrame();
         }
 
 
-        // Return cached frame(s)
-        public (Mat? inputMat, Mat? displayMat) CurrFrames()
+        // Return cached frame
+        public Mat? CurrFrames()
         {
-            Mat? inputMat = InputVideo.CurrFrameMat;
-            Mat? displayMat = (HasDisplayVideo ? DisplayVideo.CurrFrameMat : null);
-            return (inputMat, displayMat);
+            return InputVideo.CurrFrameMat;
         }
 
 

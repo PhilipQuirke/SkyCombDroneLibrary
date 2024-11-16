@@ -100,14 +100,10 @@ namespace SkyCombDrone.PersistModel
                 // Show prime input Video, Flight summary data in middle
                 SetVideoFlightSectionData(MidColOffset, "Prime", Drone.InputVideo);
 
-            if (Drone.HasDisplayVideo)
-                // Show secondary display Video, Flight summary data on RHS
-                SetVideoFlightSectionData(FarRhsColOffset, "Secondary", Drone.DisplayVideo);
-
             Steps.SetSteps(Drone);
             Steps.SaveSummary(Chapter2TitleRow, RhsColOffset);
 
-            Data.FormatSummaryPage(30, 30, 30);
+            Data.FormatSummaryPage(15, 35, 35);
 
             if (firstSave && Data.SelectWorksheet(GroundReportTabName))
             {

@@ -19,9 +19,7 @@ namespace SkyCombDrone.PersistModel
     {
         // These are the physical files that are referenced in the DataStore
         public string ThermalVideoName { get; set; } = "";
-        public string OpticalVideoName { get; set; } = "";
         public string ThermalFlightName { get; set; } = "";
-        public string OpticalFlightName { get; set; } = "";
         public string OutputVideoName { get; set; } = "";
 
 
@@ -97,12 +95,10 @@ namespace SkyCombDrone.PersistModel
 
 
         // Create a DataStore on disk & store the Files settings.
-        public DroneDataStore(string selectedFileName, string thermalVideoName, string opticalVideoName, string thermalFlightName, string opticalFlightName, string outputVideoName) : base(selectedFileName, true)
+        public DroneDataStore(string selectedFileName, string thermalVideoName, string thermalFlightName, string outputVideoName) : base(selectedFileName, true)
         {
             ThermalVideoName = thermalVideoName;
-            OpticalVideoName = opticalVideoName;
             ThermalFlightName = thermalFlightName;
-            OpticalFlightName = opticalFlightName;
             OutputVideoName = outputVideoName;
 
             SetWorkbookAnalystProperties();
@@ -138,13 +134,8 @@ namespace SkyCombDrone.PersistModel
         {
             return new DataPairList
             {
-                // Input files
                 { "ThermalVideoName", ( ThermalVideoName == "" ? UnknownString : ThermalVideoName ) },
-                { "OpticalVideoName", ( OpticalVideoName == "" ? UnknownString : OpticalVideoName ) },
                 { "ThermalFlightName", ( ThermalFlightName == "" ? UnknownString : ThermalFlightName ) },
-                { "OpticalFlightName", ( OpticalFlightName == "" ? UnknownString : OpticalFlightName ) },
-                
-                // Output files
                 { "DataStoreFileName", DataStoreFileName },
                 { "OutputVideoName", OutputVideoName },
             };
@@ -159,19 +150,13 @@ namespace SkyCombDrone.PersistModel
                 return;
 
             ThermalVideoName = settings[0];
-            OpticalVideoName = settings[1];
-            ThermalFlightName = settings[2];
-            OpticalFlightName = settings[3];
-            // DataStoreFileName = settings[4]
+            ThermalFlightName = settings[1];
+            // DataStoreFileName = settings[2]
 
             if (ThermalVideoName.ToLower() == UnknownString.ToLower())
                 ThermalVideoName = "";
-            if (OpticalVideoName.ToLower() == UnknownString.ToLower())
-                OpticalVideoName = "";
             if (ThermalFlightName.ToLower() == UnknownString.ToLower())
                 ThermalFlightName = "";
-            if (OpticalFlightName.ToLower() == UnknownString.ToLower())
-                OpticalFlightName = "";
         }
 
 

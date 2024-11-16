@@ -14,28 +14,7 @@ namespace SkyCombDrone.DroneLogic
 {
     // Drone is the interface that video runners must use. 
     // Contains video(s), flight log(s), ground & surface elevations (if any), and calculated data.
-    // This class is NOT dependent on ProcessLogic or RunSpace, so is constant per "set of input files" and can be cached & re-used.
-    //
-    // This class can load data from 1 to 4 files supporting several use cases including:
-    //
-    // 1. THERMAL VIDEO ONLY
-    // An owner of a Autel Evo 2 640T provided a thermal video (but no flight log).
-    //      IRX_0009.mp4 - the thermal video
-    //
-    // 2. OPTICAL VIDEO PLUS FLIGHT LOG
-    // A DJI Mini only has a optical camera. Taking an video creates 2 files:
-    //      DJI_0020.mp4 - the optical video
-    //      DJI_0020.srt - DJI-specific text file containing location and orientation data, etc.
-    //
-    // 3. THERMAL VIDEO PLUS FLIGHT LOG
-    // A drone creating a thermal video and a flight log
-    //
-    // 4. OPTICAL AND THERMAL VIDEOS PLUS FLIGHT LOGS (Recommended)
-    // A DJI M2E Dual has optical and thermal cameras. Taking a video creates 4 files in this order:
-    //      DJI_0119.mp4 - the optical video
-    //      DJI_0119.srt - a DJI-specific SRT file with basic data and extra optical-camera settings
-    //      DJI_0120.mp4 - the thermal video
-    //      DJI_0120.srt - a DJI-specific SRT file with basic data (location, orientation, etc)
+    // Normal use case is a drone creating a thermal video and a flight log.
     public class Drone : TwoVideos, IDisposable
     {
         public DroneConfigModel DroneConfig;
@@ -80,23 +59,6 @@ namespace SkyCombDrone.DroneLogic
         public bool UseFlightLegs { get { return HasFlightLegs && DroneConfig.UseLegs && FlightLegs.Legs.Count > 0; } }
         // How many legs to show in the UI
         public int NumLegsShown { get { return UseFlightLegs ? FlightLegs.Legs.Count : 0; } }
-
-
-        // For many drones the thermal and optical videos have different pixel resolution and horizontal field of vision(HFOV).
-        // SkyComb Analyst shows the location of significant objects found in thermal video on top of the optical video.
-        // So it needs to know the difference between the HFOV of the thermal and optical videos
-        // ExcludeMarginRatio is the "margin" of the optical video that is not displayed in the thermal video, as a ratio between 0.0 and 0.5.
-        // Refer ExcludeMarginRatio.md section Camera Down Angle for more detail.
-        public float ExcludeDisplayMarginRatio
-        {
-            get
-            {
-                if (HasTwoVideos)
-                    return DroneConfig.ExcludeDisplayMarginRatio;
-
-                return 0;
-            }
-        }
 
 
         // Some drone steps we do not use (aka process) as the thermal camera is pointing too near the horizontal
@@ -147,18 +109,9 @@ namespace SkyCombDrone.DroneLogic
                 DroneLoad dataReader = new(dataStore, this);
                 dataStore.SelectWorksheet(DroneDataStore.FileSettingsTabName);
 
-                // Without at least one video we can't do anything
+                // Without a video we can't do anything
                 if (dataStore.ThermalVideoName != "")
-                {
                     InputVideo = new VideoData(dataStore.ThermalVideoName, true, readDateEncodedUtc);
-                    if (dataStore.OpticalVideoName != "")
-                        DisplayVideo = new VideoData(dataStore.OpticalVideoName, false, readDateEncodedUtc);
-                }
-                else
-                {
-                    if (dataStore.OpticalVideoName != "")
-                        InputVideo = new VideoData(dataStore.OpticalVideoName, false, readDateEncodedUtc);
-                }
 
                 if (HasInputVideo)
                     return true;
@@ -191,27 +144,15 @@ namespace SkyCombDrone.DroneLogic
 
                     phase = 2;
                     if (dataStore.ThermalVideoName != "")
-                    {
                         FlightSections = dataReader.LoadSettings(
                             dataStore.ThermalVideoName, InputVideo,
                             dataStore.ThermalFlightName,
                             DroneLoad.MidColOffset);
 
-                        if (dataStore.OpticalVideoName != "")
-                            DisplaySections = dataReader.LoadSettings(
-                                dataStore.OpticalVideoName, DisplayVideo,
-                                dataStore.OpticalFlightName,
-                                DroneLoad.RhsColOffset);
-                    }
-                    else
-                        FlightSections = dataReader.LoadSettings(
-                            dataStore.OpticalVideoName, InputVideo,
-                            dataStore.OpticalFlightName,
-                            DroneLoad.MidColOffset);
 
                     phase = 3;
                     FlightSteps = new(this, dataReader.FlightStepsSettings());
-                    FlightSteps.FileName = (HasThermalVideo ? dataStore.ThermalFlightName : dataStore.OpticalFlightName);
+                    FlightSteps.FileName = dataStore.ThermalFlightName;
 
                     FlightLegs = new();
 
@@ -273,8 +214,6 @@ namespace SkyCombDrone.DroneLogic
         {
             if (HasThermalVideo)
                 ThermalVideo.CalculateSettings();
-            if (HasOpticalVideo)
-                OpticalVideo.CalculateSettings();
         }
 
 
@@ -284,7 +223,6 @@ namespace SkyCombDrone.DroneLogic
             FlightSections = null;
             DisplaySections = null;
             LoadFlightDataFromTextFile(ThermalVideo);
-            LoadFlightDataFromTextFile(OpticalVideo);
         }
 
 
