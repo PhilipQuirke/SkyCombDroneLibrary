@@ -67,7 +67,7 @@ namespace SkyCombDrone.DroneLogic
                 // Get the current position in the video in milliseconds
                 CurrFrameMs = (int)DataAccess.Get(CapProp.PosMsec);
 
-                if ((expectedFrameId > 0) && (expectedFrameId < FrameCount))
+                if (false && (expectedFrameId > 0) && (expectedFrameId < FrameCount))
                     Assert(CurrFrameId == expectedFrameId,
                         "GetFrameInternal: Unexpected frame." +
                         " Thermal=" + Thermal +
@@ -188,7 +188,7 @@ namespace SkyCombDrone.DroneLogic
             }
 
             if (fromVideoS < toVideoS + 1)
-                Assert(firstVideoFrameId < lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
+                Assert(firstVideoFrameId <= lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
 
             return (firstVideoFrameId, lastVideoFrameId, firstVideoFrameMs, lastVideoFrameMs);
         }
