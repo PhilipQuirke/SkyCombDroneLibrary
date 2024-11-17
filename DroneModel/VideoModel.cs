@@ -85,18 +85,10 @@ namespace SkyCombDrone.DroneModel
 
         // THERMAL CAMERA SETTINGS
 
-
-        // Is it a thermal (aka IR) video? Else an optical (aka visible-light) video.
-        // Given the purpose/focus of SkyComb Analyst, we default to true.
-        public bool Thermal { get; set; } = true;
-
         // Thermal camera minimum temperature in degrees Celcius. Default to Mavic 2 Enterprise "Gain Mode" = High value.
         public int ThermalMinTempC { get; set; } = -10;
         // Thermal camera maximum temperature in degrees Celcius. Default to Mavic 2 Enterprise "Gain Mode" = High value.
         public int ThermalMaxTempC { get; set; } = 140;
-
-
-        // OPTICAL CAMERA SETTINGS
 
 
         // FStop. An FStop of 450 is same as f4.5
@@ -119,7 +111,7 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public VideoModel(string fileName, bool thermal, Func<string, DateTime> readDateEncodedUtc)
+        public VideoModel(string fileName, Func<string, DateTime> readDateEncodedUtc)
         {
             try
             {
@@ -135,8 +127,6 @@ namespace SkyCombDrone.DroneModel
                 FrameCount = (int)DataAccess.Get(CapProp.FrameCount);
                 ImageWidth = (int)DataAccess.Get(CapProp.FrameWidth);
                 ImageHeight = (int)DataAccess.Get(CapProp.FrameHeight);
-
-                Thermal = thermal;
 
                 // Slow to calculate so left uncalculated here
                 DurationMs = UnknownValue;
@@ -251,8 +241,7 @@ namespace SkyCombDrone.DroneModel
         public string DescribeSelf()
         {
             return
-                (Thermal ? "Thermal" : "Optical") +
-                " video: " +
+                "Thermal video: " +
                 ShortFileName() + ", " +
                 ImageWidth.ToString() + "x" +
                 ImageHeight + "pxs, " +
@@ -278,19 +267,11 @@ namespace SkyCombDrone.DroneModel
                 { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
                 { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(BaseConstants.DateFormat) },
                 { "Color Md", (ColorMd == "" ? "default" : ColorMd ) },
-                { "Thermal", Thermal },
+                { "Deprecated", true },
             };
 
-            if (Thermal)
-            {
-                answer.Add("Thermal Min Temp C", ThermalMinTempC);
-                answer.Add("Thermal Max Temp C", ThermalMaxTempC);
-            }
-            else
-            {
-                answer.Add("Min FStop", MinFStop);
-                answer.Add("Max FStop", MaxFStop);
-            }
+            answer.Add("Thermal Min Temp C", ThermalMinTempC);
+            answer.Add("Thermal Max Temp C", ThermalMaxTempC);
 
             return answer;
         }
@@ -326,18 +307,10 @@ namespace SkyCombDrone.DroneModel
                 i++;
             }
             ColorMd = settings[i++].ToLower();
-            Thermal = ConfigBase.StringToBool(settings[i++]);
+            i++; // Deprecated
 
-            if (Thermal)
-            {
-                ThermalMinTempC = ConfigBase.StringToInt(settings[i++]);
-                ThermalMaxTempC = ConfigBase.StringToInt(settings[i++]);
-            }
-            else
-            {
-                MinFStop = ConfigBase.StringToInt(settings[i++]);
-                MaxFStop = ConfigBase.StringToInt(settings[i++]);
-            }
+            ThermalMinTempC = ConfigBase.StringToInt(settings[i++]);
+            ThermalMaxTempC = ConfigBase.StringToInt(settings[i++]);
         }
 
 

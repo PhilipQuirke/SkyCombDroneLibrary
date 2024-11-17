@@ -41,13 +41,6 @@ namespace SkyCombDrone.DroneModel
     //      - WARNING: Changing the values below will have no effect.
     public class DroneConfigModel : DroneIntervalModel
     {
-        // Sometimes the thermal and optical videos are out of sync by a few frames. 
-        // A ThermalToOpticalVideoDelayS value of 0.5 means the optical video starts 0.5 seconds after the thermal video.
-        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
-        // section Video Start Time Accuracy for more detail. 
-        public float ThermalToOpticalVideoDelayS { get; set; } = 0;
-
-
         // Older drones provide the pitch, yaw, roll based on the drone's orientation.
         // Newer drones provide the pitch, yaw, roll based on the camera gimbal orientation.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Flight.md 
@@ -191,7 +184,7 @@ namespace SkyCombDrone.DroneModel
             {
                 { "Run Video From S", RunVideoFromS, SecondsNdp },
                 { "Run Video To S", RunVideoToS, SecondsNdp },
-                { "Thermal To Optical Video Delay S", ThermalToOpticalVideoDelayS, SecondsNdp },
+                { "Deprecated setting", 0 },
                 { "Gimbal Data Available", GimbalDataAvail.ToString() },
                 { "Fixed Camera Down Degrees", FixedCameraDownDeg },
                 { "Min Camera Down Degrees", MinCameraDownDeg },
@@ -210,7 +203,7 @@ namespace SkyCombDrone.DroneModel
             int i = 0;
             RunVideoFromS = StringToFloat(settings[i++]);
             RunVideoToS = StringToFloat(settings[i++]);
-            ThermalToOpticalVideoDelayS = StringToFloat(settings[i++]);
+            i++; // Deprecated setting
             GimbalDataAvail = (GimbalDataEnum)Enum.Parse(typeof(GimbalDataEnum), settings[i++]);
             FixedCameraDownDeg = StringToNonNegInt(settings[i++]);
             MinCameraDownDeg = StringToNonNegInt(settings[i++]);
@@ -274,9 +267,6 @@ namespace SkyCombDrone.DroneModel
                 answer += "Gimbal pitch, yaw, roll available\r\n";
             else
                 answer += "Camera down: " + FixedCameraDownDeg + " degrees\r\n";
-
-            if (ThermalToOpticalVideoDelayS != 0)
-                answer += "Thermal to optical video: " + ThermalToOpticalVideoDelayS + " secs\r\n";
 
             if (Notes.Trim() != "")
                 answer += "Notes: " + Notes.Trim();

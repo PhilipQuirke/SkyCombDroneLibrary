@@ -108,7 +108,7 @@ namespace SkyCombDrone.DroneLogic
 
                 // Without a video we can't do anything
                 if (dataStore.ThermalVideoName != "")
-                    InputVideo = new VideoData(dataStore.ThermalVideoName, true, readDateEncodedUtc);
+                    InputVideo = new VideoData(dataStore.ThermalVideoName, readDateEncodedUtc);
 
                 if (HasInputVideo)
                     return true;
@@ -209,8 +209,8 @@ namespace SkyCombDrone.DroneLogic
         // Calculate video settings
         public void CalculateSettings_Video()
         {
-            if (HasThermalVideo)
-                ThermalVideo.CalculateSettings();
+            if (HasInputVideo)
+                InputVideo.CalculateSettings();
         }
 
 
@@ -218,7 +218,7 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings_FlightSections()
         {
             FlightSections = null;
-            LoadFlightDataFromTextFile(ThermalVideo);
+            LoadFlightDataFromTextFile(InputVideo);
         }
 
 
@@ -419,7 +419,6 @@ namespace SkyCombDrone.DroneLogic
         // After selecting/loading a file and its settings, user has edited the drone settings.
         // The new settings have been loaded into the config objects. Update our data accordingly.
         // The changed settings (from MainFormSettingsToConfig) are:
-        // - ThermalToOpticalVideoDelayS is only used in GetFrames, so next run will obey new setting.
         // - CameraDownDeg is used in DrawSpace.
         // - OnGroundAt is used in CalculateSettings_OnGroundAt to calculate DroneToGroundAltStartSyncM, DroneToGroundAltEndSyncM, FlightStep.AltitudeM
         public void CalculateSettings_ConfigHasChanged()
@@ -498,20 +497,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Reset input AND display video frame position & load image(s)
-        public void SetAndGetCurrFrames(int inputFrameId)
-        {
-            SetAndGetCurrFrames(inputFrameId, (int)(DroneConfig.ThermalToOpticalVideoDelayS * 1000));
-        }
-
-
-        // Get (advance to) the next frame of the video(s)
-        public bool GetNextFrames()
-        {
-            return GetNextFrames((int)(DroneConfig.ThermalToOpticalVideoDelayS * 1000));
-        }
-
-
         static DateTime RoundToHour(DateTime dt)
         {
             long ticks = dt.Ticks + 18000000000;
@@ -530,9 +515,9 @@ namespace SkyCombDrone.DroneLogic
             (bool success, GimbalDataEnum cameraPitchYawRoll) =
                 new DroneSrtParser().ParseFlightLogSections(theVideoData, flightData, this);
             // If theVideoData.FileName contains text H20T then set the CameraType
-            if (theVideoData.Thermal && theVideoData.FileName.ToUpper().Contains("H20T"))
+            if (theVideoData.FileName.ToUpper().Contains("H20T"))
                 theVideoData.CameraType = VideoModel.DjiH20T;
-            else if (theVideoData.Thermal && theVideoData.FileName.ToUpper().Contains("H30T"))
+            else if (theVideoData.FileName.ToUpper().Contains("H30T"))
                 theVideoData.CameraType = VideoModel.DjiH30T;
 
 

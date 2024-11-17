@@ -34,7 +34,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public VideoData(string fileName, bool thermal, Func<string, DateTime> readDateEncodedUtc) : base(fileName, thermal, readDateEncodedUtc)
+        public VideoData(string fileName, Func<string, DateTime> readDateEncodedUtc) : base(fileName, readDateEncodedUtc)
         {
             ResetCurrFrame();
         }
@@ -70,7 +70,6 @@ namespace SkyCombDrone.DroneLogic
                 if ((expectedFrameId > 0) && (expectedFrameId < FrameCount))
                     Assert(CurrFrameId == expectedFrameId,
                         "GetFrameInternal: Unexpected frame." +
-                        " Thermal=" + Thermal +
                         " CurrFrameId=" + CurrFrameId +
                         " ExpectedFrameId=" + expectedFrameId);
             }
@@ -248,11 +247,6 @@ namespace SkyCombDrone.DroneLogic
 
         public bool HasInputVideo { get { return InputVideo != null; } }
 
-        // The thermal camera video (if any)
-        public VideoData ThermalVideo { get { return HasInputVideo && InputVideo.Thermal ? InputVideo : null; } }
-
-        public bool HasThermalVideo { get { return ThermalVideo != null; } }
-
 
         // Clear video file handles. More immediate than waiting for garbage collection
         public void FreeResources_Video()
@@ -266,7 +260,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Clear the video frame(s) data
-        public void ResetCurrFrames()
+        public void ResetCurrFrame()
         {
             if (HasInputVideo)
                 InputVideo.ResetCurrFrame();
@@ -274,21 +268,21 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Do we have good video frame data
-        public bool HaveFrames()
+        public bool HaveFrame()
         {
             return HasInputVideo && InputVideo.HaveFrame;
         }
 
 
         // Reset input AND display video frame position & load image
-        public void SetAndGetCurrFrames(int inputFrameId, int delayMs)
+        public void SetAndGetCurrFrame(int inputFrameId)
         {
             InputVideo.SetAndGetCurrFrameId(inputFrameId);
         }
 
 
         // Get (advance to) the next frame of the video
-        public bool GetNextFrames(int delayMs)
+        public bool GetNextFrame()
         {
             // For the "input" video, we efficiently get the next frame. This is fast.
             // Sets InputVideo member data CurrFrameID & CurrFrameMs
@@ -297,7 +291,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return cached frame
-        public Mat? CurrFrames()
+        public Mat? CurrFrame()
         {
             return InputVideo.CurrFrameMat;
         }
