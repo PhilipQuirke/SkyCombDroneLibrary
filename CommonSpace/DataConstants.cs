@@ -20,7 +20,6 @@ namespace SkyCombDrone.CommonSpace
         public const string RunConfigTitle = "Run Config:";
         public const string ResultsTitle = "Results:";
         public const string EffortTitle = "Effort:";
-        public const string DrawTitle = "DrawLines:";
         public const string OutputConfigTitle = "Output Config:";
         public const string VideoTitle = "Video Input:";
         public const string ModelFlightStepSummaryTitle = "Flight Step Summary:";
@@ -34,6 +33,5 @@ namespace SkyCombDrone.CommonSpace
         public const int ResultsTitleRow = 9;
         public const int EffortTitleRow = 18;
         public const int OutputTitleRow = 24;
-        public const int DrawTitleRow = 31;
     }
 }

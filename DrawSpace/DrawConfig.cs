@@ -38,26 +38,6 @@ namespace SkyCombDrone.DrawSpace
 
             return answer;
         }
-
-
-        public DataPairList GetSettings()
-        {
-            return new DataPairList
-            {
-                { "Draw Area Padding", AreaPadding },
-                { "Draw Area Persistence", AreaPersistence },
-            };
-        }
-
-
-        // Load this object's settings from strings (loaded from a spreadsheet)
-        // This function must align to the above GetSettings function.
-        public void LoadSettings(List<string> settings)
-        {
-            int i = 0;
-            AreaPadding = StringToNonNegInt(settings[i++]);
-            AreaPersistence = StringToNonNegInt(settings[i++]);
-        }
     };
 
 }
