@@ -105,15 +105,6 @@ namespace SkyCombDrone.DroneModel
         public bool UseLegs { get; set; } = true;
 
 
-
-        // For many drones the thermal and optical videos have different pixel resolution and horizontal field of vision(HFOV).
-        // SkyComb Analyst shows the location of significant objects found in thermal video on top of the optical video.
-        // So it needs to know the difference between the HFOV of the thermal and optical videos
-        // ExcludeMarginRatio is the "margin" of the optical video that is not displayed in the thermal video, as a ratio between 0.0 and 0.5.
-        // Refer ExcludeMarginRatio.md section Camera Down Angle for more detail.
-        public float ExcludeDisplayMarginRatio { get; set; } = 0.125f;
-
-
         // A FlightLeg is a section of a drone flight path that is at a mostly constant altitude, in a mostly constant direction / pitch
         // of a reasonable duration and travels a reasonable distance.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
@@ -207,7 +198,6 @@ namespace SkyCombDrone.DroneModel
                 { "On Ground At", OnGroundAt.ToString() },
                 { "Smooth Section Radius", SmoothSectionRadius },
                 { "Use Legs", UseLegs },
-                { "Exclude Margin Ratio", ExcludeDisplayMarginRatio, 3 },
                 { "Notes", ( Notes == "" ? " " : Notes ) },
             };
         }
@@ -227,7 +217,6 @@ namespace SkyCombDrone.DroneModel
             OnGroundAt = (OnGroundAtEnum)Enum.Parse(typeof(OnGroundAtEnum), settings[i++]);
             SmoothSectionRadius = StringToNonNegInt(settings[i++]);
             UseLegs = StringToBool(settings[i++]);
-            ExcludeDisplayMarginRatio = StringToFloat(settings[i++]);
             Notes = settings[i++];
 
             ValidateFixedCameraDownDeg();

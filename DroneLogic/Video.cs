@@ -241,7 +241,7 @@ namespace SkyCombDrone.DroneLogic
     }
 
 
-    public abstract class TwoVideos : BaseConstants, IDisposable
+    public abstract class OneVideo : BaseConstants, IDisposable
     {
         // The primary input video to analyse. Prefer thermal to optical video.
         public VideoData? InputVideo { get; set; } = null;
@@ -326,7 +326,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        ~TwoVideos()
+        ~OneVideo()
         {
             Dispose(false);
         }

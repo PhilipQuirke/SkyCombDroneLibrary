@@ -16,7 +16,7 @@ namespace SkyCombDrone.DroneLogic
     // Drone is the interface that video runners must use. 
     // Contains video(s), flight log(s), ground & surface elevations (if any), and calculated data.
     // Normal use case is a drone creating a thermal video and a flight log.
-    public class Drone : TwoVideos, IDisposable
+    public class Drone : OneVideo, IDisposable
     {
         public DroneConfigModel DroneConfig;
 
@@ -34,8 +34,6 @@ namespace SkyCombDrone.DroneLogic
         // The calculated leg data (if any) derived from the input flight data
         public FlightLegs? FlightLegs { get; set; }
 
-        // The secondary display camera drone flight information (if any)
-        public FlightSections? DisplaySections { get; set; }
 
         // Ground (aka DEM) and surface (aka DSM) elevation (if any), in meters above sea level.
         // Covers area corresponding to the drone flight log plus a 20m buffer.
@@ -52,7 +50,6 @@ namespace SkyCombDrone.DroneLogic
         public bool HasDroneRoll { get { return HasFlightSteps && FlightSteps.MaxRollDeg != UnknownValue; } }
         public bool HasDroneFocalLength { get { return HasFlightSteps && FlightSteps.MaxFocalLength != UnknownValue; } }
         public bool HasDroneZoom { get { return HasFlightSteps && FlightSteps.MaxZoom != UnknownValue; } }
-        public bool HasDisplaySections { get { return DisplaySections != null; } }
         public bool HasGroundData { get { return (GroundData != null) && (GroundData.DemModel != null) && (GroundData.DemModel.NumElevationsStored > 0); } }
 
 
@@ -91,7 +88,6 @@ namespace SkyCombDrone.DroneLogic
             FlightSections = null;
             FlightSteps = null;
             FlightLegs = null;
-            DisplaySections = null;
         }
 
 
@@ -222,7 +218,6 @@ namespace SkyCombDrone.DroneLogic
         public void CalculateSettings_FlightSections()
         {
             FlightSections = null;
-            DisplaySections = null;
             LoadFlightDataFromTextFile(ThermalVideo);
         }
 
@@ -524,19 +519,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public int PercentFlightOverlap { get { return FlightSections.PercentOverlap(FlightSections, DisplaySections); } }
-
-
-        // The thermal and optical flight data files may not start at the same millisecond.
-        public int FlightStartOffsetMs()
-        {
-            if (PercentFlightOverlap <= 0)
-                return BaseConstants.UnknownValue;
-
-            return (int)FlightSections.MinDateTime.Subtract(DisplaySections.MinDateTime).TotalMilliseconds;
-        }
-
-
         // Load flight data file associated with the video
         private void LoadFlightDataFromTextFile(VideoData theVideoData)
         {
@@ -579,15 +561,7 @@ namespace SkyCombDrone.DroneLogic
                 theVideoData.DateEncoded = theVideoData.DateEncodedUtc.AddHours(utcToLocal.Hours);
                 // Note that flightData.MinDateTime and theVideoData.DateEncoded may differ by a few seconds.
 
-                if (theVideoData.Thermal)
-                    FlightSections = flightData;
-                else
-                {
-                    if (FlightSections == null)
-                        FlightSections = flightData;
-                    else
-                        DisplaySections = flightData;
-                }
+                FlightSections = flightData;
             }
         }
 
@@ -602,6 +576,7 @@ namespace SkyCombDrone.DroneLogic
             DroneSave datawriter = new(dataStore, this);
             datawriter.SaveDroneSettings(countryBitmap, firstSave);
             datawriter.SaveData_Detail(false);
+
             dataStore.FreeResources();
         }
 

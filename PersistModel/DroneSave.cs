@@ -118,8 +118,8 @@ namespace SkyCombDrone.PersistModel
                     new DroneDrawPath(new DroneDrawScope(Drone), false).DrawCountryGraphLocationCross(
                         Drone.FlightSections.MinCountryLocation, ref localBitmap);
 
-                    var theBitmap = BitmapGenerator.CreateDpiIndependentBitmap(localBitmap.ToImage<Bgr, byte>());
-                    Data.SaveBitmap(theBitmap, "Country", row - 1, col - 1, 45);
+                    var imageHandler = new ExcelImageHandler(Data.Worksheet);
+                    imageHandler.SaveBitmap(localBitmap, "Country", row - 1, col - 1, 35);
                 }
 
                 SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);
