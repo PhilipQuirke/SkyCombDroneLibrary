@@ -194,7 +194,9 @@ namespace SkyCombDrone.DroneLogic
             FlightSection focus_section = Sections[thisSectionId];
 
             // Collect data from the Sections around thisSectionId, weighted by their distance in time.
-            for (int j = Math.Max(0, thisSectionId - smoothRadius); j <= thisSectionId + smoothRadius; j++)
+            // Datasets like D:\SkyComb\Data_Input\CC\2024-04-D\DJI_20240417152907_0001_T.mp4 contain data
+            // like 5, 7, 5, 7, 5, 7, 5, 7. Smoothing is best done with an EVEN number of data points.
+            for (int j = Math.Max(0, thisSectionId - smoothRadius); j <= thisSectionId + smoothRadius + 1; j++)
             {
                 if (Sections.TryGetValue(j, out FlightSection? nearbySection))
                 {

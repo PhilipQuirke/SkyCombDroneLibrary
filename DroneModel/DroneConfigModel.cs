@@ -69,7 +69,7 @@ namespace SkyCombDrone.DroneModel
         // Note: If MinCameraDownDeg is set to 35, and camera has vertical field of vision (VFOV) of 47.6 degrees,
         // then the highest view the app processes is 35 +/- 24 degrees which is 11 to 49 degrees down from the horizon.
         // But the drone operator knows best. So we allow a wide range
-        public int MinCameraDownDeg { get; set; } = 35; // Min 25, Max 90
+        public int MinCameraDownDeg { get; set; } = 25; // Min 25, Max 90
 
 
         // Does the drone video / flight data start or end at ground level?
