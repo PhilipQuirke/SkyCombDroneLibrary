@@ -2,6 +2,7 @@
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using SkyCombGround.CommonSpace;
+using System.Diagnostics;
 using System.Drawing;
 
 
@@ -80,7 +81,6 @@ namespace SkyCombDrone.DroneModel
 
         // The video capture object providing access to the video contents
         protected VideoCapture? DataAccess { get; set; } = null;
-        public bool IsOpen { get { return DataAccess != null; } }
 
 
         // THERMAL CAMERA SETTINGS
@@ -117,7 +117,24 @@ namespace SkyCombDrone.DroneModel
             {
                 FileName = fileName;
 
-                DataAccess = new VideoCapture(FileName);
+                if (!System.IO.File.Exists(FileName))
+                    // This sometimes happens when files are transferred between laptops
+                    // when one laptop uses C: and the other uses D:
+                    // Check the file name locations in the xls very carefully.
+                    throw new Exception( "VideoModel: File does not exist: " +  FileName );
+
+                try
+                {
+                    DataAccess = new VideoCapture(FileName);
+                }
+                catch (Emgu.CV.Util.CvException ex)
+                {
+                    Debug.Print("Exception: " + ex.Message);
+                }
+                if (!DataAccess.IsOpened)
+                    Debug.Print("Failed to open video file.");
+                else
+                    Debug.Print("Backend Name: " + DataAccess.BackendName);
                 AssertDataAccess();
 
                 Fps = DataAccess.Get(CapProp.Fps); // e.g. 29.97 or 8.7151550960118165
