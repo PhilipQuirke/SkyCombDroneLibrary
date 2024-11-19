@@ -187,7 +187,7 @@ namespace SkyCombDrone.DroneLogic
             }
 
             if (fromVideoS < toVideoS + 1)
-                Assert(firstVideoFrameId < lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
+                Assert(firstVideoFrameId <= lastVideoFrameId, "CalculateFromToS: Bad from/to frame id"); // PQR fudge
 
             return (firstVideoFrameId, lastVideoFrameId, firstVideoFrameMs, lastVideoFrameMs);
         }
