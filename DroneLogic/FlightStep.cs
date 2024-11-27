@@ -4,6 +4,7 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using System.Drawing;
+using System.Reflection.Metadata;
 
 
 // Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
@@ -185,6 +186,7 @@ namespace SkyCombDrone.DroneLogic
         // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
         // InputImageCenterDem and InputImageCenterDem
         // Depends on CameraDownDeg, AltitudeM, DsmM, Yaw, Zoom & GroundData
+        // Handles undulating ground between drone and image center.
         public void CalculateSettings_InputImageCenterDemDsm(VideoModel videoData, GroundData? groundData)
         {
             InputImageCenter = new();
@@ -203,15 +205,16 @@ namespace SkyCombDrone.DroneLogic
             if (degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
-            // Vertical distance from drone to ground (including FixAltM)
-            double downVertM = FixedDistanceDown;
+            // Vertical distance from drone to ground (including FixAltM) at drone location
+            double droneLocnDownVertM = FixedDistanceDown;
 
             // Distance across ground to center of image area - in the direct of flight.
             // Note that the drone camera gimbal automatically compensates for
             // PitchDeg & RollDeg so we can ignore them.
 
             // The actual camera area imaged depends on CameraDownDeg.
-            double groundForwardM = downVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
+            // This assumes the land under the drone to the image centre is flat.
+            double flatEarthForwardM = droneLocnDownVertM * Math.Tan(degreesToVerticalForward * DegreesToRadians);
 
             // Get unit vector in the direction the camera is pointing
             var unitVector = InputImageUnitVector;
@@ -221,14 +224,14 @@ namespace SkyCombDrone.DroneLogic
             // Can't assume a steady change. There may be an isolated hill in view.
 
             // Start by assuming the land under the drone + image is flat.
-            var flatEarthLocn = DroneLocnM.Add(unitVector, (float)groundForwardM);
+            var flatEarthLocn = DroneLocnM.Add(unitVector, (float)flatEarthForwardM);
 
 
             // If camera is pointing nearly straight down,
             // then horizontal distance is small, and from drone's height
             // distortion is small enough to ignore.
             InputImageCenter = null;
-            if ((groundForwardM > 3) && (AltitudeM > DsmM + 3) &&
+            if ((flatEarthForwardM > 3) && (AltitudeM > DsmM + 3) &&
                 (groundData != null) && (groundData.DsmModel != null))
             {
                 // Walk from DroneLocnM towards the flatEarthLocn, evaluating the
@@ -237,7 +240,7 @@ namespace SkyCombDrone.DroneLogic
                 // flatEarthLocn. We have DSM data at 1m intervals, in a grid pattern.
                 var paceForwardM = 2;
                 var paceDsmFall = Math.Cos(degreesToVerticalForward * DegreesToRadians);
-                var numPaces = (int)(groundForwardM / paceForwardM);
+                var numPaces = (int)(flatEarthForwardM / paceForwardM);
                 for (int paceNum = 1; paceNum < numPaces; paceNum++)
                 {
                     var paceM = paceNum * paceForwardM;
@@ -264,7 +267,7 @@ namespace SkyCombDrone.DroneLogic
             if (videoData != null)
             {
                 // InputImageSizeM
-                double viewLength = Math.Sqrt(downVertM * downVertM + groundForwardM * groundForwardM);
+                double viewLength = Math.Sqrt(droneLocnDownVertM * droneLocnDownVertM + flatEarthForwardM * flatEarthForwardM);
                 double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
                 float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
 
@@ -320,11 +323,11 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate physical location of this feature based on:
         // 1) the POSITION in the image of the feature (given by horizontalFraction, verticalFraction, say 0.4, 0.1)
-        // 2) the CENTER of the drone physical field of vision (given by FlightStep.InputImageCenter, say 240m Northing, 78m Easting )
+        // 2) the CENTER of the drone physical field of vision (given by FlightStep.InputImageCenter, say 240m Northing, 78m Easting) PQR How accurate?
         // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
-        // Does NOT consider land contour undulations 
+        // Does NOT consider land contour undulations in image area
         public DroneLocation? CalcImageFeatureLocationM(DroneLocation deltaBlockLocnM, double horizontalFraction, double verticalFraction)
         {
             if (InputImageSizeM == null)
@@ -362,6 +365,7 @@ namespace SkyCombDrone.DroneLogic
 
             // Calculate CameraDownDegInputImageCenter and InputImageSizeM.
             // Depends on CameraDownDeg, AltitudeM, DemM, Yaw & Zoom.
+            // Handles undulating ground between drone and image center.
             CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
         }
     };
