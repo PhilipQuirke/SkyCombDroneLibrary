@@ -134,6 +134,21 @@ namespace SkyCombDrone.DroneModel
             }
         }
 
+        // The centre of flight locations in global coordinate system
+        public GlobalLocation? GlobalCentroid
+        {
+            get
+            {
+                var min = MinGlobalLocation;
+                var max = MaxGlobalLocation;
+                if (min == null || max == null)
+                    return null;
+                return new GlobalLocation(
+                    (min.Latitude + max.Latitude) / 2,
+                    (min.Longitude + max.Longitude) / 2);
+            }
+        }
+
 
         public FlightSectionsModel(List<string>? settings = null) : base("Section")
         {
