@@ -1,5 +1,4 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
+﻿using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
@@ -7,6 +6,7 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundModel;
 using SkyCombGround.PersistModel;
+using SkyCombGroundLibrary.GroundLogic;
 using System.Diagnostics;
 using System.Drawing;
 
@@ -114,17 +114,22 @@ namespace SkyCombDrone.PersistModel
                     var row = Chapter1TitleRow;
                     var col = 10;
                     Data.SetTitle(ref row, col, FlightLocationTitle);
-                    var localBitmap = (Bitmap)countryBitmap.Clone();
-                    new DroneDrawPath(new DroneDrawScope(Drone), false).DrawCountryGraphLocationCross(
-                        Drone.FlightSections.MinCountryLocation, ref localBitmap);
+                    GlobalLocation globalLocation = Drone.FlightSections.GlobalCentroid;
+                    if (globalLocation != null)
+                    {
+                        OpenStreetMap map = new();
+                        (var bitmap1, var bitmap2) = OpenStreetMap.GetTwoMaps(map, globalLocation);
 
-                    var imageHandler = new ExcelImageHandler(Data.Worksheet);
-                    imageHandler.SaveBitmap(localBitmap, "Country", row - 1, col - 1, 35);
+                        var imageHandler = new ExcelImageHandler(Data.Worksheet);
+                        imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, 50);
+                        imageHandler.SaveBitmap(bitmap2, "CountrySmall", row - 1, col + 4, 50);
+                    }
                 }
 
-                SaveDronePath(null, GroundType.DsmElevations, 21, 1, GroundModel.DsmTitle);
-                SaveDronePath(null, GroundType.DemElevations, 21, 6, GroundModel.DemTitle);
-                SaveDronePath(null, GroundType.SwatheSeen, 21, 15, GroundModel.SwatheTitle);
+                const int graphRow = 18;
+                SaveDronePath(null, GroundType.DsmElevations, graphRow, 1, GroundModel.DsmTitle);
+                SaveDronePath(null, GroundType.DemElevations, graphRow, 6, GroundModel.DemTitle);
+                SaveDronePath(null, GroundType.SwatheSeen, graphRow, 15, GroundModel.SwatheTitle);
             }
         }
 
