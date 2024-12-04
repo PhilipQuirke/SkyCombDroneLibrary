@@ -150,8 +150,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Calculate relative location (in NorthingM/EastingM)
-        // of the specified global location.
+        // Calculate relative location (in NorthingM/EastingM) of the specified global location.
         // Relative origin is bottom left of box.
         // Absolute origin is FlightSections.MinGlobalLocation.Latitude/Longitude
         public DroneLocation GlobalToDroneLocation(GlobalLocation globalLocation)
@@ -174,6 +173,33 @@ namespace SkyCombDrone.DroneLogic
             }
 
             return new(northingM, eastingM);
+        }
+
+
+        // Calculate global location of the specified relative location.
+        public GlobalLocation DroneToGlobalLocation(DroneLocation droneLocation)
+        {
+            var deltaLatitude = MaxGlobalLocation.Latitude - MinGlobalLocation.Latitude;
+            var deltaLongitude = MaxGlobalLocation.Longitude - MinGlobalLocation.Longitude;
+
+            double latitude = MinGlobalLocation.Latitude;
+            double longitude = MinGlobalLocation.Longitude;
+
+            // Convert northing back to latitude
+            if (Math.Abs(deltaLatitude) > Epsilon && NorthingRangeM() > Epsilon)
+            {
+                latitude = MinGlobalLocation.Latitude +
+                    (droneLocation.NorthingM / NorthingRangeM()) * deltaLatitude;
+            }
+
+            // Convert easting back to longitude
+            if (Math.Abs(deltaLongitude) > Epsilon && EastingRangeM() > Epsilon)
+            {
+                longitude = MinGlobalLocation.Longitude +
+                    (droneLocation.EastingM / EastingRangeM()) * deltaLongitude;
+            }
+
+            return new GlobalLocation(latitude, longitude);
         }
 
 
