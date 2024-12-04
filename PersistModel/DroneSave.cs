@@ -117,8 +117,7 @@ namespace SkyCombDrone.PersistModel
                     GlobalLocation globalLocation = Drone.FlightSections.GlobalCentroid;
                     if (globalLocation != null)
                     {
-                        OpenStreetMap map = new();
-                        (var bitmap1, var bitmap2) = OpenStreetMap.GetTwoMaps(map, globalLocation, Drone.FlightSections.GlobalRange);
+                        (var bitmap1, var bitmap2) = OpenStreetMap.GetTwoMaps(globalLocation, Drone.FlightSections.GlobalRange);
 
                         var imageHandler = new ExcelImageHandler(Data.Worksheet);
                         imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, 50);
