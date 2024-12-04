@@ -528,33 +528,6 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // Draw a red cross at the location of the drone flight on the country map 
-        public void DrawCountryGraphLocationCross(CountryLocation currCountryLocn, ref Bitmap countryGraphBitmap)
-        {
-            if (currCountryLocn == null)
-                return;
-
-            var currCountryN = currCountryLocn.NorthingM;
-            var currCountryE = currCountryLocn.EastingM;
-
-            (var minCountryN, var minCountryE) = NztmProjection.WgsToNztm(-47.5, 166);
-            (var maxCountryN, var maxCountryE) = NztmProjection.WgsToNztm(-34.0, 179);
-
-            var crossXFraction = (currCountryE - minCountryE) / (maxCountryE - minCountryE);
-            var crossYFraction = (currCountryN - minCountryN) / (maxCountryN - minCountryN);
-
-            var countryGraphImage = countryGraphBitmap.ToImage<Bgr, byte>();
-
-            Point crossCenter = new(
-                (int)(crossXFraction * countryGraphImage.Width),
-                countryGraphImage.Height - (int)(crossYFraction * countryGraphImage.Height));
-
-            Draw.Cross(ref countryGraphImage, crossCenter, DroneColors.ErrorBgr, 3, 20);
-
-            countryGraphBitmap = countryGraphImage.ToBitmap();
-        }
-
-
         // In the picturebox draw the legend as a scale of colours from startColor to endColor
         public static Image<Bgr, byte> DrawContourLegend(Size size, Color startColor, Color endColor)
         {

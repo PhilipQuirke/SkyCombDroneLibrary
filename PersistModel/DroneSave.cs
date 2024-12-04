@@ -85,7 +85,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Save the Drone Settings data 
-        public void SaveDroneSettings(Bitmap? countryBitmap, bool firstSave)
+        public void SaveDroneSettings(bool firstSave)
         {
             Data.SelectOrAddWorksheet(DroneSettingsTabName);
             Data.ClearWorksheet();
@@ -109,7 +109,7 @@ namespace SkyCombDrone.PersistModel
             {
                 // We draw DEM, DSM and Country graphs on the Ground Summary tab
 
-                if ((countryBitmap != null) && (Drone.FlightSections != null))
+                if (Drone.FlightSections != null)
                 {
                     var row = Chapter1TitleRow;
                     var col = 10;

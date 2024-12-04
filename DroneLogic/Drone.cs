@@ -348,7 +348,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void SaveSettings(DroneDataStore dataStore, Bitmap? countryBitmap, bool firstSave)
+        public void SaveSettings(DroneDataStore dataStore, bool firstSave)
         {
             var effort = Stopwatch.StartNew();
 
@@ -359,7 +359,7 @@ namespace SkyCombDrone.DroneLogic
             GroundSave.Save(dataStore, GroundData);
 
             DroneSave datawriter = new(dataStore, this);
-            datawriter.SaveDroneSettings(countryBitmap, firstSave);
+            datawriter.SaveDroneSettings(firstSave);
             datawriter.SaveData_Detail(true, effort);
 
             dataStore.FreeResources();
@@ -552,13 +552,13 @@ namespace SkyCombDrone.DroneLogic
 
         // After selecting/loading a file and its settings, user has edited the drone settings.
         // The new settings have been loaded into the config objects. Update our drone data accordingly.
-        public void WriteDataStore(DroneDataStore dataStore, Bitmap? countryBitmap, bool firstSave)
+        public void WriteDataStore(DroneDataStore dataStore, bool firstSave)
         {
             // We need to update the Drone datastore
             dataStore.Open();
 
             DroneSave datawriter = new(dataStore, this);
-            datawriter.SaveDroneSettings(countryBitmap, firstSave);
+            datawriter.SaveDroneSettings(firstSave);
             datawriter.SaveData_Detail(false);
 
             dataStore.FreeResources();

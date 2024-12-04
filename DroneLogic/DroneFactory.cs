@@ -125,7 +125,6 @@ namespace SkyCombDrone.DroneLogic
             Func<string, DateTime> readDateEncodedUtc,
             DroneDataStore droneDataStore, DroneConfigModel config,
             string groundDirectory,
-            Bitmap? countryBitmap,
             bool fullLoad = true)
         {
             Drone answer;
@@ -200,7 +199,7 @@ namespace SkyCombDrone.DroneLogic
 
                             phase = "Saving drone datastore...";
                             showDroneSettings(phase);
-                            answer.SaveSettings(droneDataStore, countryBitmap, true);
+                            answer.SaveSettings(droneDataStore, true);
                         }
                     }
                 }
