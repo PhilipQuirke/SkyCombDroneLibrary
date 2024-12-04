@@ -118,23 +118,9 @@ namespace SkyCombDrone.DroneModel
                 return (MaxGlobalLocation == null ? null : NztmProjection.WgsToNztm(MaxGlobalLocation));
             }
         }
-        // The centre of flight locations in country coordinate system
-        public CountryLocation? CountryCentroid
-        {
-            get
-            {
-                var min = MinCountryLocation;
-                var max = MaxCountryLocation;
-                if (min == null || max == null)
-                    return null;
 
-                return new CountryLocation(
-                    (min.NorthingM + max.NorthingM) / 2,
-                    (min.EastingM + max.EastingM) / 2);
-            }
-        }
 
-        // The centre of flight locations in global coordinate system
+        // The centre of flight in global coordinate system
         public GlobalLocation? GlobalCentroid
         {
             get
@@ -146,6 +132,20 @@ namespace SkyCombDrone.DroneModel
                 return new GlobalLocation(
                     (min.Latitude + max.Latitude) / 2,
                     (min.Longitude + max.Longitude) / 2);
+            }
+        }
+        // The range of flight in global coordinate system
+        public GlobalLocation? GlobalRange
+        {
+            get
+            {
+                var min = MinGlobalLocation;
+                var max = MaxGlobalLocation;
+                if (min == null || max == null)
+                    return null;
+                return new GlobalLocation(
+                    max.Latitude - min.Latitude,
+                    max.Longitude - min.Longitude);
             }
         }
 
