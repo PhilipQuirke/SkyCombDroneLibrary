@@ -560,7 +560,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw drone flight path based on Drone/GroundSpace data
-        public override void CurrImage(ref Image<Bgr, byte> image)
+        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
             try
             {
