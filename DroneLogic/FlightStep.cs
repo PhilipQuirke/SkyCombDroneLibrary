@@ -4,7 +4,6 @@ using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using System.Drawing;
-using System.Reflection.Metadata;
 
 
 // Contains calculated data about a drone flight, derived from raw flight data and ground elevation data
@@ -151,7 +150,8 @@ namespace SkyCombDrone.DroneLogic
         public float FixedDistanceDown { get { return FixedAltitudeM - DemM; } }
 
 
-        // How do we best calculate the camera down angle?
+        // Reported camera down angle (measured from the vertical) based on drone data.
+        // A positive value means the camera is looking forward. 
         public float CameraToVerticalForwardDeg
         {
             get
@@ -181,6 +181,12 @@ namespace SkyCombDrone.DroneLogic
                 }
             }
         }
+        // Best estimate of camera down angle (measured from the vertical)
+        public float FixedCameraToVerticalForwardDeg { get { return CameraToVerticalForwardDeg + FixPitchDeg; } }
+
+
+        // Best estimate of camera yaw. May differ slightly from camera yaw as reported by the drone.
+        public float FixedYawDeg { get { return YawDeg + FixYawDeg; } }
 
 
         // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
@@ -201,7 +207,7 @@ namespace SkyCombDrone.DroneLogic
             // (For thermal cameras the horizon is often brighter causing
             // thermal bloom with causes over estimates of temperature.)
             var vfovDeg = videoData.VFOVDeg;
-            float degreesToVerticalForward = CameraToVerticalForwardDeg;
+            float degreesToVerticalForward = FixedCameraToVerticalForwardDeg;
             if (degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
@@ -394,12 +400,14 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // For each step, set FixAltM and recalculate the ground image area viewed
-        public void CalculateSettings_FixAltM(float fixAltM, VideoModel videoData, GroundData? groundData)
+        // For each step, set FixAltM/FixYawDeg/FixPitchDeg and recalculate the ground image area viewed
+        public void CalculateSettings_FixValues(float fixAltM, float fixYawDeg, float fixPitchDeg, VideoModel videoData, GroundData? groundData)
         {
             foreach (var theStep in this)
             {
                 theStep.Value.FixAltM = fixAltM;
+                theStep.Value.FixYawDeg = fixYawDeg;
+                theStep.Value.FixPitchDeg = fixPitchDeg;
 
                 theStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
             }
