@@ -61,7 +61,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        protected void DrawNoData(ref Image<Bgr, byte> image)
+        protected void DrawNoData(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
             DrawAxises(ref image);
 
@@ -223,7 +223,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Generate an image of the graph as per scope settings.
-        public abstract void CurrImage(ref Image<Bgr, byte> image);
+        public abstract void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null);
 
 
         protected void DrawAxes(ref Bitmap bitmap)
@@ -272,11 +272,11 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Generate a bitmap of the graph as per scope settings.
-        public virtual Bitmap CurrBitmap(bool dpiIndependent = false)
+        public virtual Bitmap CurrBitmap(bool dpiIndependent = false, List<Image>? sizeImages = null)
         {
             var baseImage = BaseImage.Clone();
 
-            CurrImage(ref baseImage);
+            CurrImage(ref baseImage, sizeImages);
 
             Bitmap bitmap = dpiIndependent? BitmapGenerator.CreateDpiIndependentBitmap(baseImage) : baseImage.ToBitmap();
 
@@ -466,7 +466,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw altitude data based on Drone/GroundSpace data
-        public override void CurrImage(ref Image<Bgr, byte> image)
+        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
             if ((VertRangeRaw > 0) && (DroneDrawScope.CurrRunFlightStep != null))
                 DrawDroneCircle(ref image,
@@ -482,7 +482,7 @@ namespace SkyCombDrone.DrawSpace
         protected bool NormalCase = true;
 
 
-        public DrawAltitudeByTime(DroneDrawScope drawScope) : base(drawScope)
+        public DrawAltitudeByTime(DroneDrawScope drawScope, List<Image>? sizeImages = null) : base(drawScope)
         {
             Description =
                 "Graph of ground elevation in brown, surface (tree-top) elevation in green " +
@@ -572,7 +572,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw altitude data based on Drone/GroundSpace data
-        public override void CurrImage(ref Image<Bgr, byte> image)
+        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
             if (VertRangeRaw > 0)
                 DrawDroneCircle(ref image,
@@ -649,7 +649,7 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        public override void CurrImage(ref Image<Bgr, byte> image)
+        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
             if (VertRangeRaw > 0)
                 DrawDroneCircle(ref image,
@@ -830,7 +830,7 @@ namespace SkyCombDrone.DrawSpace
     // Code to draw drone leg data
     public class DrawLeg : DroneDrawGraph
     {
-        public DrawLeg(DroneDrawScope drawScope) : base(drawScope, true, true)
+        public DrawLeg(DroneDrawScope drawScope, List<Image>? sizeImages = null) : base(drawScope, true, true)
         {
             Description =
                 "Graph of the drone legs in blue (which have near constant altitude, direction && pitch) " +
@@ -886,7 +886,7 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Show drone Leg as a graph 
-        public override void CurrImage(ref Image<Bgr, byte> image)
+        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
         }
     }
