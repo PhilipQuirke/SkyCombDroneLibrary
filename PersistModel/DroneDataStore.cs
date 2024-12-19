@@ -13,9 +13,28 @@ using System.Xml;
 namespace SkyCombDrone.PersistModel
 {
 
-    // The SkyComb app creates a datastore (spreadsheet) per set of (1 or 2) videos and (0 to 2) srt files.
+    public class ImageDataStore : BaseDataStore
+    {
+        public ImageDataStore(string fileName, bool create) : base(fileName, false)
+        {
+        }
+
+
+        // Save the bitmap to the datastore
+        public void SaveBitmap(Bitmap? theBitmap, string chartName, int row, int col = 0, int percent = 100)
+        {
+            if (theBitmap == null || Worksheet == null)
+                return;
+
+            var imageHandler = new ExcelImageHandler(Worksheet);
+            imageHandler.SaveBitmap(theBitmap, chartName, row, col, percent);
+        }
+    }
+
+
+    // The SkyComb app creates a datastore (spreadsheet) per video and flight log file.
     // The datastore stores all settings & findings acts like a database or "no-sql document store".
-    public class DroneDataStore : BaseDataStore
+    public class DroneDataStore : ImageDataStore
     {
         // These are the physical files that are referenced in the DataStore
         public string ThermalVideoName { get; set; } = "";
@@ -375,17 +394,6 @@ namespace SkyCombDrone.PersistModel
                 Worksheet.Column(FarRhsColOffset + LabelToValueCellOffset).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
             }
             catch { }
-        }
-
-
-        // Save the bitmap to the datastore
-        public void SaveBitmap(Bitmap? theBitmap, string chartName, int row, int col = 0, int percent = 100)
-        {
-            if (theBitmap == null || Worksheet == null)
-                return;
-
-            var imageHandler = new ExcelImageHandler(Worksheet);
-            imageHandler.SaveBitmap(theBitmap, chartName, row, col, percent);
         }
     }
 

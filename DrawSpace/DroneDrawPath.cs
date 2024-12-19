@@ -5,7 +5,6 @@ using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundLogic;
 using SkyCombGround.GroundModel;
 using System.Drawing;
 
