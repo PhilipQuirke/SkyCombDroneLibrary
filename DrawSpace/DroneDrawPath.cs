@@ -146,6 +146,15 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
+        // Draw square (often red)
+        public void DrawSquare(DroneLocation locationM, int objectPixels, ref Image<Bgr, byte> image, Bgr objectBgr)
+        {
+            Rectangle objectRect = DroneLocnMToPixelSquare( locationM, objectPixels);
+
+            image.Draw(objectRect, objectBgr, NormalThickness);
+        }
+
+
         // Draw the leg name near the flight path leg.
         private void FlightPath_LegName(ref Image<Bgr, byte> image, TardisModel? flightStep, bool highlight)
         {

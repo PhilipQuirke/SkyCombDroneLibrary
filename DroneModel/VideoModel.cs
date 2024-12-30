@@ -298,6 +298,9 @@ namespace SkyCombDrone.DroneModel
         // This function must align to the above GetSettings function.
         public void LoadSettings(List<string> settings)
         {
+            if (settings == null)
+                return;
+
             int i = 0;
             FileName = settings[i++];
             CameraType = settings[i++];

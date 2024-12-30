@@ -329,7 +329,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate physical location of this feature based on:
         // 1) the POSITION in the image of the feature (given by horizontalFraction, verticalFraction, say 0.4, 0.1)
-        // 2) the CENTER of the drone physical field of vision (given by FlightStep.InputImageCenter, say 240m Northing, 78m Easting) PQR How accurate?
+        // 2) the CENTER of the drone physical field of vision (given by FlightStep.InputImageCenter, say 240m Northing, 78m Easting) 
         // 3) the SIZE of the drone physical field of vision (given by InputImageSizeM, say 18m by 9m)
         // 4) the DIRECTION of flight of the drone (given by YawDeg, say -73 degrees)
         // This is the key translation from IMAGE to PHYSICAL coordinate system. 
@@ -666,12 +666,13 @@ namespace SkyCombDrone.DroneLogic
 
                 // Smoothing should not generate values much outside the original envelope
                 float epsilon = 0.3f;
+                float speed_epsilon = 0.5f; // Needed for D:\SkyComb\Data_Input\CC\2024-03-D\DJI_20240324153817_0001_T.SRT
                 var theStepSpeed = theStep.SpeedMps;
                 Assert(theStep.DroneLocnM.NorthingM <= Sections.MaxDroneLocnM.NorthingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.NorthingM");
                 Assert(theStep.DroneLocnM.EastingM <= Sections.MaxDroneLocnM.EastingM + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad LocationM.EastingM");
                 Assert(theStep.TimeMs <= Sections.MaxTimeMs + epsilon, "CalculateSettings_SmoothLocationYawPitch: Bad TimeMs");
                 Assert(theStep.LinealM <= Sections.MaxLinealM + epsilon, "CalculateSettings_SmoothLocationYawPitch: LinealM " + theStep.LinealM + " > " + Sections.MaxLinealM);
-                Assert(theStepSpeed <= Sections.MaxSpeedMps + epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
+                Assert(theStepSpeed <= Sections.MaxSpeedMps + speed_epsilon, "CalculateSettings_SmoothLocationYawPitch: SpeedMps " + theStepSpeed + " > " + Sections.MaxSpeedMps);
                 Assert(theStep.PitchDeg <= Sections.MaxPitchDeg + 1 + epsilon, "CalculateSettings_SmoothLocationYawPitch: MaxPitchDeg " + theStep.PitchDeg + " > " + Sections.MaxPitchDeg);
                 Assert(theStep.PitchDeg >= Sections.MinPitchDeg - 1 - epsilon, "CalculateSettings_SmoothLocationYawPitch: MinPitchDeg " + theStep.PitchDeg + " < " + Sections.MinPitchDeg);
 

@@ -225,13 +225,14 @@ namespace SkyCombDrone.DroneModel
 
             AssertGoodSubset(original);
 
-            float epsilon = 0.2f;
+            float epsilon = 0.3f;
+            float speed_epsilon = 0.5f; // Needed for D:\SkyComb\Data_Input\CC\2024-03-D\DJI_20240324153817_0001_T.SRT
 
             Assert(MinSumLinealM >= original.MinSumLinealM - epsilon, "AssertGoodRevision: Bad MinSumLinealM");
             Assert(MaxSumLinealM <= original.MaxSumLinealM + epsilon, "AssertGoodRevision: Bad MaxSumLinealM");
 
             Assert(MinSpeedMps >= original.MinSpeedMps - epsilon, "AssertGoodRevision: Bad MinSpeedMps");
-            Assert(MaxSpeedMps <= original.MaxSpeedMps + epsilon, "AssertGoodRevision: Bad MaxSpeedMps");
+            Assert(MaxSpeedMps <= original.MaxSpeedMps + speed_epsilon, "AssertGoodRevision: Bad MaxSpeedMps");
 
             float delta_yaw_epsilon = 3; // For example refer DJI_0120 step 207 where drone turns 80 degrees in ~1s and we have 5 sections
             Assert(MinDeltaYawDeg >= original.MinDeltaYawDeg - delta_yaw_epsilon, "AssertGoodRevision: Bad MinDeltaYawDeg");

@@ -118,28 +118,6 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
-        // As strict, check that the rectangle is within the image size
-        public static void AssertRectangleIsSubset(Size size, Rectangle rect, int margin, string useCase)
-        {
-            Assert(rect.X >= -margin, useCase + ": Bad X");
-            Assert(rect.Y >= -margin, useCase + ": Bad Y");
-            Assert(rect.X + rect.Width <= size.Width + margin, useCase + ": Bad Width");
-            Assert(rect.Y + rect.Height <= size.Height + margin, useCase + ": Bad Height");
-        }
-
-
-        // Draw contours
-        public static void Contours(DrawImageConfig config, ref Image<Bgr, byte> image, VectorOfVectorOfPoint contours)
-        {
-            if (config.DrawPixelColor == Color.White)
-                return;
-
-            var color = DroneColors.ColorToBgr(config.DrawPixelColor);
-
-            CvInvoke.DrawContours(image, contours, -1, color.MCvScalar);
-        }
-
-
         // Return a range of colour shades 
         public static List<Color> GetColorShades(Color startColor, Color endColor, int numShades = 20)
         {
