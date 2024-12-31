@@ -85,7 +85,7 @@ namespace SkyCombDrone.DroneLogic
         // Some settings differ per manufacturer's camera.
         public static void SetCameraSpecifics(Drone drone)
         {
-            if (drone != null)
+            if ((drone != null) && drone.HasInputVideo)
                 switch (drone.InputVideo.CameraType)
                 {
                     case VideoModel.DjiH20N:
@@ -98,23 +98,20 @@ namespace SkyCombDrone.DroneLogic
                         // Thermal camera: 640×512 @ 30fps
                         // DFOV: Diagonal Field of View = 61 degrees
                         // so HFOV = 38.1 degrees and VFOV = 47.6 degrees 
-                        if (drone.HasInputVideo)
-                            drone.InputVideo.HFOVDeg = 38;
+                        drone.InputVideo.HFOVDeg = 38;
                         break;
 
                     case VideoModel.DjiM3T:
                         // Colin Aitchison's DJI M300 with XT2 19mm
                         // https://www.pbtech.co.nz/product/CAMDJI20219/DJI-Zenmuse-XT2-ZXT2B19FR-Camera-19mm-Lens--30-Hz says:
                         // FOV 57.12 Degrees x 42.44 Degrees
-                        if (drone.HasInputVideo)
-                            drone.InputVideo.HFOVDeg = 42;
+                        drone.InputVideo.HFOVDeg = 42;
                         break;
 
                     case VideoModel.DjiM2E:
                         // Philip Quirke's DJI Mavic 2 Enterprise Dual
                         // Refer https://www.dji.com/nz/mavic-2-enterprise/specs
-                        if (drone.HasInputVideo)
-                            drone.InputVideo.HFOVDeg = 57;
+                        drone.InputVideo.HFOVDeg = 57;
                         break;
                 }
         }

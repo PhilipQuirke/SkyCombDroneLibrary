@@ -191,14 +191,14 @@ namespace SkyCombDrone.DroneLogic
 
         // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
         // InputImageCenterDem and InputImageCenterDem
-        // Depends on CameraDownDeg, AltitudeM, DsmM, Yaw, Zoom & GroundData
+        // Depends on Camera.VFOVDeg, CameraDownDeg, AltitudeM, DsmM, Yaw, Zoom & GroundData
         // Handles undulating ground between drone and image center.
         public void CalculateSettings_InputImageCenterDemDsm(VideoModel videoData, GroundData? groundData)
         {
             InputImageCenter = new();
 
             // Can only calculate this if we can compare the ground elevation & drone altitude.
-            if ((DsmM == UnknownValue) || (DroneLocnM == null))
+            if ((DsmM == UnknownValue) || (DroneLocnM == null) || (videoData == null))
                 return;
 
             // If the camera is pointing at the horizon, then the 
@@ -270,24 +270,21 @@ namespace SkyCombDrone.DroneLogic
                 InputImageDemM = groundData.DemModel.GetElevationByDroneLocn(InputImageCenter);
 
 
-            if (videoData != null)
-            {
-                // InputImageSizeM
-                double viewLength = Math.Sqrt(droneLocnDownVertM * droneLocnDownVertM + flatEarthForwardM * flatEarthForwardM);
-                double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
-                float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
+            // InputImageSizeM
+            double viewLength = Math.Sqrt(droneLocnDownVertM * droneLocnDownVertM + flatEarthForwardM * flatEarthForwardM);
+            double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
+            float imageXSizeM = (float)(viewLength * 2 * Math.Sin(halfHFOVRadians));
 
-                // If this drone camera supports zooming,
-                // the zoom reduces the input area.
-                // For Lennard Sparks drone zoom is in the range 1 to 6.07
-                var zoom = (Zoom >= 1 ? Zoom : 1);
-                imageXSizeM /= zoom;
+            // If this drone camera supports zooming,
+            // the zoom reduces the input area.
+            // For Lennard Sparks drone zoom is in the range 1 to 6.07
+            var zoom = (Zoom >= 1 ? Zoom : 1);
+            imageXSizeM /= zoom;
 
-                int videoHeight = videoData.ImageHeight;
-                int videoWidth = videoData.ImageWidth;
-                InputImageSizeM = new(imageXSizeM, imageXSizeM * videoHeight / videoWidth);
-                InputImageSizeM.AssertGood();
-            }
+            int videoHeight = videoData.ImageHeight;
+            int videoWidth = videoData.ImageWidth;
+            InputImageSizeM = new(imageXSizeM, imageXSizeM * videoHeight / videoWidth);
+            InputImageSizeM.AssertGood();
         }
 
 

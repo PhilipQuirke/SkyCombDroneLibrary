@@ -57,12 +57,8 @@ namespace SkyCombDrone.DroneModel
 
         // Horizontal video image field of view in degrees. Differs per manufacturer's camera.
         public int HFOVDeg { get; set; } = 57;
-        // Horizontal video image field of view in radians. 
-        public double HFOVRad { get { return HFOVDeg * DegreesToRadians; } }
         // Vertical video image field of view in degrees. Differs per manufacturer's camera. Assumes pixels are square
         public double VFOVDeg { get { return HFOVDeg * (double)ImageHeight / ImageWidth; } }
-        // Vertical video image field of view in radians. 
-        public double VFOVRad { get { return VFOVDeg * DegreesToRadians; } }
 
 
         // The UTC date/time the video file was encoded.
