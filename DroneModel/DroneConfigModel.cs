@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombGround.CommonSpace;
 
 
@@ -259,12 +259,12 @@ namespace SkyCombDrone.DroneModel
                 "From " + VideoModel.DurationSecToString(RunVideoFromS) +
                 " to " + VideoModel.DurationSecToString(RunVideoToS) + " \r\n";
 
-            if (OnGroundAt != OnGroundAtEnum.Neither)
+            if (OnGroundAt != OnGroundAtEnum.Auto)
                 answer += "On ground at: " + OnGroundAt + "\r\n";
 
             if ((GimbalDataAvail == GimbalDataEnum.AutoYes) ||
                (GimbalDataAvail == GimbalDataEnum.ManualYes))
-                answer += "Gimbal pitch, yaw, roll available\r\n";
+                answer += "Gimbal data available.\r\n";
             else
                 answer += "Camera down: " + FixedCameraDownDeg + " degrees\r\n";
 
