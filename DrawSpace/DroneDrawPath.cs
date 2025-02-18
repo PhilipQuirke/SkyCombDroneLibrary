@@ -81,7 +81,7 @@ namespace SkyCombDrone.DrawSpace
         public Point DroneLocnMToPixelPoint(DroneLocation orgLocationM)
         {
             var locationM = orgLocationM.Translate(TranslateM);
-
+            //nq
             var x = TransformMToPixels.XMargin + TransformMToPixels.Scale * locationM.EastingM;
             var y = TransformMToPixels.YMargin - TransformMToPixels.Scale * locationM.NorthingM;
 
@@ -426,7 +426,7 @@ namespace SkyCombDrone.DrawSpace
 
                 // Do we want to just show a 4m by 4m area of the flight path?
                 bool tightFocus = (processObjectLocation != null);
-                var tightFocusM = 2f;
+                var tightFocusM = 10f; //NQ This is enough to see location of object, but sometimes not the flight path if it is at the very edge of view.
 
                 if (tightFocus)
                 {
@@ -458,7 +458,7 @@ namespace SkyCombDrone.DrawSpace
                         if ((!tightFocus) && (drone != null))
                         {
                             // Max path width changes depending on camera down angle.
-                            float pathImageWidthM = 2;
+                            float pathImageWidthM = 2; 
                             for (int stepId = DroneDrawScope.FirstDrawStepId; stepId < DroneDrawScope.LastDrawStepId; stepId++)
                                 if (drone.FlightSteps.Steps.TryGetValue(stepId, out var step))
                                 {
