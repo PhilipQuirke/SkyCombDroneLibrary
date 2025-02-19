@@ -89,8 +89,7 @@ namespace SkyCombDrone.DroneModel
         // we smooth by averaging over a window of flight sections, to reduce spikes and leaps.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // section Drone Location Accuracy for more detail. 
-        // Sections are recorded every SectionMinMs (250), so a SmoothSectionRadius of 2 spans 5 points or ~1.25 second
-        public int SmoothSectionRadius { get; set; } = 2;
+        public int SmoothSectionRadius { get; set; } = 4;
 
 
         // Does this flight benefit from the use of the legs?
@@ -101,12 +100,6 @@ namespace SkyCombDrone.DroneModel
         // A FlightLeg is a section of a drone flight path that is at a mostly constant altitude, in a mostly constant direction / pitch
         // of a reasonable duration and travels a reasonable distance.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for more details.
-
-        // Maximum variation in altitude allowed in a single step for leg to be considered "smooth"
-        public float MaxLegStepAltitudeDeltaM { get; set; } = 0.10f;
-
-        // Maximum variation in altitude allowed in a leg for leg to be considered "mostly level" i.e. leg has a constant Altitude within +/- 4 meters
-        public float MaxLegSumAltitudeDeltaM { get; set; } = 1.0f;
 
 
         // Maximum variation in direction for a single step for the leg to be considered "mostly in one direction"  
@@ -145,7 +138,7 @@ namespace SkyCombDrone.DroneModel
 
         // Maximum gap in flight data gap allowed in a leg. (In rare cases, drone hardware issues can result
         // in a say 1.5s gap in the flight record and video during the middle of a "leg", effectively breaking it into two legs.)
-        public int MaxLegGapDurationMs { get; set; } = 2 * FlightSectionModel.SectionMinMs;
+        public int MaxLegGapDurationMs { get; set; } = 500;
 
 
         // The Camera down angle must be in range +25 to +90 degrees.
@@ -222,8 +215,6 @@ namespace SkyCombDrone.DroneModel
         {
             return new DataPairList
             {
-                { "Max Leg Step Alt Delta M", MaxLegStepAltitudeDeltaM, LocationNdp },
-                { "Max Leg Sum Alt Delta M", MaxLegSumAltitudeDeltaM, LocationNdp },
                 { "Max Leg Step Delta Yaw Deg", MaxLegStepDeltaYawDeg },
                 { "Max Leg Sum Delta Yaw Deg", MaxLegSumDeltaYawDeg },
                 { "Min Leg Duration Ms", MinLegDurationMs },
@@ -240,8 +231,6 @@ namespace SkyCombDrone.DroneModel
         public void LoadLegSettings(List<string> settings)
         {
             int i = 0;
-            MaxLegStepAltitudeDeltaM = StringToNonNegFloat(settings[i++]);
-            MaxLegSumAltitudeDeltaM = StringToNonNegFloat(settings[i++]);
             MaxLegStepDeltaYawDeg = StringToInt(settings[i++]);
             MaxLegSumDeltaYawDeg = StringToInt(settings[i++]);
             MinLegDurationMs = StringToNonNegInt(settings[i++]);

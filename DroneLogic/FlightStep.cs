@@ -28,10 +28,9 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Smooth the Section data, based on a window of "NumSmoothSteps" Sections, to give Step data.
+        // Smooth the Section data, based on a window of "2*smoothRadius+1" Sections, to give Step data.
         // Calculates FlightStep smoothed attributes AltitudeM 
-        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
-        // chapter on NumSmoothSteps for the rationale for this function.
+        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md for the rationale for this function.
         public bool CalculateSettings_SmoothAltitude(int smoothRadius, FlightSections sections)
         {
             // If flight stepId duration is too great don't try to smooth it. This happens very rarely.
@@ -55,10 +54,12 @@ namespace SkyCombDrone.DroneLogic
                         return false;
 
                     bool middleSection = (nearbySection.SectionId == thisSectionId);
+                    int stepsDistance = Math.Abs(thisSectionId - nearbySection.SectionId);
                     var time_diff = Math.Abs(nearbySection.SumTimeMs - FlightSection.SumTimeMs);
                     if ((!middleSection) && (time_diff == 0))
                         continue;
-                    float weight = middleSection ? 1.0f : 1.0f * FlightSectionModel.SectionMinMs / time_diff;
+                    // Give most weight to the middle section, less weight to other sections, depending on their distance.
+                    float weight = middleSection ? 1.0f : Math.Max(0.0f, Math.Min(0.9f, 1.0f * (smoothRadius - stepsDistance) / smoothRadius));
 
                     if (nearbySection.AltitudeM != UnknownValue)
                     {
@@ -108,8 +109,15 @@ namespace SkyCombDrone.DroneLogic
             else if (sumPosYawWeight > 0)
                 YawDeg = sumPosYawDegs / sumPosYawWeight;
 
+            if ((YawDeg > -0.001) && (YawDeg < +0.001))
+                YawDeg = 0;
+
+
             if (sumPitchWeight > 0)
                 PitchDeg = sumPitchDegs / sumPitchWeight;
+
+            if ((PitchDeg > -0.001) && (PitchDeg < +0.001))
+                PitchDeg = 0;
 
             return true;
         }
@@ -459,9 +467,8 @@ namespace SkyCombDrone.DroneLogic
         private Drone Drone { get; }
         private FlightSections Sections { get; }
 
-        // The list of flight steps sorted in time order.
-        // The index is the number of SectionMinMs units since the flight started.
-        // The index sequence will be 1, 2, 3, etc. Occassional gaps do occur - but they are rare, and only if the drone flight log has time gaps.
+        // The list of flight sections sorted in time order.
+        // The index sequence will be 1, 2, 3, etc. Rarely, gaps occur,but only if the drone flight log has time gaps.
         public FlightStepList Steps = new();
 
 
@@ -908,7 +915,7 @@ namespace SkyCombDrone.DroneLogic
                     return answer;
             }
 
-            // We have now tried -8 to +8 slots, or 17 * SectionMinMs milliseconds = span of 4.25 seconds. Give up.
+            // We have now tried -8 to +8 slots. Give up.
             return null;
         }
 
@@ -963,32 +970,21 @@ namespace SkyCombDrone.DroneLogic
 
             return null;
         }
-
-
-        // Return the approximate FlightStep with the specified flightMs or a lower StartTime
-        // Try not to use this function.
-        public FlightStep? RoughFlightStepBeforeFlightMs(int flightMs)
+        // Return the FlightStep with a SumTimeMs at or lower than flightMs. Slow but accurate
+        public FlightStep? FlightStepAtOrBeforeFlightMs(int flightMs)
         {
-            if (Steps.Count == 0)
-                return null;
+            FlightStep? answer = null;
 
-            if (flightMs < Steps[0].SumTimeMs)
-                return Steps[0];
+            foreach (var step in Steps)
+            {
+                if (step.Value.SumTimeMs > flightMs)
+                    break;
 
-            var stepId = FlightSection.MsToRoughFlightSectionID(flightMs);
+                answer = step.Value;
+            }
 
-            FlightStep? answer;
-            for (int i = 0; i <= 4; i++)
-                if (Steps.TryGetValue(stepId - i, out answer))
-                {
-                    int answerMs = answer.SumTimeMs;
-                    if (answerMs <= flightMs)
-                        return answer;
-                }
-
-            return null;
+            return answer;
         }
-
 
         // Returns percentage of FlightSteps where the drone AltitudeM is less than ground DemM.
         // A good answer is 0. A bad OnGroundAt value can mean a value of say 45%

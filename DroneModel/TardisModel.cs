@@ -158,6 +158,9 @@ namespace SkyCombDrone.DroneModel
             else if (deltaYawDeg < -180)
                 deltaYawDeg += 360;
 
+            if ((deltaYawDeg > -0.001) && (deltaYawDeg < +0.001))
+                deltaYawDeg = 0;
+
             return deltaYawDeg;
         }
 

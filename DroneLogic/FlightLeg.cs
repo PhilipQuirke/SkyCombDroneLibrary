@@ -175,8 +175,6 @@ namespace SkyCombDrone.DroneLogic
                     if (startKey >= 0)
                     {
                         // If this step violates a rule, then we should finish this leg
-                        //bool badSumAltitude = (Math.Abs(startStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegSumAltitudeDeltaM);
-                        //bool badStepAltitude = (prevStep != null) && (Math.Abs(prevStep.AltitudeM - thisStep.AltitudeM) > config.MaxLegStepAltitudeDeltaM);
                         bool badYaw = (Math.Abs(thisStep.YawDegsDelta(startStep)) > config.MaxLegSumDeltaYawDeg);
                         bool badSumPitch = (Math.Abs(startStep.PitchDeg - thisStep.PitchDeg) >= config.MaxLegSumPitchDeg);
                         bool badDuration = (thisStep.FlightSection.TimeMs > config.MaxLegGapDurationMs);
@@ -200,10 +198,6 @@ namespace SkyCombDrone.DroneLogic
                             else
                             {
                                 // End this (good) leg.
-                                // if (badSumAltitude)
-                                //    whyEnd.Add($"Sum altitude change too large: {startStep.AltitudeM} to {thisStep.AltitudeM}");
-                                //if (badStepAltitude)
-                                //    whyEnd.Add($"Step altitude change too large: {prevStep.AltitudeM} to {thisStep.AltitudeM}");
                                 if (badYaw)
                                     whyEnd.Add($"Large yaw change: {startStep.YawDegsDelta(startStep)} to {thisStep.YawDegsDelta(startStep)}");
                                 else if (badSumPitch)

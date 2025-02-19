@@ -45,8 +45,7 @@ namespace SkyCombDrone.DroneLogic
     public class FlightSections : FlightSectionsModel
     {
         // The list of flight sections sorted in time order.
-        // The index is the number of SectionMinMs units since the flight started.
-        // The index sequence will be 1, 2, 3, etc. Occassional gaps do occur - but they are rare, and only if the drone flight log has time gaps.
+        // The index sequence will be 1, 2, 3, etc. Rarely, gaps occur,but only if the drone flight log has time gaps.
         public SortedList<int, FlightSection> Sections { get; }
 
 
@@ -73,7 +72,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Add the flight section, indexed by SectionMinMs units
+        // Add the flight section
         public void AddSection(FlightSection thisSection, FlightSection? prevSection)
         {
             thisSection.CalculateSettings_TimeMs(prevSection);
@@ -232,11 +231,12 @@ namespace SkyCombDrone.DroneLogic
                         return (false, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
                     bool middleSection = (nearbySection.SectionId == thisSectionId);
+                    int stepsDistance = Math.Abs(thisSectionId - nearbySection.SectionId);
                     var time_diff = Math.Abs(nearbySection.SumTimeMs - focus_section.SumTimeMs);
                     if ((!middleSection) && (time_diff == 0))
                         continue;
                     // Give most weight to the middle section, less weight to other sections, depending on their distance.
-                    float weight = middleSection ? 1.0f : Math.Min(0.9f, 1.0f * FlightSectionModel.SectionMinMs / time_diff);
+                    float weight = middleSection ? 1.0f : Math.Max(0.0f, Math.Min(0.9f, 1.0f * (smoothRadius - stepsDistance) / smoothRadius));
 
                     if (nearbySection.GlobalLocation.Specified && (nearbySection.DroneLocnM != null))
                     {
