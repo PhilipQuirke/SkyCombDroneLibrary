@@ -89,7 +89,7 @@ namespace SkyCombDrone.DroneModel
         // we smooth by averaging over a window of flight sections, to reduce spikes and leaps.
         // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
         // section Drone Location Accuracy for more detail. 
-        public int SmoothSectionRadius { get; set; } = 4;
+        public int SmoothSectionRadius { get; set; } = 0;
 
 
         // Does this flight benefit from the use of the legs?
