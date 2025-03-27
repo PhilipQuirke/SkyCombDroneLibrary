@@ -260,22 +260,16 @@ namespace SkyCombDrone.DroneLogic
                     var paceM = paceNum * paceForwardM;
                     var paceLocn = DroneLocnM.Add(unitVector, paceM);
                     var viewDsm = FixedAltitudeM - paceDsmFall * paceM;
-                    InputImageDsmM = groundData.DsmModel.GetElevationByDroneLocn(paceLocn);
+                    var inputImageDsmM = groundData.DsmModel.GetElevationByDroneLocn(paceLocn);
 
                     // Drone altitude inaccuracies can mean we never reach the earthDSM.
                     InputImageCenter = paceLocn;
-                    if (InputImageDsmM >= viewDsm)
+                    if (inputImageDsmM >= viewDsm)
                         break;
                 }
             }
             if (InputImageCenter == null)
-            {
                 InputImageCenter = flatEarthLocn;
-                InputImageDemM = DemM;
-                InputImageDsmM = DsmM;
-            }
-            else if (groundData.DemModel != null)
-                InputImageDemM = groundData.DemModel.GetElevationByDroneLocn(InputImageCenter);
 
 
             // InputImageSizeM

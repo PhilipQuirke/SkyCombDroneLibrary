@@ -56,13 +56,6 @@ namespace SkyCombDrone.DroneModel
             }
         }
 
-        // The ground (not drone) elevation, above sea level (meters)
-        // at the centre of the imaged area
-        public float InputImageDemM { get; set; } = UnknownValue;
-
-        // The surface (i.e tree-top) elevation, above sea level (meters)
-        // at the centre of the imaged area
-        public float InputImageDsmM { get; set; } = UnknownValue;
 
 
         // FIX INACCURATE DRONE DATA
@@ -114,8 +107,6 @@ namespace SkyCombDrone.DroneModel
             answer.Add("DEM", DemM, ElevationNdp); // Graphs depend on this name (TBC)
             answer.Add("Img Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
             answer.Add("Img Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
-            answer.Add("Img Dem M", InputImageDemM, ElevationNdp);
-            answer.Add("Img Dsm M", InputImageDsmM, ElevationNdp);
             answer.Add("Has Leg", (FlightLegId > 0 ? 1 : 0));
             // We do not save FixValues
 
@@ -136,9 +127,6 @@ namespace SkyCombDrone.DroneModel
             DemM = StringToFloat(settings[i++]);
             InputImageCenter = new DroneLocation(settings[i++]);
             InputImageSizeM = new AreaF(settings[i++]);
-            InputImageDemM = StringToFloat(settings[i++]);
-            InputImageDsmM = StringToFloat(settings[i++]);
-            i++; // Skip HasLeg  
             // We do not load FixValues. It is updated by ProcessSpan on load
 
             InputImageCenter.AssertGood();
