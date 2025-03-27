@@ -264,6 +264,8 @@ namespace SkyCombDrone.PersistModel
         {
             var worksheetXml = pivotTable.WorkSheet.WorksheetXml;
             var element = worksheetXml.GetElementsByTagName("conditionalFormatting")[0];
+            if (element == null)
+                return;
             ((XmlElement)element).SetAttribute("pivot", "1");
         }
 
