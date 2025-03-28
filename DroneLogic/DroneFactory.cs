@@ -2,8 +2,8 @@
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
+using SkyCombGround.GroundLogic;
 using System.Diagnostics;
-using System.Drawing;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -116,6 +116,27 @@ namespace SkyCombDrone.DroneLogic
                 }
         }
 
+#if DEBUG
+        // Check that the Flight DEM and DSM values align with the Ground data values.
+        public static void SanityCheckGroundElevationData(Drone drone, GroundData groundData)
+        {
+            int maxAllowedDeltaM = 4;
+
+            if (groundData.HasDemModel)
+                foreach (var step in drone.FlightSteps.Steps)
+                {
+                    var theDem = groundData.DemModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
+                    BaseConstants.Assert(Math.Abs(theDem - step.Value.DemM) <= maxAllowedDeltaM, "Flight DEM and Ground DEM mismatch");
+                }
+
+            if (groundData.HasDsmModel)
+                foreach (var step in drone.FlightSteps.Steps)
+                {
+                    var theDsm = groundData.DsmModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
+                    BaseConstants.Assert(Math.Abs(theDsm - step.Value.DsmM) <= maxAllowedDeltaM, "Flight DSM and Ground DSM mismatch");
+                }
+        }
+#endif
 
         public static Drone Create(
             Action<string> showDroneSettings,
@@ -200,6 +221,12 @@ namespace SkyCombDrone.DroneLogic
                         }
                     }
                 }
+
+#if DEBUG 
+                // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
+                if(answer.GroundData != null)
+                    SanityCheckGroundElevationData(answer, answer.GroundData);
+#endif
 
                 phase = "Drone and ground data ready.";
                 showDroneSettings(phase);

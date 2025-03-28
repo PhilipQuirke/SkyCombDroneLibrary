@@ -126,16 +126,14 @@ namespace SkyCombDrone.DroneLogic
         // Estimate the ground elevation (in metres) of this flight step
         public void CalculateSettings_DemM(GroundData groundData)
         {
-            if ((groundData != null) && (groundData.DemModel != null))
-                DemM = groundData.DemModel.GetElevationByDroneLocn(DroneLocnM);
+            DemM = groundData?.DemModel?.GetElevationByDroneLocn(DroneLocnM) ?? DemM;
         }
 
 
         // Estimate the surface elevation (in metres) of this flight step
         public void CalculateSettings_DsmM(GroundData groundData)
         {
-            if ((groundData != null) && (groundData.DsmModel != null))
-                DsmM = groundData.DsmModel.GetElevationByDroneLocn(DroneLocnM);
+            DsmM = groundData?.DsmModel?.GetElevationByDroneLocn(DroneLocnM) ?? DsmM;
         }
 
 
@@ -754,6 +752,7 @@ namespace SkyCombDrone.DroneLogic
         // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
         public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs, GroundData? groundData)
         {
+/*
             if ((legs != null) && (legs.Legs.Count > 0))
                 foreach (var leg in legs.Legs)
                 {
@@ -868,6 +867,7 @@ namespace SkyCombDrone.DroneLogic
                     // Check that this smoothing has not changed the data envelope 
                     AssertGoodStepRevision(rawSummary);
                 }
+*/
 
             // Calculate the summary of all (leg and non-leg) steps.
             // Check that it is a reasonable revision of the sections.
