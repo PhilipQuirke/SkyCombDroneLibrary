@@ -1,13 +1,11 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved.
+// Copyright SkyComb Limited 2025. All rights reserved.
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
 using OfficeOpenXml.Style;
-using OfficeOpenXml.Table.PivotTable;
 using SkyCombDrone.CommonSpace;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
 using System.Drawing;
-using System.Xml;
 
 
 namespace SkyCombDrone.PersistModel
@@ -222,16 +220,6 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public (ExcelWorksheet?, int) EndRow(string dataTabName)
-        {
-            int lastDataRow = 0;
-            var dataWs = ReferWorksheet(dataTabName);
-            if ((dataWs != null) && (dataWs.Dimension != null) && (dataWs.Dimension.End != null))
-                lastDataRow = dataWs.Dimension.End.Row;
-            return (dataWs, lastDataRow);
-        }
-
-
         // Prepare to add a chart on one tab referring to data from another tab.
         public (ExcelWorksheet, int) PrepareChartArea(string chartTabName, string chartName, string dataTabName)
         {
@@ -243,30 +231,6 @@ namespace SkyCombDrone.PersistModel
             Assert(chartWs.Drawings[chartName] == null, "PrepareChartArea: Bad logic");
 
             return (chartWs, lastDataRow);
-        }
-
-
-        // Prepare to add a pivot table on one tab referring to data from another tab.
-        public (ExcelWorksheet? pivotWs, ExcelWorksheet? dataWs, int) PreparePivotArea(string pivotTabName, string pivotName, string dataTabName)
-        {
-            (var dataWs, int lastDataRow) = EndRow(dataTabName);
-
-            (_, var pivotWs) = SelectOrAddWorksheet(pivotTabName);
-            if ((pivotWs != null) && (pivotWs.PivotTables[pivotName] != null))
-                pivotWs.PivotTables.Delete(pivotName);
-
-            return (pivotWs, dataWs, lastDataRow);
-        }
-
-
-        // Enable conditional formatting on a pivot table.
-        public void AddConditionalFormattingToPivotTable(ExcelPivotTable pivotTable)
-        {
-            var worksheetXml = pivotTable.WorkSheet.WorksheetXml;
-            var element = worksheetXml.GetElementsByTagName("conditionalFormatting")[0];
-            if (element == null)
-                return;
-            ((XmlElement)element).SetAttribute("pivot", "1");
         }
 
 

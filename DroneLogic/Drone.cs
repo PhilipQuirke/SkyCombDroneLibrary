@@ -6,7 +6,6 @@ using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
-using System.Drawing;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -362,7 +361,17 @@ namespace SkyCombDrone.DroneLogic
             datawriter.SaveDroneSettings(firstSave);
             datawriter.SaveData_Detail(true, effort);
 
+#if DEBUG
+            // Check that the Flight DEM and DSM values align with the Ground data.
+            DroneDataFactory.SanityCheckGroundElevationData(this, GroundData);
+
+            // Check that the DEM and DSM ground data values survive the round trip.
+            GroundData reloadedGroundData = SkyCombGround.PersistModel.GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStore.DataStoreFileName);
+            // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
+            DroneDataFactory.SanityCheckGroundElevationData(this, reloadedGroundData);
+            reloadedGroundData.Dispose();
             dataStore.FreeResources();
+#endif
         }
 
 

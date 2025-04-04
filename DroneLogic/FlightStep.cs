@@ -126,16 +126,14 @@ namespace SkyCombDrone.DroneLogic
         // Estimate the ground elevation (in metres) of this flight step
         public void CalculateSettings_DemM(GroundData groundData)
         {
-            if ((groundData != null) && (groundData.DemModel != null))
-                DemM = groundData.DemModel.GetElevationByLocn(DroneLocnM);
+            DemM = groundData?.DemModel?.GetElevationByDroneLocn(DroneLocnM) ?? DemM;
         }
 
 
         // Estimate the surface elevation (in metres) of this flight step
         public void CalculateSettings_DsmM(GroundData groundData)
         {
-            if ((groundData != null) && (groundData.DsmModel != null))
-                DsmM = groundData.DsmModel.GetElevationByLocn(DroneLocnM);
+            DsmM = groundData?.DsmModel?.GetElevationByDroneLocn(DroneLocnM) ?? DsmM;
         }
 
 
@@ -260,23 +258,16 @@ namespace SkyCombDrone.DroneLogic
                     var paceM = paceNum * paceForwardM;
                     var paceLocn = DroneLocnM.Add(unitVector, paceM);
                     var viewDsm = FixedAltitudeM - paceDsmFall * paceM;
-                    InputImageDsmM = groundData.DsmModel.GetElevationByLocn(paceLocn);
+                    var inputImageDsmM = groundData.DsmModel.GetElevationByDroneLocn(paceLocn);
 
                     // Drone altitude inaccuracies can mean we never reach the earthDSM.
                     InputImageCenter = paceLocn;
-                    if (InputImageDsmM >= viewDsm)
+                    if (inputImageDsmM >= viewDsm)
                         break;
                 }
             }
             if (InputImageCenter == null)
-            {
                 InputImageCenter = flatEarthLocn;
-                InputImageDemM = DemM;
-                InputImageDsmM = DsmM;
-            }
-            else if (groundData.DemModel != null)
-                InputImageDemM = groundData.DemModel.GetElevationByLocn(InputImageCenter);
-
 
             // InputImageSizeM
             double viewLength = Math.Sqrt(droneLocnDownVertM * droneLocnDownVertM + flatEarthForwardM * flatEarthForwardM);
@@ -760,7 +751,8 @@ namespace SkyCombDrone.DroneLogic
         // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
         public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs, GroundData? groundData)
         {
- /*           if ((legs != null) && (legs.Legs.Count > 0))
+            /*
+            if ((legs != null) && (legs.Legs.Count > 0))
                 foreach (var leg in legs.Legs)
                 {
                     // A leg is has ~ constant altitude, in a ~ constant direction for a significant duration
@@ -874,7 +866,8 @@ namespace SkyCombDrone.DroneLogic
                     // Check that this smoothing has not changed the data envelope 
                     AssertGoodStepRevision(rawSummary);
                 }
-*/
+            */
+
             // Calculate the summary of all (leg and non-leg) steps.
             // Check that it is a reasonable revision of the sections.
             Steps.CalculateSettings_Summarise(this, Sections);
