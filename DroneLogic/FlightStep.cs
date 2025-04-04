@@ -269,7 +269,6 @@ namespace SkyCombDrone.DroneLogic
             if (InputImageCenter == null)
                 InputImageCenter = flatEarthLocn;
 
-
             // InputImageSizeM
             double viewLength = Math.Sqrt(droneLocnDownVertM * droneLocnDownVertM + flatEarthForwardM * flatEarthForwardM);
             double halfHFOVRadians = 0.5 * videoData.HFOVDeg * DegreesToRadians;
@@ -752,7 +751,7 @@ namespace SkyCombDrone.DroneLogic
         // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
         public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs, GroundData? groundData)
         {
-/*
+            /*
             if ((legs != null) && (legs.Legs.Count > 0))
                 foreach (var leg in legs.Legs)
                 {
@@ -867,7 +866,7 @@ namespace SkyCombDrone.DroneLogic
                     // Check that this smoothing has not changed the data envelope 
                     AssertGoodStepRevision(rawSummary);
                 }
-*/
+            */
 
             // Calculate the summary of all (leg and non-leg) steps.
             // Check that it is a reasonable revision of the sections.
