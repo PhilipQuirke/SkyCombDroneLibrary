@@ -13,6 +13,8 @@ namespace SkyCombDrone.PersistModel
     {
         public const string DataStoreSuffix = "_SkyComb.xlsx";
 
+        public const string MultipleImages = "Multiple images";
+
 
         // Find name of video file that exists
         public static string FindVideo(string fileName)
@@ -31,7 +33,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Calculate the names of the input files we have available.
-        public static (string, string) LocateInputFiles_TwoVideos(string firstFileName)
+        public static (string, string) LocateInputFiles(string firstFileName)
         {
             string thermalVideoName = "", thermalFlightName = "";
 
@@ -105,6 +107,7 @@ namespace SkyCombDrone.PersistModel
             string thermalVideoName, 
             string thermalFlightName, 
             string outputElseInputDirectory,
+            string outputVideoName,
             bool canCreate)
         {
             DroneDataStore? answer = null;
@@ -137,8 +140,8 @@ namespace SkyCombDrone.PersistModel
                         // One failure mode is if the outputElseInputDirectory does not exist.                        
                         answer = new(dataStoreName,
                             thermalVideoName, 
-                            thermalFlightName, 
-                            VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory));
+                            thermalFlightName,
+                            outputVideoName);
                 }
             }
             catch
@@ -152,46 +155,47 @@ namespace SkyCombDrone.PersistModel
 
         // From a video file name, locate all applicable input files, ensure that a DataStore exists. 
         // Handles case where there is both a thermal and an optical video file.
-        public static DroneDataStore? OpenOrCreate_TwoVideos(
-            string videoFileName,
+        public static DroneDataStore? OpenOrCreate(
+            string inputDirectory,
+            string inputFileName,
             string outputElseInputDirectory,
-            bool canCreate)
+            bool doCreate = true)
         {
-            (var thermalVideoName, var thermalFlightName) =
-                LocateInputFiles_TwoVideos(videoFileName);
-
+            var thermalVideoName = "";
+            var thermalFlightName = "";
             var dataStoreName = "";
-            if (thermalVideoName != "")
-                dataStoreName = DataStoreName(thermalVideoName, outputElseInputDirectory);
+            var outputVideoName = "";
+
+            if (inputFileName == "")
+            {
+                // Base datastore name on the input folder name
+                thermalVideoName = MultipleImages;
+                thermalFlightName = "None";
+                outputVideoName = "None";
+
+                // Set dataStoreName to the last foldername in the input directory
+                var lastFolderName = inputDirectory.Substring(inputDirectory.LastIndexOf("\\") + 1);
+                dataStoreName = outputElseInputDirectory + "\\" + lastFolderName + DataStoreSuffix;
+            }
+            else
+            {
+                // Base datastore name on the single video file and associated flight log file
+                (thermalVideoName, thermalFlightName) =
+                    LocateInputFiles(inputFileName);
+
+                if (thermalVideoName != "")
+                    dataStoreName = DataStoreName(thermalVideoName, outputElseInputDirectory);
+
+                outputVideoName = VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory);
+            }
 
             return DataStoreFactory.OpenOrCreateDataStore(
                 dataStoreName,
-                thermalVideoName, 
-                thermalFlightName, 
+                thermalVideoName,
+                thermalFlightName,
                 outputElseInputDirectory,
-                canCreate);
-        }
-
-
-        // From a video file name, locate all applicable input files, ensure that a DataStore exists. 
-        public static DroneDataStore? OpenOrCreate_OneVideo(
-            string videoFileName,
-            string outputElseInputDirectory,
-            bool canCreate)
-        {
-            (var thermalVideoName, var thermalFlightName) =
-                LocateInputFiles_OneVideo(videoFileName);
-
-            var dataStoreName = "";
-            if (thermalVideoName != "")
-                dataStoreName = DataStoreName(thermalVideoName, outputElseInputDirectory);
-
-            return DataStoreFactory.OpenOrCreateDataStore(
-                dataStoreName,
-                thermalVideoName, 
-                thermalFlightName, 
-                outputElseInputDirectory,
-                canCreate);
+                outputVideoName,
+                doCreate);
         }
     }
 }
