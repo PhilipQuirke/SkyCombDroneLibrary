@@ -11,7 +11,7 @@ namespace SkyCombDrone.DroneLogic
         public string FileName { get; set; }
         public string CameraModelName { get; set; }
         public string Software { get; set; }
-        public DateTime CreateDate { get; set; }
+        public DateTime CreateDate { get; set; }    // Does not store milliseconds so accuracy is +/-0.5s
         public double? FNumber { get; set; }
         public double? FocalLength { get; set; }
         public int? ImageWidth { get; set; }
@@ -158,9 +158,20 @@ namespace SkyCombDrone.DroneLogic
         }
 
         public const string UnitTestDirectory = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
-        //public const string UnitTestImage = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\DJI_20250206214525_0016_T.JPG";
         public const string exifToolPath = @"D:\SkyComb\exiftool-13.26_64\exiftool.exe"; // Removed (-k) from the exe name to run it in batch mode (not interactively)
 
+
+        // Unit test sample output
+        // 6/02/2025 9:54:15 pm, DJI_20250206215415_0240_T.JPG, 531.899, -47.5, -79.4, 176.6495209, -38.3320808
+        // 6/02/2025 9:54:17 pm, DJI_20250206215417_0241_T.JPG, 532.114, -66.1, -79.5, 176.649765, -38.3320999
+        // 6/02/2025 9:54:18 pm, DJI_20250206215418_0242_T.JPG, 532.338, -85.5, -79.3, 176.6499481, -38.3321114
+        // 6/02/2025 9:54:20 pm, DJI_20250206215420_0243_T.JPG, 532.637, -104.4, -78.8, 176.6500854, -38.3321152
+        // 6/02/2025 9:54:23 pm, DJI_20250206215423_0244_T.JPG, 532.956, -99, -78.5, 176.6498108, -38.332077
+        // 6/02/2025 9:54:25 pm, DJI_20250206215425_0245_T.JPG, 533.211, -93.4, -78.8, 176.6495514, -38.3320427
+        // 6/02/2025 9:54:26 pm, DJI_20250206215426_0246_T.JPG, 533.417, -90.1, -79.1, 176.6493683, -38.3320198
+        // 6/02/2025 9:54:29 pm, DJI_20250206215429_0247_T.JPG, 533.693, -90.1, -79.3, 176.6492004, -38.3319931
+        // 6/02/2025 9:54:31 pm, DJI_20250206215431_0248_T.JPG, 533.995, -90.1, -79.2, 176.6490326, -38.3319664
+        // 6/02/2025 9:54:33 pm, DJI_20250206215433_0249_T.JPG, 534.259, -90.1, -79.5, 176.6488647, -38.3319435
         public static void UnitTest1()
         {
             var metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(UnitTestDirectory, exifToolPath);
@@ -169,8 +180,6 @@ namespace SkyCombDrone.DroneLogic
             {
                 Debug.WriteLine($"{item.CreateDate}, {item.FileName}, {item.AbsoluteAltitude}, {item.GimbalPitchDegree}, {item.FlightYawDegree}, {item.LRFLon}, {item.LRFLat}");
             }
-
         }
     }
-
 }
