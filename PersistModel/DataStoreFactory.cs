@@ -96,9 +96,18 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public static string DataStoreName(string inputFileName, string outputElseInputDirectory)
+        public static string DataStoreName(string inputDirectory, string inputFileName, string outputElseInputDirectory)
         {
-            return BaseDataStore.AddFileNameSuffix(outputElseInputDirectory + "\\" + VideoModel.ShortFileName(inputFileName), DataStoreSuffix);
+            if((inputFileName == "") || (inputFileName == MultipleImages))
+            {
+                // Base datastore name on the inputDirectory last folder name
+                inputDirectory = inputDirectory.Trim('\\');
+                var index = inputDirectory.LastIndexOf("\\");
+                var lastFolderName = inputDirectory.Substring(index + 1);
+                return outputElseInputDirectory + "\\" + lastFolderName + DataStoreSuffix;
+            }
+            else
+                return outputElseInputDirectory + "\\" + VideoModel.ShortFileName(inputFileName) + DataStoreSuffix;
         }
 
 
@@ -178,9 +187,8 @@ namespace SkyCombDrone.PersistModel
                 thermalFlightName = "None";
                 outputVideoName = "None";
 
-                // Set dataStoreName to the last foldername in the input directory
-                var lastFolderName = inputDirectory.Substring(index + 1);
-                dataStoreName = outputElseInputDirectory + "\\" + lastFolderName + DataStoreSuffix;
+                // Set dataStoreName prefix to the last foldername in the input directory
+                dataStoreName = DataStoreName(inputDirectory, "", outputElseInputDirectory);
             }
             else
             {
@@ -188,7 +196,7 @@ namespace SkyCombDrone.PersistModel
                 (thermalVideoName, thermalFlightName) = LocateInputFiles(inputFileName);
 
                 if (thermalVideoName != "")
-                    dataStoreName = DataStoreName(thermalVideoName, outputElseInputDirectory);
+                    dataStoreName = DataStoreName(inputDirectory, thermalVideoName, outputElseInputDirectory);
 
                 outputVideoName = VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory);
             }

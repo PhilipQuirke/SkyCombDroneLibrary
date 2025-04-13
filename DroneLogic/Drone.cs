@@ -349,6 +349,10 @@ namespace SkyCombDrone.DroneLogic
 
                 FlightSteps.CalculateSettings_Summarise();
 
+                // PQR TODO. For folder of images, we would like to remove legs with less than 3 images.
+                // Hard to code as the steps refer to the legs.
+                //FlightLegs.Calculate_Pass2();
+                
                 FlightLegs.Calculate_Pass3(FlightSteps);
                 FlightLegs.AssertGood(HasFlightSteps);
             }
@@ -406,7 +410,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void SaveSettings(DroneDataStore dataStore, bool firstSave)
+        public void SaveAllData(DroneDataStore dataStore, bool firstSave)
         {
             var effort = Stopwatch.StartNew();
 
@@ -421,6 +425,7 @@ namespace SkyCombDrone.DroneLogic
             datawriter.SaveData_Detail(true, effort);
 
 #if DEBUG
+/* PQR
             // Check that the Flight DEM and DSM values align with the Ground data.
             DroneDataFactory.SanityCheckGroundElevationData(this, GroundData);
 
@@ -430,6 +435,7 @@ namespace SkyCombDrone.DroneLogic
             DroneDataFactory.SanityCheckGroundElevationData(this, reloadedGroundData);
             reloadedGroundData.Dispose();
             dataStore.FreeResources();
+PQR */
 #endif
         }
 

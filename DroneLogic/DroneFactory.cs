@@ -254,15 +254,17 @@ namespace SkyCombDrone.DroneLogic
                             // Save sections, steps, legs, DEM, DSM, etc.
                             phase = "Saving drone datastore...";
                             showDroneSettings(phase);
-                            answer.SaveSettings(droneDataStore, true);
+                            answer.SaveAllData(droneDataStore, true);
                         }
                     }
                 }
 
 #if DEBUG 
+/* PQR
                 // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
                 if (answer.GroundData != null)
                     SanityCheckGroundElevationData(answer, answer.GroundData);
+PQR */
 #endif
 
                 phase = "Drone and ground data ready.";
