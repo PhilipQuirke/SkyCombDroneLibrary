@@ -195,7 +195,6 @@ namespace SkyCombDrone.DroneModel
             int i = 0;
             RunVideoFromS = StringToFloat(settings[i++]);
             RunVideoToS = StringToFloat(settings[i++]);
-            i++; // Deprecated setting
             GimbalDataAvail = (GimbalDataEnum)Enum.Parse(typeof(GimbalDataEnum), settings[i++]);
             FixedCameraDownDeg = StringToNonNegInt(settings[i++]);
             MinCameraDownDeg = StringToNonNegInt(settings[i++]);

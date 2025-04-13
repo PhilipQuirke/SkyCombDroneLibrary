@@ -177,8 +177,7 @@ namespace SkyCombDrone.PersistModel
                 video.FileName = videoName;
             }
 
-            var flightSections = FlightInputSettings(col);
-            return flightSections;
+            return FlightInputSettings(col);
         }
     }
 }
