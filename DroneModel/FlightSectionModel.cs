@@ -65,10 +65,6 @@ namespace SkyCombDrone.DroneModel
     // Raw input data about a flight 
     public abstract class FlightSectionsModel : TardisSummaryModel
     {
-        // The file name containing the flight data
-        public string FileName { get; set; } = "";
-
-
         // Minimum local (not UTC) date/time from the flight data
         public DateTime MinDateTime { get; set; } = DateTime.MinValue;
         // Maximum local (not UTC) date/time from the flight data
@@ -158,20 +154,6 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public string ShortFileName()
-        {
-            if (FileName == "")
-                return "";
-
-            var answer = FileName.Substring(FileName.LastIndexOf('\\') + 1);
-
-            // Uppercase filename and lowercase suffix for consistency
-            return
-                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
-                answer.Substring(answer.LastIndexOf('.')).ToLower();
-        }
-
-
         public string DescribePath
         {
             get
@@ -188,7 +170,6 @@ namespace SkyCombDrone.DroneModel
         {
             var answer = base.GetSettings();
 
-            answer.Add("File Name", ShortFileName());
             answer.Add("Min Date Time", MinDateTime.ToString(DateFormat));
             answer.Add("Max Date Time", MaxDateTime.ToString(DateFormat));
             answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
@@ -209,7 +190,6 @@ namespace SkyCombDrone.DroneModel
         {
             int index = LoadSettingsOffset(settings);
 
-            FileName = settings[index++];
             MinDateTime = DateTime.Parse(settings[index++]);
             MaxDateTime = DateTime.Parse(settings[index++]);
             MinGlobalLocation = new GlobalLocation(settings[index++]);

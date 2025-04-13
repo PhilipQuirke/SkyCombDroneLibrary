@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
@@ -471,7 +471,7 @@ namespace SkyCombDrone.DroneLogic
                 {
                     Assert(thisLeg.MinStepId >= 0, "FlightLegs.AssertGood: Bad MinStepId");
                     Assert(thisLeg.MaxStepId > 0, "FlightLegs.AssertGood: Bad MaxStepId");
-                    Assert(thisLeg.RangeSumTimeMs > 0, "FlightLegs.AssertGood: Bad RangeSumTimeMs");
+                    Assert(thisLeg.RangeSumTimeMs >= 0, "FlightLegs.AssertGood: Bad RangeSumTimeMs");
                     Assert(thisLeg.MinAltitudeM > 0, "FlightLegs.AssertGood: Bad MinAltitudeM");
                     Assert(thisLeg.MaxAltitudeM > 0, "FlightLegs.AssertGood: Bad MaxAltitudeM");
                 }

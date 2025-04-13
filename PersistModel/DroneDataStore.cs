@@ -35,6 +35,7 @@ namespace SkyCombDrone.PersistModel
     public class DroneDataStore : ImageDataStore
     {
         // These are the physical files that are referenced in the DataStore
+        public string ThermalFolderName { get; set; } = "";
         public string ThermalVideoName { get; set; } = "";
         public string ThermalFlightName { get; set; } = "";
         public string OutputVideoName { get; set; } = "";
@@ -46,6 +47,12 @@ namespace SkyCombDrone.PersistModel
             SelectWorksheet(FileSettingsTabName);
             LoadSettings(GetColumnSettings(3, LhsColOffset, LhsColOffset + LabelToValueCellOffset));
         }
+
+
+        // Is the input data based on multiple images?
+        public bool InputIsImages { get { return (ThermalVideoName == DataStoreFactory.MultipleImages); } }
+        // Is the input data based on a video?
+        public bool InputIsVideo { get { return !InputIsImages; } }
 
 
         // Save the Index tab
@@ -112,8 +119,9 @@ namespace SkyCombDrone.PersistModel
 
 
         // Create a DataStore on disk & store the Files settings.
-        public DroneDataStore(string selectedFileName, string thermalVideoName, string thermalFlightName, string outputVideoName) : base(selectedFileName, true)
+        public DroneDataStore(string selectedFileName, string thermalFolderName, string thermalVideoName, string thermalFlightName, string outputVideoName) : base(selectedFileName, true)
         {
+            ThermalFolderName = thermalFolderName;
             ThermalVideoName = thermalVideoName;
             ThermalFlightName = thermalFlightName;
             OutputVideoName = outputVideoName;
@@ -151,6 +159,7 @@ namespace SkyCombDrone.PersistModel
         {
             return new DataPairList
             {
+                { "ThermalFolderName", ( ThermalFolderName == "" ? UnknownString : ThermalFolderName ) },
                 { "ThermalVideoName", ( ThermalVideoName == "" ? UnknownString : ThermalVideoName ) },
                 { "ThermalFlightName", ( ThermalFlightName == "" ? UnknownString : ThermalFlightName ) },
                 { "DataStoreFileName", DataStoreFileName },
@@ -166,43 +175,16 @@ namespace SkyCombDrone.PersistModel
             if (settings == null)
                 return;
 
-            ThermalVideoName = settings[0];
-            ThermalFlightName = settings[1];
-            // DataStoreFileName = settings[2]
+            ThermalFolderName = settings[0];
+            ThermalVideoName = settings[1];
+            ThermalFlightName = settings[2];
 
+            if (ThermalFolderName.ToLower() == UnknownString.ToLower())
+                ThermalFolderName = "";
             if (ThermalVideoName.ToLower() == UnknownString.ToLower())
                 ThermalVideoName = "";
             if (ThermalFlightName.ToLower() == UnknownString.ToLower())
                 ThermalFlightName = "";
-        }
-
-
-        // Delta numeric string like DJI_0046.mp4 to give DJI_0045.mp4
-        // On a file name like C:\\Data_Input\\TestVideo.mp4 will return "".
-        public static string DeltaNumericString(string input, int delta)
-        {
-            var startPos = input.LastIndexOf("_");
-
-            int newValue = 0;
-            try
-            {
-                var numericString = input.Substring(startPos + 1, 4);
-                newValue = StringToInt(numericString) + delta;
-            }
-            catch
-            {
-                return "";
-            }
-
-            return input.Substring(0, startPos + 1) + newValue.ToString("D4") + input.Substring(startPos + 5);
-        }
-
-
-        public void SetCellLabelAndStr(ref int row, int baseCol, string label, string value)
-        {
-            Worksheet.Cells[row, baseCol].Value = label;
-            Worksheet.Cells[row, baseCol + LabelToValueCellOffset].Value = value;
-            row++;
         }
 
 
@@ -211,12 +193,6 @@ namespace SkyCombDrone.PersistModel
             Worksheet.Cells[row, baseCol].Value = label;
             Worksheet.Cells[row, baseCol + LabelToValueCellOffset].Value = value;
             row++;
-        }
-
-
-        public void SetCellLabelAndInt(ref int row, string label, int value)
-        {
-            SetCellLabelAndInt(ref row, LhsColOffset, label, value);
         }
 
 

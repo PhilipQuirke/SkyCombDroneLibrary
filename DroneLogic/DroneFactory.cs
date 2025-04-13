@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
@@ -83,7 +83,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Some settings differ per manufacturer's camera.
-        public static void SetCameraSpecifics(Drone drone)
+        public static void CalculateCameraSpecifics_InputIsVideo(Drone drone)
         {
             if ((drone != null) && drone.HasInputVideo)
                 switch (drone.InputVideo.CameraType)
@@ -116,20 +116,44 @@ namespace SkyCombDrone.DroneLogic
                 }
         }
 
+
+        public static void CalculateCameraSpecifics_InputIsImages(Drone drone, List<DroneImageMetadata> metaData)
+        {
+            if((drone == null) || (metaData == null) || (metaData.Count == 0))  
+                return;
+
+            // Images are taken every 2 or 3 seconds
+            int num_seconds_between_images = 2;
+
+            drone.InputVideo = new VideoData("", null); 
+            drone.InputVideo.CameraType = metaData[0].CameraModelName;
+            drone.InputVideo.Fps = 1.0 / num_seconds_between_images;
+            drone.InputVideo.FrameCount = 1;
+            drone.InputVideo.DurationMs = num_seconds_between_images * 1000;
+            drone.InputVideo.ImageHeight = metaData[0].ImageHeight ?? 640;
+            drone.InputVideo.ImageWidth = metaData[0].ImageWidth ?? 512;
+            drone.InputVideo.HFOVDeg = (float)(metaData[0].FieldOfViewDegree ?? 38.2);
+            drone.InputVideo.DateEncodedUtc = metaData[0].CreateDate;
+            drone.InputVideo.DateEncoded = metaData[0].CreateDate;
+
+            drone.DroneConfig.MaxLegGapDurationMs = 2 * num_seconds_between_images * 1000;
+        }
+
+
 #if DEBUG
         // Check that the Flight DEM and DSM values align with the Ground data values.
         public static void SanityCheckGroundElevationData(Drone drone, GroundData groundData)
         {
             int maxAllowedDeltaM = 4;
 
-            if (groundData.HasDemModel)
+            if (groundData != null && groundData.HasDemModel)
                 foreach (var step in drone.FlightSteps.Steps)
                 {
                     var theDem = groundData.DemModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
                     BaseConstants.Assert(Math.Abs(theDem - step.Value.DemM) <= maxAllowedDeltaM, "Flight DEM and Ground DEM mismatch");
                 }
 
-            if (groundData.HasDsmModel)
+            if (groundData != null && groundData.HasDsmModel)
                 foreach (var step in drone.FlightSteps.Steps)
                 {
                     var theDsm = groundData.DsmModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
@@ -158,7 +182,7 @@ namespace SkyCombDrone.DroneLogic
 
                 phase = "Loading video...";
                 showDroneSettings(phase);
-                if (answer.LoadSettings_Videos(droneDataStore, readDateEncodedUtc))
+                if (answer.LoadFileSettings(droneDataStore, readDateEncodedUtc))
                 {
                     answer.EffortDurations.LoadVideosMs = EffortMs();
 
@@ -181,19 +205,30 @@ namespace SkyCombDrone.DroneLogic
                         if (answer.EffortDurations.LoadGroundMs < 5)
                             answer.EffortDurations.LoadGroundMs = 0;
 
-                        phase = "Calculating video data...";
-                        showDroneSettings(phase);
-                        answer.CalculateSettings_Video();
-                        answer.EffortDurations.CalcVideosMs = EffortMs();
+                        if (droneDataStore.InputIsVideo)
+                        {
+                            phase = "Calculating video data...";
+                            showDroneSettings(phase);
+                            answer.CalculateSettings_Video();
+                            answer.EffortDurations.CalcVideosMs = EffortMs();
+                        }
 
                         if (fullLoad)
                         {
                             phase = "Calculating flight sections...";
                             showDroneSettings(phase);
-                            answer.CalculateSettings_FlightSections();
-                            answer.EffortDurations.CalcSectionsMs = EffortMs();
+                            if (droneDataStore.InputIsVideo)
+                            {
+                                answer.CalculateSettings_FlightSections_FromFlightLog();
+                                CalculateCameraSpecifics_InputIsVideo(answer);
+                            }
+                            else
+                            {
+                                var metaData = answer.CalculateSettings_FlightSections_FromFolder(droneDataStore.ThermalFolderName);
+                                CalculateCameraSpecifics_InputIsImages(answer, metaData);
+                            }
 
-                            SetCameraSpecifics(answer);
+                            answer.EffortDurations.CalcSectionsMs = EffortMs();
 
                             phase = "Calculating ground elevations...";
                             showDroneSettings(phase);
@@ -202,7 +237,8 @@ namespace SkyCombDrone.DroneLogic
 
                             phase = "Calculating flight steps and legs...";
                             showDroneSettings(phase);
-                            answer.CalculateSettings_StepsAndLegs();
+                            answer.CalculateSettings_FlightSteps();
+                            answer.CalculateSettings_FlightLegs();
                             if (!answer.CalculateSettings_OnGroundAt_IsValid())
                             {
                                 answer.DroneConfig.OnGroundAt = OnGroundAtEnum.Neither;
@@ -215,6 +251,7 @@ namespace SkyCombDrone.DroneLogic
                             answer.DefaultConfigRunFromTo();
                             answer.EffortDurations.CalcSwatheMs = EffortMs();
 
+                            // Save sections, steps, legs, DEM, DSM, etc.
                             phase = "Saving drone datastore...";
                             showDroneSettings(phase);
                             answer.SaveSettings(droneDataStore, true);
@@ -224,7 +261,7 @@ namespace SkyCombDrone.DroneLogic
 
 #if DEBUG 
                 // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-                if(answer.GroundData != null)
+                if (answer.GroundData != null)
                     SanityCheckGroundElevationData(answer, answer.GroundData);
 #endif
 

@@ -22,6 +22,7 @@ namespace SkyCombDrone.DroneLogic
         public string LensInfo { get; set; }
         public double? AbsoluteAltitude { get; set; }
         public double? RelativeAltitude { get; set; }
+        public double? GpsAltitude { get; set; }
         public double? GimbalRollDegree { get; set; }
         public double? GimbalYawDegree { get; set; }
         public double? GimbalPitchDegree { get; set; }
@@ -46,6 +47,10 @@ namespace SkyCombDrone.DroneLogic
 
     public class DroneImageMetadataReader
     {
+        public const string UnitTestDirectory = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
+        public const string ExifToolPath = @"D:\SkyComb\exiftool-13.26_64\exiftool.exe"; // Removed (-k) from the exe name to run it in batch mode (not interactively)
+
+
         public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, string exifToolPath)
         {
             var files = Directory.GetFiles(folderPath, "*_T*.JPG");
@@ -67,6 +72,13 @@ namespace SkyCombDrone.DroneLogic
                 .ThenBy(m => m.FileName)
                 .ToList();
         }
+
+
+        public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath)
+        {
+            return ReadMetadataFromFolder(folderPath, ExifToolPath);    
+        }
+
 
         private static string RunExifTool(string exifToolPath, string filePath)
         {
@@ -134,6 +146,7 @@ namespace SkyCombDrone.DroneLogic
             data.LensInfo = GetValue("Lens Info");
             data.AbsoluteAltitude = GetDouble("Absolute Altitude");
             data.RelativeAltitude = GetDouble("Relative Altitude");
+            data.GpsAltitude = GetDouble("GPS Altitude");
             data.GimbalRollDegree = GetDouble("Gimbal Roll Degree");
             data.GimbalYawDegree = GetDouble("Gimbal Yaw Degree");
             data.GimbalPitchDegree = GetDouble("Gimbal Pitch Degree");
@@ -157,9 +170,6 @@ namespace SkyCombDrone.DroneLogic
             return data;
         }
 
-        public const string UnitTestDirectory = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
-        public const string exifToolPath = @"D:\SkyComb\exiftool-13.26_64\exiftool.exe"; // Removed (-k) from the exe name to run it in batch mode (not interactively)
-
 
         // Unit test sample output
         // 6/02/2025 9:54:15 pm, DJI_20250206215415_0240_T.JPG, 531.899, -47.5, -79.4, 176.6495209, -38.3320808
@@ -174,11 +184,11 @@ namespace SkyCombDrone.DroneLogic
         // 6/02/2025 9:54:33 pm, DJI_20250206215433_0249_T.JPG, 534.259, -90.1, -79.5, 176.6488647, -38.3319435
         public static void UnitTest1()
         {
-            var metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(UnitTestDirectory, exifToolPath);
+            var metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(UnitTestDirectory, ExifToolPath);
 
             foreach (var item in metadataList)
             {
-                Debug.WriteLine($"{item.CreateDate}, {item.FileName}, {item.AbsoluteAltitude}, {item.GimbalPitchDegree}, {item.FlightYawDegree}, {item.LRFLon}, {item.LRFLat}");
+                Debug.WriteLine($"{item.CreateDate}, {item.FileName}, {item.GpsAltitude}, {item.GimbalPitchDegree}, {item.FlightYawDegree}, {item.LRFLon}, {item.LRFLat}");
             }
         }
     }

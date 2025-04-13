@@ -1,5 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
-using SkyCombDrone.CommonSpace;
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
@@ -464,11 +463,10 @@ namespace SkyCombDrone.DroneLogic
 
 
         public FlightSteps(Drone drone, List<string>? settings = null)
-            : base(drone.FlightSections.FileName, settings)
+            : base(settings)
         {
             Drone = drone;
             Sections = drone.FlightSections;
-            FileName = drone.FlightSections.FileName;
         }
 
 
@@ -745,138 +743,16 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // For the Steps in each leg, refine the location settings.
-        // A leg has ~ constant altitude, in a ~ constant direction for a significant duration 
-        // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant.         
-        // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-        public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs, GroundData? groundData)
+        // Calculate the summary of all (leg and non-leg) steps.
+        // Check that it is a reasonable revision of the sections.
+        public void CalculateSettings_Summarise()
         {
-            /*
-            if ((legs != null) && (legs.Legs.Count > 0))
-                foreach (var leg in legs.Legs)
-                {
-                    // A leg is has ~ constant altitude, in a ~ constant direction for a significant duration
-                    // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant. 
-                    // Time interval between Steps can also vary.
-
-                    // Calculate the summary of this leg's steps before smoothing them
-                    Steps.CalculateSettings_Summarise(this, leg.MinStepId, leg.MaxStepId);
-                    FlightStepSummaryModel rawSummary = new();
-                    rawSummary.CopySteps(this);
-
-                    // If the drone is travelling at a reasonable speed then it has reasonable inertia,
-                    // and the speed should be reasonably smooth, with avg and max speed being similar. 
-                    // Edge case, in DJI_0198 leg 5 is the drone slowing from 5.4mps to 0mps with avg of 1.3m/s
-                    if (rawSummary.AvgSpeedMps >= 1.5 && rawSummary.MaxSpeedMps < 2 * rawSummary.AvgSpeedMps)
-                    {
-                        // Use simple linear smoothing.
-                        var minStep = Steps[leg.MinStepId];
-                        var maxStep = Steps[leg.MaxStepId];
-                        var minLocn = minStep.DroneLocnM;
-                        var maxLocn = maxStep.DroneLocnM;
-                        var deltaLocn = new RelativeLocation(
-                            maxLocn.NorthingM - minLocn.NorthingM,
-                            maxLocn.EastingM - minLocn.EastingM);
-                        float deltaTime = maxStep.SumTimeMs - minStep.SumTimeMs;
-
-                        FlightStep? prevStep = null;
-                        for (int theStepId = leg.MinStepId + 1; theStepId <= leg.MaxStepId - 1; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if (theStep == null)
-                                continue;
-
-                            var fraction = (theStep.SumTimeMs - minStep.SumTimeMs) / deltaTime;
-                            Assert(fraction > 0, "CalculateSettings_RefineLocationData: Fraction logic 1");
-                            Assert(fraction < 1, "CalculateSettings_RefineLocationData: Fraction logic 2");
-
-                            theStep.DroneLocnM = new(
-                                minLocn.NorthingM + deltaLocn.NorthingM * fraction,
-                                minLocn.EastingM + deltaLocn.EastingM * fraction);
-
-                            // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                            theStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
-
-                            prevStep = theStep;
-                        }
-                    }
-                    else
-                    {
-                        // Use cubic spline smoothing for more complex edge cases
-                        int arraySize = 0;
-                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocnM != null))
-                                arraySize++;
-                        }
-
-                        float[] timeRaw = new float[arraySize];
-                        float[] northingRaw = new float[arraySize];
-                        float[] eastingRaw = new float[arraySize];
-
-                        int arrayIndex = 0;
-                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocnM != null))
-                            {
-                                timeRaw[arrayIndex] = theStep.SumTimeMs;
-                                northingRaw[arrayIndex] = theStep.DroneLocnM.NorthingM;
-                                eastingRaw[arrayIndex] = theStep.DroneLocnM.EastingM;
-                                arrayIndex++;
-                            }
-                        }
-
-                        // Calculate a cubic spline smoothing of the Leg.
-                        // We maintain the time sequence, as we have frames at these time intervals.
-                        CubicSpline cubicSpline = new();
-                        var northingSmooth = cubicSpline.FitAndEval(timeRaw, northingRaw, timeRaw);
-                        var eastingSmooth = cubicSpline.FitAndEval(timeRaw, eastingRaw, timeRaw);
-
-
-                        // Recalculate the Steps Locations, Distance Traveled and Speed
-                        arrayIndex = 0;
-                        Steps.TryGetValue(leg.MinStepId - 1, out FlightStep? prevStep);
-                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocnM != null))
-                            {
-                                theStep.DroneLocnM.NorthingM = northingSmooth[arrayIndex];
-                                theStep.DroneLocnM.EastingM = eastingSmooth[arrayIndex];
-
-                                // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                                theStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
-
-                                arrayIndex++;
-                                prevStep = theStep;
-                            }
-                        }
-
-                        // As last leg step may have moved, update (non-Location data) one step past the leg.
-                        Steps.TryGetValue(leg.MaxStepId + 1, out FlightStep? nextStep);
-                        if ((nextStep != null) && (prevStep != null))
-                            // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                            nextStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
-                    }
-
-                    // Calculate the summary of this leg's steps after smoothing them
-                    Steps.CalculateSettings_Summarise(this, leg.MinStepId, leg.MaxStepId);
-                    // Check that this smoothing has not changed the data envelope 
-                    AssertGoodStepRevision(rawSummary);
-                }
-            */
-
-            // Calculate the summary of all (leg and non-leg) steps.
-            // Check that it is a reasonable revision of the sections.
             Steps.CalculateSettings_Summarise(this, Sections);
         }
 
 
         public void AssertGood()
         {
-            Assert(FileName != "", "FlightSteps.AssertGood: No FileName");
             Assert(Steps.Count != 0, "FlightSteps.AssertGood: No Steps");
         }
 

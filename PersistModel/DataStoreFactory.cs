@@ -104,6 +104,7 @@ namespace SkyCombDrone.PersistModel
 
         private static DroneDataStore? OpenOrCreateDataStore(
             string dataStoreName,
+            string thermalFolderName,
             string thermalVideoName, 
             string thermalFlightName, 
             string outputElseInputDirectory,
@@ -128,6 +129,7 @@ namespace SkyCombDrone.PersistModel
                             {
                                 // Spreadsheet may have ben copied from say C: to D:
                                 // Reset the file names to the new locations
+                                answer.ThermalFolderName = thermalFolderName;
                                 answer.ThermalVideoName = thermalVideoName;
                                 answer.ThermalFlightName = thermalFlightName;
                             }
@@ -139,6 +141,7 @@ namespace SkyCombDrone.PersistModel
                         // Create a new datastore.
                         // One failure mode is if the outputElseInputDirectory does not exist.                        
                         answer = new(dataStoreName,
+                            thermalFolderName,
                             thermalVideoName, 
                             thermalFlightName,
                             outputVideoName);
@@ -161,6 +164,8 @@ namespace SkyCombDrone.PersistModel
             string outputElseInputDirectory,
             bool doCreate = true)
         {
+            var index = inputDirectory.LastIndexOf("\\");
+            var thermalFolderName = inputDirectory.Substring(0, index);
             var thermalVideoName = "";
             var thermalFlightName = "";
             var dataStoreName = "";
@@ -174,14 +179,13 @@ namespace SkyCombDrone.PersistModel
                 outputVideoName = "None";
 
                 // Set dataStoreName to the last foldername in the input directory
-                var lastFolderName = inputDirectory.Substring(inputDirectory.LastIndexOf("\\") + 1);
+                var lastFolderName = inputDirectory.Substring(index + 1);
                 dataStoreName = outputElseInputDirectory + "\\" + lastFolderName + DataStoreSuffix;
             }
             else
             {
                 // Base datastore name on the single video file and associated flight log file
-                (thermalVideoName, thermalFlightName) =
-                    LocateInputFiles(inputFileName);
+                (thermalVideoName, thermalFlightName) = LocateInputFiles(inputFileName);
 
                 if (thermalVideoName != "")
                     dataStoreName = DataStoreName(thermalVideoName, outputElseInputDirectory);
@@ -191,6 +195,7 @@ namespace SkyCombDrone.PersistModel
 
             return DataStoreFactory.OpenOrCreateDataStore(
                 dataStoreName,
+                thermalFolderName,
                 thermalVideoName,
                 thermalFlightName,
                 outputElseInputDirectory,

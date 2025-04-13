@@ -34,7 +34,7 @@ namespace SkyCombDrone.DroneModel
 
         // Frames per second. Drone physical implementation means it is not 100% accurate for each second of a drone video.
         // Example Fps seen with M2E Dual are 30 and 8.78
-        public double Fps { get; set; }
+        public double Fps { get; set; } = UnknownValue;
 
 
         // Total number of frames in video
@@ -56,7 +56,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // Horizontal video image field of view in degrees. Differs per manufacturer's camera.
-        public int HFOVDeg { get; set; } = 38;
+        public float HFOVDeg { get; set; } = 38.2f;
         // Vertical video image field of view in degrees. Differs per manufacturer's camera. Assumes pixels are square
         public float VFOVDeg { get { return HFOVDeg * (float)ImageHeight / ImageWidth; } }
 
@@ -107,12 +107,14 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public VideoModel(string fileName, Func<string, DateTime> readDateEncodedUtc)
+        public VideoModel(string videoFileName, Func<string, DateTime> readDateEncodedUtc)
         {
+            FileName = videoFileName;
+            if(FileName == "")
+                return;
+
             try
             {
-                FileName = fileName;
-
                 if (!System.IO.File.Exists(FileName))
                     // This sometimes happens when files are transferred between laptops
                     // when one laptop uses C: and the other uses D:
@@ -275,8 +277,8 @@ namespace SkyCombDrone.DroneModel
                 { "Time Ms", DurationMs },
                 { "Image Width", ImageWidth },
                 { "Image Height", ImageHeight },
-                { "HFOV Deg", HFOVDeg },
-                { "VFOV Deg", VFOVDeg, 2 },
+                { "HFOV Deg", HFOVDeg, 1 },
+                { "VFOV Deg", VFOVDeg, 1 },
                 { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
                 { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(BaseConstants.DateFormat) },
                 { "Color Md", (ColorMd == "" ? "default" : ColorMd ) },

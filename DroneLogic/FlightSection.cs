@@ -143,7 +143,6 @@ namespace SkyCombDrone.DroneLogic
         }
         public void AssertGood()
         {
-            Assert(FileName != "", "FlightSections.AssertGood: No FileName");
             AssertGood_GlobalLocations();
             AssertGood_SizeM();
         }

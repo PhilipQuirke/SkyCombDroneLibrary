@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
@@ -96,28 +96,32 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Load video(s) objects
-        public bool LoadSettings_Videos(DroneDataStore dataStore, Func<string, DateTime> readDateEncodedUtc)
+        // Load file settings and maybe create video object
+        public bool LoadFileSettings(DroneDataStore dataStore, Func<string, DateTime> readDateEncodedUtc)
         {
+            bool success = false;
+            FreeResources_Video();
+
             try
             {
                 DroneLoad dataReader = new(dataStore, this);
                 dataStore.SelectWorksheet(DroneDataStore.FileSettingsTabName);
 
-                // Without a video we can't do anything
-                if (dataStore.ThermalVideoName != "")
-                    InputVideo = new VideoData(dataStore.ThermalVideoName, readDateEncodedUtc);
+                if (dataStore.InputIsImages)
+                    success = true;
 
-                if (HasInputVideo)
-                    return true;
+                else if (dataStore.ThermalVideoName != "")
+                {
+                    InputVideo = new VideoData(dataStore.ThermalVideoName, readDateEncodedUtc);
+                    success = true;
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Suppressed Drone.LoadSettings_Videos failure: " + ex.ToString());
+                Debug.WriteLine("Suppressed Drone.LoadSettings failure: " + ex.ToString());
             }
 
-            FreeResources_Video();
-            return false;
+            return success;
         }
 
 
@@ -141,13 +145,11 @@ namespace SkyCombDrone.DroneLogic
                     if (dataStore.ThermalVideoName != "")
                         FlightSections = dataReader.LoadSettings(
                             dataStore.ThermalVideoName, InputVideo,
-                            dataStore.ThermalFlightName,
                             DroneLoad.MidColOffset);
 
 
                     phase = 3;
                     FlightSteps = new(this, dataReader.FlightStepsSettings());
-                    FlightSteps.FileName = dataStore.ThermalFlightName;
 
                     FlightLegs = new();
 
@@ -213,10 +215,61 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate FlightSections settings by parsing the flight logs (if any). Updates Drone.CameraType
-        public void CalculateSettings_FlightSections()
+        public void CalculateSettings_FlightSections_FromFlightLog()
         {
             FlightSections = null;
             LoadFlightDataFromTextFile(InputVideo);
+        }
+
+
+        // Calculate FlightSections settings by parsing the properties of the images
+        public List<DroneImageMetadata> CalculateSettings_FlightSections_FromFolder(string thermalFolderName)
+        {
+            FlightSections = null;
+            DroneConfig.GimbalDataAvail = GimbalDataEnum.AutoYes;
+
+            List<DroneImageMetadata> metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(thermalFolderName + "\\");
+            if ((metadataList != null) && (metadataList.Count > 0))
+            {
+                FlightSections = new();
+                var firstCreateDate = metadataList[0].CreateDate;
+
+                // Loop through all the images
+                FlightSection? prevSection = null;
+                int prevSectionId = -1;
+                foreach (var imageData in metadataList)
+                {
+                    var thisSectionId = prevSectionId + 1;
+                    FlightSection thisSection = new(this, thisSectionId);
+                    thisSection.StartTime = imageData.CreateDate - firstCreateDate;
+
+                    if (prevSection == null)
+                        FlightSections.MinDateTime = imageData.CreateDate;
+                    else
+                        FlightSections.MaxDateTime = imageData.CreateDate;
+
+                    thisSection.GlobalLocation.Latitude = imageData.LRFLat ?? 0;
+                    thisSection.GlobalLocation.Longitude = imageData.LRFLon ?? 0;
+                    thisSection.AltitudeM = (float)(imageData.GpsAltitude ?? 0);
+                    thisSection.FocalLength = (float)(imageData.FocalLength ?? 0);
+                    thisSection.Zoom = (float)imageData.DigitalZoomRatio;
+                    thisSection.YawDeg = (float)(imageData.FlightYawDegree ?? 0); // PQR We could use GimbalYawDegree!!
+                    thisSection.PitchDeg = (float)(imageData.GimbalPitchDegree ?? 0); // We care about camera down angle
+                    thisSection.RollDeg = (float)(imageData.FlightRollDegree ?? 0);
+
+                    // Add the FlightSection to the Flight
+                    FlightSections.AddSection(thisSection, prevSection);
+
+                    prevSection = thisSection;
+                    prevSectionId = thisSectionId;
+                }
+
+                FlightSections.SetTardisMaxKey();
+                FlightSections.CalculateSettings();
+                FlightSections.AssertGood();
+            }
+
+            return metadataList;
         }
 
 
@@ -262,7 +315,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate flight steps and legs
-        public void CalculateSettings_StepsAndLegs()
+        public void CalculateSettings_FlightSteps()
         {
             if (HasFlightSections)
             {
@@ -270,7 +323,14 @@ namespace SkyCombDrone.DroneLogic
                 FlightSteps = new(this);
                 FlightSteps.CalculateSettings(InputVideo, GroundData);
                 FlightSteps.AssertGood();
+            }
+        }
 
+
+        public void CalculateSettings_FlightLegs()
+        {
+            if (HasFlightSections)
+            {
                 // Calculate the flight legs Min/MaxStepIds
                 FlightLegs = new();
                 FlightLegs.Calculate_Pass1(FlightSections, FlightSteps, DroneConfig);
@@ -287,8 +347,7 @@ namespace SkyCombDrone.DroneLogic
                     DroneConfig.UseLegs = (legsLinealM / sectionsLinealM > 0.33f);
                 }
 
-                // Refine the flight steps settings using leg information
-                FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs, GroundData);
+                FlightSteps.CalculateSettings_Summarise();
 
                 FlightLegs.Calculate_Pass3(FlightSteps);
                 FlightLegs.AssertGood(HasFlightSteps);
@@ -531,7 +590,6 @@ namespace SkyCombDrone.DroneLogic
 
             if (!success)
             {
-                // Try to load the flight log from a second drone manufacturer's flight log file. PQR TODO
                 flightData = new FlightSections();
                 success = false;
             }

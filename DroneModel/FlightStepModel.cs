@@ -147,10 +147,6 @@ namespace SkyCombDrone.DroneModel
     // FlightStepsModel summarises a list of FlightSteps and other summary data
     public abstract class FlightStepsModel : FlightStepSummaryModel
     {
-        // The file name containing the flight data
-        public string FileName { get; set; }
-
-
         // Drone altitudes are often measured using barometic pressure, which is inaccurate, and can be negative!
         // These offsets (derived from OnGroundAt logic) are added to the drone FlightStep altitudes to give more accurate altitudes.
         protected float OnGroundAtFixStartM { get; set; } = 0;
@@ -164,25 +160,10 @@ namespace SkyCombDrone.DroneModel
         public float MinHeightOverDsmM { get; set; } = BaseConstants.UnknownValue;
 
 
-        public FlightStepsModel(string fileName, List<string>? settings = null)
+        public FlightStepsModel(List<string>? settings = null)
         {
-            FileName = fileName;
             if (settings != null)
                 LoadSettings(settings);
-        }
-
-
-        public string ShortFileName()
-        {
-            if (FileName == "")
-                return "";
-
-            var answer = FileName.Substring(FileName.LastIndexOf('\\') + 1);
-
-            // Uppercase filename and lowercase suffix for consistency
-            return
-                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
-                answer.Substring(answer.LastIndexOf('.')).ToLower();
         }
 
 
@@ -191,7 +172,6 @@ namespace SkyCombDrone.DroneModel
         {
             var answer = base.GetSettings();
 
-            answer.Add("File Name", ShortFileName());
             answer.Add("Avg Speed Mps", AvgSpeedMps, 2);
             answer.Add("Min Dem M", MinDemM, ElevationNdp);
             answer.Add("Max Dem M", MaxDemM, ElevationNdp);
@@ -212,7 +192,6 @@ namespace SkyCombDrone.DroneModel
         {
             int offset = LoadSettingsOffset(settings);
 
-            FileName = settings[offset++];
             AvgSpeedMps = StringToFloat(settings[offset++]);
             MinDemM = StringToFloat(settings[offset++]);
             MaxDemM = StringToFloat(settings[offset++]);

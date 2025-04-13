@@ -177,7 +177,6 @@ namespace SkyCombDrone.DroneModel
             {
                 { "Run Video From S", RunVideoFromS, SecondsNdp },
                 { "Run Video To S", RunVideoToS, SecondsNdp },
-                { "Deprecated setting", 0 },
                 { "Gimbal Data Available", GimbalDataAvail.ToString() },
                 { "Fixed Camera Down Degrees", FixedCameraDownDeg },
                 { "Min Camera Down Degrees", MinCameraDownDeg },
