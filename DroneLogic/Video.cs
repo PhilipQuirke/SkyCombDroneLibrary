@@ -206,7 +206,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Create an output video file writer
-        public static (VideoWriter, string) CreateVideoWriter(
+        public static VideoWriter CreateVideoWriter(
             string inputFileName,
             string outputElseInputDirectory,
             double Fps, Size frameSize)
@@ -220,7 +220,7 @@ namespace SkyCombDrone.DroneLogic
                 frameSize,
                 true);
 
-            return (videoWriter, outputFilename);
+            return videoWriter;
         }
 
 
