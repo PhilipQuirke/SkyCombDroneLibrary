@@ -13,8 +13,6 @@ namespace SkyCombDrone.PersistModel
     {
         public const string DataStoreSuffix = "_SkyComb.xlsx";
 
-        public const string MultipleImages = "Multiple images";
-
 
         // Find name of video file that exists
         public static string FindVideo(string fileName)
@@ -98,7 +96,7 @@ namespace SkyCombDrone.PersistModel
 
         public static string DataStoreName(string inputDirectory, string inputFileName, string outputElseInputDirectory)
         {
-            if((inputFileName == "") || (inputFileName == MultipleImages))
+            if(inputFileName == "")
             {
                 // Base datastore name on the inputDirectory last folder name
                 inputDirectory = inputDirectory.Trim('\\');
@@ -183,9 +181,9 @@ namespace SkyCombDrone.PersistModel
             if (inputFileName == "")
             {
                 // Base datastore name on the input folder name
-                thermalVideoName = MultipleImages;
-                thermalFlightName = "None";
-                outputVideoName = "None";
+                thermalVideoName = ""; // "None"
+                thermalFlightName = "";
+                outputVideoName = "";
 
                 // Set dataStoreName prefix to the last foldername in the input directory
                 dataStoreName = DataStoreName(inputDirectory, "", outputElseInputDirectory);

@@ -12,15 +12,14 @@ namespace SkyCombDrone.DroneModel
     public class VideoModel : BaseConstants, IDisposable
     {
         // Drone and camera combinations for which we have specific settings
-        public const string DjiPrefix = "SRT";
-        public const string DjiGeneric = "SRT (DJI)";
-        public const string DjiM2E = "SRT (DJI M2E Dual)";
-        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
-        public const string DjiM3T = "SRT (DJI M3T)";
-        public const string DjiM300XT2 = "SRT (DJI M300 XT2)";
-        public const string DjiH20T = "SRT (DJI H20T)";
-        public const string DjiH20N = "SRT (DJI H20N)";
-        public const string DjiH30T = "SRT (DJI H30T)";
+        public const string DjiGeneric = "DJI";
+        public const string DjiM2E = "DJI M2E Dual";
+        public const string DjiMavic3 = "DJI Mavic 3";
+        public const string DjiM3T = "DJI M3T";
+        public const string DjiM300XT2 = "DJI M300 XT2";
+        public const string DjiH20T = "ZH20T"; // Z for ZenMuse
+        public const string DjiH20N = "ZH20N"; // Z for ZenMuse. Matches DJI image property value
+        public const string DjiH30T = "ZH30T"; // Z for ZenMuse
 
 
         // THERMAL / OPTICAL CAMERA SETTINGS
@@ -101,9 +100,10 @@ namespace SkyCombDrone.DroneModel
         public int FontScale { get { return ImageWidth < 1000 ? 1 : 2; } }
 
 
+        public bool HasDataAccess { get { return DataAccess != null; } }
         public void AssertDataAccess()
         {
-            Assert(DataAccess != null, "DataAccess is null");
+            Assert(HasDataAccess, "DataAccess is null");
         }
 
 
@@ -268,7 +268,7 @@ namespace SkyCombDrone.DroneModel
         // Get the class's settings as datapairs (e.g. for saving to a spreadsheet)
         public DataPairList GetSettings()
         {
-            var answer = new DataPairList()
+            return new DataPairList()
             {
                 { "File Name", ShortFileName() },
                 { "Camera Type", CameraType },
@@ -282,13 +282,9 @@ namespace SkyCombDrone.DroneModel
                 { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
                 { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(BaseConstants.DateFormat) },
                 { "Color Md", (ColorMd == "" ? "default" : ColorMd ) },
-                { "Deprecated", true },
+                { "Thermal Min Temp C", ThermalMinTempC },
+                { "Thermal Max Temp C", ThermalMaxTempC },
             };
-
-            answer.Add("Thermal Min Temp C", ThermalMinTempC);
-            answer.Add("Thermal Max Temp C", ThermalMaxTempC);
-
-            return answer;
         }
 
 
@@ -307,7 +303,7 @@ namespace SkyCombDrone.DroneModel
             DurationMs = ConfigBase.StringToInt(settings[i++]);
             ImageWidth = ConfigBase.StringToInt(settings[i++]);
             ImageHeight = ConfigBase.StringToInt(settings[i++]);
-            HFOVDeg = ConfigBase.StringToInt(settings[i++]);
+            HFOVDeg = ConfigBase.StringToFloat(settings[i++]);
             i++; // Skip VFOVDeg 
 
             if (settings[i] != "")
@@ -325,7 +321,6 @@ namespace SkyCombDrone.DroneModel
                 i++;
             }
             ColorMd = settings[i++].ToLower();
-            i++; // Deprecated
 
             ThermalMinTempC = ConfigBase.StringToInt(settings[i++]);
             ThermalMaxTempC = ConfigBase.StringToInt(settings[i++]);

@@ -63,6 +63,10 @@ namespace SkyCombDrone.DroneLogic
             return ((!DroneConfig.UseGimbalData) || (Math.Abs(flightStep.PitchDeg) >= DroneConfig.MinCameraDownDeg));
         }
 
+        // Is the input data based on a video?
+        public bool InputIsVideo { get { return HasInputVideo && InputVideo.FileName != ""; } }
+        // Is the input data based on multiple images?
+        public bool InputIsImages { get { return !InputIsVideo; } }
 
         public Drone(DroneConfigModel config)
         {
@@ -108,7 +112,10 @@ namespace SkyCombDrone.DroneLogic
                 dataStore.SelectWorksheet(DroneDataStore.FileSettingsTabName);
 
                 if (dataStore.InputIsImages)
+                { 
+                    InputVideo = new VideoData("", null);
                     success = true;
+                }
 
                 else if (dataStore.ThermalVideoName != "")
                 {
@@ -142,10 +149,9 @@ namespace SkyCombDrone.DroneLogic
                     dataReader.EffortSettings();
 
                     phase = 2;
-                    if (dataStore.ThermalVideoName != "")
-                        FlightSections = dataReader.LoadSettings(
-                            dataStore.ThermalVideoName, InputVideo,
-                            DroneLoad.MidColOffset);
+                    FlightSections = dataReader.LoadSettings(
+                        dataStore.ThermalVideoName, InputVideo,
+                        DroneLoad.MidColOffset);
 
 
                     phase = 3;
@@ -189,7 +195,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Suppressed Drone.LoadSettings_Flight failure (Phase =" + phase + "):" + ex.ToString());
+                Debug.WriteLine("Suppressed Drone.LoadSettings_Flight failure (Phase =" + phase + "):" + ex.ToString());
             }
 
             FreeResources_Flight();
@@ -215,15 +221,15 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate FlightSections settings by parsing the flight logs (if any). Updates Drone.CameraType
-        public void CalculateSettings_FlightSections_FromFlightLog()
+        public void CalculateSettings_FlightSections_InputIsVideo()
         {
             FlightSections = null;
             LoadFlightDataFromTextFile(InputVideo);
         }
 
 
-        // Calculate FlightSections settings by parsing the properties of the images
-        public List<DroneImageMetadata> CalculateSettings_FlightSections_FromFolder(string thermalFolderName)
+        // Calculate FlightSections settings by parsing the properties of all the images
+        public List<DroneImageMetadata> CalculateSettings_FlightSections_InputIsImages(string thermalFolderName)
         {
             FlightSections = null;
             DroneConfig.GimbalDataAvail = GimbalDataEnum.AutoYes;
@@ -256,6 +262,7 @@ namespace SkyCombDrone.DroneLogic
                     thisSection.YawDeg = (float)(imageData.FlightYawDegree ?? 0); // PQR We could use GimbalYawDegree!!
                     thisSection.PitchDeg = (float)(imageData.GimbalPitchDegree ?? 0); // We care about camera down angle
                     thisSection.RollDeg = (float)(imageData.FlightRollDegree ?? 0);
+                    thisSection.ImageFileName = imageData.FileName;
 
                     // Add the FlightSection to the Flight
                     FlightSections.AddSection(thisSection, prevSection);

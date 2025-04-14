@@ -49,10 +49,10 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        // Is the input data based on multiple images?
-        public bool InputIsImages { get { return (ThermalVideoName == DataStoreFactory.MultipleImages); } }
         // Is the input data based on a video?
-        public bool InputIsVideo { get { return !InputIsImages; } }
+        public bool InputIsVideo { get { return ThermalVideoName != ""; } }
+        // Is the input data based on multiple images?
+        public bool InputIsImages { get { return !InputIsVideo; } }
 
 
         // Save the Index tab

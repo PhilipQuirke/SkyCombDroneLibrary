@@ -161,7 +161,6 @@ namespace SkyCombDrone.DroneLogic
         public (int firstVideoFrameId, int lastVideoFrameId, int firstVideoFrameMs, int lastVideoFrameMs)
             CalculateFromToS(float fromVideoS, float toVideoS)
         {
-            AssertDataAccess();
             Assert(fromVideoS <= toVideoS, "CalculateFromToS: Bad from/to sec");
 
             int firstVideoFrameId = 1;
@@ -169,25 +168,28 @@ namespace SkyCombDrone.DroneLogic
             int firstVideoFrameMs = 0;
             int lastVideoFrameMs = DurationMs;
 
-            if ((toVideoS > 0) && (toVideoS * 1000 < DurationMs))
+            if (HasDataAccess)
             {
-                lastVideoFrameMs = (int)(toVideoS * 1000);
-                // Refer https://github.com/opencv/opencv/issues/15749
-                SetAndGetCurrFrameMs(lastVideoFrameMs);
-                lastVideoFrameId = CurrFrameId;
-            }
+                if ((toVideoS > 0) && (toVideoS * 1000 < DurationMs))
+                {
+                    lastVideoFrameMs = (int)(toVideoS * 1000);
+                    // Refer https://github.com/opencv/opencv/issues/15749
+                    SetAndGetCurrFrameMs(lastVideoFrameMs);
+                    lastVideoFrameId = CurrFrameId;
+                }
 
-            // Do this one second, as we most likely want video at this frame for subsequent actions.
-            if (fromVideoS > 0)
-            {
-                firstVideoFrameMs = (int)(fromVideoS * 1000);
-                // Refer https://github.com/opencv/opencv/issues/15749
-                SetAndGetCurrFrameMs(firstVideoFrameMs);
-                firstVideoFrameId = CurrFrameId;
-            }
+                // Do this one second, as we most likely want video at this frame for subsequent actions.
+                if (fromVideoS > 0)
+                {
+                    firstVideoFrameMs = (int)(fromVideoS * 1000);
+                    // Refer https://github.com/opencv/opencv/issues/15749
+                    SetAndGetCurrFrameMs(firstVideoFrameMs);
+                    firstVideoFrameId = CurrFrameId;
+                }
 
-            if (fromVideoS < toVideoS + 1)
-                Assert(firstVideoFrameId < lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
+                if (fromVideoS < toVideoS + 1)
+                    Assert(firstVideoFrameId < lastVideoFrameId, "CalculateFromToS: Bad from/to frame id");
+            }
 
             return (firstVideoFrameId, lastVideoFrameId, firstVideoFrameMs, lastVideoFrameMs);
         }
@@ -274,7 +276,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Reset input AND display video frame position & load image
+        // Reset input video frame position & load image
         public void SetAndGetCurrFrame(int inputFrameId)
         {
             InputVideo.SetAndGetCurrFrameId(inputFrameId);

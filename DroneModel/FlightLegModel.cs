@@ -42,7 +42,7 @@ namespace SkyCombDrone.DroneModel
             {
                 Assert(MinStepId >= 0, "FlightLeg.AssertGood: Bad MinStepId");
                 Assert(MaxStepId >= MinStepId, "FlightLeg.AssertGood: Bad MaxStepId");
-                Assert(RangeSumTimeMs > 0, "FlightLeg.AssertGood: Bad TimeMs");
+                Assert(RangeSumTimeMs >= 0, "FlightLeg.AssertGood: Bad TimeMs");
             }
         }
 

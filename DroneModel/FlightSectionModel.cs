@@ -17,9 +17,11 @@ namespace SkyCombDrone.DroneModel
 
         public int SectionId { get { return TardisId; } }
 
-
         // Drone location in longitude and latitude
         public GlobalLocation GlobalLocation { get; set; }
+
+        // When imput is images, name of the image file
+        public string ImageFileName { get; set; } = string.Empty;
 
 
         public FlightSectionModel(int sectionId) : base(sectionId)
@@ -30,7 +32,7 @@ namespace SkyCombDrone.DroneModel
         // One-based settings index values. Must align with GetSettings procedure below
         public const int LongitudeSetting = FirstFreeSetting;
         public const int LatitudeSetting = FirstFreeSetting + 1;
-
+        public const int ImageFileNameSetting = FirstFreeSetting + 2;
 
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
@@ -41,6 +43,7 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("Longitude", GlobalLocation.Longitude, BaseConstants.LatLongNdp);
             answer.Add("Latitude", GlobalLocation.Latitude, BaseConstants.LatLongNdp);
+            answer.Add("Image File Name", ImageFileName);
 
             return answer;
         }
@@ -55,6 +58,7 @@ namespace SkyCombDrone.DroneModel
             int i = FirstFreeSetting - 1;
             GlobalLocation.Longitude = double.Parse(settings[i++]);
             GlobalLocation.Latitude = double.Parse(settings[i++]);
+            ImageFileName = settings[i++];
 
             GlobalLocation.AssertNZ();
         }

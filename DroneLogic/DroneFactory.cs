@@ -97,8 +97,8 @@ namespace SkyCombDrone.DroneLogic
                         // Lennard Sparks' DJI Mavic 3t
                         // Thermal camera: 640×512 @ 30fps
                         // DFOV: Diagonal Field of View = 61 degrees
-                        // so HFOV = 38.1 degrees and VFOV = 47.6 degrees 
-                        drone.InputVideo.HFOVDeg = 38;
+                        // so HFOV = 38.2 degrees and VFOV = 47.6 degrees 
+                        drone.InputVideo.HFOVDeg = 38.2f;
                         break;
 
                     case VideoModel.DjiM3T:
@@ -219,12 +219,12 @@ namespace SkyCombDrone.DroneLogic
                             showDroneSettings(phase);
                             if (droneDataStore.InputIsVideo)
                             {
-                                answer.CalculateSettings_FlightSections_FromFlightLog();
+                                answer.CalculateSettings_FlightSections_InputIsVideo();
                                 CalculateCameraSpecifics_InputIsVideo(answer);
                             }
                             else
                             {
-                                var metaData = answer.CalculateSettings_FlightSections_FromFolder(droneDataStore.ThermalFolderName);
+                                var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.ThermalFolderName);
                                 CalculateCameraSpecifics_InputIsImages(answer, metaData);
                             }
 
