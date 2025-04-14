@@ -199,7 +199,7 @@ namespace SkyCombDrone.DroneLogic
         {
             return
                 outputElseInputDirectory + "\\" +
-                RemoveFileNameSuffix(ShortFileName(inputFileName)) +
+                RemoveFileNameSuffix(ShortFolderFileName(inputFileName)) +
                 "_SkyComb" +
                 inputFileName.Substring(inputFileName.Length - 4);
         }

@@ -367,7 +367,8 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public static string ShortFileName(string filename)
+        // Return the file name (if any) else the last folder name
+        public static string ShortFolderFileName(string filename)
         {
             var index = filename.LastIndexOf('\\');
             if (index < 0)
@@ -386,7 +387,7 @@ namespace SkyCombDrone.DroneModel
         }
         public string ShortFileName()
         {
-            return ShortFileName(FileName);
+            return ShortFolderFileName(FileName);
         }
 
 

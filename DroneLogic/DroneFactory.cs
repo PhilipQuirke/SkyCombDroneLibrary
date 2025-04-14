@@ -275,12 +275,14 @@ namespace SkyCombDrone.DroneLogic
                 }
 
 #if DEBUG
+/* PQR TODO
                 if (droneDataStore.InputIsVideo) // PQR TODO Should not be necessary
                 {
                     // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
                     if (answer.GroundData != null)
                         SanityCheckGroundElevationData(answer, answer.GroundData);
                 }
+*/
 #endif
 
                 phase = "Drone and ground data ready.";

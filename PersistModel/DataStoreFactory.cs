@@ -105,7 +105,7 @@ namespace SkyCombDrone.PersistModel
                 return outputElseInputDirectory + "\\" + lastFolderName + DataStoreSuffix;
             }
             else
-                return outputElseInputDirectory + "\\" + VideoModel.ShortFileName(inputFileName) + DataStoreSuffix;
+                return outputElseInputDirectory + "\\" + VideoModel.ShortFolderFileName(inputFileName) + DataStoreSuffix;
         }
 
 
