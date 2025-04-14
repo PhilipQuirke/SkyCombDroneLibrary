@@ -151,20 +151,28 @@ namespace SkyCombDrone.DroneLogic
         // Check that the Flight DEM and DSM values align with the Ground data values.
         public static void SanityCheckGroundElevationData(Drone drone, GroundData groundData)
         {
-            int maxAllowedDeltaM = 4;
+            int maxAllowedDeltaM = 4; // PQR TODO. This should be 1m
 
             if (groundData != null && groundData.HasDemModel)
                 foreach (var step in drone.FlightSteps.Steps)
                 {
-                    var theDem = groundData.DemModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
-                    BaseConstants.Assert(Math.Abs(theDem - step.Value.DemM) <= maxAllowedDeltaM, "Flight DEM and Ground DEM mismatch");
+                    var theOldDem = step.Value.DemM;
+                    if (theOldDem != BaseConstants.UnknownValue)
+                    {
+                        var theNewDem = groundData.DemModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
+                        BaseConstants.Assert(Math.Abs(theNewDem - theOldDem) <= maxAllowedDeltaM, "Flight DEM and Ground DEM mismatch");
+                    }
                 }
 
             if (groundData != null && groundData.HasDsmModel)
                 foreach (var step in drone.FlightSteps.Steps)
                 {
-                    var theDsm = groundData.DsmModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
-                    BaseConstants.Assert(Math.Abs(theDsm - step.Value.DsmM) <= maxAllowedDeltaM, "Flight DSM and Ground DSM mismatch");
+                    var theOldDsm = step.Value.DsmM;
+                    if (theOldDsm != BaseConstants.UnknownValue)
+                    {
+                        var theNewDsm = groundData.DsmModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
+                        BaseConstants.Assert(Math.Abs(theNewDsm - theOldDsm) <= maxAllowedDeltaM, "Flight DSM and Ground DSM mismatch");
+                    }
                 }
         }
 #endif
@@ -266,12 +274,13 @@ namespace SkyCombDrone.DroneLogic
                     }
                 }
 
-#if DEBUG 
-/* PQR
-                // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-                if (answer.GroundData != null)
-                    SanityCheckGroundElevationData(answer, answer.GroundData);
-PQR */
+#if DEBUG
+                if (droneDataStore.InputIsVideo) // PQR TODO Should not be necessary
+                {
+                    // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
+                    if (answer.GroundData != null)
+                        SanityCheckGroundElevationData(answer, answer.GroundData);
+                }
 #endif
 
                 phase = "Drone and ground data ready.";
