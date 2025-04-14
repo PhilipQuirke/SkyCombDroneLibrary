@@ -194,7 +194,7 @@ namespace SkyCombDrone.PersistModel
                 (thermalVideoName, thermalFlightName) = LocateInputFiles(inputFileName);
 
                 if (thermalVideoName != "")
-                    dataStoreName = DataStoreName(inputDirectory, thermalVideoName, outputElseInputDirectory);
+                    dataStoreName = DataStoreName(inputDirectory, BaseDataStore.RemoveFileNameSuffix(thermalVideoName), outputElseInputDirectory);
 
                 outputVideoName = VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory);
             }

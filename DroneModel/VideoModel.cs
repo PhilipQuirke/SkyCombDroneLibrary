@@ -376,9 +376,13 @@ namespace SkyCombDrone.DroneModel
             var answer = filename.Substring(index + 1);
 
             // Uppercase filename and lowercase suffix for consistency
-            return
-                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
-                answer.Substring(answer.LastIndexOf('.')).ToLower();
+            var dotIndex = answer.LastIndexOf('.');
+            if (dotIndex > 0)
+                return
+                    answer.Substring(0, dotIndex).ToUpper() +
+                    answer.Substring(dotIndex).ToLower();
+
+            return answer;
         }
         public string ShortFileName()
         {
