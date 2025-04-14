@@ -163,8 +163,8 @@ namespace SkyCombDrone.DroneLogic
         {
             Assert(fromVideoS <= toVideoS, "CalculateFromToS: Bad from/to sec");
 
-            int firstVideoFrameId = 1;
-            int lastVideoFrameId = FrameCount;
+            int firstVideoFrameId = 0;
+            int lastVideoFrameId = FrameCount-1;
             int firstVideoFrameMs = 0;
             int lastVideoFrameMs = DurationMs;
 

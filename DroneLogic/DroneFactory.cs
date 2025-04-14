@@ -137,6 +137,13 @@ namespace SkyCombDrone.DroneLogic
             drone.InputVideo.DateEncoded = metaData[0].CreateDate;
 
             drone.DroneConfig.MaxLegGapDurationMs = 2 * num_seconds_between_images * 1000;
+
+            if (drone.HasFlightSections)
+            {
+                drone.InputVideo.FrameCount = drone.FlightSections.Sections.Count;
+                drone.InputVideo.DurationMs = drone.FlightSections.Sections.Last().Value.SumTimeMs;
+                drone.InputVideo.Fps = 1.0 * drone.InputVideo.FrameCount / (drone.InputVideo.DurationMs / 1000.0);
+            }
         }
 
 
