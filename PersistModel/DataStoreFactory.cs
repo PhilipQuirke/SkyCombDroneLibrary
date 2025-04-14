@@ -171,8 +171,7 @@ namespace SkyCombDrone.PersistModel
             string outputElseInputDirectory,
             bool doCreate = true)
         {
-            var index = inputDirectory.LastIndexOf("\\");
-            var thermalFolderName = inputDirectory.Substring(0, index);
+            var thermalFolderName = inputDirectory.Trim('\\');
             var thermalVideoName = "";
             var thermalFlightName = "";
             var dataStoreName = "";
@@ -180,11 +179,6 @@ namespace SkyCombDrone.PersistModel
 
             if (inputFileName == "")
             {
-                // Base datastore name on the input folder name
-                thermalVideoName = ""; // "None"
-                thermalFlightName = "";
-                outputVideoName = "";
-
                 // Set dataStoreName prefix to the last foldername in the input directory
                 dataStoreName = DataStoreName(inputDirectory, "", outputElseInputDirectory);
             }
