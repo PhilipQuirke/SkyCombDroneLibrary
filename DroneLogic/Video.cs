@@ -107,7 +107,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Returns the next frame of the video. Sets CurrVideoFrameID and CurrVideoFrameMs.
+        // Returns the next frame of the video. Sets CurrInputFrameID and CurrInputFrameMs.
         // WARNING: Calling SetFramePos(14) then QueryFrame() will give you frame 15 (not 14).
         public bool GetNextFrame()
         {
