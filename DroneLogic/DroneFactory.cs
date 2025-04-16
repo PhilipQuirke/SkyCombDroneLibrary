@@ -123,7 +123,7 @@ namespace SkyCombDrone.DroneLogic
                 return;
 
             // Images are taken every 2 or 3 seconds
-            int num_seconds_between_images = 2;
+            int num_seconds_between_images = 3;
 
             drone.InputVideo = new VideoData("", null); 
             drone.InputVideo.CameraType = metaData[0].CameraModelName;
