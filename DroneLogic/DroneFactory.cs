@@ -122,7 +122,7 @@ namespace SkyCombDrone.DroneLogic
             if((drone == null) || (metaData == null) || (metaData.Count == 0))  
                 return;
 
-            // Images are taken every 2 or 3 seconds
+            // Images are taken every 2 to 5 seconds
             int num_seconds_between_images = 3;
 
             drone.InputVideo = new VideoData("", null); 
@@ -275,14 +275,9 @@ namespace SkyCombDrone.DroneLogic
                 }
 
 #if DEBUG
-/* PQR TODO
-                if (droneDataStore.InputIsVideo) // PQR TODO Should not be necessary
-                {
-                    // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-                    if (answer.GroundData != null)
-                        SanityCheckGroundElevationData(answer, answer.GroundData);
-                }
-*/
+                // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
+                if (answer.GroundData != null)
+                    SanityCheckGroundElevationData(answer, answer.GroundData);
 #endif
 
                 phase = "Drone and ground data ready.";

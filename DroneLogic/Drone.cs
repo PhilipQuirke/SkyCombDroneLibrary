@@ -1,4 +1,6 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+using Emgu.CV.Structure;
+using Emgu.CV;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
@@ -344,8 +346,9 @@ namespace SkyCombDrone.DroneLogic
 
                 // Do we default to using legs? User can override in UI.
                 // We use legs if the total leg distance is > 33% of the total flight distance
+                var minSections = InputIsVideo ? 200 : 20;
                 DroneConfig.UseLegs =
-                    (FlightSections.Sections.Count > 200) &&
+                    (FlightSections.Sections.Count > minSections) &&
                     (FlightLegs.Legs.Count > 2);
                 if (DroneConfig.UseLegs)
                 {
@@ -356,7 +359,6 @@ namespace SkyCombDrone.DroneLogic
 
                 FlightSteps.CalculateSettings_Summarise();
 
-                // PQR TODO. For folder of images, we would like to remove legs with less than 3 images.
                 // Hard to code as the steps refer to the legs.
                 //FlightLegs.Calculate_Pass2();
                 
@@ -432,21 +434,32 @@ namespace SkyCombDrone.DroneLogic
             datawriter.SaveData_Detail(true, effort);
 
 #if DEBUG
-            /* PQR TODO
-            if (dataStore.InputIsVideo) // PQR TODO Should not be necessary
-            {
-                // Check that the Flight DEM and DSM values align with the Ground data.
-                DroneDataFactory.SanityCheckGroundElevationData(this, GroundData);
+            // Check that the Flight DEM and DSM values align with the Ground data.
+            DroneDataFactory.SanityCheckGroundElevationData(this, GroundData);
 
-                // Check that the DEM and DSM ground data values survive the round trip.
-                GroundData reloadedGroundData = GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStore.DataStoreFileName);
-                // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-                DroneDataFactory.SanityCheckGroundElevationData(this, reloadedGroundData);
-                reloadedGroundData.Dispose();
-                dataStore.FreeResources();
-            }
-            */
+            // Check that the DEM and DSM ground data values survive the round trip.
+            GroundData reloadedGroundData = GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStore.DataStoreFileName);
+            // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
+            DroneDataFactory.SanityCheckGroundElevationData(this, reloadedGroundData);
+            reloadedGroundData.Dispose();
+            dataStore.FreeResources();
 #endif
+        }
+
+
+        // Read a single image from disk into memory
+        public Image<Bgr, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
+        {
+            var section = FlightSections?.Sections[frameId];
+            Assert(section != null, "GetCurrImage_InputIsImages: bad logic 1");
+
+            var imageFileName = section.ImageFileName;
+            Assert(imageFileName != "", "GetCurrImage_InputIsImages: bad logic 2");
+
+            imageFileName = inputDirectory.Trim('\\') + "\\" + imageFileName;
+            Assert(File.Exists(imageFileName), "GetCurrImage_InputIsImages: bad logic 3");
+
+            return new Image<Bgr, byte>(imageFileName);
         }
 
 
