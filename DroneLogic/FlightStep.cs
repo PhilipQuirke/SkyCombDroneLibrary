@@ -545,66 +545,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Drone altitudes are often measured using barometic pressure, which is inaccurate.
-        // See if we can improve the accuracy of the input drone altitude data.          
-        public void CalculateSettings_OnGroundAt(GroundData ground)
-        {
-            try
-            {
-                OnGroundAtFixStartM = 0;
-                OnGroundAtFixEndM = 0;
-
-                // If the drone flight video record started &/or ended when the drone was on the ground
-                // then the ground DEM and drone Altitude should match (within the ground.ElevationAccuracyM error).
-                // If they don't we assume the ground DEM us more accurate, and correct the drone altitude.
-                switch (Drone.DroneConfig.OnGroundAt)
-                {
-                    case OnGroundAtEnum.Start:
-                        // Drone was on ground at start of the flight
-                        OnGroundAtFixStartM = CalcDemLessInputAltitude(ground, Sections.MinTardisId);
-                        OnGroundAtFixEndM = OnGroundAtFixStartM;
-                        break;
-
-                    case OnGroundAtEnum.End:
-                        // Drone was on ground at end of the flight
-                        OnGroundAtFixEndM = CalcDemLessInputAltitude(ground, Sections.MaxTardisId);
-                        OnGroundAtFixStartM = OnGroundAtFixEndM;
-                        break;
-
-                    case OnGroundAtEnum.Both:
-                        // Drone was on ground at the start and the end of the flight.   
-                        OnGroundAtFixStartM = CalcDemLessInputAltitude(ground, Sections.MinTardisId);
-                        OnGroundAtFixEndM = CalcDemLessInputAltitude(ground, Sections.MaxTardisId);
-                        break;
-
-                    case OnGroundAtEnum.Neither:
-                    case OnGroundAtEnum.Auto:
-                        // If the minimum drone altitude is below the minimum ground DEM then correct it.
-                        // This case has been seen for a drone flight from a sea beach where the drone MinAltitude was NEGATIVE 56 metres!
-                        if ((MinDemM != UnknownValue) && (Sections.MinAltitudeM < MinDemM))
-                        {
-                            OnGroundAtFixStartM = MinDemM - Sections.MinAltitudeM;
-                            OnGroundAtFixEndM = OnGroundAtFixStartM;
-                        }
-                        break;
-                }
-
-
-                // If OnGroundAt data gave altitude delats then apply them to all steps 
-                if (HasOnGroundAtFix)
-                    foreach (var thisStep in Steps)
-                        thisStep.Value.CalculateSettings_AltitudeM_ApplyOnGroundAt(
-                            OnGroundAtFixStartM,
-                            OnGroundAtFixEndM,
-                            Sections.MaxTardisId);
-            }
-            catch (Exception ex)
-            {
-                throw ThrowException("FlightSteps.CalculateSettings_OnGroundAt", ex);
-            }
-        }
-
-
         // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM.
         // Depends on AltitudeM, DemM, Yaw & Zoom.
         public void CalculateSettings_CameraDownDeg(VideoData videoData, GroundData? groundData)
@@ -678,14 +618,11 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // User has edited the drone settings including CameraDownDeg & OnGroundAt
+        // User has edited the drone settings including CameraDownDeg 
         public void CalculateSettings_ConfigHasChanged(GroundData groundData, VideoData videoData)
         {
             // Calculate Step.AltitudeM by smoothing Section.AltitudeM
             CalculateSettings_SmoothAltitudeM();
-
-            // Modify Step.AltitudeM using OnGroundAt info
-            CalculateSettings_OnGroundAt(groundData);
 
             // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM. Depends on AltitudeM, DemM & StepVelocityMps
             CalculateSettings_CameraDownDeg(videoData, groundData);
@@ -723,9 +660,6 @@ namespace SkyCombDrone.DroneLogic
 
                     prevStep = theStep;
                 }
-
-                // Modify Step.AltitudeM using OnGroundAt info
-                CalculateSettings_OnGroundAt(groundData);
 
                 // Calculate InputImageCenter and InputImageSizeM.
                 // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
@@ -856,7 +790,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
         // Returns percentage of FlightSteps where the drone AltitudeM is less than ground DemM.
-        // A good answer is 0. A bad OnGroundAt value can mean a value of say 45%
+        // A good answer is 0. 
         public float PercentAltitudeLessThanDem()
         {
             if (Steps.Count == 0)

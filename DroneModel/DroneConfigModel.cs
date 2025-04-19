@@ -8,8 +8,6 @@ namespace SkyCombDrone.DroneModel
 {
     public enum GimbalDataEnum { AutoYes, ManualYes, ManualNo };
 
-    public enum OnGroundAtEnum { Start, End, Both, Neither, Auto };
-
 
     // Configuration settings related to flight data.  
     public class DroneIntervalModel : ConfigBase
@@ -70,15 +68,6 @@ namespace SkyCombDrone.DroneModel
         // then the highest view the app processes is 35 +/- 24 degrees which is 11 to 49 degrees down from the horizon.
         // But the drone operator knows best. So we allow a wide range
         public int MinCameraDownDeg { get; set; } = 25; // Min 25, Max 90
-
-
-        // Does the drone video / flight data start or end at ground level?
-        // Takes values Start, End, Both, Neither, Unknown.
-        // The drone's self-calculated altitude is inaccurate. If OnGroundAt is Start, End or Both, we can correct that inaccuracy.
-        // Refer https://github.com/PhilipQuirke/SkyCombAnalystHelp/Drone.md
-        // section Drone Altitude Accuracy for more detail.
-        // Also https://github.com/PhilipQuirke/SkyCombAnalystHelp/Errors.md
-        public OnGroundAtEnum OnGroundAt { get; set; } = OnGroundAtEnum.Auto;
 
 
         // Free form text describing the input video(s).
@@ -180,7 +169,6 @@ namespace SkyCombDrone.DroneModel
                 { "Gimbal Data Available", GimbalDataAvail.ToString() },
                 { "Fixed Camera Down Degrees", FixedCameraDownDeg },
                 { "Min Camera Down Degrees", MinCameraDownDeg },
-                { "On Ground At", OnGroundAt.ToString() },
                 { "Smooth Section Radius", SmoothSectionRadius },
                 { "Use Legs", UseLegs },
                 { "Notes", ( Notes == "" ? " " : Notes ) },
@@ -198,7 +186,6 @@ namespace SkyCombDrone.DroneModel
             GimbalDataAvail = (GimbalDataEnum)Enum.Parse(typeof(GimbalDataEnum), settings[i++]);
             FixedCameraDownDeg = StringToNonNegInt(settings[i++]);
             MinCameraDownDeg = StringToNonNegInt(settings[i++]);
-            OnGroundAt = (OnGroundAtEnum)Enum.Parse(typeof(OnGroundAtEnum), settings[i++]);
             SmoothSectionRadius = StringToNonNegInt(settings[i++]);
             UseLegs = StringToBool(settings[i++]);
             Notes = settings[i++];
@@ -245,9 +232,6 @@ namespace SkyCombDrone.DroneModel
             var answer =
                 "From " + VideoModel.DurationSecToString(RunVideoFromS) +
                 " to " + VideoModel.DurationSecToString(RunVideoToS) + " \r\n";
-
-            if (OnGroundAt != OnGroundAtEnum.Auto)
-                answer += "On ground at: " + OnGroundAt + "\r\n";
 
             if ((GimbalDataAvail == GimbalDataEnum.AutoYes) ||
                (GimbalDataAvail == GimbalDataEnum.ManualYes))

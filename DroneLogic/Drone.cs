@@ -296,33 +296,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Validate the OnGroundAt setting
-        public bool CalculateSettings_OnGroundAt_IsValid()
-        {
-            if ((DroneConfig.OnGroundAt == OnGroundAtEnum.Neither) ||
-                (DroneConfig.OnGroundAt == OnGroundAtEnum.Auto))
-                return true;
-
-            // The Config.OnGroundAt value is either Start, End or Both. Is this reasonable?
-
-            if (HasGroundData && HasFlightSteps)
-            {
-                // If Ground elevation range is say 20m, and drone altitude range is <= 20,
-                // then "Both", "Start" & "End" are all counter-indicated.
-                if (FlightSteps.MaxDemM - FlightSteps.MinDemM >
-                    FlightSteps.MaxAltitudeM - FlightSteps.MinAltitudeM)
-                    return false;
-
-                // If drone altitude < ground elevation say 10 % of time
-                // then "Both", "Start" & "End" are all counter-indicated.
-                if (FlightSteps.PercentAltitudeLessThanDem() > 10)
-                    return false;
-            }
-
-            return true;
-        }
-
-
         // Calculate flight steps and legs
         public void CalculateSettings_FlightSteps()
         {

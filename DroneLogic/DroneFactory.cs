@@ -254,11 +254,7 @@ namespace SkyCombDrone.DroneLogic
                             showDroneSettings(phase);
                             answer.CalculateSettings_FlightSteps();
                             answer.CalculateSettings_FlightLegs();
-                            if (!answer.CalculateSettings_OnGroundAt_IsValid())
-                            {
-                                answer.DroneConfig.OnGroundAt = OnGroundAtEnum.Neither;
-                                answer.CalculateSettings_ConfigHasChanged();
-                            }
+                            answer.CalculateSettings_ConfigHasChanged();
                             answer.EffortDurations.CalcStepsMs = EffortMs();
 
                             phase = "Calculating swathe seen...";
