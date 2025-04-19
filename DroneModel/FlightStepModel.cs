@@ -63,12 +63,6 @@ namespace SkyCombDrone.DroneModel
 
         // FixAltM is a delta that improves the altitude reported by the drone.
         public float FixAltM { get; set; } = 0;
-        // FixYawDeg is a delta that improves the yaw reported by the drone/camera.
-        // It is the difference between the drone flight path yaw and the camera's real yaw. Often -1, 0 or +1
-        public float FixYawDeg { get; set; } = 0;
-        // FixPitchDeg is a delta that improves the pitch reported by the drone/camera.
-        // It is the difference between the drone / camera reported and the camera's real pitch. Often -1, 0 or +1
-        public float FixPitchDeg { get; set; } = 0;
 
 
         public FlightStepModel(FlightSectionModel flightSection, List<string>? settings = null) : base(flightSection.TardisId)

@@ -186,12 +186,6 @@ namespace SkyCombDrone.DroneLogic
                 }
             }
         }
-        // Best estimate of camera down angle (measured from the vertical)
-        public float FixedCameraToVerticalForwardDeg { get { return CameraToVerticalForwardDeg + FixPitchDeg; } }
-
-
-        // Best estimate of camera yaw. May differ slightly from camera yaw as reported by the drone.
-        public float FixedYawDeg { get { return YawDeg + FixYawDeg; } }
 
 
         // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
@@ -212,7 +206,7 @@ namespace SkyCombDrone.DroneLogic
             // (For thermal cameras the horizon is often brighter causing
             // thermal bloom with causes over estimates of temperature.)
             var vfovDeg = videoData.VFOVDeg;
-            float degreesToVerticalForward = FixedCameraToVerticalForwardDeg;
+            float degreesToVerticalForward = CameraToVerticalForwardDeg;
             if (degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
@@ -396,13 +390,11 @@ namespace SkyCombDrone.DroneLogic
 
 
         // For each step, set FixAltM/FixYawDeg/FixPitchDeg and recalculate the ground image area viewed
-        public void CalculateSettings_FixValues(float fixAltM, float fixYawDeg, float fixPitchDeg, VideoModel videoData, GroundData? groundData)
+        public void CalculateSettings_FixValues(float fixAltM, VideoModel videoData, GroundData? groundData)
         {
             foreach (var theStep in this)
             {
                 theStep.Value.FixAltM = fixAltM;
-                theStep.Value.FixYawDeg = fixYawDeg;
-                theStep.Value.FixPitchDeg = fixPitchDeg;
 
                 theStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
             }
