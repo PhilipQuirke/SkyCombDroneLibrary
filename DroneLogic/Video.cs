@@ -277,7 +277,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Reset input video frame position & load image
-        public void SetAndGetCurrFrame(int inputFrameId)
+        public virtual void SetAndGetCurrFrame(int inputFrameId)
         {
             InputVideo.SetAndGetCurrFrameId(inputFrameId);
         }

@@ -447,6 +447,20 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // Reset input video frame position & load image
+        public override void SetAndGetCurrFrame(int inputFrameId)
+        {
+            if (InputIsVideo)
+                base.SetAndGetCurrFrame(inputFrameId);
+            else
+            {
+                InputVideo.ResetCurrFrame();
+                InputVideo.CurrFrameId = inputFrameId;
+                InputVideo.CurrFrameMs = FlightSections.Sections[inputFrameId].SumTimeMs;
+            }
+        }
+
+
         // Read a single image from disk into memory
         public Image<Bgr, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
         {
