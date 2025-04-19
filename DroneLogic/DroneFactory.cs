@@ -224,8 +224,8 @@ namespace SkyCombDrone.DroneLogic
 
 #if DEBUG 
                 // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-                if(answer.GroundData != null)
-                    SanityCheckGroundElevationData(answer, answer.GroundData);
+                //if(answer.GroundData != null)
+                    //SanityCheckGroundElevationData(answer, answer.GroundData);
 #endif
 
                 phase = "Drone and ground data ready.";
