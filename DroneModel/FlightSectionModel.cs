@@ -17,9 +17,11 @@ namespace SkyCombDrone.DroneModel
 
         public int SectionId { get { return TardisId; } }
 
-
         // Drone location in longitude and latitude
         public GlobalLocation GlobalLocation { get; set; }
+
+        // When imput is images, name of the image file
+        public string ImageFileName { get; set; } = string.Empty;
 
 
         public FlightSectionModel(int sectionId) : base(sectionId)
@@ -30,7 +32,7 @@ namespace SkyCombDrone.DroneModel
         // One-based settings index values. Must align with GetSettings procedure below
         public const int LongitudeSetting = FirstFreeSetting;
         public const int LatitudeSetting = FirstFreeSetting + 1;
-
+        public const int ImageFileNameSetting = FirstFreeSetting + 2;
 
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
@@ -41,6 +43,7 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("Longitude", GlobalLocation.Longitude, BaseConstants.LatLongNdp);
             answer.Add("Latitude", GlobalLocation.Latitude, BaseConstants.LatLongNdp);
+            answer.Add("Image File Name", ImageFileName);
 
             return answer;
         }
@@ -55,6 +58,7 @@ namespace SkyCombDrone.DroneModel
             int i = FirstFreeSetting - 1;
             GlobalLocation.Longitude = double.Parse(settings[i++]);
             GlobalLocation.Latitude = double.Parse(settings[i++]);
+            ImageFileName = settings[i++];
 
             GlobalLocation.AssertNZ();
         }
@@ -65,10 +69,6 @@ namespace SkyCombDrone.DroneModel
     // Raw input data about a flight 
     public abstract class FlightSectionsModel : TardisSummaryModel
     {
-        // The file name containing the flight data
-        public string FileName { get; set; } = "";
-
-
         // Minimum local (not UTC) date/time from the flight data
         public DateTime MinDateTime { get; set; } = DateTime.MinValue;
         // Maximum local (not UTC) date/time from the flight data
@@ -158,20 +158,6 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public string ShortFileName()
-        {
-            if (FileName == "")
-                return "";
-
-            var answer = FileName.Substring(FileName.LastIndexOf('\\') + 1);
-
-            // Uppercase filename and lowercase suffix for consistency
-            return
-                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
-                answer.Substring(answer.LastIndexOf('.')).ToLower();
-        }
-
-
         public string DescribePath
         {
             get
@@ -188,7 +174,6 @@ namespace SkyCombDrone.DroneModel
         {
             var answer = base.GetSettings();
 
-            answer.Add("File Name", ShortFileName());
             answer.Add("Min Date Time", MinDateTime.ToString(DateFormat));
             answer.Add("Max Date Time", MaxDateTime.ToString(DateFormat));
             answer.Add("Min Global Location", (MinGlobalLocation != null ? MinGlobalLocation.ToString() : ""));
@@ -209,7 +194,6 @@ namespace SkyCombDrone.DroneModel
         {
             int index = LoadSettingsOffset(settings);
 
-            FileName = settings[index++];
             MinDateTime = DateTime.Parse(settings[index++]);
             MaxDateTime = DateTime.Parse(settings[index++]);
             MinGlobalLocation = new GlobalLocation(settings[index++]);

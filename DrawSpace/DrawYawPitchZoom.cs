@@ -99,7 +99,7 @@ namespace SkyCombDrone.DrawSpace
                             drawDirectionDigits = drawDirectionDigits && (Math.Abs(distDeg) > 5);
                             var deltaX = distDeg * (topRightPt.X - topLeftPt.X) / HFOVDeg;
 
-                            var pt = new Point(bottomMiddlePt.X + deltaX, bottomMiddlePt.Y);
+                            var pt = new Point((int)(bottomMiddlePt.X + deltaX), bottomMiddlePt.Y);
                             image.Draw(new LineSegment2D(new Point(pt.X, topY), new Point(pt.X, bottomY)), activeBgr, lineThick);
 
                             var textPt = new Point(pt.X - 5 * fontScale * compassDirections[i].Length, bottomMiddlePt.Y);

@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 
@@ -96,7 +96,7 @@ namespace SkyCombDrone.DroneLogic
     public class FlightLegs : ConfigBase
     {
         // The list of flight legs in time order.
-        public List<FlightLeg> Legs = new();
+        public List<FlightLeg> Legs { get; private set; } = new();
 
 
         public FlightLegs()
@@ -125,27 +125,6 @@ namespace SkyCombDrone.DroneLogic
                 if (theStep.Key == legEndKey)
                     break;
             }
-        }
-
-
-        // Remove legs that are too short
-        private void RemoveSmallLinealLegs(int min_lineal_length_m)
-        {
-            bool removed = false;
-            for (int i = Legs.Count - 1; i >= 0; i--)
-            {
-                var leg = Legs[i];
-                if (leg.MaxSumLinealM - leg.MinSumLinealM < min_lineal_length_m)
-                {
-                    removed = true;
-                    Legs.RemoveAt(i);
-                }
-            }
-
-            if (removed)
-                // Rename the remaining legs into a continuous sequence
-                for (int i = 0; i < Legs.Count; i++)
-                    Legs[i].FlightLegId = i + 1;
         }
 
 
@@ -372,23 +351,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // If we have many legs we may be running a search grid with long legs and short legs.
-        // Remove short legs as they are less interesting.
-        public void Calculate_Pass2()
-        {
-            int optimal_num_legs = 26; // Based on UI constraints
-
-            for (int lineal_length_m = 5; lineal_length_m <= 50; lineal_length_m += 5)
-            {
-                if (Legs.Count > optimal_num_legs)
-                    RemoveSmallLinealLegs(lineal_length_m);
-
-                if (Legs.Count <= optimal_num_legs)
-                    return;
-            }
-        }
-
-
         // Update the leg objects
         public void Calculate_Pass3(FlightSteps steps)
         {
@@ -402,8 +364,8 @@ namespace SkyCombDrone.DroneLogic
                         step.Value.FlightLeg = leg;
                     }
 
-                Assert(leg.MinTardisId > 0, "FlightLeg.Calculate_Pass2: Bad MinTardisId");
-                Assert(leg.MaxTardisId > 0, "FlightLeg.Calculate_Pass2: Bad MaxTardisId");
+                Assert(leg.MinTardisId > 0, "FlightLeg.Calculate_Pass3: Bad MinTardisId");
+                Assert(leg.MaxTardisId > 0, "FlightLeg.Calculate_Pass3: Bad MaxTardisId");
             }
         }
 
@@ -471,7 +433,7 @@ namespace SkyCombDrone.DroneLogic
                 {
                     Assert(thisLeg.MinStepId >= 0, "FlightLegs.AssertGood: Bad MinStepId");
                     Assert(thisLeg.MaxStepId > 0, "FlightLegs.AssertGood: Bad MaxStepId");
-                    Assert(thisLeg.RangeSumTimeMs > 0, "FlightLegs.AssertGood: Bad RangeSumTimeMs");
+                    Assert(thisLeg.RangeSumTimeMs >= 0, "FlightLegs.AssertGood: Bad RangeSumTimeMs");
                     Assert(thisLeg.MinAltitudeM > 0, "FlightLegs.AssertGood: Bad MinAltitudeM");
                     Assert(thisLeg.MaxAltitudeM > 0, "FlightLegs.AssertGood: Bad MaxAltitudeM");
                 }

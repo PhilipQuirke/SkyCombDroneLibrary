@@ -427,7 +427,7 @@ namespace SkyCombDrone.DroneModel
                 { "Min Time Ms", MinTimeMs },
                 { "Max Sum Time Ms", MaxSumTimeMs },
                 { "Min Sum Time Ms", MinSumTimeMs },
-                { "Range Sum Time Ms", MaxSumTimeMs - MinSumTimeMs },
+                { "Range Sum Time Ms", RangeSumTimeMs },
                 { "Max Speed Mps", MaxSpeedMps, LocationNdp  },
                 { "Min Speed Mps", MinSpeedMps, LocationNdp  },
             };

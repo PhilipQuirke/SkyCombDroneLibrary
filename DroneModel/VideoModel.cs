@@ -12,15 +12,14 @@ namespace SkyCombDrone.DroneModel
     public class VideoModel : BaseConstants, IDisposable
     {
         // Drone and camera combinations for which we have specific settings
-        public const string DjiPrefix = "SRT";
-        public const string DjiGeneric = "SRT (DJI)";
-        public const string DjiM2E = "SRT (DJI M2E Dual)";
-        public const string DjiMavic3 = "SRT (DJI Mavic 3)";
-        public const string DjiM3T = "SRT (DJI M3T)";
-        public const string DjiM300XT2 = "SRT (DJI M300 XT2)";
-        public const string DjiH20T = "SRT (DJI H20T)";
-        public const string DjiH20N = "SRT (DJI H20N)";
-        public const string DjiH30T = "SRT (DJI H30T)";
+        public const string DjiGeneric = "DJI";
+        public const string DjiM2E = "DJI M2E Dual";
+        public const string DjiMavic3 = "DJI Mavic 3";
+        public const string DjiM3T = "DJI M3T";
+        public const string DjiM300XT2 = "DJI M300 XT2";
+        public const string DjiH20T = "ZH20T"; // Z for ZenMuse
+        public const string DjiH20N = "ZH20N"; // Z for ZenMuse. Matches DJI image property value
+        public const string DjiH30T = "ZH30T"; // Z for ZenMuse
 
 
         // THERMAL / OPTICAL CAMERA SETTINGS
@@ -34,7 +33,7 @@ namespace SkyCombDrone.DroneModel
 
         // Frames per second. Drone physical implementation means it is not 100% accurate for each second of a drone video.
         // Example Fps seen with M2E Dual are 30 and 8.78
-        public double Fps { get; set; }
+        public double Fps { get; set; } = UnknownValue;
 
 
         // Total number of frames in video
@@ -56,7 +55,7 @@ namespace SkyCombDrone.DroneModel
 
 
         // Horizontal video image field of view in degrees. Differs per manufacturer's camera.
-        public int HFOVDeg { get; set; } = 38;
+        public float HFOVDeg { get; set; } = 38.2f;
         // Vertical video image field of view in degrees. Differs per manufacturer's camera. Assumes pixels are square
         public float VFOVDeg { get { return HFOVDeg * (float)ImageHeight / ImageWidth; } }
 
@@ -101,18 +100,21 @@ namespace SkyCombDrone.DroneModel
         public int FontScale { get { return ImageWidth < 1000 ? 1 : 2; } }
 
 
+        public bool HasDataAccess { get { return DataAccess != null; } }
         public void AssertDataAccess()
         {
-            Assert(DataAccess != null, "DataAccess is null");
+            Assert(HasDataAccess, "DataAccess is null");
         }
 
 
-        public VideoModel(string fileName, Func<string, DateTime> readDateEncodedUtc)
+        public VideoModel(string videoFileName, Func<string, DateTime> readDateEncodedUtc)
         {
+            FileName = videoFileName;
+            if(FileName == "")
+                return;
+
             try
             {
-                FileName = fileName;
-
                 if (!System.IO.File.Exists(FileName))
                     // This sometimes happens when files are transferred between laptops
                     // when one laptop uses C: and the other uses D:
@@ -266,7 +268,7 @@ namespace SkyCombDrone.DroneModel
         // Get the class's settings as datapairs (e.g. for saving to a spreadsheet)
         public DataPairList GetSettings()
         {
-            var answer = new DataPairList()
+            return new DataPairList()
             {
                 { "File Name", ShortFileName() },
                 { "Camera Type", CameraType },
@@ -275,18 +277,14 @@ namespace SkyCombDrone.DroneModel
                 { "Time Ms", DurationMs },
                 { "Image Width", ImageWidth },
                 { "Image Height", ImageHeight },
-                { "HFOV Deg", HFOVDeg },
-                { "VFOV Deg", VFOVDeg, 2 },
+                { "HFOV Deg", HFOVDeg, 1 },
+                { "VFOV Deg", VFOVDeg, 1 },
                 { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
                 { "Date Encoded", DateEncoded == DateTime.MinValue ? "" : DateEncoded.ToString(BaseConstants.DateFormat) },
                 { "Color Md", (ColorMd == "" ? "default" : ColorMd ) },
-                { "Deprecated", true },
+                { "Thermal Min Temp C", ThermalMinTempC },
+                { "Thermal Max Temp C", ThermalMaxTempC },
             };
-
-            answer.Add("Thermal Min Temp C", ThermalMinTempC);
-            answer.Add("Thermal Max Temp C", ThermalMaxTempC);
-
-            return answer;
         }
 
 
@@ -305,7 +303,7 @@ namespace SkyCombDrone.DroneModel
             DurationMs = ConfigBase.StringToInt(settings[i++]);
             ImageWidth = ConfigBase.StringToInt(settings[i++]);
             ImageHeight = ConfigBase.StringToInt(settings[i++]);
-            HFOVDeg = ConfigBase.StringToInt(settings[i++]);
+            HFOVDeg = ConfigBase.StringToFloat(settings[i++]);
             i++; // Skip VFOVDeg 
 
             if (settings[i] != "")
@@ -323,7 +321,6 @@ namespace SkyCombDrone.DroneModel
                 i++;
             }
             ColorMd = settings[i++].ToLower();
-            i++; // Deprecated
 
             ThermalMinTempC = ConfigBase.StringToInt(settings[i++]);
             ThermalMaxTempC = ConfigBase.StringToInt(settings[i++]);
@@ -370,7 +367,8 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public static string ShortFileName(string filename)
+        // Return the file name (if any) else the last folder name
+        public static string ShortFolderFileName(string filename)
         {
             var index = filename.LastIndexOf('\\');
             if (index < 0)
@@ -379,13 +377,17 @@ namespace SkyCombDrone.DroneModel
             var answer = filename.Substring(index + 1);
 
             // Uppercase filename and lowercase suffix for consistency
-            return
-                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
-                answer.Substring(answer.LastIndexOf('.')).ToLower();
+            var dotIndex = answer.LastIndexOf('.');
+            if (dotIndex > 0)
+                return
+                    answer.Substring(0, dotIndex).ToUpper() +
+                    answer.Substring(dotIndex).ToLower();
+
+            return answer;
         }
         public string ShortFileName()
         {
-            return ShortFileName(FileName);
+            return ShortFolderFileName(FileName);
         }
 
 

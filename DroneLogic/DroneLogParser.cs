@@ -204,15 +204,15 @@ namespace SkyCombDrone.DroneLogic
                 sections.Sections.Clear();
 
                 // See if there is an SRT file with the same name as the video file, just a different extension
-                sections.FileName = BaseDataStore.SwapFileNameExtension(video.FileName, ".SRT");
-                if (!System.IO.File.Exists(sections.FileName))
+                var fileName = BaseDataStore.SwapFileNameExtension(video.FileName, ".SRT");
+                if (!System.IO.File.Exists(fileName))
                     return (false, cameraPitchYawRoll);
 
                 // For DJI drones, flight information is in the SRT text file 
                 video.CameraType = VideoModel.DjiGeneric;
 
 
-                File = new(sections.FileName);
+                File = new(fileName);
 
                 // Loop through all the lines
                 FlightSection? prevSection = null;
@@ -483,7 +483,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                throw BaseConstants.ThrowException("Drone_DJI_SRT: Unable to parse flight log " + sections.FileName + ", Sections=" + sections.Sections.Count + ", " + ex.Message);
+                throw BaseConstants.ThrowException("Drone_DJI_SRT: Unable to parse flight log, Sections=" + sections.Sections.Count + ", " + ex.Message);
             }
             finally
             {

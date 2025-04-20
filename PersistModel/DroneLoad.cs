@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
@@ -169,14 +169,15 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public FlightSections LoadSettings(string videoName, VideoData video, string logName, int col)
+        public FlightSections LoadSettings(string videoName, VideoData video, int col)
         {
-            video.LoadSettings(VideoSettings(col));
-            video.FileName = videoName;
+            if (video != null)
+            {
+                video.LoadSettings(VideoSettings(col));
+                video.FileName = videoName;
+            }
 
-            var flightSections = FlightInputSettings(col);
-            flightSections.FileName = logName;
-            return flightSections;
+            return FlightInputSettings(col);
         }
     }
 }

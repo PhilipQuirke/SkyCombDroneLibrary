@@ -63,12 +63,6 @@ namespace SkyCombDrone.DroneModel
 
         // FixAltM is a delta that improves the altitude reported by the drone.
         public float FixAltM { get; set; } = 0;
-        // FixYawDeg is a delta that improves the yaw reported by the drone/camera.
-        // It is the difference between the drone flight path yaw and the camera's real yaw. Often -1, 0 or +1
-        public float FixYawDeg { get; set; } = 0;
-        // FixPitchDeg is a delta that improves the pitch reported by the drone/camera.
-        // It is the difference between the drone / camera reported and the camera's real pitch. Often -1, 0 or +1
-        public float FixPitchDeg { get; set; } = 0;
 
 
         public FlightStepModel(FlightSectionModel flightSection, List<string>? settings = null) : base(flightSection.TardisId)
@@ -147,42 +141,16 @@ namespace SkyCombDrone.DroneModel
     // FlightStepsModel summarises a list of FlightSteps and other summary data
     public abstract class FlightStepsModel : FlightStepSummaryModel
     {
-        // The file name containing the flight data
-        public string FileName { get; set; }
-
-
-        // Drone altitudes are often measured using barometic pressure, which is inaccurate, and can be negative!
-        // These offsets (derived from OnGroundAt logic) are added to the drone FlightStep altitudes to give more accurate altitudes.
-        protected float OnGroundAtFixStartM { get; set; } = 0;
-        protected float OnGroundAtFixEndM { get; set; } = 0;
-        // Do we have DroneOnGroundAtFix offsets?
-        public bool HasOnGroundAtFix { get { return (OnGroundAtFixStartM != 0 || OnGroundAtFixEndM != 0); } }
-
         // The average height of the drone above the DEM over these steps
         public float AvgHeightOverDemM { get; set; } = BaseConstants.UnknownValue;
         // The min height of the drone above the DSM over these steps
         public float MinHeightOverDsmM { get; set; } = BaseConstants.UnknownValue;
 
 
-        public FlightStepsModel(string fileName, List<string>? settings = null)
+        public FlightStepsModel(List<string>? settings = null)
         {
-            FileName = fileName;
             if (settings != null)
                 LoadSettings(settings);
-        }
-
-
-        public string ShortFileName()
-        {
-            if (FileName == "")
-                return "";
-
-            var answer = FileName.Substring(FileName.LastIndexOf('\\') + 1);
-
-            // Uppercase filename and lowercase suffix for consistency
-            return
-                answer.Substring(0, answer.LastIndexOf('.')).ToUpper() +
-                answer.Substring(answer.LastIndexOf('.')).ToLower();
         }
 
 
@@ -191,14 +159,11 @@ namespace SkyCombDrone.DroneModel
         {
             var answer = base.GetSettings();
 
-            answer.Add("File Name", ShortFileName());
             answer.Add("Avg Speed Mps", AvgSpeedMps, 2);
             answer.Add("Min Dem M", MinDemM, ElevationNdp);
             answer.Add("Max Dem M", MaxDemM, ElevationNdp);
             answer.Add("Min Dsm M", MinDsmM, ElevationNdp);
             answer.Add("Max Dsm M", MaxDsmM, ElevationNdp);
-            answer.Add("OnGroundAt Fix Start M", OnGroundAtFixStartM, ElevationNdp);
-            answer.Add("OnGroundAt Fix End M", OnGroundAtFixEndM, ElevationNdp);
             answer.Add("Avg Ht over Dem M", AvgHeightOverDemM, ElevationNdp);
             answer.Add("Min Ht over Dsm M", MinHeightOverDsmM, ElevationNdp);
 
@@ -212,14 +177,11 @@ namespace SkyCombDrone.DroneModel
         {
             int offset = LoadSettingsOffset(settings);
 
-            FileName = settings[offset++];
             AvgSpeedMps = StringToFloat(settings[offset++]);
             MinDemM = StringToFloat(settings[offset++]);
             MaxDemM = StringToFloat(settings[offset++]);
             MinDsmM = StringToFloat(settings[offset++]);
             MaxDsmM = StringToFloat(settings[offset++]);
-            OnGroundAtFixStartM = StringToFloat(settings[offset++]);
-            OnGroundAtFixEndM = StringToFloat(settings[offset++]);
             AvgHeightOverDemM = StringToFloat(settings[offset++]);
             MinHeightOverDsmM = StringToFloat(settings[offset++]);
         }

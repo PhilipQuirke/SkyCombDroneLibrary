@@ -143,7 +143,6 @@ namespace SkyCombDrone.DroneLogic
         }
         public void AssertGood()
         {
-            Assert(FileName != "", "FlightSections.AssertGood: No FileName");
             AssertGood_GlobalLocations();
             AssertGood_SizeM();
         }
@@ -327,6 +326,27 @@ namespace SkyCombDrone.DroneLogic
             foreach (var thisSection in Sections)
                 SummariseTardis(thisSection.Value);
             AssertGood_SizeM();
+        }
+
+
+        // Return the closest FlightSection to the input param seconds
+        public FlightSection SecondToFlightSection( float seconds )
+        {
+            int milliseconds = (int)(seconds * 1000);
+
+            FlightSection prevSection = null;
+            foreach ((_, FlightSection thisSection) in Sections)
+            {
+                if (thisSection.SumTimeMs == milliseconds)
+                    return thisSection;
+
+                if (thisSection.SumTimeMs > milliseconds)
+                    return prevSection;
+
+                prevSection = thisSection;
+            }
+
+            return prevSection;
         }
     }
 }

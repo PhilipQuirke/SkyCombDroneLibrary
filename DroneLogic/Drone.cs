@@ -1,4 +1,6 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+using Emgu.CV.Structure;
+using Emgu.CV;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
@@ -63,6 +65,10 @@ namespace SkyCombDrone.DroneLogic
             return ((!DroneConfig.UseGimbalData) || (Math.Abs(flightStep.PitchDeg) >= DroneConfig.MinCameraDownDeg));
         }
 
+        // Is the input data based on a video?
+        public bool InputIsVideo { get { return HasInputVideo && InputVideo.FileName != ""; } }
+        // Is the input data based on multiple images?
+        public bool InputIsImages { get { return !InputIsVideo; } }
 
         public Drone(DroneConfigModel config)
         {
@@ -96,28 +102,35 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Load video(s) objects
-        public bool LoadSettings_Videos(DroneDataStore dataStore, Func<string, DateTime> readDateEncodedUtc)
+        // Load file settings and maybe create video object
+        public bool LoadFileSettings(DroneDataStore dataStore, Func<string, DateTime> readDateEncodedUtc)
         {
+            bool success = false;
+            FreeResources_Video();
+
             try
             {
                 DroneLoad dataReader = new(dataStore, this);
                 dataStore.SelectWorksheet(DroneDataStore.FileSettingsTabName);
 
-                // Without a video we can't do anything
-                if (dataStore.ThermalVideoName != "")
-                    InputVideo = new VideoData(dataStore.ThermalVideoName, readDateEncodedUtc);
+                if (dataStore.InputIsImages)
+                { 
+                    InputVideo = new VideoData("", null);
+                    success = true;
+                }
 
-                if (HasInputVideo)
-                    return true;
+                else if (dataStore.ThermalVideoName != "")
+                {
+                    InputVideo = new VideoData(dataStore.ThermalVideoName, readDateEncodedUtc);
+                    success = true;
+                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Suppressed Drone.LoadSettings_Videos failure: " + ex.ToString());
+                Debug.WriteLine("Suppressed Drone.LoadSettings failure: " + ex.ToString());
             }
 
-            FreeResources_Video();
-            return false;
+            return success;
         }
 
 
@@ -138,16 +151,13 @@ namespace SkyCombDrone.DroneLogic
                     dataReader.EffortSettings();
 
                     phase = 2;
-                    if (dataStore.ThermalVideoName != "")
-                        FlightSections = dataReader.LoadSettings(
-                            dataStore.ThermalVideoName, InputVideo,
-                            dataStore.ThermalFlightName,
-                            DroneLoad.MidColOffset);
+                    FlightSections = dataReader.LoadSettings(
+                        dataStore.ThermalVideoName, InputVideo,
+                        DroneLoad.MidColOffset);
 
 
                     phase = 3;
                     FlightSteps = new(this, dataReader.FlightStepsSettings());
-                    FlightSteps.FileName = dataStore.ThermalFlightName;
 
                     FlightLegs = new();
 
@@ -187,7 +197,7 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Suppressed Drone.LoadSettings_Flight failure (Phase =" + phase + "):" + ex.ToString());
+                Debug.WriteLine("Suppressed Drone.LoadSettings_Flight failure (Phase =" + phase + "):" + ex.ToString());
             }
 
             FreeResources_Flight();
@@ -213,10 +223,62 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate FlightSections settings by parsing the flight logs (if any). Updates Drone.CameraType
-        public void CalculateSettings_FlightSections()
+        public void CalculateSettings_FlightSections_InputIsVideo()
         {
             FlightSections = null;
             LoadFlightDataFromTextFile(InputVideo);
+        }
+
+
+        // Calculate FlightSections settings by parsing the properties of all the images
+        public List<DroneImageMetadata> CalculateSettings_FlightSections_InputIsImages(string thermalFolderName)
+        {
+            FlightSections = null;
+            DroneConfig.GimbalDataAvail = GimbalDataEnum.AutoYes;
+
+            List<DroneImageMetadata> metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(thermalFolderName + "\\");
+            if ((metadataList != null) && (metadataList.Count > 0))
+            {
+                FlightSections = new();
+                var firstCreateDate = metadataList[0].CreateDate;
+
+                // Loop through all the images
+                FlightSection? prevSection = null;
+                int prevSectionId = -1;
+                foreach (var imageData in metadataList)
+                {
+                    var thisSectionId = prevSectionId + 1;
+                    FlightSection thisSection = new(this, thisSectionId);
+                    thisSection.StartTime = imageData.CreateDate - firstCreateDate;
+
+                    if (prevSection == null)
+                        FlightSections.MinDateTime = imageData.CreateDate;
+                    else
+                        FlightSections.MaxDateTime = imageData.CreateDate;
+
+                    thisSection.GlobalLocation.Latitude = imageData.LRFLat ?? 0;
+                    thisSection.GlobalLocation.Longitude = imageData.LRFLon ?? 0;
+                    thisSection.AltitudeM = (float)(imageData.GpsAltitude ?? 0);
+                    thisSection.FocalLength = (float)(imageData.FocalLength ?? 0);
+                    thisSection.Zoom = (float)imageData.DigitalZoomRatio;
+                    thisSection.YawDeg = (float)(imageData.FlightYawDegree ?? 0); // PQR We could use GimbalYawDegree!!
+                    thisSection.PitchDeg = (float)(imageData.GimbalPitchDegree ?? 0); // We care about camera down angle
+                    thisSection.RollDeg = (float)(imageData.FlightRollDegree ?? 0);
+                    thisSection.ImageFileName = imageData.FileName;
+
+                    // Add the FlightSection to the Flight
+                    FlightSections.AddSection(thisSection, prevSection);
+
+                    prevSection = thisSection;
+                    prevSectionId = thisSectionId;
+                }
+
+                FlightSections.SetTardisMaxKey();
+                FlightSections.CalculateSettings();
+                FlightSections.AssertGood();
+            }
+
+            return metadataList;
         }
 
 
@@ -234,35 +296,8 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Validate the OnGroundAt setting
-        public bool CalculateSettings_OnGroundAt_IsValid()
-        {
-            if ((DroneConfig.OnGroundAt == OnGroundAtEnum.Neither) ||
-                (DroneConfig.OnGroundAt == OnGroundAtEnum.Auto))
-                return true;
-
-            // The Config.OnGroundAt value is either Start, End or Both. Is this reasonable?
-
-            if (HasGroundData && HasFlightSteps)
-            {
-                // If Ground elevation range is say 20m, and drone altitude range is <= 20,
-                // then "Both", "Start" & "End" are all counter-indicated.
-                if (FlightSteps.MaxDemM - FlightSteps.MinDemM >
-                    FlightSteps.MaxAltitudeM - FlightSteps.MinAltitudeM)
-                    return false;
-
-                // If drone altitude < ground elevation say 10 % of time
-                // then "Both", "Start" & "End" are all counter-indicated.
-                if (FlightSteps.PercentAltitudeLessThanDem() > 10)
-                    return false;
-            }
-
-            return true;
-        }
-
-
         // Calculate flight steps and legs
-        public void CalculateSettings_StepsAndLegs()
+        public void CalculateSettings_FlightSteps()
         {
             if (HasFlightSections)
             {
@@ -270,15 +305,23 @@ namespace SkyCombDrone.DroneLogic
                 FlightSteps = new(this);
                 FlightSteps.CalculateSettings(InputVideo, GroundData);
                 FlightSteps.AssertGood();
+            }
+        }
 
+
+        public void CalculateSettings_FlightLegs()
+        {
+            if (HasFlightSections)
+            {
                 // Calculate the flight legs Min/MaxStepIds
                 FlightLegs = new();
                 FlightLegs.Calculate_Pass1(FlightSections, FlightSteps, DroneConfig);
 
                 // Do we default to using legs? User can override in UI.
                 // We use legs if the total leg distance is > 33% of the total flight distance
+                var minSections = InputIsVideo ? 200 : 20;
                 DroneConfig.UseLegs =
-                    (FlightSections.Sections.Count > 200) &&
+                    (FlightSections.Sections.Count > minSections) &&
                     (FlightLegs.Legs.Count > 2);
                 if (DroneConfig.UseLegs)
                 {
@@ -287,9 +330,11 @@ namespace SkyCombDrone.DroneLogic
                     DroneConfig.UseLegs = (legsLinealM / sectionsLinealM > 0.33f);
                 }
 
-                // Refine the flight steps settings using leg information
-                FlightSteps.CalculateSettings_RefineLocationData(InputVideo, FlightLegs, GroundData);
+                FlightSteps.CalculateSettings_Summarise();
 
+                // Hard to code as the steps refer to the legs.
+                //FlightLegs.Calculate_Pass2();
+                
                 FlightLegs.Calculate_Pass3(FlightSteps);
                 FlightLegs.AssertGood(HasFlightSteps);
             }
@@ -347,7 +392,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void SaveSettings(DroneDataStore dataStore, bool firstSave)
+        public void SaveAllData(DroneDataStore dataStore, bool firstSave)
         {
             var effort = Stopwatch.StartNew();
 
@@ -366,12 +411,42 @@ namespace SkyCombDrone.DroneLogic
             DroneDataFactory.SanityCheckGroundElevationData(this, GroundData);
 
             // Check that the DEM and DSM ground data values survive the round trip.
-            GroundData reloadedGroundData = SkyCombGround.PersistModel.GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStore.DataStoreFileName);
+            GroundData reloadedGroundData = GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStore.DataStoreFileName);
             // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
             DroneDataFactory.SanityCheckGroundElevationData(this, reloadedGroundData);
             reloadedGroundData.Dispose();
             dataStore.FreeResources();
 #endif
+        }
+
+
+        // Reset input video frame position & load image
+        public override void SetAndGetCurrFrame(int inputFrameId)
+        {
+            if (InputIsVideo)
+                base.SetAndGetCurrFrame(inputFrameId);
+            else
+            {
+                InputVideo.ResetCurrFrame();
+                InputVideo.CurrFrameId = inputFrameId;
+                InputVideo.CurrFrameMs = FlightSections.Sections[inputFrameId].SumTimeMs;
+            }
+        }
+
+
+        // Read a single image from disk into memory
+        public Image<Bgr, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
+        {
+            var section = FlightSections?.Sections[frameId];
+            Assert(section != null, "GetCurrImage_InputIsImages: bad logic 1");
+
+            var imageFileName = section.ImageFileName;
+            Assert(imageFileName != "", "GetCurrImage_InputIsImages: bad logic 2");
+
+            imageFileName = inputDirectory.Trim('\\') + "\\" + imageFileName;
+            Assert(File.Exists(imageFileName), "GetCurrImage_InputIsImages: bad logic 3");
+
+            return new Image<Bgr, byte>(imageFileName);
         }
 
 
@@ -531,7 +606,6 @@ namespace SkyCombDrone.DroneLogic
 
             if (!success)
             {
-                // Try to load the flight log from a second drone manufacturer's flight log file. PQR TODO
                 flightData = new FlightSections();
                 success = false;
             }

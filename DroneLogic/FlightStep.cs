@@ -1,5 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
-using SkyCombDrone.CommonSpace;
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
@@ -187,12 +186,6 @@ namespace SkyCombDrone.DroneLogic
                 }
             }
         }
-        // Best estimate of camera down angle (measured from the vertical)
-        public float FixedCameraToVerticalForwardDeg { get { return CameraToVerticalForwardDeg + FixPitchDeg; } }
-
-
-        // Best estimate of camera yaw. May differ slightly from camera yaw as reported by the drone.
-        public float FixedYawDeg { get { return YawDeg + FixYawDeg; } }
 
 
         // Calculate CameraDownDegInputImageCenter, InputImageSizeM,
@@ -213,7 +206,7 @@ namespace SkyCombDrone.DroneLogic
             // (For thermal cameras the horizon is often brighter causing
             // thermal bloom with causes over estimates of temperature.)
             var vfovDeg = videoData.VFOVDeg;
-            float degreesToVerticalForward = FixedCameraToVerticalForwardDeg;
+            float degreesToVerticalForward = CameraToVerticalForwardDeg;
             if (degreesToVerticalForward >= 90 - vfovDeg / 2)
                 return;
 
@@ -397,13 +390,11 @@ namespace SkyCombDrone.DroneLogic
 
 
         // For each step, set FixAltM/FixYawDeg/FixPitchDeg and recalculate the ground image area viewed
-        public void CalculateSettings_FixValues(float fixAltM, float fixYawDeg, float fixPitchDeg, VideoModel videoData, GroundData? groundData)
+        public void CalculateSettings_FixValues(float fixAltM, VideoModel videoData, GroundData? groundData)
         {
             foreach (var theStep in this)
             {
                 theStep.Value.FixAltM = fixAltM;
-                theStep.Value.FixYawDeg = fixYawDeg;
-                theStep.Value.FixPitchDeg = fixPitchDeg;
 
                 theStep.Value.CalculateSettings_InputImageCenterDemDsm(videoData, groundData);
             }
@@ -464,11 +455,10 @@ namespace SkyCombDrone.DroneLogic
 
 
         public FlightSteps(Drone drone, List<string>? settings = null)
-            : base(drone.FlightSections.FileName, settings)
+            : base(settings)
         {
             Drone = drone;
             Sections = drone.FlightSections;
-            FileName = drone.FlightSections.FileName;
         }
 
 
@@ -547,66 +537,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Drone altitudes are often measured using barometic pressure, which is inaccurate.
-        // See if we can improve the accuracy of the input drone altitude data.          
-        public void CalculateSettings_OnGroundAt(GroundData ground)
-        {
-            try
-            {
-                OnGroundAtFixStartM = 0;
-                OnGroundAtFixEndM = 0;
-
-                // If the drone flight video record started &/or ended when the drone was on the ground
-                // then the ground DEM and drone Altitude should match (within the ground.ElevationAccuracyM error).
-                // If they don't we assume the ground DEM us more accurate, and correct the drone altitude.
-                switch (Drone.DroneConfig.OnGroundAt)
-                {
-                    case OnGroundAtEnum.Start:
-                        // Drone was on ground at start of the flight
-                        OnGroundAtFixStartM = CalcDemLessInputAltitude(ground, Sections.MinTardisId);
-                        OnGroundAtFixEndM = OnGroundAtFixStartM;
-                        break;
-
-                    case OnGroundAtEnum.End:
-                        // Drone was on ground at end of the flight
-                        OnGroundAtFixEndM = CalcDemLessInputAltitude(ground, Sections.MaxTardisId);
-                        OnGroundAtFixStartM = OnGroundAtFixEndM;
-                        break;
-
-                    case OnGroundAtEnum.Both:
-                        // Drone was on ground at the start and the end of the flight.   
-                        OnGroundAtFixStartM = CalcDemLessInputAltitude(ground, Sections.MinTardisId);
-                        OnGroundAtFixEndM = CalcDemLessInputAltitude(ground, Sections.MaxTardisId);
-                        break;
-
-                    case OnGroundAtEnum.Neither:
-                    case OnGroundAtEnum.Auto:
-                        // If the minimum drone altitude is below the minimum ground DEM then correct it.
-                        // This case has been seen for a drone flight from a sea beach where the drone MinAltitude was NEGATIVE 56 metres!
-                        if ((MinDemM != UnknownValue) && (Sections.MinAltitudeM < MinDemM))
-                        {
-                            OnGroundAtFixStartM = MinDemM - Sections.MinAltitudeM;
-                            OnGroundAtFixEndM = OnGroundAtFixStartM;
-                        }
-                        break;
-                }
-
-
-                // If OnGroundAt data gave altitude delats then apply them to all steps 
-                if (HasOnGroundAtFix)
-                    foreach (var thisStep in Steps)
-                        thisStep.Value.CalculateSettings_AltitudeM_ApplyOnGroundAt(
-                            OnGroundAtFixStartM,
-                            OnGroundAtFixEndM,
-                            Sections.MaxTardisId);
-            }
-            catch (Exception ex)
-            {
-                throw ThrowException("FlightSteps.CalculateSettings_OnGroundAt", ex);
-            }
-        }
-
-
         // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM.
         // Depends on AltitudeM, DemM, Yaw & Zoom.
         public void CalculateSettings_CameraDownDeg(VideoData videoData, GroundData? groundData)
@@ -680,14 +610,11 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // User has edited the drone settings including CameraDownDeg & OnGroundAt
+        // User has edited the drone settings including CameraDownDeg 
         public void CalculateSettings_ConfigHasChanged(GroundData groundData, VideoData videoData)
         {
             // Calculate Step.AltitudeM by smoothing Section.AltitudeM
             CalculateSettings_SmoothAltitudeM();
-
-            // Modify Step.AltitudeM using OnGroundAt info
-            CalculateSettings_OnGroundAt(groundData);
 
             // Calculate CameraDownDeg, InputImageCenter and InputImageSizeM. Depends on AltitudeM, DemM & StepVelocityMps
             CalculateSettings_CameraDownDeg(videoData, groundData);
@@ -726,9 +653,6 @@ namespace SkyCombDrone.DroneLogic
                     prevStep = theStep;
                 }
 
-                // Modify Step.AltitudeM using OnGroundAt info
-                CalculateSettings_OnGroundAt(groundData);
-
                 // Calculate InputImageCenter and InputImageSizeM.
                 // Depends on CameraDownDeg, AltitudeM, DemM & StepVelocityMps
                 CalculateSettings_CameraDownDeg(videoData, groundData);
@@ -745,138 +669,16 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // For the Steps in each leg, refine the location settings.
-        // A leg has ~ constant altitude, in a ~ constant direction for a significant duration 
-        // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant.         
-        // Alters the LocationM, LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-        public void CalculateSettings_RefineLocationData(VideoData videoData, FlightLegs legs, GroundData? groundData)
+        // Calculate the summary of all (leg and non-leg) steps.
+        // Check that it is a reasonable revision of the sections.
+        public void CalculateSettings_Summarise()
         {
-            /*
-            if ((legs != null) && (legs.Legs.Count > 0))
-                foreach (var leg in legs.Legs)
-                {
-                    // A leg is has ~ constant altitude, in a ~ constant direction for a significant duration
-                    // and travels a significant distance. Pitch, Roll and Speed may NOT be mostly constant. 
-                    // Time interval between Steps can also vary.
-
-                    // Calculate the summary of this leg's steps before smoothing them
-                    Steps.CalculateSettings_Summarise(this, leg.MinStepId, leg.MaxStepId);
-                    FlightStepSummaryModel rawSummary = new();
-                    rawSummary.CopySteps(this);
-
-                    // If the drone is travelling at a reasonable speed then it has reasonable inertia,
-                    // and the speed should be reasonably smooth, with avg and max speed being similar. 
-                    // Edge case, in DJI_0198 leg 5 is the drone slowing from 5.4mps to 0mps with avg of 1.3m/s
-                    if (rawSummary.AvgSpeedMps >= 1.5 && rawSummary.MaxSpeedMps < 2 * rawSummary.AvgSpeedMps)
-                    {
-                        // Use simple linear smoothing.
-                        var minStep = Steps[leg.MinStepId];
-                        var maxStep = Steps[leg.MaxStepId];
-                        var minLocn = minStep.DroneLocnM;
-                        var maxLocn = maxStep.DroneLocnM;
-                        var deltaLocn = new RelativeLocation(
-                            maxLocn.NorthingM - minLocn.NorthingM,
-                            maxLocn.EastingM - minLocn.EastingM);
-                        float deltaTime = maxStep.SumTimeMs - minStep.SumTimeMs;
-
-                        FlightStep? prevStep = null;
-                        for (int theStepId = leg.MinStepId + 1; theStepId <= leg.MaxStepId - 1; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if (theStep == null)
-                                continue;
-
-                            var fraction = (theStep.SumTimeMs - minStep.SumTimeMs) / deltaTime;
-                            Assert(fraction > 0, "CalculateSettings_RefineLocationData: Fraction logic 1");
-                            Assert(fraction < 1, "CalculateSettings_RefineLocationData: Fraction logic 2");
-
-                            theStep.DroneLocnM = new(
-                                minLocn.NorthingM + deltaLocn.NorthingM * fraction,
-                                minLocn.EastingM + deltaLocn.EastingM * fraction);
-
-                            // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                            theStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
-
-                            prevStep = theStep;
-                        }
-                    }
-                    else
-                    {
-                        // Use cubic spline smoothing for more complex edge cases
-                        int arraySize = 0;
-                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocnM != null))
-                                arraySize++;
-                        }
-
-                        float[] timeRaw = new float[arraySize];
-                        float[] northingRaw = new float[arraySize];
-                        float[] eastingRaw = new float[arraySize];
-
-                        int arrayIndex = 0;
-                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocnM != null))
-                            {
-                                timeRaw[arrayIndex] = theStep.SumTimeMs;
-                                northingRaw[arrayIndex] = theStep.DroneLocnM.NorthingM;
-                                eastingRaw[arrayIndex] = theStep.DroneLocnM.EastingM;
-                                arrayIndex++;
-                            }
-                        }
-
-                        // Calculate a cubic spline smoothing of the Leg.
-                        // We maintain the time sequence, as we have frames at these time intervals.
-                        CubicSpline cubicSpline = new();
-                        var northingSmooth = cubicSpline.FitAndEval(timeRaw, northingRaw, timeRaw);
-                        var eastingSmooth = cubicSpline.FitAndEval(timeRaw, eastingRaw, timeRaw);
-
-
-                        // Recalculate the Steps Locations, Distance Traveled and Speed
-                        arrayIndex = 0;
-                        Steps.TryGetValue(leg.MinStepId - 1, out FlightStep? prevStep);
-                        for (int theStepId = leg.MinStepId; theStepId <= leg.MaxStepId; theStepId++)
-                        {
-                            Steps.TryGetValue(theStepId, out FlightStep? theStep);
-                            if ((theStep != null) && (theStep.DroneLocnM != null))
-                            {
-                                theStep.DroneLocnM.NorthingM = northingSmooth[arrayIndex];
-                                theStep.DroneLocnM.EastingM = eastingSmooth[arrayIndex];
-
-                                // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                                theStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
-
-                                arrayIndex++;
-                                prevStep = theStep;
-                            }
-                        }
-
-                        // As last leg step may have moved, update (non-Location data) one step past the leg.
-                        Steps.TryGetValue(leg.MaxStepId + 1, out FlightStep? nextStep);
-                        if ((nextStep != null) && (prevStep != null))
-                            // Recalculate the LinealM, SpeedMps, SumLinealM, StepVelocityMps, ImageVelocityMps, InputImageCenter & InputImageSizeM
-                            nextStep.CalculateSettings_RefineLocationData(videoData, prevStep, groundData);
-                    }
-
-                    // Calculate the summary of this leg's steps after smoothing them
-                    Steps.CalculateSettings_Summarise(this, leg.MinStepId, leg.MaxStepId);
-                    // Check that this smoothing has not changed the data envelope 
-                    AssertGoodStepRevision(rawSummary);
-                }
-            */
-
-            // Calculate the summary of all (leg and non-leg) steps.
-            // Check that it is a reasonable revision of the sections.
             Steps.CalculateSettings_Summarise(this, Sections);
         }
 
 
         public void AssertGood()
         {
-            Assert(FileName != "", "FlightSteps.AssertGood: No FileName");
             Assert(Steps.Count != 0, "FlightSteps.AssertGood: No Steps");
         }
 
@@ -980,7 +782,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
         // Returns percentage of FlightSteps where the drone AltitudeM is less than ground DemM.
-        // A good answer is 0. A bad OnGroundAt value can mean a value of say 45%
+        // A good answer is 0. 
         public float PercentAltitudeLessThanDem()
         {
             if (Steps.Count == 0)
