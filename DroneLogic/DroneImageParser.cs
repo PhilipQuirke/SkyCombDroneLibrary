@@ -48,7 +48,7 @@ namespace SkyCombDrone.DroneLogic
     public class DroneImageMetadataReader
     {
         public const string UnitTestDirectory = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
-        public const string ExifToolPath = @"D:\SkyComb\exiftool-13.26_64\exiftool.exe"; // Removed (-k) from the exe name to run it in batch mode (not interactively)
+        public const string ExifToolPath = @"C:\SkyComb\exiftool\exiftool.exe"; // Removed (-k) from the exe name to run it in batch mode (not interactively)
 
 
         public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, string exifToolPath)
