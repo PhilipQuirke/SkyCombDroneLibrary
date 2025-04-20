@@ -167,10 +167,10 @@ namespace SkyCombDrone.DroneLogic
                         if (badYaw || badSumPitch || badDuration || badStepPitch || badCameraDown) // badStepAltitude || badSumAltitude || 
                         {
                             if ((legDurationMs < config.MinLegDurationMs) ||
+                                (startStep.StepId == thisStep.StepId - 1) ||  // Leg has one step. 
                                 (RelativeLocation.DistanceM(startStep.DroneLocnM, thisStep.DroneLocnM) < config.MinLegDistanceM))
                             {
-                                // This leg violate the duration or distance rule,
-                                // remove the leg and clean up the steps.
+                                // Remove the leg and clean up the steps.
                                 RemoveLeg(steps, startKey, thisStepPair.Key);
                                 maxLegId--;
                             }
@@ -308,41 +308,44 @@ namespace SkyCombDrone.DroneLogic
                         thisLeg = null;
                 }
 
-                // In DJI_0120 ~3 objects are detected very early in leg 3.
-                // While the DeltaYawDeg at the start of the leg is near 0,
-                // the video clearly shows a 1/2 second of yaw in the leg.
-                // This is likely the gimbal recentering to catch up just after drone finishes yawing.
-                // The gimbal is an independent drone subsystem. The drone does not log gimbal-specific yaw data.
-                // Each leg is at least config.MinLegDurationMs long (defaults to 2 seconds)
-                // Sacrifice (remove) the first 1 second of each leg.
-                // PQR TODO: For short legs this may delete the leg!
-                foreach (var leg in Legs)
+
+                if (config.GimbalDataAvail == GimbalDataEnum.ManualNo)
                 {
-                    var minStepId = leg.MinTardisId;
-                    var minStep = steps.Steps[minStepId];
-
-                    var minStepTimeNew = minStep.FlightSection.SumTimeMs + 1;
-                    var minStepIdNew = minStepId;
-
-                    while (true)
+                    // In DJI_0120 ~3 objects are detected very early in leg 3.
+                    // While the DeltaYawDeg at the start of the leg is near 0,
+                    // the video clearly shows a 1/2 second of yaw in the leg.
+                    // This is likely the gimbal recentering to catch up just after drone finishes yawing.
+                    // The gimbal is an independent drone subsystem. The drone does not log gimbal-specific yaw data.
+                    // Each leg is at least config.MinLegDurationMs long (defaults to 2 seconds)
+                    // Sacrifice (remove) the first 1 second of each leg.
+                    // PQR TODO: For short legs this may delete the leg!
+                    foreach (var leg in Legs)
                     {
-                        if (steps.Steps.TryGetValue(minStepIdNew, out FlightStep? theStep))
-                        {
-                            if (theStep.FlightSection.SumTimeMs >= minStepTimeNew)
-                            {
-                                // Reset the leg to start with this step
-                                leg.MinTardisId = minStepIdNew;
-                                break;
-                            }
-                            else
-                                // Remove the step from the leg
-                                theStep.FlightLegId = 0;
-                        }
+                        var minStepId = leg.MinTardisId;
+                        var minStep = steps.Steps[minStepId];
 
-                        minStepIdNew++;
+                        var minStepTimeNew = minStep.FlightSection.SumTimeMs + 1;
+                        var minStepIdNew = minStepId;
+
+                        while (true)
+                        {
+                            if (steps.Steps.TryGetValue(minStepIdNew, out FlightStep? theStep))
+                            {
+                                if (theStep.FlightSection.SumTimeMs >= minStepTimeNew)
+                                {
+                                    // Reset the leg to start with this step
+                                    leg.MinTardisId = minStepIdNew;
+                                    break;
+                                }
+                                else
+                                    // Remove the step from the leg
+                                    theStep.FlightLegId = 0;
+                            }
+
+                            minStepIdNew++;
+                        }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -364,7 +367,7 @@ namespace SkyCombDrone.DroneLogic
                         step.Value.FlightLeg = leg;
                     }
 
-                Assert(leg.MinTardisId > 0, "FlightLeg.Calculate_Pass3: Bad MinTardisId");
+                Assert(leg.MinTardisId >= 0, "FlightLeg.Calculate_Pass3: Bad MinTardisId");
                 Assert(leg.MaxTardisId > 0, "FlightLeg.Calculate_Pass3: Bad MaxTardisId");
             }
         }

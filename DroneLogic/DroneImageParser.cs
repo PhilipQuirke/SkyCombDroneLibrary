@@ -48,7 +48,12 @@ namespace SkyCombDrone.DroneLogic
     public class DroneImageMetadataReader
     {
         public const string UnitTestDirectory = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
-        public const string ExifToolPath = @"C:\SkyComb\exiftool\exiftool.exe"; // Removed (-k) from the exe name to run it in batch mode (not interactively)
+
+        // ExifTool is a command line exe that reads the encrypted properties from a DJI drone image (jpg).
+        // Removed (-k) from the exe name to run it in batch mode (not interactively)
+        // User must add the "C:\SkyComb\exiftool" or similar to the Windows path.
+        //public const string ExifToolPath = @"C:\SkyComb\exiftool\exiftool.exe"; 
+        public const string ExifToolPath = "exiftool.exe"; 
 
 
         public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, string exifToolPath)
