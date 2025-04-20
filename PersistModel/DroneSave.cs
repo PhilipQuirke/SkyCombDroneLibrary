@@ -171,7 +171,7 @@ namespace SkyCombDrone.PersistModel
                 Data.SelectWorksheet(DroneReportTabName);
 
                 Data.HideWorksheet(SectionDataTabName);
-                Data.HideWorksheet(LegDataTabName);
+                //Data.HideWorksheet(LegDataTabName);
                 Data.HideWorksheet(StepDataTabName);
 
                 Save();
