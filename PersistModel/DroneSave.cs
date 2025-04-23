@@ -1,4 +1,5 @@
-﻿using Emgu.CV.Structure;
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
@@ -120,8 +121,8 @@ namespace SkyCombDrone.PersistModel
                         (var bitmap1, var bitmap2) = OpenStreetMap.GetTwoMaps(globalLocation, Drone.FlightSections.GlobalRange);
 
                         var imageHandler = new ExcelImageHandler(Data.Worksheet);
-                        imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, 50);
-                        imageHandler.SaveBitmap(bitmap2, "CountrySmall", row - 1, col + 4, 50);
+                        imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, CountryImageWidth, CountryImageHeight); 
+                        imageHandler.SaveBitmap(bitmap2, "CountrySmall", row - 1, col + 4, CountryImageWidth, CountryImageHeight); 
                     }
                 }
 
