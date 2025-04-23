@@ -35,7 +35,7 @@ namespace SkyCombDrone.PersistModel
     public class DroneDataStore : ImageDataStore
     {
         // These are the physical files that are referenced in the DataStore
-        public string ThermalFolderName { get; set; } = "";
+        public string InputFolderName { get; set; } = "";
         public string ThermalVideoName { get; set; } = "";
         public string ThermalFlightName { get; set; } = "";
         public string OutputVideoName { get; set; } = "";
@@ -119,9 +119,9 @@ namespace SkyCombDrone.PersistModel
 
 
         // Create a DataStore on disk & store the Files settings.
-        public DroneDataStore(string selectedFileName, string thermalFolderName, string thermalVideoName, string thermalFlightName, string outputVideoName) : base(selectedFileName, true)
+        public DroneDataStore(string selectedFileName, string inputFolderName, string thermalVideoName, string thermalFlightName, string outputVideoName) : base(selectedFileName, true)
         {
-            ThermalFolderName = thermalFolderName;
+            InputFolderName = inputFolderName;
             ThermalVideoName = thermalVideoName;
             ThermalFlightName = thermalFlightName;
             OutputVideoName = outputVideoName;
@@ -159,7 +159,7 @@ namespace SkyCombDrone.PersistModel
         {
             return new DataPairList
             {
-                { "ThermalFolderName", ( ThermalFolderName == "" ? UnknownString : ThermalFolderName ) },
+                { "InputFolderName", ( InputFolderName == "" ? UnknownString : InputFolderName ) },
                 { "ThermalVideoName", ( ThermalVideoName == "" ? UnknownString : ThermalVideoName ) },
                 { "ThermalFlightName", ( ThermalFlightName == "" ? UnknownString : ThermalFlightName ) },
                 { "DataStoreFileName", DataStoreFileName },
@@ -175,12 +175,12 @@ namespace SkyCombDrone.PersistModel
             if (settings == null)
                 return;
 
-            ThermalFolderName = settings[0];
+            InputFolderName = settings[0];
             ThermalVideoName = settings[1];
             ThermalFlightName = settings[2];
 
-            if (ThermalFolderName.ToLower() == UnknownString.ToLower())
-                ThermalFolderName = "";
+            if (InputFolderName.ToLower() == UnknownString.ToLower())
+                InputFolderName = "";
             if (ThermalVideoName.ToLower() == UnknownString.ToLower())
                 ThermalVideoName = "";
             if (ThermalFlightName.ToLower() == UnknownString.ToLower())

@@ -1,4 +1,5 @@
-﻿using SkyCombDrone.DroneLogic;
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+using SkyCombDrone.DroneLogic;
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
@@ -136,7 +137,7 @@ namespace SkyCombDrone.PersistModel
                             {
                                 // Spreadsheet may have ben copied from say C: to D:
                                 // Reset the file names to the new locations
-                                answer.ThermalFolderName = thermalFolderName;
+                                answer.InputFolderName = thermalFolderName;
                                 answer.ThermalVideoName = thermalVideoName;
                                 answer.ThermalFlightName = thermalFlightName;
                             }
@@ -169,7 +170,8 @@ namespace SkyCombDrone.PersistModel
             string inputDirectory,
             string inputFileName,
             string outputElseInputDirectory,
-            bool doCreate = true)
+            bool doCreate,
+            bool inputIsVideo)
         {
             var thermalFolderName = inputDirectory.Trim('\\');
             var thermalVideoName = "";
@@ -177,30 +179,36 @@ namespace SkyCombDrone.PersistModel
             var dataStoreName = "";
             var outputVideoName = "";
 
-            if (inputFileName == "")
+            if (inputIsVideo)
             {
-                // Set dataStoreName prefix to the last foldername in the input directory
-                dataStoreName = DataStoreName(inputDirectory, "", outputElseInputDirectory);
+                if (inputFileName == "")
+                    // Set dataStoreName prefix to the last foldername in the input directory
+                    dataStoreName = DataStoreName(inputDirectory, "", outputElseInputDirectory);
+                else
+                {
+                    // Base datastore name on the single video file and associated flight log file
+                    (thermalVideoName, thermalFlightName) = LocateInputFiles(inputFileName);
+
+                    if (thermalVideoName != "")
+                        dataStoreName = DataStoreName(inputDirectory, BaseDataStore.RemoveFileNameSuffix(thermalVideoName), outputElseInputDirectory);
+
+                    outputVideoName = VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory);
+                }
             }
             else
             {
-                // Base datastore name on the single video file and associated flight log file
-                (thermalVideoName, thermalFlightName) = LocateInputFiles(inputFileName);
-
-                if (thermalVideoName != "")
-                    dataStoreName = DataStoreName(inputDirectory, BaseDataStore.RemoveFileNameSuffix(thermalVideoName), outputElseInputDirectory);
-
-                outputVideoName = VideoData.OutputVideoFileName(thermalVideoName, outputElseInputDirectory);
+                //(string folder, string file) = BaseDataStore. SplitFileName(inputFileName);
+                dataStoreName = DataStoreName(inputDirectory, inputFileName, outputElseInputDirectory);
             }
 
             return DataStoreFactory.OpenOrCreateDataStore(
-                dataStoreName,
-                thermalFolderName,
-                thermalVideoName,
-                thermalFlightName,
-                outputElseInputDirectory,
-                outputVideoName,
-                doCreate);
+                    dataStoreName,
+                    thermalFolderName,
+                    thermalVideoName,
+                    thermalFlightName,
+                    outputElseInputDirectory,
+                    outputVideoName,
+                    doCreate);
         }
     }
 }

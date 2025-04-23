@@ -239,7 +239,7 @@ namespace SkyCombDrone.DroneLogic
                             }
                             else
                             {
-                                var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.ThermalFolderName);
+                                var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.InputFolderName);
                                 CalculateCameraSpecifics_InputIsImages(answer, metaData);
                             }
 

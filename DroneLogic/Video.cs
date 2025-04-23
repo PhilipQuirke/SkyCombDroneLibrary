@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using SkyCombDrone.DroneModel;
@@ -197,6 +197,9 @@ namespace SkyCombDrone.DroneLogic
 
         public static string OutputVideoFileName(string inputFileName, string outputElseInputDirectory)
         {
+            if (inputFileName == "")
+                return "";
+
             return
                 outputElseInputDirectory + "\\" +
                 RemoveFileNameSuffix(ShortFolderFileName(inputFileName)) +
