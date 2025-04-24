@@ -1,9 +1,8 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using System.Drawing;
 using System.Drawing.Imaging;
-using Emgu.CV.Structure;
-using Emgu.CV;
 using OfficeOpenXml;
+using System.Diagnostics;
 
 
 namespace SkyCombDrone.PersistModel
@@ -23,32 +22,39 @@ namespace SkyCombDrone.PersistModel
             if (theBitmap == null || Worksheet == null)
                 return;
 
-            using (var normalizedBitmap = NormalizeBitmap(theBitmap))
-            using (var stream = new MemoryStream())
+            try 
             {
-                // Save with optimal PNG encoder settings
-                var pngEncoder = GetPngEncoder();
-                var encoderParameters = new EncoderParameters(1);
-                encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
-
-                // Save the normalized bitmap to the memory stream
-                normalizedBitmap.Save(stream, pngEncoder, encoderParameters);
-
-                // Reset stream position before adding to worksheet
-                stream.Position = 0;
-
-                // Add picture to worksheet
-                var picture = Worksheet.Drawings.AddPicture(name, stream);
-                picture.SetPosition(row, 0, col, 0);
-                picture.Border.Width = 0;
-
-                // Apply scaling while maintaining aspect ratio
-                if (percent != 100)
+                using (var normalizedBitmap = NormalizeBitmap(theBitmap))
+                using (var stream = new MemoryStream())
                 {
-                    double scale = percent / 100.0;
-                    // EPPlus uses pixels for SetSize
-                    picture.SetSize((int)(normalizedBitmap.Width * scale), (int)(normalizedBitmap.Height * scale));
+                    // Save with optimal PNG encoder settings
+                    var pngEncoder = GetPngEncoder();
+                    var encoderParameters = new EncoderParameters(1);
+                    encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
+
+                    // Save the normalized bitmap to the memory stream
+                    normalizedBitmap.Save(stream, pngEncoder, encoderParameters);
+
+                    // Reset stream position before adding to worksheet
+                    stream.Position = 0;
+
+                    // Add picture to worksheet
+                    var picture = Worksheet.Drawings.AddPicture(name, stream);
+                    picture.SetPosition(row, 0, col, 0);
+                    picture.Border.Width = 0;
+
+                    // Apply scaling while maintaining aspect ratio
+                    if (percent != 100)
+                    {
+                        double scale = percent / 100.0;
+                        // EPPlus uses pixels for SetSize
+                        picture.SetSize((int)(normalizedBitmap.Width * scale), (int)(normalizedBitmap.Height * scale));
+                    }
                 }
+            }
+            catch(Exception ex) {
+                // Suppress error
+                Debug.Print("ExcelImageHandler.SaveBitmap1" + ex.ToString());
             }
         }
 
@@ -79,58 +85,43 @@ namespace SkyCombDrone.PersistModel
             return codecs.First(codec => codec.FormatID == ImageFormat.Png.Guid);
         }
 
-        public void SaveBitmap(Image<Bgr, byte>? emguImage, string name, int row, int col = 0, int percent = 100)
-        {
-            if (emguImage == null)
-                return;
-
-            using (var bitmap = emguImage.ToBitmap())
-            {
-                SaveBitmap(bitmap, name, row, col, percent);
-            }
-        }
-
         public void SaveBitmap(Bitmap? theBitmap, string name, int row, int col, int widthPx, int heightPx)
         {
             if (theBitmap == null || Worksheet == null)
                 return;
 
-            using (var normalizedBitmap = NormalizeBitmap(theBitmap))
-            using (var stream = new MemoryStream())
+            try
             {
-                var pngEncoder = GetPngEncoder();
-                var encoderParameters = new EncoderParameters(1);
-                encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
-
-                normalizedBitmap.Save(stream, pngEncoder, encoderParameters);
-                stream.Position = 0;
-
-                var picture = Worksheet.Drawings.AddPicture(name, stream);
-                picture.SetPosition(row, 0, col, 0);
-                picture.Border.Width = 0;
-
-                // Use fixed pixel dimensions if specified
-                if (widthPx > 0 && heightPx > 0)
+                using (var normalizedBitmap = NormalizeBitmap(theBitmap))
+                using (var stream = new MemoryStream())
                 {
-                    picture.SetSize(widthPx, heightPx);
-                }
-                else
-                {
-                    picture.SetSize(normalizedBitmap.Width, normalizedBitmap.Height);
+                    var pngEncoder = GetPngEncoder();
+                    var encoderParameters = new EncoderParameters(1);
+                    encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
+
+                    normalizedBitmap.Save(stream, pngEncoder, encoderParameters);
+                    stream.Position = 0;
+
+                    var picture = Worksheet.Drawings.AddPicture(name, stream);
+                    picture.SetPosition(row, 0, col, 0);
+                    picture.Border.Width = 0;
+
+                    // Use fixed pixel dimensions if specified
+                    if (widthPx > 0 && heightPx > 0)
+                    {
+                        picture.SetSize(widthPx, heightPx);
+                    }
+                    else
+                    {
+                        picture.SetSize(normalizedBitmap.Width, normalizedBitmap.Height);
+                    }
                 }
             }
-        }
-
-        public void SaveBitmap(Image<Bgr, byte>? emguImage, string name, int row, int col, int widthPx, int heightPx)
-        {
-            if (emguImage == null)
-                return;
-
-            using (var bitmap = emguImage.ToBitmap())
+            catch (Exception ex)
             {
-                SaveBitmap(bitmap, name, row, col, widthPx, heightPx);
+                // Suppress error
+                Debug.Print("ExcelImageHandler.SaveBitmap2" + ex.ToString());
             }
         }
-
     }
 }
