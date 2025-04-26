@@ -1,5 +1,4 @@
-﻿using Emgu.CV.Structure;
-using OfficeOpenXml.Drawing.Chart;
+﻿using OfficeOpenXml.Drawing.Chart;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DrawSpace;
 using SkyCombDrone.DroneLogic;
