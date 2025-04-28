@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 
 namespace SkyCombDrone.PersistModel
@@ -13,15 +12,87 @@ namespace SkyCombDrone.PersistModel
         public double? Altitude { get; set; }
     }
 
+
     public class DroneFlight
     {
         public string Name { get; set; }
         public List<(double Longitude, double Latitude, double? Altitude)> Path { get; set; }
     }
 
+
+    public class PinList
+    {
+        public string KmlPath { get; set; }
+        public List<Pin> Pins { get; set; }
+
+        public PinList( string kmlPath )
+        {
+            KmlPath = kmlPath;
+            Pins = new();
+        }
+    }
+
+
     public class KmlLoader
     {
         private static readonly XNamespace KmlNs = "http://www.opengis.net/kml/2.2";
+
+
+        // Load a list of placemark pins from a KML file
+        public static PinList LoadPinList(string kmlPath)
+        {
+            var pinList = new PinList(kmlPath);
+
+            XDocument kmlDoc = XDocument.Load(kmlPath);
+
+            var placemarks = kmlDoc.Descendants().Where(e => e.Name.LocalName == "Placemark");
+            foreach (var placemark in placemarks)
+            {
+                var name = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "name")?.Value ?? "Unnamed Pin";
+                var description = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "description")?.Value ?? "";
+                var pointElement = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "Point");
+
+                if (pointElement != null)
+                {
+                    var coordinatesElement = pointElement.Descendants().FirstOrDefault(e => e.Name.LocalName == "coordinates");
+                    if (coordinatesElement != null)
+                    {
+                        var coordinatesText = coordinatesElement.Value;
+                        if (!string.IsNullOrWhiteSpace(coordinatesText))
+                        {
+                            var parts = coordinatesText.Split(',').Select(x => double.Parse(x)).ToArray();
+
+                            pinList.Pins.Add(new Pin
+                            {
+                                Name = name,
+                                Description = description,
+                                Longitude = parts[0],
+                                Latitude = parts[1],
+                                Altitude = parts.Length > 2 ? parts[2] : (double?)null
+                            });
+                        }
+                    }
+                }
+            }
+
+            return pinList;
+        }
+
+
+        public static List<PinList> LoadPinListList(List<string> kmlPaths)
+        {
+            // There may be one pin file shared across many flights.
+            // So we load all the pins here so they are available below.
+            List<PinList> allpins = new();
+            foreach (var kmlPath in kmlPaths)
+            {
+                var pinList = KmlLoader.LoadPinList(kmlPath);
+                if (pinList != null)
+                    allpins.Add(pinList);
+            }
+            return allpins;
+        }
+
 
         public static List<DroneFlight> LoadDroneFlights(string kmlPath)
         {
@@ -47,40 +118,6 @@ namespace SkyCombDrone.PersistModel
             }
 
             return flights;
-        }
-
-
-        public static List<Pin> LoadPins(string kmlPath)
-        {
-            var pins = new List<Pin>();
-            XDocument kmlDoc = XDocument.Load(kmlPath);
-
-            foreach (var placemark in kmlDoc.Descendants().Where(e => e.Name.LocalName == "Placemark"))
-            {
-                var pointElement = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "Point");
-                if (pointElement != null)
-                {
-                    var coordinatesElement = pointElement.Descendants().FirstOrDefault(e => e.Name.LocalName == "coordinates");
-                    if (coordinatesElement != null)
-                    {
-                        var coordinatesText = coordinatesElement.Value;
-                        if (!string.IsNullOrWhiteSpace(coordinatesText))
-                        {
-                            var parts = coordinatesText.Split(',').Select(x => double.Parse(x)).ToArray();
-                            pins.Add(new Pin
-                            {
-                                Name = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "name")?.Value ?? "Unnamed Pin",
-                                Description = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "description")?.Value ?? "",
-                                Longitude = parts[0],
-                                Latitude = parts[1],
-                                Altitude = parts.Length > 2 ? parts[2] : (double?)null
-                            });
-                        }
-                    }
-                }
-            }
-
-            return pins;
         }
 
 
