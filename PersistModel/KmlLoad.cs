@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics;
+using System.Xml.Linq;
 
 
 namespace SkyCombDrone.PersistModel
@@ -48,34 +49,40 @@ namespace SkyCombDrone.PersistModel
             return flights;
         }
 
+
         public static List<Pin> LoadPins(string kmlPath)
         {
             var pins = new List<Pin>();
             XDocument kmlDoc = XDocument.Load(kmlPath);
 
-            foreach (var placemark in kmlDoc.Descendants(KmlNs + "Placemark"))
+            foreach (var placemark in kmlDoc.Descendants().Where(e => e.Name.LocalName == "Placemark"))
             {
-                var point = placemark.Element(KmlNs + "Point");
-                if (point != null)
+                var pointElement = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "Point");
+                if (pointElement != null)
                 {
-                    var coordinatesText = point.Element(KmlNs + "coordinates")?.Value;
-                    if (!string.IsNullOrWhiteSpace(coordinatesText))
+                    var coordinatesElement = pointElement.Descendants().FirstOrDefault(e => e.Name.LocalName == "coordinates");
+                    if (coordinatesElement != null)
                     {
-                        var parts = coordinatesText.Split(',').Select(x => double.Parse(x)).ToArray();
-                        pins.Add(new Pin
+                        var coordinatesText = coordinatesElement.Value;
+                        if (!string.IsNullOrWhiteSpace(coordinatesText))
                         {
-                            Name = placemark.Element(KmlNs + "name")?.Value ?? "Unnamed Pin",
-                            Description = placemark.Element(KmlNs + "description")?.Value ?? "",
-                            Longitude = parts[0],
-                            Latitude = parts[1],
-                            Altitude = parts.Length > 2 ? parts[2] : (double?)null
-                        });
+                            var parts = coordinatesText.Split(',').Select(x => double.Parse(x)).ToArray();
+                            pins.Add(new Pin
+                            {
+                                Name = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "name")?.Value ?? "Unnamed Pin",
+                                Description = placemark.Descendants().FirstOrDefault(e => e.Name.LocalName == "description")?.Value ?? "",
+                                Longitude = parts[0],
+                                Latitude = parts[1],
+                                Altitude = parts.Length > 2 ? parts[2] : (double?)null
+                            });
+                        }
                     }
                 }
             }
 
             return pins;
         }
+
 
         private static List<(double Longitude, double Latitude, double? Altitude)> ParseCoordinates(string coordinatesText)
         {
