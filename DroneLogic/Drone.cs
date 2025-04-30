@@ -1,6 +1,6 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved. 
-using Emgu.CV.Structure;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
@@ -114,7 +114,7 @@ namespace SkyCombDrone.DroneLogic
                 dataStore.SelectWorksheet(DroneDataStore.FileSettingsTabName);
 
                 if (dataStore.InputIsImages)
-                { 
+                {
                     InputVideo = new VideoData("", null);
                     success = true;
                 }
@@ -334,7 +334,7 @@ namespace SkyCombDrone.DroneLogic
 
                 // Hard to code as the steps refer to the legs.
                 //FlightLegs.Calculate_Pass2();
-                
+
                 FlightLegs.Calculate_Pass3(FlightSteps);
                 FlightLegs.AssertGood(HasFlightSteps);
             }

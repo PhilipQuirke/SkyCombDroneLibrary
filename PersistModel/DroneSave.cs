@@ -47,7 +47,7 @@ namespace SkyCombDrone.PersistModel
                 case GroundType.DsmElevations: bitmapName = "DSM"; break;
                 case GroundType.DemElevations: bitmapName = "DEM"; break;
                 case GroundType.SwatheSeen: bitmapName = "SWATHE"; break;
-            };
+            }
 
             return (drawPath.Title, drawPath.Metrics, bitmapName, pathImage);
         }
@@ -121,8 +121,8 @@ namespace SkyCombDrone.PersistModel
                         (var bitmap1, var bitmap2) = OpenStreetMap.GetTwoMaps(globalLocation, Drone.FlightSections.GlobalRange);
 
                         var imageHandler = new ExcelImageHandler(Data.Worksheet);
-                        imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, CountryImageWidth, CountryImageHeight); 
-                        imageHandler.SaveBitmap(bitmap2, "CountrySmall", row - 1, col + 4, CountryImageWidth, CountryImageHeight); 
+                        imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, CountryImageWidth, CountryImageHeight);
+                        imageHandler.SaveBitmap(bitmap2, "CountrySmall", row - 1, col + 4, CountryImageWidth, CountryImageHeight);
                     }
                 }
 
@@ -187,7 +187,7 @@ namespace SkyCombDrone.PersistModel
         // Show elevation legend coloured cells
         public static void SaveElevationLegend(BaseDataStore dataStore, int startRow = 4, int startCol = 6, int droneReps = 3, int otherReps = 2)
         {
-            for( int i = 0; i < droneReps; i++ )
+            for (int i = 0; i < droneReps; i++)
                 dataStore.Worksheet.Cells[startRow++, startCol].Style.Fill.SetBackground(DroneColors.InScopeDroneColor);
             for (int i = 0; i < otherReps; i++)
                 dataStore.Worksheet.Cells[startRow++, startCol].Style.Fill.SetBackground(SurfaceLowColor);

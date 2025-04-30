@@ -278,7 +278,7 @@ namespace SkyCombDrone.DrawSpace
 
             CurrImage(ref baseImage, sizeImages);
 
-            Bitmap bitmap = dpiIndependent? BitmapGenerator.CreateDpiIndependentBitmap(baseImage) : baseImage.ToBitmap();
+            Bitmap bitmap = dpiIndependent ? BitmapGenerator.CreateDpiIndependentBitmap(baseImage) : baseImage.ToBitmap();
 
             DrawAxes(ref bitmap);
 
@@ -508,7 +508,7 @@ namespace SkyCombDrone.DrawSpace
                     Title = "Drone Altitude";
                     DrawNoData(ref BaseImage);
                 }
-                else 
+                else
                 {
                     if (NormalCase)
                     {

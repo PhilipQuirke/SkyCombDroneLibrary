@@ -2,7 +2,6 @@
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
-using Emgu.CV.Util;
 using SkyCombDrone.CommonSpace;
 using System.Drawing;
 
@@ -111,9 +110,9 @@ namespace SkyCombDrone.DrawSpace
             if (color == Color.White)
                 return;
 
-            if (inflate>0)
+            if (inflate > 0)
                 boundingRect.Inflate(inflate, inflate);
-            
+
             image.Draw(boundingRect, DroneColors.ColorToBgr(color), thickness);
         }
 

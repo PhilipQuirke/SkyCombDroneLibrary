@@ -53,7 +53,7 @@ namespace SkyCombDrone.DroneLogic
         // Removed (-k) from the exe name to run it in batch mode (not interactively)
         // User must add the "C:\SkyComb\exiftool" or similar to the Windows path.
         //public const string ExifToolPath = @"C:\SkyComb\exiftool\exiftool.exe"; 
-        public const string ExifToolPath = "exiftool.exe"; 
+        public const string ExifToolPath = "exiftool.exe";
 
 
         public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, string exifToolPath)
@@ -81,7 +81,7 @@ namespace SkyCombDrone.DroneLogic
 
         public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath)
         {
-            return ReadMetadataFromFolder(folderPath, ExifToolPath);    
+            return ReadMetadataFromFolder(folderPath, ExifToolPath);
         }
 
 
@@ -127,7 +127,7 @@ namespace SkyCombDrone.DroneLogic
                 if (spaceIndex > 0)
                     value = value.Substring(0, spaceIndex);
 
-                return double.TryParse(value, out var result) ? result : (double?)null;
+                return double.TryParse(value, out var result) ? result : null;
             }
 
             data.CameraModelName = GetValue("Camera Model Name");

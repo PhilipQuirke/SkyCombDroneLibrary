@@ -25,7 +25,7 @@ namespace SkyCombDrone.PersistModel
         public string KmlPath { get; set; }
         public List<Pin> Pins { get; set; }
 
-        public PinList( string kmlPath )
+        public PinList(string kmlPath)
         {
             KmlPath = kmlPath;
             Pins = new();
@@ -68,7 +68,7 @@ namespace SkyCombDrone.PersistModel
                                 Description = description,
                                 Longitude = parts[0],
                                 Latitude = parts[1],
-                                Altitude = parts.Length > 2 ? parts[2] : (double?)null
+                                Altitude = parts.Length > 2 ? parts[2] : null
                             });
                         }
                     }
@@ -133,7 +133,7 @@ namespace SkyCombDrone.PersistModel
                 {
                     double lon = double.Parse(parts[0]);
                     double lat = double.Parse(parts[1]);
-                    double? alt = parts.Length >= 3 ? double.Parse(parts[2]) : (double?)null;
+                    double? alt = parts.Length >= 3 ? double.Parse(parts[2]) : null;
                     coords.Add((lon, lat, alt));
                 }
             }

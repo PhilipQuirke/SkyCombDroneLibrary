@@ -98,7 +98,7 @@ namespace SkyCombDrone.PersistModel
                     SetExternalHyperLink(link_cell, external_link);
                 else if (do_internal_link)
                     SetInternalHyperLink(link_cell, title);
- 
+
                 row++;
             }
         }
@@ -315,7 +315,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void FormatSummaryPage( int dataWidth1 = 15, int dataWidth2 = 15, int dataWidth3 = 15)
+        public void FormatSummaryPage(int dataWidth1 = 15, int dataWidth2 = 15, int dataWidth3 = 15)
         {
             SetColumnWidth(LhsColOffset, 25);
             SetColumnWidth(LhsColOffset + LabelToValueCellOffset, dataWidth1);

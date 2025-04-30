@@ -1,8 +1,8 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved. 
-using System.Drawing;
-using System.Drawing.Imaging;
 using OfficeOpenXml;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 
 namespace SkyCombDrone.PersistModel
@@ -22,7 +22,7 @@ namespace SkyCombDrone.PersistModel
             if (theBitmap == null || Worksheet == null)
                 return;
 
-            try 
+            try
             {
                 using (var normalizedBitmap = NormalizeBitmap(theBitmap))
                 using (var stream = new MemoryStream())
@@ -52,7 +52,8 @@ namespace SkyCombDrone.PersistModel
                     }
                 }
             }
-            catch(Exception ex) {
+            catch (Exception ex)
+            {
                 // Suppress error
                 Debug.Print("ExcelImageHandler.SaveBitmap1" + ex.ToString());
             }

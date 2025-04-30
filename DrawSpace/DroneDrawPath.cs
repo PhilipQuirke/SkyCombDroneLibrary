@@ -81,7 +81,7 @@ namespace SkyCombDrone.DrawSpace
         public Point DroneLocnMToPixelPoint(DroneLocation orgLocationM)
         {
             var locationM = orgLocationM.Translate(TranslateM);
- 
+
             var x = TransformMToPixels.XMargin + TransformMToPixels.Scale * locationM.EastingM;
             var y = TransformMToPixels.YMargin - TransformMToPixels.Scale * locationM.NorthingM;
 
@@ -149,7 +149,7 @@ namespace SkyCombDrone.DrawSpace
         // Draw square (often red)
         public void DrawSquare(DroneLocation locationM, int objectPixels, ref Image<Bgr, byte> image, Bgr objectBgr)
         {
-            Rectangle objectRect = DroneLocnMToPixelSquare( locationM, objectPixels);
+            Rectangle objectRect = DroneLocnMToPixelSquare(locationM, objectPixels);
 
             image.Draw(objectRect, objectBgr, NormalThickness);
         }
@@ -418,7 +418,7 @@ namespace SkyCombDrone.DrawSpace
 
                 if ((size.Width < 100) || (size.Height < 100))
                 {
-                    BaseImage = NewImage(new Size(100,100), BackgroundColor);
+                    BaseImage = NewImage(new Size(100, 100), BackgroundColor);
                     return;
                 }
 
@@ -458,7 +458,7 @@ namespace SkyCombDrone.DrawSpace
                         if ((!tightFocus) && (drone != null))
                         {
                             // Max path width changes depending on camera down angle.
-                            float pathImageWidthM = 2; 
+                            float pathImageWidthM = 2;
                             for (int stepId = DroneDrawScope.FirstDrawStepId; stepId < DroneDrawScope.LastDrawStepId; stepId++)
                                 if (drone.FlightSteps.Steps.TryGetValue(stepId, out var step))
                                 {

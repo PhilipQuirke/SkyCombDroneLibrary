@@ -1,11 +1,11 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
-using Emgu.CV;
+﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 
 namespace SkyCombDrone.DrawSpace
-{ 
+{
     public class BitmapGenerator
     {
         // Standard reference DPI - typically 96 DPI is the default Windows value

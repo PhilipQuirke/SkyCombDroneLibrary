@@ -119,13 +119,13 @@ namespace SkyCombDrone.DroneLogic
 
         public static void CalculateCameraSpecifics_InputIsImages(Drone drone, List<DroneImageMetadata> metaData)
         {
-            if((drone == null) || (metaData == null) || (metaData.Count == 0))  
+            if ((drone == null) || (metaData == null) || (metaData.Count == 0))
                 return;
 
             // Images are taken every 2 to 5 seconds
             int num_seconds_between_images = 3;
 
-            drone.InputVideo = new VideoData("", null); 
+            drone.InputVideo = new VideoData("", null);
             drone.InputVideo.CameraType = metaData[0].CameraModelName;
             drone.InputVideo.Fps = 1.0 / num_seconds_between_images;
             drone.InputVideo.FrameCount = 1;

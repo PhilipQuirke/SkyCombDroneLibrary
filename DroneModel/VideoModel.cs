@@ -57,7 +57,7 @@ namespace SkyCombDrone.DroneModel
         // Horizontal video image field of view in degrees. Differs per manufacturer's camera.
         public float HFOVDeg { get; set; } = 38.2f;
         // Vertical video image field of view in degrees. Differs per manufacturer's camera. Assumes pixels are square
-        public float VFOVDeg { get { return HFOVDeg * (float)ImageHeight / ImageWidth; } }
+        public float VFOVDeg { get { return HFOVDeg * ImageHeight / ImageWidth; } }
 
 
         // The UTC date/time the video file was encoded.
@@ -110,7 +110,7 @@ namespace SkyCombDrone.DroneModel
         public VideoModel(string videoFileName, Func<string, DateTime> readDateEncodedUtc)
         {
             FileName = videoFileName;
-            if(FileName == "")
+            if (FileName == "")
                 return;
 
             try
@@ -119,7 +119,7 @@ namespace SkyCombDrone.DroneModel
                     // This sometimes happens when files are transferred between laptops
                     // when one laptop uses C: and the other uses D:
                     // Check the file name locations in the xls very carefully.
-                    throw new Exception( "VideoModel: File does not exist: " +  FileName );
+                    throw new Exception("VideoModel: File does not exist: " + FileName);
 
                 try
                 {

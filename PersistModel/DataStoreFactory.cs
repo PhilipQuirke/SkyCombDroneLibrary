@@ -97,7 +97,7 @@ namespace SkyCombDrone.PersistModel
 
         public static string DataStoreName(string inputDirectory, string inputFileName, string outputElseInputDirectory)
         {
-            if(inputFileName == "")
+            if (inputFileName == "")
             {
                 // Base datastore name on the inputDirectory last folder name
                 inputDirectory = inputDirectory.Trim('\\');
@@ -113,8 +113,8 @@ namespace SkyCombDrone.PersistModel
         private static DroneDataStore? OpenOrCreateDataStore(
             string dataStoreName,
             string thermalFolderName,
-            string thermalVideoName, 
-            string thermalFlightName, 
+            string thermalVideoName,
+            string thermalFlightName,
             string outputElseInputDirectory,
             string outputVideoName,
             bool canCreate)
@@ -150,7 +150,7 @@ namespace SkyCombDrone.PersistModel
                         // One failure mode is if the outputElseInputDirectory does not exist.                        
                         answer = new(dataStoreName,
                             thermalFolderName,
-                            thermalVideoName, 
+                            thermalVideoName,
                             thermalFlightName,
                             outputVideoName);
                 }

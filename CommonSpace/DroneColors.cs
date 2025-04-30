@@ -19,6 +19,7 @@ namespace SkyCombDrone.CommonSpace
 
         public static Color ActiveDroneColor = Color.FromArgb(31, 81, 255);
         public static Color InScopeDroneColor = Color.FromArgb(126, 226, 255);
+        public static Color PlacemarkDroneColor = Color.Yellow;
         public static Color OutScopeDroneColor = Color.DarkGray;
 
 
@@ -38,6 +39,7 @@ namespace SkyCombDrone.CommonSpace
         public static Bgr ColorToBgr(Color theColor) { return new Bgr(theColor.B, theColor.G, theColor.R); }
         public static Bgr ActiveDroneBgr { get { return ColorToBgr(ActiveDroneColor); } }
         public static Bgr InScopeDroneBgr { get { return ColorToBgr(InScopeDroneColor); } }
+        public static Bgr PlacemarkDroneBgr { get { return ColorToBgr(PlacemarkDroneColor); } }
         public static Bgr OutScopeDroneBgr { get { return ColorToBgr(OutScopeDroneColor); } }
         public static Bgr LegNameBgr { get { return ColorToBgr(LegNameColor); } }
         public static Bgr InScopeObjectBgr { get { return ColorToBgr(InScopeObjectColor); } }

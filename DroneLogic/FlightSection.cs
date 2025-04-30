@@ -330,7 +330,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the closest FlightSection to the input param seconds
-        public FlightSection SecondToFlightSection( float seconds )
+        public FlightSection SecondToFlightSection(float seconds)
         {
             int milliseconds = (int)(seconds * 1000);
 

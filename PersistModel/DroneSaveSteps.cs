@@ -121,7 +121,7 @@ namespace SkyCombDrone.PersistModel
             Data.SetTitle(ref firstGraphRow, 1, title);
             Data.SaveBitmap(theBitmap, imageName, firstGraphRow - 1, 0);
             if (show_legend)
-                DroneSave.SaveElevationLegend(Data, firstGraphRow+1, metricsCol - 1);
+                DroneSave.SaveElevationLegend(Data, firstGraphRow + 1, metricsCol - 1);
             if (metrics != null)
                 Data.SetTitleAndDataListColumn("Metrics", firstGraphRow, metricsCol, metrics, true, 1);
         }
@@ -130,9 +130,9 @@ namespace SkyCombDrone.PersistModel
         // Add a graph of the drone & ground elevations as per Steps data
         public void AddElevationsGraph()
         {
-            AddGraph(2, 
+            AddGraph(2,
                 "Drone, Surface and Ground elevations",
-                new DrawElevations(DrawScope), 
+                new DrawElevations(DrawScope),
                 "StepsElevations", Steps.GetSettings_Altitude(), true);
         }
 
@@ -140,9 +140,9 @@ namespace SkyCombDrone.PersistModel
         // Add a graph of the drone speed as per Steps data 
         public void AddSpeedGraph()
         {
-            AddGraph(3, 
+            AddGraph(3,
                 "Drone flight speed (in Mps) vs Step",
-                new DrawSpeed(DrawScope), 
+                new DrawSpeed(DrawScope),
                 "StepsSpeed", Steps.GetSettings_Speed());
         }
 
@@ -150,27 +150,27 @@ namespace SkyCombDrone.PersistModel
         // Add a graph of the drone delta yaw (change of direction) using smoothed Steps data
         public void AddDeltaYawGraph()
         {
-            AddGraph(4, 
+            AddGraph(4,
                 "Drone change in direction (aka Delta Yaw) in Degrees vs Step",
-                new DrawDeltaYaw(DrawScope), 
+                new DrawDeltaYaw(DrawScope),
                 "StepsDeltaYaw", Steps.GetSettings_DeltaYaw());
         }
 
 
         public void AddPitchGraph()
         {
-            AddGraph(5, 
+            AddGraph(5,
                 "Drone Pitch (in degrees) vs Step",
-                new DrawPitch(DrawScope), 
+                new DrawPitch(DrawScope),
                 "StepPitch", Steps.GetSettings_Pitch());
         }
 
 
         public void AddRollGraph()
         {
-            AddGraph(6, 
+            AddGraph(6,
                 "Drone flight speed (in Mps) vs Step",
-                new DrawRoll(DrawScope), 
+                new DrawRoll(DrawScope),
                 "StepRoll", Steps.GetSettings_Roll());
         }
 
@@ -178,9 +178,9 @@ namespace SkyCombDrone.PersistModel
         // Add a graph of whether the drone step is part of a leg or not using Step data
         public void AddLegGraph()
         {
-            AddGraph(7, 
+            AddGraph(7,
                 "Drone Step is part of a flight Leg",
-                new DrawLeg(DrawScope), 
+                new DrawLeg(DrawScope),
                 "StepsLegs", null, false, 100);
         }
 
