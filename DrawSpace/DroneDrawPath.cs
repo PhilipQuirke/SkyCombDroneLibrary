@@ -16,11 +16,11 @@ namespace SkyCombDrone.DrawSpace
     public class DroneDrawPath : DroneDrawGraph
     {
         // Number of shades of green or brown to use in the background
-        const int NumShades = 20;
+        private const int NumShades = 20;
         // A gap (jump) in the Tardis location sequence that makes us NOT draw a line
-        const int DrawLineMaxGapM = 10;
+        private const int DrawLineMaxGapM = 10;
         // If the camera is pointing almost horizontal we dont draw the image area.
-        const int DegreesToVerticalCutoff = 80;
+        private const int DegreesToVerticalCutoff = 80;
 
 
         // Do we draw the flightsteps on the image?

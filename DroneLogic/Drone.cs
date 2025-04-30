@@ -580,7 +580,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        static DateTime RoundToHour(DateTime dt)
+        private static DateTime RoundToHour(DateTime dt)
         {
             long ticks = dt.Ticks + 18000000000;
             return new DateTime(ticks - ticks % 36000000000, dt.Kind);

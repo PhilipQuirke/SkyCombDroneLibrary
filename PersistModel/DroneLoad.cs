@@ -9,7 +9,7 @@ namespace SkyCombDrone.PersistModel
     // Load meta-data about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations from a datastore
     public class DroneLoad : DataStoreAccessor
     {
-        Drone Drone { get; }
+        private Drone Drone { get; }
 
 
         public DroneLoad(DroneDataStore data, Drone drone) : base(data)
