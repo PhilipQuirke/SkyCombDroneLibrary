@@ -97,7 +97,7 @@ namespace SkyCombDrone.PersistModel
                     Steps.EastingRangeM()));
 
                 var chart = chartWs.Drawings.AddScatterChart(ChartName, eScatterChartType.XYScatter);
-                Data.SetChart(chart, ChartTitle, 0.14f, 0, LargeChartRows);
+                Data.SetChart(chart, ChartTitle, 0.14f);
                 Data.SetAxises(chart, "Easting", "Northing", "0", "0");
                 chart.Legend.Remove();
                 chart.XAxis.MinValue = 0;
