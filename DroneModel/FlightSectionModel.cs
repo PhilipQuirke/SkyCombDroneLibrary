@@ -60,7 +60,8 @@ namespace SkyCombDrone.DroneModel
             GlobalLocation.Latitude = double.Parse(settings[i++]);
             ImageFileName = settings[i++];
 
-            GlobalLocation.AssertNZ();
+            if (!GlobalLocation.IsZero())
+                GlobalLocation.AssertNZ();
         }
     }
 

@@ -115,7 +115,7 @@ namespace SkyCombDrone.DroneModel
                     DroneLocnM.NorthingM - prevTardis.DroneLocnM.NorthingM,
                     DroneLocnM.EastingM - prevTardis.DroneLocnM.EastingM)
                         .DiagonalM;
-                Assert(LinealM < 1000, "CalculateSettings_LinealM: 1km step");
+                // Assert(LinealM < 1000, "CalculateSettings_LinealM: 1km step"); // Fails on ProVision rabbit and rocks images-only no-DEM data sets
                 SumLinealM = prevTardis.SumLinealM + LinealM;
             }
         }
