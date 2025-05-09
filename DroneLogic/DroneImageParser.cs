@@ -47,28 +47,29 @@ namespace SkyCombDrone.DroneLogic
 
     public class DroneImageMetadataReader
     {
-        public const string UnitTestDirectory = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
-
         // ExifTool is a command line exe that reads the encrypted properties from a DJI drone image (jpg).
         // Removed (-k) from the exe name to run it in batch mode (not interactively)
         // User must add the "C:\SkyComb\exiftool" or similar to the Windows path.
-        //public const string ExifToolPath = @"C:\SkyComb\exiftool\exiftool.exe"; 
         public const string ExifToolPath = "exiftool.exe";
 
 
-        public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, string exifToolPath)
+        public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, bool all = true)
         {
             var files = Directory.GetFiles(folderPath, "*_T*.JPG");
             var metadataList = new List<DroneImageMetadata>();
 
             foreach (var file in files)
             {
-                string output = RunExifTool(exifToolPath, file);
+                string output = RunExifTool(file);
                 var metadata = ParseExifOutput(output);
                 if (metadata != null)
                 {
                     metadata.FileName = Path.GetFileName(file);
                     metadataList.Add(metadata);
+
+                    if (!all)
+                        // Only read the first file
+                        break;
                 }
             }
 
@@ -79,19 +80,13 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath)
-        {
-            return ReadMetadataFromFolder(folderPath, ExifToolPath);
-        }
-
-
-        private static string RunExifTool(string exifToolPath, string filePath)
+        private static string RunExifTool(string filePath)
         {
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = exifToolPath,
+                    FileName = ExifToolPath,
                     Arguments = $"\"{filePath}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
@@ -175,6 +170,34 @@ namespace SkyCombDrone.DroneLogic
             return data;
         }
 
+        // Returns FocalLength, ImageWidth, ImageHeight, SensorWidth, SensorHeight
+        public static (double fl, int iw, int ih, double sw, double sh) GetCameraIntrinsicParams(DroneImageMetadata firstItem)
+        {
+            double fl = firstItem.FocalLength ?? 0;
+            double fl35 = firstItem.FocalLength35mm ?? 0;
+            double sf = fl35 / fl;
+
+            int iw = firstItem.ImageWidth ?? 0;
+            int ih = firstItem.ImageHeight ?? 1;
+
+            double esd = Math.Sqrt(36 * 36 + 24 * 24);
+            double sd = esd / sf;
+
+            double r = iw / ih;
+
+            double sh = sd / Math.Sqrt(1 + r * r);
+            double sw = r * sh;
+
+            return (fl, iw, ih, sw, sh);
+        }
+    }
+
+
+    public class DroneImageMetadataReader_UnitTest : DroneImageMetadataReader
+    {
+        public const string UnitTestDirectoryA = @"D:\SkyComb\Data_Input\CC\TLPossum\DJI_202502062106_005_TL3\";
+        public const string UnitTestDirectoryB = @"D:\SkyComb\Data_Input\PV\DJI_202504101900_007_PP-Ortho-4-HG\";
+
 
         // Unit test sample output
         // 6/02/2025 9:54:15 pm, DJI_20250206215415_0240_T.JPG, 531.899, -47.5, -79.4, 176.6495209, -38.3320808
@@ -187,14 +210,48 @@ namespace SkyCombDrone.DroneLogic
         // 6/02/2025 9:54:29 pm, DJI_20250206215429_0247_T.JPG, 533.693, -90.1, -79.3, 176.6492004, -38.3319931
         // 6/02/2025 9:54:31 pm, DJI_20250206215431_0248_T.JPG, 533.995, -90.1, -79.2, 176.6490326, -38.3319664
         // 6/02/2025 9:54:33 pm, DJI_20250206215433_0249_T.JPG, 534.259, -90.1, -79.5, 176.6488647, -38.3319435
-        public static void UnitTest1()
+        public static void ReadAll()
         {
-            var metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(UnitTestDirectory, ExifToolPath);
+            var metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(UnitTestDirectoryA, true);
 
             foreach (var item in metadataList)
             {
-                Debug.WriteLine($"{item.CreateDate}, {item.FileName}, {item.GpsAltitude}, {item.GimbalPitchDegree}, {item.FlightYawDegree}, {item.LRFLon}, {item.LRFLat}");
+                Debug.Print($"{item.CreateDate}, {item.FileName}, {item.GpsAltitude}, {item.GimbalPitchDegree}, {item.FlightYawDegree}, {item.LRFLon}, {item.LRFLat}");
             }
+        }
+
+        public static (double, double, double, double, double) ReadOne(string foldername)
+        {
+            var metadataList = DroneImageMetadataReader.ReadMetadataFromFolder(foldername, false);
+
+            // Check the first item
+            var firstItem = metadataList.FirstOrDefault();
+            if (firstItem != null)
+            {
+                Debug.Print($"FocalLength35mm: {firstItem.FocalLength35mm}");
+                Debug.Print($"FocalLength: {firstItem.FocalLength}");
+                Debug.Print($"ScaleFactor35mm: {firstItem.ScaleFactor35mm}");
+                Debug.Print($"ImageWidth: {firstItem.ImageWidth}");
+                Debug.Print($"ImageHeight: {firstItem.ImageHeight}");
+
+                (var fl, var iw, var ih, var sw, var sh) = GetCameraIntrinsicParams(firstItem);
+
+                var sd1 = Math.Sqrt(iw * iw + ih * ih);
+                Debug.Print($"sd1: {sd1}");
+
+                var r = iw / ih;
+                Debug.Print($"r: {r}");
+
+                Debug.Print($"sw: {sw}");
+                Debug.Print($"sh: {sh}");
+
+                var sd2 = Math.Sqrt(sw * sw + sh * sh);
+                Debug.Print($"sd2: {sd2}");
+
+                return (fl, iw, ih, sw, sh);
+            }
+
+            return (0, 0, 0, 0, 0);
         }
     }
 }

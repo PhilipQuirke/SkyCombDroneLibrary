@@ -44,6 +44,8 @@ namespace SkyCombDrone.DroneModel
         public int DurationMs { get; set; } = UnknownValue;
 
 
+        // Focal length in mm. This is the focal length of the lens used to capture the video.
+        public double FocalLength { get; set; } = UnknownValue;
         // Height of video frame in pixels
         public int ImageHeight { get; set; } = UnknownValue;
         // Width of video frame in pixels
@@ -52,8 +54,10 @@ namespace SkyCombDrone.DroneModel
         public Size ImageSize { get { return new Size(ImageWidth, ImageHeight); } }
         // Size of the video frame in pixels
         public int ImagePixels { get { return ImageWidth * ImageHeight; } }
-
-
+        // The thermal camera sensor width in mm. This is the width of the sensor used to capture the video.
+        public double SensorWidth { get; set; } = UnknownValue;
+        // The thermal camera sensor height in mm. This is the height of the sensor used to capture the video.
+        public double SensorHeight { get; set; } = UnknownValue;
         // Horizontal video image field of view in degrees. Differs per manufacturer's camera.
         public float HFOVDeg { get; set; } = 38.2f;
         // Vertical video image field of view in degrees. Differs per manufacturer's camera. Assumes pixels are square
@@ -275,8 +279,11 @@ namespace SkyCombDrone.DroneModel
                 { "Fps", Fps, FpsNdp },
                 { "Frame Count", FrameCount },
                 { "Time Ms", DurationMs },
+                { "Focal Length", FocalLength, 1 },
                 { "Image Width", ImageWidth },
                 { "Image Height", ImageHeight },
+                { "Sensor Width", SensorWidth, 1 },
+                { "Sensor Height", SensorHeight, 1 },
                 { "HFOV Deg", HFOVDeg, 1 },
                 { "VFOV Deg", VFOVDeg, 1 },
                 { "Date Encoded Utc", DateEncodedUtc == DateTime.MinValue ? "" : DateEncodedUtc.ToString(BaseConstants.DateFormat) },
@@ -301,8 +308,11 @@ namespace SkyCombDrone.DroneModel
             Fps = double.Parse(settings[i++]);
             FrameCount = ConfigBase.StringToInt(settings[i++]);
             DurationMs = ConfigBase.StringToInt(settings[i++]);
+            FocalLength = ConfigBase.StringToFloat(settings[i++]);
             ImageWidth = ConfigBase.StringToInt(settings[i++]);
             ImageHeight = ConfigBase.StringToInt(settings[i++]);
+            SensorWidth = ConfigBase.StringToFloat(settings[i++]);
+            SensorHeight = ConfigBase.StringToFloat(settings[i++]);
             HFOVDeg = ConfigBase.StringToFloat(settings[i++]);
             i++; // Skip VFOVDeg 
 

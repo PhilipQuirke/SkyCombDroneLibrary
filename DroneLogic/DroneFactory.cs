@@ -124,17 +124,24 @@ namespace SkyCombDrone.DroneLogic
 
             // Images are taken every 2 to 5 seconds
             int num_seconds_between_images = 3;
+            var firstItem = metaData[0];
+
+            (double fl, int iw, int ih, double sw, double sh) =
+                DroneImageMetadataReader.GetCameraIntrinsicParams(firstItem);
 
             drone.InputVideo = new VideoData("", null);
-            drone.InputVideo.CameraType = metaData[0].CameraModelName;
+            drone.InputVideo.CameraType = firstItem.CameraModelName;
             drone.InputVideo.Fps = 1.0 / num_seconds_between_images;
             drone.InputVideo.FrameCount = 1;
             drone.InputVideo.DurationMs = num_seconds_between_images * 1000;
-            drone.InputVideo.ImageHeight = metaData[0].ImageHeight ?? 640;
-            drone.InputVideo.ImageWidth = metaData[0].ImageWidth ?? 512;
-            drone.InputVideo.HFOVDeg = (float)(metaData[0].FieldOfViewDegree ?? 38.2);
-            drone.InputVideo.DateEncodedUtc = metaData[0].CreateDate;
-            drone.InputVideo.DateEncoded = metaData[0].CreateDate;
+            drone.InputVideo.FocalLength = fl;
+            drone.InputVideo.ImageHeight = ih;
+            drone.InputVideo.ImageWidth = iw;
+            drone.InputVideo.SensorWidth = sw;
+            drone.InputVideo.SensorHeight = sh;
+            drone.InputVideo.HFOVDeg = (float)(firstItem.FieldOfViewDegree ?? 38.2);
+            drone.InputVideo.DateEncodedUtc = firstItem.CreateDate;
+            drone.InputVideo.DateEncoded = firstItem.CreateDate;
 
             drone.DroneConfig.MaxLegGapDurationMs = 2 * num_seconds_between_images * 1000;
 
@@ -241,6 +248,9 @@ namespace SkyCombDrone.DroneLogic
                             {
                                 var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.InputFolderName);
                                 CalculateCameraSpecifics_InputIsImages(answer, metaData);
+
+                                // Now set camera intrinsics.
+
                             }
 
                             answer.EffortDurations.CalcSectionsMs = EffortMs();
