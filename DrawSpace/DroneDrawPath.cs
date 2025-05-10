@@ -300,7 +300,7 @@ namespace SkyCombDrone.DrawSpace
             List<Color> theShades = GetColorShades(lowColor, highColor, NumShades);
 
             var pixelsPerMeter = (int)TransformMToPixels.Scale;
-            double maxElevationM = -9999;
+            double maxElevationM = UnknownValue;
 
             for (int row = 1; row < groundModel.NumRows + 1; row++)
             {

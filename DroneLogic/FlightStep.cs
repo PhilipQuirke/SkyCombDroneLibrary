@@ -151,8 +151,8 @@ namespace SkyCombDrone.DroneLogic
 
         // Best estimate of drone altitude (height) above sea level in metres e.g. 61.241 m. Aka absolute altitude.
         public float FixedAltitudeM { get { return (AltitudeM == UnknownValue ? UnknownValue : AltitudeM + FixAltM); } }
-        // Vertical distance from drone to ground
-        public float FixedDistanceDown { get { return FixedAltitudeM - DemM; } }
+        // Vertical distance from drone to ground. On very rare occassion DemM can be bad (very large).
+        public float FixedDistanceDown { get { return Math.Max(0, FixedAltitudeM - DemM); } }
 
 
         // Reported camera down angle (measured from the vertical) based on drone data.
