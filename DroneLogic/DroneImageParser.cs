@@ -177,13 +177,13 @@ namespace SkyCombDrone.DroneLogic
             double fl35 = firstItem.FocalLength35mm ?? 0;
             double sf = fl35 / fl;
 
-            int iw = firstItem.ImageWidth ?? 0;
+            int iw = firstItem.ImageWidth ?? 1;
             int ih = firstItem.ImageHeight ?? 1;
 
             double esd = Math.Sqrt(36 * 36 + 24 * 24);
             double sd = esd / sf;
 
-            double r = iw / ih;
+            double r = ((double)iw) / ih;
 
             double sh = sd / Math.Sqrt(1 + r * r);
             double sw = r * sh;
