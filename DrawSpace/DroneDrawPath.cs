@@ -147,11 +147,31 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw square (often red)
-        public void DrawSquare(DroneLocation locationM, int objectPixels, ref Image<Bgr, byte> image, Bgr objectBgr)
+        public void DrawSquare(DroneLocation locationM, int objectPixels, ref Image<Bgr, byte> image, Bgr edgeBgr)
         {
             Rectangle objectRect = DroneLocnMToPixelSquare(locationM, objectPixels);
 
-            image.Draw(objectRect, objectBgr, NormalThickness);
+            image.Draw(objectRect, edgeBgr, NormalThickness);
+        }
+
+
+        // Draw diamond (rhombus) often yellow
+        public void DrawDiamond(DroneLocation locationM, int objectPixels, ref Image<Bgr, byte> image, Bgr edgeBgr, int thickness = NormalThickness)
+        {
+            // Get the center point of where the diamond should be drawn
+            Point centerPoint = DroneLocnMToPixelPoint(locationM);
+
+            // Calculate the four points of the diamond
+            Point topPoint = new Point(centerPoint.X, centerPoint.Y - objectPixels / 2);
+            Point rightPoint = new Point(centerPoint.X + objectPixels / 2, centerPoint.Y);
+            Point bottomPoint = new Point(centerPoint.X, centerPoint.Y + objectPixels / 2);
+            Point leftPoint = new Point(centerPoint.X - objectPixels / 2, centerPoint.Y);
+
+            // Draw the four lines that make up the diamond
+            image.Draw(new LineSegment2D(topPoint, rightPoint), edgeBgr, thickness);
+            image.Draw(new LineSegment2D(rightPoint, bottomPoint), edgeBgr, thickness);
+            image.Draw(new LineSegment2D(bottomPoint, leftPoint), edgeBgr, thickness);
+            image.Draw(new LineSegment2D(leftPoint, topPoint), edgeBgr, thickness);
         }
 
 
