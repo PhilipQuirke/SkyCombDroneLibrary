@@ -99,24 +99,66 @@ namespace SkyCombDrone.DroneLogic
             }
             catch (Exception ex)
             {
+                // Handle the edge case with :60 in any field
                 if (line.Contains(":60"))
                 {
-                    line = line.Replace(":60", ":00");
-                    answer = TimeSpan.Parse(line.Substring(0, line.IndexOf(',')));
+                    // Extract hours, minutes, seconds separately
+                    var timePart = line.Substring(0, line.IndexOf(','));
+                    var parts = timePart.Split(':');
 
-                    answer += TimeSpan.FromSeconds(60);
+                    int hours = 0, minutes = 0, seconds = 0;
+
+                    if (parts.Length >= 3)
+                    {
+                        hours = int.Parse(parts[0]);
+                        minutes = int.Parse(parts[1]);
+                        seconds = int.Parse(parts[2]);
+                    }
+                    else if (parts.Length == 2)
+                    {
+                        minutes = int.Parse(parts[0]);
+                        seconds = int.Parse(parts[1]);
+                    }
+
+                    // Handle overflow in seconds
+                    if (seconds >= 60)
+                    {
+                        minutes += seconds / 60;
+                        seconds = seconds % 60;
+                    }
+
+                    // Handle overflow in minutes
+                    if (minutes >= 60)
+                    {
+                        hours += minutes / 60;
+                        minutes = minutes % 60;
+                    }
+
+                    answer = new TimeSpan(hours, minutes, seconds);
                 }
                 else
-                    throw ex;
+                {
+                    throw new FormatException($"Unable to parse duration: {line}", ex);
+                }
             }
 
             // Parse the separate milliseconds field
-            line = line.Substring(line.IndexOf(',') + 1);
-            int milliseconds = ConfigBase.StringToNonNegInt(line);
+            var millisecondsStart = line.IndexOf(',') + 1;
+            if (millisecondsStart > 0 && millisecondsStart < line.Length)
+            {
+                // Find the end of milliseconds (could be end of string or another delimiter)
+                var millisecondsEnd = line.IndexOf(',', millisecondsStart);
+                if (millisecondsEnd == -1)
+                    millisecondsEnd = line.Length;
 
-            // In rare cases the milliseconds is greater than 1000 e.g. 1824
-            // Add milliseconds to the timespan StartTime
-            answer += TimeSpan.FromMilliseconds(milliseconds);
+                var millisecondsStr = line.Substring(millisecondsStart, millisecondsEnd - millisecondsStart);
+
+                if (int.TryParse(millisecondsStr, out int milliseconds))
+                {
+                    // Handle case where milliseconds might be > 1000 (e.g., 1824)
+                    answer = answer.Add(TimeSpan.FromMilliseconds(milliseconds));
+                }
+            }
 
             return answer;
         }

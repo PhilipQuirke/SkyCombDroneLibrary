@@ -126,7 +126,7 @@ namespace SkyCombDrone.DroneModel
         {
             get
             {
-                if (TimeMs <= 0 || LinealM <= 0)
+                if (TimeMs <= 0 || LinealM <= 0 || (Math.Abs(TimeMs) < 0.001f))
                     return 0;
 
                 return 1000.0f * LinealM / TimeMs;
@@ -143,8 +143,8 @@ namespace SkyCombDrone.DroneModel
             float fromYawDegs = fromTardis.YawDeg;
             float thisYawDegs = YawDeg;
 
-            if (fromYawDegs == UnknownValue ||
-               thisYawDegs == UnknownValue)
+            if (FloatComparisonHelper.IsUnknownValue(fromYawDegs) ||
+                FloatComparisonHelper.IsUnknownValue(thisYawDegs))
                 return 0;
 
             // Combining positive (+174) degrees with negative (-166) degrees
@@ -158,7 +158,7 @@ namespace SkyCombDrone.DroneModel
             else if (deltaYawDeg < -180)
                 deltaYawDeg += 360;
 
-            if ((deltaYawDeg > -0.001) && (deltaYawDeg < +0.001))
+            if (FloatComparisonHelper.IsEffectivelyZero(deltaYawDeg, 0.001f))
                 deltaYawDeg = 0;
 
             return deltaYawDeg;

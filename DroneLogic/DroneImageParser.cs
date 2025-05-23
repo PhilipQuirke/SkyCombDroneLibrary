@@ -82,22 +82,36 @@ namespace SkyCombDrone.DroneLogic
 
         private static string RunExifTool(string filePath)
         {
-            var process = new Process
+            using (var process = new Process())
             {
-                StartInfo = new ProcessStartInfo
+                process.StartInfo = new ProcessStartInfo
                 {
                     FileName = ExifToolPath,
                     Arguments = $"\"{filePath}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
-                }
-            };
+                };
 
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-            return output;
+                try
+                {
+                    process.Start();
+                    string output = process.StandardOutput.ReadToEnd();
+                    process.WaitForExit();
+
+                    // Check if process exited successfully
+                    if (process.ExitCode != 0)
+                    {
+                        throw new Exception($"ExifTool exited with code {process.ExitCode}");
+                    }
+
+                    return output;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Failed to run ExifTool on {filePath}: {ex.Message}", ex);
+                }
+            }
         }
 
         private static DroneImageMetadata ParseExifOutput(string output)
