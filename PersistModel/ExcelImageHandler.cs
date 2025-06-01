@@ -17,7 +17,34 @@ namespace SkyCombDrone.PersistModel
             Worksheet = worksheet;
         }
 
-        public void SaveBitmap(Bitmap? theBitmap, string name, int row, int col = 0, int percent = 100)
+        private static Bitmap NormalizeBitmap(Bitmap source)
+        {
+            // Create a new bitmap with consistent DPI and format
+            var normalized = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
+            normalized.SetResolution(StandardDpi, StandardDpi);
+
+            using (var g = Graphics.FromImage(normalized))
+            {
+                // Configure for high quality
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+
+                // Draw the original bitmap onto the normalized one
+                g.DrawImage(source, 0, 0, source.Width, source.Height);
+            }
+
+            return normalized;
+        }
+
+        private static ImageCodecInfo GetPngEncoder()
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+            return codecs.First(codec => codec.FormatID == ImageFormat.Png.Guid);
+        }
+
+        public void SaveBitmap(Bitmap? theBitmap, string name, int row, int col, int percent = 100)
         {
             if (theBitmap == null || Worksheet == null)
                 return;
@@ -55,38 +82,11 @@ namespace SkyCombDrone.PersistModel
             catch (Exception ex)
             {
                 // Suppress error
-                Debug.Print("ExcelImageHandler.SaveBitmap1" + ex.ToString());
+                Debug.Print("ExcelImageHandler.SaveBitmap" + ex.ToString());
             }
         }
 
-        private static Bitmap NormalizeBitmap(Bitmap source)
-        {
-            // Create a new bitmap with consistent DPI and format
-            var normalized = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb);
-            normalized.SetResolution(StandardDpi, StandardDpi);
-
-            using (var g = Graphics.FromImage(normalized))
-            {
-                // Configure for high quality
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-
-                // Draw the original bitmap onto the normalized one
-                g.DrawImage(source, 0, 0, source.Width, source.Height);
-            }
-
-            return normalized;
-        }
-
-        private static ImageCodecInfo GetPngEncoder()
-        {
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
-            return codecs.First(codec => codec.FormatID == ImageFormat.Png.Guid);
-        }
-
-        public void SaveBitmap(Bitmap? theBitmap, string name, int row, int col, int widthPx, int heightPx)
+        public void SaveBitmapSized(Bitmap? theBitmap, string name, int row, int col, int widthPx, int heightPx)
         {
             if (theBitmap == null || Worksheet == null)
                 return;
@@ -121,7 +121,7 @@ namespace SkyCombDrone.PersistModel
             catch (Exception ex)
             {
                 // Suppress error
-                Debug.Print("ExcelImageHandler.SaveBitmap2" + ex.ToString());
+                Debug.Print("ExcelImageHandler.SaveBitmapSized" + ex.ToString());
             }
         }
     }

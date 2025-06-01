@@ -19,7 +19,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Save the bitmap to the datastore
-        public void SaveBitmap(Bitmap? theBitmap, string chartName, int row, int col = 0, int percent = 100)
+        public void SaveBitmap(Bitmap? theBitmap, string chartName, int row, int col, int percent = 100)
         {
             if (theBitmap == null || Worksheet == null)
                 return;

@@ -121,8 +121,8 @@ namespace SkyCombDrone.PersistModel
                         (var bitmap1, var bitmap2) = OpenStreetMap.GetTwoMaps(globalLocation, Drone.FlightSections.GlobalRange);
 
                         var imageHandler = new ExcelImageHandler(Data.Worksheet);
-                        imageHandler.SaveBitmap(bitmap1, "CountryLarge", row - 1, col - 1, CountryImageWidth, CountryImageHeight);
-                        imageHandler.SaveBitmap(bitmap2, "CountrySmall", row - 1, col + 4, CountryImageWidth, CountryImageHeight);
+                        imageHandler.SaveBitmapSized(bitmap1, "CountryLarge", row - 1, col - 1, CountryImageWidth, CountryImageHeight);
+                        imageHandler.SaveBitmapSized(bitmap2, "CountrySmall", row - 1, col + 4, CountryImageWidth, CountryImageHeight);
                     }
                 }
 
