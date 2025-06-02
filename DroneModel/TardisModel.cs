@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombGround.CommonSpace;
 using System.Drawing;
 
@@ -265,22 +265,38 @@ namespace SkyCombDrone.DroneModel
         // This function must align to the above GetSettings function.
         public virtual void LoadSettings(List<string> settings)
         {
-            // TardisId = settings[0]
-            StartTime = StringToTimeSpan(settings[1]);
-            TimeMs = StringToNonNegInt(settings[2]);
-            // SumTimeMs = StringToNonNegInt(settings[3]);
-            DroneLocnM = new DroneLocation(settings[4], settings[5]);
-            LinealM = StringToFloat(settings[6]) / 100;
-            SumLinealM = StringToFloat(settings[7]);
-            // SpeedMps = settings[8]
-            YawDeg = StringToFloat(settings[9]);
-            DeltaYawDeg = StringToFloat(settings[10]);
-            PitchDeg = StringToFloat(settings[11]);
-            RollDeg = StringToFloat(settings[12]);
-            AltitudeM = StringToFloat(settings[13]);
-            FocalLength = StringToFloat(settings[14]);
-            Zoom = StringToFloat(settings[15]);
+            // Convert float settings in batch for speed  
+            var floatSettings = new float[11];
+            var floatIndices = new[] { 
+                NorthingMSetting - 1, 
+                EastingMSetting - 1, 
+                LinealMSetting - 1, 
+                SumLinealMSetting - 1, 
+                YawDegSetting - 1, 
+                DeltaYawDegSetting - 1,
+                PitchDegSetting - 1,
+                RollDegSetting - 1, 
+                AltitudeMSetting - 1,
+                FocalLengthSetting - 1,
+                ZoomSetting - 1 }; 
+            var floatInputs = floatIndices.Select(i => settings[i]).ToArray();
+            ConfigBase.ConvertStringBatch(floatInputs, floatSettings);
 
+            // TardisId 
+            StartTime = StringToTimeSpan(settings[StartTimeSetting-1]);
+            TimeMs = StringToNonNegInt(settings[TimeMsSetting-1]);
+            // SumTimeMs 
+            DroneLocnM = new DroneLocation(floatSettings[0], floatSettings[1]);
+            LinealM = floatSettings[2] / 100;
+            SumLinealM = floatSettings[3];
+            // SpeedMps 
+            YawDeg = floatSettings[4];
+            DeltaYawDeg = floatSettings[5];
+            PitchDeg = floatSettings[6];
+            RollDeg = floatSettings[7];
+            AltitudeM = floatSettings[8];
+            FocalLength = floatSettings[9];
+            Zoom = floatSettings[10];
 
             if (LinealM == UnknownLinealValue)
                 LinealM = UnknownValue;
