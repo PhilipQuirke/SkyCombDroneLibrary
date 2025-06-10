@@ -267,24 +267,24 @@ namespace SkyCombDrone.DroneModel
         {
             // Convert float settings in batch for speed  
             var floatSettings = new float[11];
-            var floatIndices = new[] { 
-                NorthingMSetting - 1, 
-                EastingMSetting - 1, 
-                LinealMSetting - 1, 
-                SumLinealMSetting - 1, 
-                YawDegSetting - 1, 
+            var floatIndices = new[] {
+                NorthingMSetting - 1,
+                EastingMSetting - 1,
+                LinealMSetting - 1,
+                SumLinealMSetting - 1,
+                YawDegSetting - 1,
                 DeltaYawDegSetting - 1,
                 PitchDegSetting - 1,
-                RollDegSetting - 1, 
+                RollDegSetting - 1,
                 AltitudeMSetting - 1,
                 FocalLengthSetting - 1,
-                ZoomSetting - 1 }; 
+                ZoomSetting - 1 };
             var floatInputs = floatIndices.Select(i => settings[i]).ToArray();
             ConfigBase.ConvertStringBatch(floatInputs, floatSettings);
 
             // TardisId 
-            StartTime = StringToTimeSpan(settings[StartTimeSetting-1]);
-            TimeMs = StringToNonNegInt(settings[TimeMsSetting-1]);
+            StartTime = StringToTimeSpan(settings[StartTimeSetting - 1]);
+            TimeMs = StringToNonNegInt(settings[TimeMsSetting - 1]);
             // SumTimeMs 
             DroneLocnM = new DroneLocation(floatSettings[0], floatSettings[1]);
             LinealM = floatSettings[2] / 100;
