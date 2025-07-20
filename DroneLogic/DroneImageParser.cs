@@ -114,6 +114,33 @@ namespace SkyCombDrone.DroneLogic
             }
         }
 
+        static double ParseDmsCoordinate(string input)
+        {
+            // Match format like: 175 deg 36' 20.81" E
+            var regex = new Regex(@"(\d+)\s*deg\s*(\d+)'\s*([\d.]+)""\s*([NSEW])", RegexOptions.IgnoreCase);
+            var match = regex.Match(input.Trim());
+
+            if (!match.Success)
+            {
+                throw new FormatException("Input string is not in the correct DMS format.");
+            }
+
+            double degrees = double.Parse(match.Groups[1].Value);
+            double minutes = double.Parse(match.Groups[2].Value);
+            double seconds = double.Parse(match.Groups[3].Value);
+            char direction = char.ToUpper(match.Groups[4].Value[0]);
+
+            double decimalDegrees = degrees + (minutes / 60.0) + (seconds / 3600.0);
+
+            // Apply negative sign for South or West
+            if (direction == 'S' || direction == 'W')
+            {
+                decimalDegrees *= -1;
+            }
+
+            return decimalDegrees;
+        }
+
         private static DroneImageMetadata ParseExifOutput(string output)
         {
             var data = new DroneImageMetadata();
@@ -121,7 +148,7 @@ namespace SkyCombDrone.DroneLogic
             string GetValue(string label)
             {
                 var match = Regex.Match(output, @$"{Regex.Escape(label)}\s*:\s*(.+)");
-                return match.Success ? match.Groups[1].Value.Trim() : null;
+                return match.Success ? match.Groups[1].Value.Trim() : "";
             }
 
             double? GetDouble(string label)
@@ -170,16 +197,33 @@ namespace SkyCombDrone.DroneLogic
             data.DroneModel = GetValue("Drone Model");
             data.DroneSerialNumber = GetValue("Drone Serial Number");
             data.LRFStatus = GetValue("LRF Status");
-            data.LRFDistance = GetDouble("LRF Target Distance");
-            data.LRFLon = GetDouble("LRF Target Lon");
-            data.LRFLat = GetDouble("LRF Target Lat");
-            data.LRFAlt = GetDouble("LRF Target Alt");
-            data.LRFAbsAlt = GetDouble("LRF Target Abs Alt");
+            data.LRFDistance = GetDouble("LRF Target Distance"); 
+            data.LRFLon = GetDouble("LRF Target Lon"); 
+            data.LRFLat = GetDouble("LRF Target Lat"); 
+            data.LRFAlt = GetDouble("LRF Target Alt"); 
+            data.LRFAbsAlt = GetDouble("LRF Target Abs Alt"); 
             data.ScaleFactor35mm = GetDouble("Scale Factor To 35 mm Equivalent");
             data.CircleOfConfusionMM = GetDouble("Circle Of Confusion");
             data.DepthOfFieldM = GetDouble("Depth Of Field");
             data.FieldOfViewDegree = GetDouble("Field Of View");
             data.HyperfocalDistanceM = GetDouble("Hyperfocal Distance");
+
+            // Hamish Kendal's (HK) drone has values like this:
+            // Latitude   36 deg 45' 4.52" S
+            // Longitude  175 deg 36' 20.81" E
+            // Altitude   94.18
+            bool haveLong = (data.LRFLon != null) && (Math.Abs((double)data.LRFLon) > 0.001);
+            bool haveLat  = (data.LRFLat != null) && (Math.Abs((double)data.LRFLat) > 0.001);
+            bool haveAlt  = (data.LRFAlt != null) && (Math.Abs((double)data.LRFAlt) > 0.001);
+            string longStr = GetValue("Longitude");
+            string latStr = GetValue("Latitude");
+            string altStr = GetValue("Altitude"); 
+            if (!haveLong && longStr.Contains(" deg ") )
+                data.LRFLon = ParseDmsCoordinate(longStr);
+            if (!haveLat && latStr.Contains(" deg "))
+                data.LRFLat = ParseDmsCoordinate(latStr);
+            if ((!haveAlt) && altStr.Contains('.'))
+                data.LRFAlt = GetDouble("Altitude");
 
             return data;
         }
