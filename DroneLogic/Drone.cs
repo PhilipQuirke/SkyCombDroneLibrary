@@ -392,6 +392,51 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+#if DEBUG
+        // Check that the Flight DEM and DSM values still aalign with the Ground data values.
+        public string SanityCheckGroundElevationData(GroundData groundData)
+        {
+            if( groundData == null)
+                return "";
+
+            int maxAllowedDeltaM = 1;
+
+            foreach (var step in this.FlightSteps.Steps)
+            {
+                var theStep = step.Value;
+                var theOldDem = theStep.DemM;
+                var theOldDsm = theStep.DsmM;
+
+                if ((theOldDem != BaseConstants.UnknownValue) && groundData.HasDemModel)
+                {
+                    var theNewDem = groundData.DemModel.GetElevationByDroneLocn(theStep.DroneLocnM, true);
+                    var good = Math.Abs(theNewDem - theOldDem) <= maxAllowedDeltaM;
+                    if (!good)
+                        return "Flight DEM and Ground DEM mismatch:" + 
+                               " StepId=" + theStep.StepId +
+                               " Old=" + theOldDem.ToString("F2") +
+                               " New=" + theNewDem.ToString("F2") +
+                               " DroneLocnM=" + theStep.DroneLocnM.ToString();
+                }
+
+                if ((theOldDsm != BaseConstants.UnknownValue) && groundData.HasDsmModel)
+                {
+                    var theNewDsm = groundData.DsmModel.GetElevationByDroneLocn(theStep.DroneLocnM, true);
+                    var good = Math.Abs(theNewDsm - theOldDsm) <= maxAllowedDeltaM;
+                    if (!good)
+                        return "Flight DSM and Ground DSM mismatch" +
+                               " StepId=" + theStep.StepId +
+                               " Old=" + theOldDsm.ToString("F2") +
+                               " New=" + theNewDsm.ToString("F2") +
+                               " DroneLocnM=" + theStep.DroneLocnM.ToString();
+                }
+            }
+
+            return "";
+        }
+#endif
+
+
         public void SaveAllData(DroneDataStore dataStore, bool firstSave)
         {
             var effort = Stopwatch.StartNew();
@@ -407,15 +452,32 @@ namespace SkyCombDrone.DroneLogic
             datawriter.SaveData_Detail(true, effort);
 
 #if DEBUG
+            var dataStoreFileName = dataStore.DataStoreFileName;
+
             // Check that the Flight DEM and DSM values align with the Ground data.
-            DroneDataFactory.SanityCheckGroundElevationData(this, GroundData);
+            var error = SanityCheckGroundElevationData(GroundData);
+            Assert(error == "", "Drone.SaveAllData: SanityCheckGroundElevationData failed: " + error);
 
             // Check that the DEM and DSM ground data values survive the round trip.
-            GroundData reloadedGroundData = GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStore.DataStoreFileName);
+            GroundData reloadedGroundData = GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStoreFileName);
             // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-            DroneDataFactory.SanityCheckGroundElevationData(this, reloadedGroundData);
+            error = SanityCheckGroundElevationData(reloadedGroundData);
+            Assert(error == "", "Drone.SaveAllData: SanityCheckGroundElevationData failed: " + error);
             reloadedGroundData.Dispose();
             dataStore.FreeResources();
+#endif
+        }
+
+
+        public void CheckGroundDataPostLoad(string dataStoreFileName)
+        {
+#if DEBUG
+            // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
+            if (GroundData != null)
+            {
+                var error = SanityCheckGroundElevationData(GroundData);
+                Assert(error == "", "Drone.CheckGroundDataPostLoad: SanityCheckGroundElevationData failed: " + error );
+            }
 #endif
         }
 

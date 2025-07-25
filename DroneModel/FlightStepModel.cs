@@ -18,14 +18,12 @@ namespace SkyCombDrone.DroneModel
         public string FlightLegName { get { return IdToLetter(FlightLegId); } }
 
 
-        // The ground (not drone) elevation, above sea level (meters)
-        // directly below the drone
-        public float DemM { get; set; } = UnknownValue;
         // The surface (i.e tree-top) elevation, above sea level (meters)
         // directly below the drone
         public float DsmM { get; set; } = UnknownValue;
-        // Get the best measure of the surface elevation we have available.
-        public float DsmElseDemM { get { return (DsmM != UnknownValue ? DsmM : DemM); } }
+        // The ground (not drone) elevation, above sea level (meters)
+        // directly below the drone
+        public float DemM { get; set; } = UnknownValue;
 
 
         // InputImageCenter:
@@ -97,8 +95,8 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("Leg Id", FlightLegId);
             answer.Add("Leg Name", FlightLegName);
-            answer.Add("DSM", DsmM, ElevationNdp); // Graphs depend on this name (TBC)
-            answer.Add("DEM", DemM, ElevationNdp); // Graphs depend on this name (TBC)
+            answer.Add("DSM", DsmM, ElevationNdp); 
+            answer.Add("DEM", DemM, ElevationNdp); 
             answer.Add("Img Center", (InputImageCenter != null ? InputImageCenter.ToString() : "0,0"));
             answer.Add("Img Size M", (InputImageSizeM != null ? InputImageSizeM.ToString(2) : "0,0"));
             answer.Add("Has Leg", (FlightLegId > 0 ? 1 : 0));
@@ -114,14 +112,12 @@ namespace SkyCombDrone.DroneModel
         {
             base.LoadSettings(settings);
 
-            int i = FirstFreeSetting - 1;
-            FlightLegId = StringToNonNegInt(settings[i++]);
-            i++; // Skip LegName 
-            DsmM = StringToFloat(settings[i++]);
-            DemM = StringToFloat(settings[i++]);
-            InputImageCenter = new DroneLocation(settings[i++]);
-            InputImageSizeM = new AreaF(settings[i++]);
-            // We do not load FixValues. It is updated by ProcessSpan on load
+            FlightLegId = StringToNonNegInt(settings[LegIdSetting-1]);
+            // Skip LegName 
+            DsmM = StringToFloat(settings[DsmSetting-1]);
+            DemM = StringToFloat(settings[DemSetting-1]);
+            InputImageCenter = new DroneLocation(settings[ImageCenterSetting-1]);
+            InputImageSizeM = new AreaF(settings[ImageSizeMSetting-1]);
 
             InputImageCenter.AssertGood();
             InputImageSizeM.AssertGood();

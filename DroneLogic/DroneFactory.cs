@@ -2,7 +2,6 @@
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
-using SkyCombGround.GroundLogic;
 using System.Diagnostics;
 
 
@@ -154,36 +153,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-#if DEBUG
-        // Check that the Flight DEM and DSM values align with the Ground data values.
-        public static void SanityCheckGroundElevationData(Drone drone, GroundData groundData)
-        {
-            int maxAllowedDeltaM = 4; // PQR TODO. This should be 1m
-
-            if (groundData != null && groundData.HasDemModel)
-                foreach (var step in drone.FlightSteps.Steps)
-                {
-                    var theOldDem = step.Value.DemM;
-                    if (theOldDem != BaseConstants.UnknownValue)
-                    {
-                        var theNewDem = groundData.DemModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
-                        BaseConstants.Assert(Math.Abs(theNewDem - theOldDem) <= maxAllowedDeltaM, "Flight DEM and Ground DEM mismatch");
-                    }
-                }
-
-            if (groundData != null && groundData.HasDsmModel)
-                foreach (var step in drone.FlightSteps.Steps)
-                {
-                    var theOldDsm = step.Value.DsmM;
-                    if (theOldDsm != BaseConstants.UnknownValue)
-                    {
-                        var theNewDsm = groundData.DsmModel.GetElevationByDroneLocn(step.Value.DroneLocnM, true);
-                        BaseConstants.Assert(Math.Abs(theNewDsm - theOldDsm) <= maxAllowedDeltaM, "Flight DSM and Ground DSM mismatch");
-                    }
-                }
-        }
-#endif
-
         public static Drone Create(
             Action<string> showDroneSettings,
             Func<string, DateTime> readDateEncodedUtc,
@@ -280,11 +249,8 @@ namespace SkyCombDrone.DroneLogic
                     }
                 }
 
-#if DEBUG
                 // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-                if (answer.GroundData != null)
-                    SanityCheckGroundElevationData(answer, answer.GroundData);
-#endif
+                answer.CheckGroundDataPostLoad(droneDataStore.DataStoreFileName);
 
                 phase = "Drone and ground data ready.";
                 showDroneSettings(phase);
