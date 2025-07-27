@@ -371,23 +371,23 @@ namespace SkyCombDrone.DrawSpace
 
 
         // Draw the ground or surface elevations or "seen" as background of shades of brown or green
-        private void DrawElevationOrSwathe(ref Image<Bgr, byte> image, GroundType backgroundType)
+        private void DrawElevationOrSwathe(ref Image<Bgr, byte> image)
         {
             if ((DroneDrawScope == null) || (DroneDrawScope.Drone == null) || (DroneDrawScope.Drone.GroundData == null))
                 return;
 
-            GroundModel? groundModel = DroneDrawScope.Drone.GroundData.GroundModelByType(backgroundType);
+            GroundModel? groundModel = DroneDrawScope.Drone.GroundData.GroundModelByType(GroundType);
             if ((groundModel == null) || !groundModel.HasElevationData())
                 return;
 
             Color highColor = DroneColors.SurfaceHighColor;
             Color lowColor = DroneColors.SurfaceLowColor;
-            if (backgroundType == GroundType.DemElevations)
+            if (GroundType == GroundType.DemElevations)
             {
                 highColor = DroneColors.GroundHighColor;
                 lowColor = DroneColors.GroundLowColor;
             }
-            else if (backgroundType == GroundType.SwatheSeen)
+            else if (GroundType == GroundType.SwatheSeen)
             {
                 highColor = DroneColors.SwatheHighColor;
                 lowColor = DroneColors.SwatheLowColor;
@@ -397,7 +397,7 @@ namespace SkyCombDrone.DrawSpace
 
             // Calculate the range of surface elevations
             (double minValue, double maxValue) = groundModel.GetMinMaxElevationM();
-            if (backgroundType == GroundType.SwatheSeen)
+            if (GroundType == GroundType.SwatheSeen)
             {
                 minValue = 0;
                 maxValue = 1;
@@ -412,7 +412,7 @@ namespace SkyCombDrone.DrawSpace
 
 
             // Overdraw the highest elevation with a white triangle
-            if ((maxLocation.Width > 0) && (backgroundType != GroundType.SwatheSeen))
+            if ((maxLocation.Width > 0) && (GroundType != GroundType.SwatheSeen))
             {
                 var where = new Point(maxLocation.X + maxLocation.Width / 2, maxLocation.Y + maxLocation.Height / 2);
 
@@ -538,7 +538,7 @@ namespace SkyCombDrone.DrawSpace
 
                         // Draw the ground or surface elevations as background of shades of brown or green
                         if (!tightFocus)
-                            DrawElevationOrSwathe(ref image, groundType);
+                            DrawElevationOrSwathe(ref image);
 
                         // Draw all flight path legs (as straight lines)
                         if (DrawLegs)
