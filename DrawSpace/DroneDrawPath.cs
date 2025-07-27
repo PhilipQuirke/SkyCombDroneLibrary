@@ -36,6 +36,8 @@ namespace SkyCombDrone.DrawSpace
         public Bgr TextNormalColor;
         public Bgr TextHighlightColor;
 
+        // Ground type to draw
+        public GroundType GroundType = GroundType.DsmElevations;
         // Normally zero, used in SkyCombFlights when drawing multiple flights in the same image
         public DroneLocation LocationOffset = new();
         // Move locations to desired centre of FOV
@@ -431,6 +433,8 @@ namespace SkyCombDrone.DrawSpace
         // Also use FlightLeg data to draw straight lines.
         public void Initialise(Size size, DroneLocation? processObjectLocation, GroundType groundType)
         {
+            GroundType = groundType;
+
             try
             {
                 TransformMToPixels = new();
@@ -587,8 +591,30 @@ namespace SkyCombDrone.DrawSpace
         }
 
 
+        // Draw (rotated) box to show the image area seen by the drone.
+        public (Point, Point, Point, Point) DrawInputImageArea(ref Image<Bgr, byte> image, FlightStep flightStep)
+        {
+            var activeBgr = DroneColors.ActiveDroneBgr;
+
+            var (corner1, corner2, corner3, corner4) =
+                flightStep.Calculate_InputImageArea_Corners();
+
+            var point1 = DroneLocnMToPixelPoint(corner1);
+            var point2 = DroneLocnMToPixelPoint(corner2);
+            var point3 = DroneLocnMToPixelPoint(corner3);
+            var point4 = DroneLocnMToPixelPoint(corner4);
+
+            Line(ref image, point1, point2, activeBgr, NormalThickness);
+            Line(ref image, point2, point3, activeBgr, NormalThickness);
+            Line(ref image, point3, point4, activeBgr, NormalThickness);
+            Line(ref image, point4, point1, activeBgr, NormalThickness);
+
+            return (point1, point2, point3, point4); 
+        }
+
+
         // Draw drone flight path based on Drone/GroundSpace data
-        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
+        public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? _ = null)
         {
             try
             {
@@ -610,18 +636,7 @@ namespace SkyCombDrone.DrawSpace
                         if (flightStep.InputImageSizeM != null)
                         {
                             // Draw lines to show the image area seen by the drone.
-                            var (corner1, corner2, corner3, corner4) =
-                                flightStep.Calculate_InputImageArea_Corners();
-
-                            var point1 = DroneLocnMToPixelPoint(corner1);
-                            var point2 = DroneLocnMToPixelPoint(corner2);
-                            var point3 = DroneLocnMToPixelPoint(corner3);
-                            var point4 = DroneLocnMToPixelPoint(corner4);
-
-                            Line(ref image, point1, point2, activeBgr, NormalThickness);
-                            Line(ref image, point2, point3, activeBgr, NormalThickness);
-                            Line(ref image, point3, point4, activeBgr, NormalThickness);
-                            Line(ref image, point4, point1, activeBgr, NormalThickness);
+                            var (point1, point2, point3, point4) = DrawInputImageArea(ref image, flightStep);
 
                             // If camera is vertically down then lines from drone to image area
                             // are unnecessary & look ugly. Suppress them for small angles.
@@ -646,6 +661,14 @@ namespace SkyCombDrone.DrawSpace
                             }
                         }
                     }
+                }
+
+                if (GroundType == GroundType.SwatheSeen && DroneDrawScope.Drone.InputIsImages)
+                {
+                    // The flight path images may or may not overlap.
+                    // On the swathe, draw an image rectangle for each flightstep.
+                    foreach( var flightStep in DroneDrawScope.Drone.FlightSteps.Steps.Values)
+                        DrawInputImageArea(ref image, flightStep);
                 }
             }
             catch (Exception ex)
