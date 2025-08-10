@@ -1,17 +1,260 @@
-# [SkyComb Drone Library](https://github.com/PhilipQuirke/SkyCombDroneLibrary/) 
+﻿# SkyComb Drone Library
 
-SkyComb Drone Library is a library that:
-- takes as input the flight log (SRT) and video files created by a drone during a flight containing drone elevation, location, pitch, etc information
-- integrates ground (DEM & DSM) data provided by the SkyComb Ground library
-- generates a summary of the drone flight and saves the detail, summary and graphs to a spreadsheet
+A .NET library for processing drone flight data, including video files, flight logs, and thermal imaging data. Designed for scientific drone data analysis and integrated with ground elevation data.
 
-This "drone data" library is incorporated into the tools:
-- [SkyComb Analyst](https://github.com/PhilipQuirke/SkyCombAnalyst/) 
-- [SkyComb Flights](https://github.com/PhilipQuirke/SkyCombFlights/)
+## Features
 
-The code folders are:
-- **CommonSpace:** Constants and generic code shared by SkyCombDroneLibrary, SkyCombFlights & SkyCombAnalyst
-- **DroneModel:** In-memory representations (models) of drone flight objects including sections, steps, legs,
-- **DroneLogic:** Logic on how to parse flight logs, integrate ground data, correct flight data, and summarise the flight data    
-- **DrawSpace:** Code to draw graphs, charts, images containing drone and/or ground data.
-- **PersistModel:** Save/load DroneModel data from/to the datastore (spreadsheet) including graphs
+- 🎬 **Video Processing** - Load and process drone video files (MP4) with flight log data (SRT)
+- 📷 **Image Processing** - Process collections of thermal/optical drone images with GPS metadata  
+- 🛰️ **Flight Analysis** - Parse flight logs, detect flight legs, and analyze flight patterns
+- 🗺️ **Ground Integration** - Integrate with SkyCombGroundLibrary for elevation data
+- 📊 **Flight Metrics** - Calculate speed, altitude, pitch, yaw, and other flight characteristics
+- 🎯 **Camera Support** - Support for DJI thermal cameras (Mavic 3T, M300 XT2, H20T, etc.)
+- ⚡ **High Performance** - Efficient processing of large video files and image collections
+- 🔧 **Extensible Design** - Clean interfaces for integration into larger applications
+
+## Quick Start
+
+### Installation
+
+Add the project reference or package:
+
+```bash
+dotnet add reference ../SkyCombDroneLibrary/SkyCombDroneLibrary.csproj
+```
+
+### Basic Usage - Video Processing
+
+```csharp
+using SkyCombDrone.Interfaces;
+using SkyCombDrone.Services;
+
+// Create the service
+var droneService = DroneDataService.Create();
+
+// Process a drone video with flight log
+string videoPath = @"C:\DroneVideos\flight_20241201_143022.mp4";
+string groundDataPath = @"C:\ElevationData";
+
+using var droneData = await droneService.LoadVideoDataAsync(videoPath, groundDataPath);
+
+// Get flight summary
+var summary = droneData.FlightSummary;
+Console.WriteLine($"Flight Duration: {summary.Duration:hh\\:mm\\:ss}");
+Console.WriteLine($"Distance Flown: {summary.DistanceM:F0}m");
+Console.WriteLine($"Flight Legs: {summary.NumLegsDetected}");
+Console.WriteLine($"Camera Type: {summary.CameraType}");
+
+// Get flight bounds
+var bounds = droneData.Bounds;
+Console.WriteLine($"Altitude Range: {bounds.AltitudeRange.MinAltitudeM:F1}m - {bounds.AltitudeRange.MaxAltitudeM:F1}m");
+```
+
+### Basic Usage - Image Processing
+
+```csharp
+// Process a directory of drone images
+string imageDirectory = @"C:\DroneImages\ThermalSurvey";
+string groundDataPath = @"C:\ElevationData";
+
+using var droneData = await droneService.LoadImageDataAsync(imageDirectory, groundDataPath);
+
+Console.WriteLine($"Images processed: Survey duration {droneData.FlightSummary.Duration:hh\\:mm\\:ss}");
+
+// Get flight data at specific times
+var flightPoint = droneData.GetFlightDataAt(30000); // 30 seconds in
+if (flightPoint != null)
+{
+    Console.WriteLine($"At 30s: {flightPoint.Location}, Alt: {flightPoint.AltitudeM:F1}m");
+}
+```
+
+### Quick Flight Summary
+
+```csharp
+// Get quick summary without full processing
+var summary = await droneService.GetFlightSummaryAsync(@"C:\DroneVideos\flight.mp4");
+
+Console.WriteLine($"Quick Summary:");
+Console.WriteLine($"  Date: {summary.FlightDateTime:yyyy-MM-dd HH:mm}");
+Console.WriteLine($"  Duration: {summary.Duration:hh\\:mm\\:ss}");
+Console.WriteLine($"  Distance: {summary.DistanceM:F0}m");
+Console.WriteLine($"  Center: {summary.CenterLocation}");
+```
+
+## Data Requirements
+
+### Video Files
+- **Format**: MP4 video files from drone cameras
+- **Flight Logs**: Associated SRT files with GPS and IMU data
+- **Location**: SRT file should be in the same directory as the video
+- **Naming**: SRT file should have the same base name as video file
+
+### Image Files  
+- **Formats**: JPG, JPEG, PNG, TIFF
+- **Metadata**: Files must contain GPS coordinates and timestamp EXIF data
+- **Organization**: All images in a single directory or subdirectories
+
+### Ground Data (Optional)
+- **Integration**: Uses SkyCombGroundLibrary for elevation data
+- **Formats**: GeoTIFF elevation files (DEM/DSM)
+- **Coverage**: Elevation data should cover the flight area
+- **Setup**: Requires running `GroundDataService.RebuildElevationIndexes()` after adding new elevation files
+
+## Advanced Configuration
+
+```csharp
+var options = new DroneDataOptions
+{
+    EnableCaching = true,
+    MaxConcurrentOperations = Environment.ProcessorCount,
+    FullDataLoad = true,
+    AutoDetectLegs = true,
+    BufferDistanceM = 50  // Ground data buffer around flight path
+};
+
+var droneService = DroneDataService.Create(options);
+```
+
+## API Reference
+
+### Core Interfaces
+
+- **`IDroneDataService`** - Main service for loading drone data
+- **`IDroneData`** - Provides access to processed drone flight data
+- **`DroneDataOptions`** - Configuration options for processing
+- **`DroneFlightSummary`** - Summary information about a flight
+
+### Key Methods
+
+```csharp
+// Load video with flight log
+Task<IDroneData> LoadVideoDataAsync(string videoFilePath, string groundDataDirectory, 
+                                   string? outputDirectory = null, CancellationToken cancellationToken = default);
+
+// Load directory of images  
+Task<IDroneData> LoadImageDataAsync(string imageDirectory, string groundDataDirectory,
+                                   string? outputDirectory = null, CancellationToken cancellationToken = default);
+
+// Get quick flight summary
+Task<DroneFlightSummary> GetFlightSummaryAsync(string inputPath, CancellationToken cancellationToken = default);
+
+// Query processed data
+float GetElevationAt(GlobalLocation location, ElevationType elevationType);
+FlightDataPoint? GetFlightDataAt(int timestampMs);
+IReadOnlyCollection<FlightLegSummary> GetFlightLegs();
+```
+
+## Data Models
+
+### Flight Data Point
+```csharp
+public class FlightDataPoint
+{
+    public int TimestampMs { get; set; }
+    public GlobalLocation Location { get; set; }
+    public float AltitudeM { get; set; }
+    public float SpeedMps { get; set; }
+    public float PitchDeg { get; set; }
+    public float YawDeg { get; set; }
+    public float GroundElevationM { get; set; }
+    public float SurfaceElevationM { get; set; }
+}
+```
+
+### Flight Leg Summary
+```csharp
+public class FlightLegSummary  
+{
+    public int LegId { get; set; }
+    public string LegName { get; set; } // A, B, C, etc.
+    public int StartTimeMs { get; set; }
+    public int EndTimeMs { get; set; }
+    public float DistanceM { get; set; }
+    public float AverageAltitudeM { get; set; }
+    public float AverageSpeedMps { get; set; }
+}
+```
+
+## Examples
+
+See the [Examples](Examples/) directory for comprehensive usage examples:
+
+- `BasicUsageExamples.cs` - Getting started with video and image processing
+- Flight data analysis
+- Error handling  
+- Advanced configuration
+- Integration with ground data
+
+## Error Handling
+
+The library provides specific exception types:
+
+- **`UnsupportedVideoFormatException`** - Video format not supported
+- **`FlightLogProcessingException`** - Issues processing flight log data
+- **`InsufficientDroneDataException`** - Not enough data for processing
+- **`CameraCalibrationException`** - Camera calibration issues
+- **`DroneMetadataException`** - Metadata processing problems
+
+```csharp
+try
+{
+    using var droneData = await droneService.LoadVideoDataAsync(videoPath, groundPath);
+    // Process data...
+}
+catch (UnsupportedVideoFormatException ex)
+{
+    Console.WriteLine($"Video format not supported: {ex.FilePath}");
+}
+catch (FlightLogProcessingException ex) 
+{
+    Console.WriteLine($"Flight log issue: {ex.Message}");
+}
+```
+
+## Performance Considerations
+
+- **Memory Usage**: Large videos and image sets require substantial memory
+- **Processing Time**: Full processing can take several minutes for long flights  
+- **Storage**: Processed data is cached in Excel files for faster subsequent access
+- **Concurrency**: Configure `MaxConcurrentOperations` based on system capabilities
+
+## File Organization
+
+```
+SkyCombDroneLibrary/
+├── Interfaces/          # Public interfaces (IDroneDataService, IDroneData)
+├── Services/           # Service implementations (DroneDataService)
+├── Examples/           # Usage examples and documentation
+├── Exceptions/         # Custom exception types
+├── src/
+│   ├── CommonSpace/    # Constants and shared utilities
+│   ├── DroneModel/     # Data models for drone flights
+│   ├── DroneLogic/     # Core flight processing logic
+│   ├── DrawSpace/      # Visualization and drawing utilities
+│   └── PersistModel/   # Data persistence and caching
+```
+
+## Related Projects
+
+Part of the SkyComb ecosystem:
+
+- **[SkyComb Analyst](../../SkyCombAnalyst/)** - Complete drone thermal analysis application
+- **[SkyComb Flights](../../SkyCombFlights/)** - Batch drone data processing
+- **[SkyComb Ground Library](../../SkyCombGroundLibrary/)** - Ground elevation data processing
+- **[SkyComb Image Library](../../SkyCombImageLibrary/)** - Computer vision and object detection
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Support
+
+- 📖 **Documentation**: See [Examples](Examples/) directory
+- 🐛 **Issues**: Report via GitHub Issues  
+- 💬 **Discussions**: Use GitHub Discussions
+- 📧 **Contact**: Through GitHub
+
+---
+
+**Note**: This library processes drone video and flight log files. Camera-specific calibration may be required for optimal results with new drone models.
