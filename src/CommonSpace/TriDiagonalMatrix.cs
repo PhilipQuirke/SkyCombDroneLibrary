@@ -45,7 +45,7 @@ namespace SkyCombDrone.CommonSpace
     /// That means that A[0] is not actually on the matrix and is therefore never used, and same with C[N-1].
     /// </para>
     /// </remarks>
-    public class TriDiagonalMatrixF
+    internal class TriDiagonalMatrixF
     {
         /// <summary>
         /// The values for the sub-diagonal. A[0] is never used.

@@ -32,6 +32,11 @@ Add the project reference or package:
 dotnet add reference ../SkyCombDroneLibrary/SkyCombDroneLibrary.csproj
 ```
 
+### EXIF Tool
+If you are processing images, you will need the [ExifTool](https://exiftool.org/) to extract GPS metadata from images.  
+Ensure it is installed and available in your system PATH.
+
+
 ### Basic Usage - Video Processing
 
 ```csharp

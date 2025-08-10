@@ -46,13 +46,6 @@ namespace SkyCombDrone.DrawSpace
         {
             CvInvoke.Circle(image, point, radius, color.MCvScalar, lineThicknessScale);
         }
-        public static void Circle(DrawImageConfig config, ref Image<Bgr, byte> image, Point point)
-        {
-            if (config.DrawRealFeatureColor == Color.White)
-                return;
-
-            Circle(ref image, point, DroneColors.ColorToBgr(config.DrawRealFeatureColor));
-        }
 
 
         // Draw a cross in specified color

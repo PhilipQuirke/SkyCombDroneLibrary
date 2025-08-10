@@ -9,7 +9,7 @@ using System.Drawing;
 
 namespace SkyCombDrone.PersistModel
 {
-    public class SaveDroneDrawScope(Drone drone) : DroneDrawScope(drone)
+    internal class SaveDroneDrawScope(Drone drone) : DroneDrawScope(drone)
     {
         public override FlightStep? CurrRunFlightStep { get { return Drone.FlightSteps.Steps[CurrRunStepId]; } }
     };
@@ -17,7 +17,7 @@ namespace SkyCombDrone.PersistModel
 
 
     // Save meta-data about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations to a datastore, including graphs
-    public class DroneSaveSteps : TardisSaveGraph
+    internal class DroneSaveSteps : TardisSaveGraph
     {
         private Drone Drone;
         private FlightSteps Steps;
@@ -128,7 +128,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Add a graph of the drone & ground elevations as per Steps data
-        public void AddElevationsGraph()
+        private void AddElevationsGraph()
         {
             AddGraph(2,
                 "Drone, Surface and Ground elevations",
@@ -138,7 +138,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Add a graph of the drone speed as per Steps data 
-        public void AddSpeedGraph()
+        private void AddSpeedGraph()
         {
             AddGraph(3,
                 "Drone flight speed (in Mps) vs Step",
@@ -148,7 +148,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Add a graph of the drone delta yaw (change of direction) using smoothed Steps data
-        public void AddDeltaYawGraph()
+        private void AddDeltaYawGraph()
         {
             AddGraph(4,
                 "Drone change in direction (aka Delta Yaw) in Degrees vs Step",
@@ -157,7 +157,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void AddPitchGraph()
+        private void AddPitchGraph()
         {
             AddGraph(5,
                 "Drone Pitch (in degrees) vs Step",
@@ -166,7 +166,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void AddRollGraph()
+        private void AddRollGraph()
         {
             AddGraph(6,
                 "Drone flight speed (in Mps) vs Step",
@@ -176,7 +176,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Add a graph of whether the drone step is part of a leg or not using Step data
-        public void AddLegGraph()
+        private void AddLegGraph()
         {
             AddGraph(7,
                 "Drone Step is part of a flight Leg",

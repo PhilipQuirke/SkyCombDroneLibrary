@@ -82,7 +82,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Some settings differ per manufacturer's camera.
-        public static void CalculateCameraSpecifics_InputIsVideo(Drone drone)
+        private static void CalculateCameraSpecifics_InputIsVideo(Drone drone)
         {
             if ((drone != null) && drone.HasInputVideo)
                 switch (drone.InputVideo.CameraType)

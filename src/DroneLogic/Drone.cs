@@ -87,7 +87,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void FreeResources_Flight()
+        private void FreeResources_Flight()
         {
             FlightSections = null;
             FlightSteps = null;
@@ -95,7 +95,7 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public void FreeResources_Ground()
+        private void FreeResources_Ground()
         {
             GroundData?.Dispose();
             GroundData = null;

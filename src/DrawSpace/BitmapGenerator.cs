@@ -6,7 +6,7 @@ using System.Drawing.Imaging;
 
 namespace SkyCombDrone.DrawSpace
 {
-    public class BitmapGenerator
+    internal class BitmapGenerator
     {
         // Standard reference DPI - typically 96 DPI is the default Windows value
         private const float StandardDpi = 96.0f;
