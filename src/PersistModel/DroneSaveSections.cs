@@ -5,7 +5,7 @@ using SkyCombDrone.DroneModel;
 namespace SkyCombDrone.PersistModel
 {
     // Save meta-data about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations to a datastore, including graphs
-    public class DroneSaveSections : TardisSaveGraph
+    internal class DroneSaveSections : TardisSaveGraph
     {
         private Drone Drone;
         private FlightSections Sections;

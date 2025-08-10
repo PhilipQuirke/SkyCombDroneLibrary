@@ -1,12 +1,11 @@
-﻿using System.Text;
-
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+using SkyCombGround.CommonSpace;
+using System.Text;
 
 namespace SkyCombDrone.CommonSpace
 {
-    /// <summary>
-    /// Utility methods for arrays.
-    /// </summary>
-    public static class ArrayUtil
+    // Utility class to provide array utility methods
+    internal class ArrayUtil : BaseConstants
     {
         /// <summary>
         /// Create a string to display the array values.

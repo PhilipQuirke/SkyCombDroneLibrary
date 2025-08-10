@@ -54,7 +54,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Generate and save a bitmap of the DSM/DEM/Swathe land overlaid with the drone path 
-        public void SaveDronePath(
+        private void SaveDronePath(
              TardisSummaryModel? tardisModel, GroundType groundType,
              int row, int col, string title)
         {
@@ -75,7 +75,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public void SetVideoFlightSectionData(int col, string title, VideoData? video)
+        private void SetVideoFlightSectionData(int col, string title, VideoData? video)
         {
             if (video != null)
                 Data.SetTitleAndDataListColumn(title + VideoInputTitleSuffix, Chapter1TitleRow, col, video.GetSettings());
@@ -135,7 +135,7 @@ namespace SkyCombDrone.PersistModel
 
 
         // Save the effort data into the DroneSummaryTab
-        public void SaveData_Effort()
+        private void SaveData_Effort()
         {
             Data.SelectOrAddWorksheet(DroneSettingsTabName);
 

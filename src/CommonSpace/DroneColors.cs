@@ -1,10 +1,12 @@
-﻿using Emgu.CV.Structure;
+﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+using Emgu.CV.Structure;
 using SkyCombGround.CommonSpace;
 using System.Drawing;
 
 
 namespace SkyCombDrone.CommonSpace
 {
+    // Standard colours used by the drone library when drawing flight paths etc.
     public class DroneColors : GroundColors
     {
         // Overall color approach is:

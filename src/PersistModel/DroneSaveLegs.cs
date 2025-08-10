@@ -6,7 +6,7 @@ using System.Drawing;
 namespace SkyCombDrone.PersistModel
 {
     // Save meta-data about drone legs
-    public class DroneSaveLegs : DataStoreAccessor
+    internal class DroneSaveLegs : DataStoreAccessor
     {
         public DroneSaveLegs(DroneDataStore data)
             : base(data)

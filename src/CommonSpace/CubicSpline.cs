@@ -27,23 +27,9 @@
 namespace SkyCombDrone.CommonSpace
 {
     /// <summary>
-    /// Cubic spline interpolation.
-    /// Call Fit (or use the corrector constructor) to compute spline coefficients, then Eval to evaluate the spline at other X coordinates.
+    /// A cubic spline algorithm implementation. Kudos to https://github.com/SciSharp/SciSharp-Learn-ML/blob/master/TestSpline/CubicSpline.cs
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// This is implemented based on the wikipedia article:
-    /// http://en.wikipedia.org/wiki/Spline_interpolation
-    /// I'm not sure I have the right to include a copy of the article so the equation numbers referenced in 
-    /// comments will end up being wrong at some point.
-    /// </para>
-    /// <para>
-    /// This is not optimized, and is not MT safe.
-    /// This can extrapolate off the ends of the splines.
-    /// You must provide points in X sort order.
-    /// </para>
-    /// </remarks>
-    public class CubicSpline
+    internal class CubicSpline 
     {
         #region Fields
 
