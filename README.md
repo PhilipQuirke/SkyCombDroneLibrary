@@ -1,16 +1,25 @@
 ﻿# SkyComb Drone Library
 
-A .NET library for processing drone flight data, including video files, flight logs, and thermal imaging data. Designed for scientific drone data analysis and integrated with ground elevation data.
+A .NET library for analysing and processing drone flight data
+(longitude, latitude, altitude, speed, yaw, roll, camera down angle, etc).
+
+Flight data is derived from either:
+- A text-based flight log generally containing an entry per image
+- Meta-data stored on each of the images taken in a flight.
+
+The results are integrated with geographical elevation data,
+and persisted in a spreadsheet (i.e. an xls) called a DataStore.
+
+(Note that processing of the image pictures is NOT handled by this library.)
 
 ## Features
 
-- 🎬 **Video Processing** - Load and process drone video files (MP4) with flight log data (SRT)
-- 📷 **Image Processing** - Process collections of thermal/optical drone images with GPS metadata  
-- 🛰️ **Flight Analysis** - Parse flight logs, detect flight legs, and analyze flight patterns
+- 🚁 **Flight path analysis** - Calculate elevation profiles along drone flight paths
+- 🎬 **Log Processing** - Load and process drone flight log data (SRT)
+- 📷 **Image Processing** - Load and process flight metadata from collections of thermal/optical drone images   
+- 🛰️ **Flight Analysis** - Detect flight legs, and analyze flight patterns
 - 🗺️ **Ground Integration** - Integrate with SkyCombGroundLibrary for elevation data
 - 📊 **Flight Metrics** - Calculate speed, altitude, pitch, yaw, and other flight characteristics
-- 🎯 **Camera Support** - Support for DJI thermal cameras (Mavic 3T, M300 XT2, H20T, etc.)
-- ⚡ **High Performance** - Efficient processing of large video files and image collections
 - 🔧 **Extensible Design** - Clean interfaces for integration into larger applications
 
 ## Quick Start
