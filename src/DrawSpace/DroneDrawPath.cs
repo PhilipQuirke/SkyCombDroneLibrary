@@ -377,7 +377,7 @@ namespace SkyCombDrone.DrawSpace
                 return;
 
             GroundModel? groundModel = DroneDrawScope.Drone.GroundData.GroundModelByType(GroundType);
-            if ((groundModel == null) || !groundModel.HasElevationData())
+            if ((groundModel == null) || !groundModel.HasGroundData())
                 return;
 
             Color highColor = DroneColors.SurfaceHighColor;
@@ -494,7 +494,7 @@ namespace SkyCombDrone.DrawSpace
                             if (drone.GroundData != null)
                             {
                                 GroundModel? groundModel = drone.GroundData.GroundModelByType(groundType);
-                                if ((groundModel == null) || !groundModel.HasElevationData())
+                                if ((groundModel == null) || !groundModel.HasGroundData())
                                 {
                                     minLocation.NorthingM -= pathImageWidthM;
                                     minLocation.EastingM -= pathImageWidthM;

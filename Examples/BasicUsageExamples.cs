@@ -19,7 +19,7 @@ namespace SkyCombDrone.Examples
             Console.WriteLine("=== Basic Drone Video Processing Example ===");
 
             string videoPath = @"C:\DroneVideos\flight_video.mp4";
-            string groundDataPath = @"C:\ElevationData";
+            string groundDataPath = @"C:\GroundData";
             string outputPath = @"C:\ProcessedDroneData";
 
             Console.WriteLine($"Processing video: {videoPath}");
@@ -85,7 +85,7 @@ namespace SkyCombDrone.Examples
             Console.WriteLine("\n=== Drone Image Directory Processing Example ===");
 
             string imageDirectory = @"C:\DroneImages\ThermalSurvey";
-            string groundDataPath = @"C:\ElevationData";
+            string groundDataPath = @"C:\GroundData";
 
             Console.WriteLine($"Processing images from: {imageDirectory}");
 
@@ -185,7 +185,7 @@ namespace SkyCombDrone.Examples
             var droneService = DroneDataService.Create(advancedOptions);
 
             string videoPath = @"C:\DroneVideos\complex_flight.mp4";
-            string groundDataPath = @"C:\ElevationData";
+            string groundDataPath = @"C:\GroundData";
 
             try
             {
@@ -267,7 +267,7 @@ namespace SkyCombDrone.Examples
             Console.WriteLine("\n=== Flight Data Analysis Example ===");
 
             string videoPath = @"C:\DroneVideos\survey_flight.mp4";
-            string groundDataPath = @"C:\ElevationData";
+            string groundDataPath = @"C:\GroundData";
 
             var droneService = DroneDataService.Create();
 

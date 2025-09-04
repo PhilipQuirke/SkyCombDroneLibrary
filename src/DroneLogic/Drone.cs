@@ -355,7 +355,7 @@ namespace SkyCombDrone.DroneLogic
             {
                 if ((GroundData == null) ||
                     (GroundData.DemModel == null) ||
-                    (!GroundData.DemModel.HasElevationData()) ||
+                    (!GroundData.DemModel.HasGroundData()) ||
                     (!HasInputVideo) ||
                     (!HasFlightSections) ||
                     (!HasGroundData))
@@ -394,7 +394,7 @@ namespace SkyCombDrone.DroneLogic
 
 #if DEBUG
         // Check that the Flight DEM and DSM values still aalign with the Ground data values.
-        public string SanityCheckGroundElevationData(GroundData groundData)
+        public string SanityCheckGroundData(GroundData groundData)
         {
             if( groundData == null)
                 return "";
@@ -455,14 +455,14 @@ namespace SkyCombDrone.DroneLogic
             var dataStoreFileName = dataStore.DataStoreFileName;
 
             // Check that the Flight DEM and DSM values align with the Ground data.
-            var error = SanityCheckGroundElevationData(GroundData);
-            Assert(error == "", "Drone.SaveAllData: SanityCheckGroundElevationData failed: " + error);
+            var error = SanityCheckGroundData(GroundData);
+            Assert(error == "", "Drone.SaveAllData: SanityCheckGroundData failed: " + error);
 
             // Check that the DEM and DSM ground data values survive the round trip.
             GroundData reloadedGroundData = GroundCheck.GroundData_RoundTrip_PreservesElevationsWithinTolerance(GroundData, dataStoreFileName);
             // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
-            error = SanityCheckGroundElevationData(reloadedGroundData);
-            Assert(error == "", "Drone.SaveAllData: SanityCheckGroundElevationData failed: " + error);
+            error = SanityCheckGroundData(reloadedGroundData);
+            Assert(error == "", "Drone.SaveAllData: SanityCheckGroundData failed: " + error);
             reloadedGroundData.Dispose();
             dataStore.FreeResources();
 #endif
@@ -475,8 +475,8 @@ namespace SkyCombDrone.DroneLogic
             // Check that the Flight DEM and DSM values align with the (compacted, stored, loaded, uncompacted) Ground data.
             if (GroundData != null)
             {
-                var error = SanityCheckGroundElevationData(GroundData);
-                Assert(error == "", "Drone.CheckGroundDataPostLoad: SanityCheckGroundElevationData failed: " + error );
+                var error = SanityCheckGroundData(GroundData);
+                Assert(error == "", "Drone.CheckGroundDataPostLoad: SanityCheckGroundData failed: " + error );
             }
 #endif
         }

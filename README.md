@@ -49,7 +49,7 @@ var droneService = DroneDataService.Create();
 
 // Process a drone video with associated flight log
 string videoPath = @"C:\DroneVideos\flight_20241201_143022.mp4";
-string groundDataPath = @"C:\ElevationData";
+string groundDataPath = @"C:\GroundData";
 
 using var droneData = await droneService.LoadVideoDataAsync(videoPath, groundDataPath);
 
@@ -70,7 +70,7 @@ Console.WriteLine($"Altitude Range: {bounds.AltitudeRange.MinAltitudeM:F1}m - {b
 ```csharp
 // Process a directory of drone images
 string imageDirectory = @"C:\DroneImages\ThermalSurvey";
-string groundDataPath = @"C:\ElevationData";
+string groundDataPath = @"C:\GroundData";
 
 using var droneData = await droneService.LoadImageDataAsync(imageDirectory, groundDataPath);
 
