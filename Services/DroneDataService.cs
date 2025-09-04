@@ -102,7 +102,6 @@ namespace SkyCombDrone.Services
             var summaryOptions = new DroneDataOptions
             {
                 FullDataLoad = false,
-                EnableCaching = false
             };
 
             DroneInputType inputType = File.Exists(inputPath) ? DroneInputType.Video : DroneInputType.Images;

@@ -27,16 +27,6 @@ namespace SkyCombDrone.Interfaces
     public class DroneDataOptions
     {
         /// <summary>
-        /// Gets or sets whether to enable caching of calculated data
-        /// </summary>
-        public bool EnableCaching { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the maximum number of concurrent operations
-        /// </summary>
-        public int MaxConcurrentOperations { get; set; } = Environment.ProcessorCount;
-
-        /// <summary>
         /// Gets or sets whether to perform full data loading (vs summary only)
         /// </summary>
         public bool FullDataLoad { get; set; } = true;

@@ -177,8 +177,6 @@ namespace SkyCombDrone.Examples
 
             var advancedOptions = new DroneDataOptions
             {
-                EnableCaching = true,
-                MaxConcurrentOperations = 2,
                 FullDataLoad = true,
                 AutoDetectLegs = true,
                 BufferDistanceM = 75 // Larger buffer for ground data

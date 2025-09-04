@@ -15,8 +15,8 @@ and persisted in a spreadsheet (i.e. an xls) called a DataStore.
 ## Features
 
 - 🚁 **Flight path analysis** - Calculate elevation profiles along drone flight paths
-- 🎬 **Log Processing** - Load and process drone flight log data (SRT)
-- 📷 **Image Processing** - Load and process flight metadata from collections of thermal/optical drone images   
+- 🎬 **Flight log Processing** - Load and process drone flight log data (SRT)
+- 📷 **Image metadata Processing** - Load and process flight metadata from collections of thermal/optical drone images   
 - 🛰️ **Flight Analysis** - Detect flight legs, and analyze flight patterns
 - 🗺️ **Ground Integration** - Integrate with SkyCombGroundLibrary for elevation data
 - 📊 **Flight Metrics** - Calculate speed, altitude, pitch, yaw, and other flight characteristics
@@ -33,11 +33,12 @@ dotnet add reference ../SkyCombDroneLibrary/SkyCombDroneLibrary.csproj
 ```
 
 ### EXIF Tool
-If you are processing images, you will need the [ExifTool](https://exiftool.org/) to extract GPS metadata from images.  
+If you are processing images, you will need the [ExifTool](https://exiftool.org/) to extract metadata from the images.  
+EXIF understands and if necessary decrypts the metadata formats used by many drone cameras.
 Ensure it is installed and available in your system PATH.
 
 
-### Basic Usage - Video Processing
+### Basic Usage - Video Metadata Processing
 
 ```csharp
 using SkyCombDrone.Interfaces;
@@ -46,7 +47,7 @@ using SkyCombDrone.Services;
 // Create the service
 var droneService = DroneDataService.Create();
 
-// Process a drone video with flight log
+// Process a drone video with associated flight log
 string videoPath = @"C:\DroneVideos\flight_20241201_143022.mp4";
 string groundDataPath = @"C:\ElevationData";
 
@@ -64,7 +65,7 @@ var bounds = droneData.Bounds;
 Console.WriteLine($"Altitude Range: {bounds.AltitudeRange.MinAltitudeM:F1}m - {bounds.AltitudeRange.MaxAltitudeM:F1}m");
 ```
 
-### Basic Usage - Image Processing
+### Basic Usage - Image Metadata Processing
 
 ```csharp
 // Process a directory of drone images
@@ -100,13 +101,13 @@ Console.WriteLine($"  Center: {summary.CenterLocation}");
 
 ### Video Files
 - **Format**: MP4 video files from drone cameras
-- **Flight Logs**: Associated SRT files with GPS and IMU data
+- **Flight Logs**: Associated SRT files containing GPS and IMU data per video frame
 - **Location**: SRT file should be in the same directory as the video
 - **Naming**: SRT file should have the same base name as video file
 
 ### Image Files  
-- **Formats**: JPG, JPEG, PNG, TIFF
-- **Metadata**: Files must contain GPS coordinates and timestamp EXIF data
+- **Formats**: JPG, JPEG 
+- **Metadata**: Image files must contain GPS etc metadata - accessed using the EXIF tool
 - **Organization**: All images in a single directory or subdirectories
 
 ### Ground Data (Optional)
@@ -120,8 +121,6 @@ Console.WriteLine($"  Center: {summary.CenterLocation}");
 ```csharp
 var options = new DroneDataOptions
 {
-    EnableCaching = true,
-    MaxConcurrentOperations = Environment.ProcessorCount,
     FullDataLoad = true,
     AutoDetectLegs = true,
     BufferDistanceM = 50  // Ground data buffer around flight path
@@ -231,7 +230,6 @@ catch (FlightLogProcessingException ex)
 - **Memory Usage**: Large videos and image sets require substantial memory
 - **Processing Time**: Full processing can take several minutes for long flights  
 - **Storage**: Processed data is cached in Excel files for faster subsequent access
-- **Concurrency**: Configure `MaxConcurrentOperations` based on system capabilities
 
 ## File Organization
 
@@ -266,9 +264,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - 📖 **Documentation**: See [Examples](Examples/) directory
 - 🐛 **Issues**: Report via GitHub Issues  
-- 💬 **Discussions**: Use GitHub Discussions
 - 📧 **Contact**: Through GitHub
 
 ---
 
-**Note**: This library processes drone video and flight log files. Camera-specific calibration may be required for optimal results with new drone models.
+**Note**: This library processes drone video flight log files and images meta-data. The code handles all known cases at time of writing. However, when new drones and cameras are released, the format of data in the log/images sometimes changes. The code may then need updating to handle the changed format
