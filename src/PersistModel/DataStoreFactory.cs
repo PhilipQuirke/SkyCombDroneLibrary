@@ -7,7 +7,7 @@ using SkyCombGround.PersistModel;
 
 namespace SkyCombDrone.PersistModel
 {
-    // Given a single (thermal or optical) video file name, find out whether there is one or two-paired videos, and any flight files.
+    // Given a single video file name, find out whether there is a video and/or a flight log file.
     // Find the existing DataStore or create a DataStore.
     // Return key information needed to instantiate input, model & run objects 
     public class DataStoreFactory
@@ -58,40 +58,6 @@ namespace SkyCombDrone.PersistModel
             }
 
             return (thermalVideoName, thermalFlightName);
-        }
-
-
-        // Calculate the names of the input files we have available.
-        public static (string videoName, string flightName) LocateInputFiles_OneVideo(string theFileName)
-        {
-            string answerVideoName = "", answerFlightName = "";
-
-            try
-            {
-                // Without at least one video we can't do anything
-                var theVideoName = FindVideo(theFileName);
-                if (theVideoName.Length > 0)
-                {
-                    answerVideoName = theVideoName;
-                    if (answerVideoName != "")
-                    {
-                        // See if there is an SRT file with the same name as the video file, just a different extension
-                        answerFlightName = BaseDataStore.SwapFileNameExtension(answerVideoName, ".SRT");
-                        if (!System.IO.File.Exists(answerFlightName))
-                            answerFlightName = "";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Write the error message to the console
-                Console.WriteLine("DataStoreFactory.LocateInputFiles_OneVideo: " + ex.Message);
-
-                answerVideoName = "";
-                answerFlightName = "";
-            }
-
-            return (answerVideoName, answerFlightName);
         }
 
 
