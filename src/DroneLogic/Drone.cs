@@ -619,7 +619,13 @@ namespace SkyCombDrone.DroneLogic
         // Default the RunFromS and RunToS config values 
         public void DefaultConfigRunFromTo()
         {
-            if (HasFlightLegs && DroneConfig.UseLegs)
+            if (InputIsImages)
+              // Process all images
+              SetConfigRunFromToBySection(
+                    FlightSteps.MinStepId,
+                    FlightSteps.MaxStepId);
+
+            else if (HasFlightLegs && DroneConfig.UseLegs)
                 // If the flight is more than 1/3 legs, use the first and last legs to default the Run From/To.
                 // This is the "interesting" part of the flight that the Yolo and Comb processes are best applied to.
                 SetConfigRunFromToBySection(
