@@ -1,7 +1,6 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved.
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
-using SkyCombGround.PersistModel;
  
 
 namespace SkyCombDrone.DroneLogic
@@ -44,6 +43,7 @@ namespace SkyCombDrone.DroneLogic
 
                 int sectionId = 0;
                 DateTime? minDateTime = null, maxDateTime = null;
+                DateTime? firstTime = null; // Remember the first time value
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
@@ -53,12 +53,28 @@ namespace SkyCombDrone.DroneLogic
 
                     var section = new FlightSection(drone, sectionId++);
 
-                    // Parse time
+                    // Parse time e.g. "2025-09-06T06:38:33.670" 
                     string timeStr = fields[colMap["time"]];
                     if (DateTime.TryParse(timeStr, out DateTime dt))
                     {
                         if (minDateTime == null) minDateTime = dt;
                         maxDateTime = dt;
+                        if (firstTime == null)
+                        {
+                            firstTime = dt;
+                            section.TimeMs = 0;
+                        }
+                        else
+                        {
+                            section.TimeMs = (int)(dt - firstTime.Value).TotalMilliseconds;
+                        }
+                        section.StartTime = TimeSpan.FromMilliseconds(section.TimeMs);
+                    }
+                    else
+                    {
+                        // If time can't be parsed, fallback to 0
+                        section.TimeMs = 0;
+                        section.StartTime = TimeSpan.Zero;
                     }
 
                     // Parse longitude/latitude
