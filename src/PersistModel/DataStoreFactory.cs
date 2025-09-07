@@ -16,37 +16,60 @@ namespace SkyCombDrone.PersistModel
 
 
         // Find name of video file that exists
-        public static string FindVideo(string fileName)
+        public static string FindVideoFileName(string fileName)
         {
             var answer = BaseDataStore.SwapFileNameExtension(fileName, ".mp4");
-            if (!System.IO.File.Exists(answer))
-            {
-                answer = BaseDataStore.SwapFileNameExtension(fileName, ".avi");
-                if (!System.IO.File.Exists(answer))
-                {
-                    answer = "";
-                }
-            }
-            return answer;
+            if (System.IO.File.Exists(answer))
+                return answer;
+
+            answer = BaseDataStore.SwapFileNameExtension(fileName, ".avi");
+            if (System.IO.File.Exists(answer))
+                return answer;
+
+            answer = BaseDataStore.SwapFileNameExtension(fileName, ".ts");
+            if (System.IO.File.Exists(answer))
+                return answer;
+
+            return "";
+        }
+
+
+        // See if there is an SRT file with the same name as the video file, just a different extension.
+        // Alternatively, we accept a M4T*.CSV file in the same directory
+        public static string FindFlightLogFileName(string videoFileName)
+        {
+            var fileName = BaseDataStore.SwapFileNameExtension(videoFileName, ".csv");
+            if (System.IO.File.Exists(fileName))
+                return fileName;
+
+            string? videoDir = null;
+            try { videoDir = Path.GetDirectoryName(videoFileName); } catch { }
+            string[] m4tFiles = Array.Empty<string>();
+            if (!string.IsNullOrEmpty(videoDir) && Directory.Exists(videoDir))
+                m4tFiles = Directory.GetFiles(videoDir, "M4T*.CSV", SearchOption.TopDirectoryOnly);
+            else
+                m4tFiles = Directory.GetFiles(".", "M4T*.CSV", SearchOption.TopDirectoryOnly);
+            if (m4tFiles.Length > 0)
+                fileName = m4tFiles[0]; // Use the first matching file
+
+            if (System.IO.File.Exists(fileName))
+                return fileName;
+
+            return "";
         }
 
 
         // Calculate the names of the input files we have available.
-        public static (string, string) LocateInputFiles(string firstFileName)
+        public static (string, string) FindInputFileNames(string firstFileName)
         {
             string thermalVideoName = "", thermalFlightName = "";
 
             try
             {
                 // Without a video we can't do anything
-                thermalVideoName = FindVideo(firstFileName);
+                thermalVideoName = FindVideoFileName(firstFileName);
                 if (thermalVideoName != "")
-                {
-                    // See if there is an SRT file with the same name as the video file, just a different extension
-                    thermalFlightName = BaseDataStore.SwapFileNameExtension(thermalVideoName, ".SRT");
-                    if (!System.IO.File.Exists(thermalFlightName))
-                        thermalFlightName = "";
-                }
+                    thermalFlightName = FindFlightLogFileName(thermalVideoName);
             }
             catch (Exception ex)
             {
@@ -153,7 +176,7 @@ namespace SkyCombDrone.PersistModel
                 else
                 {
                     // Base datastore name on the single video file and associated flight log file
-                    (thermalVideoName, thermalFlightName) = LocateInputFiles(inputFileName);
+                    (thermalVideoName, thermalFlightName) = FindInputFileNames(inputFileName);
 
                     if (thermalVideoName != "")
                         dataStoreName = DataStoreName(inputDirectory, BaseDataStore.RemoveFileNameSuffix(thermalVideoName), outputElseInputDirectory);

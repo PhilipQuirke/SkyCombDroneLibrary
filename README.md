@@ -4,7 +4,7 @@ A .NET library for analysing and processing drone flight data
 (longitude, latitude, altitude, speed, yaw, roll, camera down angle, etc).
 
 Flight data is derived from either:
-- A text-based flight log generally containing an entry per image
+- A flight log (a text file or CSV) containing an entry per image
 - Meta-data stored on each of the images taken in a flight.
 
 The results are integrated with geographical elevation data,
@@ -15,7 +15,7 @@ and persisted in a spreadsheet (i.e. an xls) called a DataStore.
 ## Features
 
 - 🚁 **Flight path analysis** - Calculate elevation profiles along drone flight paths
-- 🎬 **Flight log Processing** - Load and process drone flight log data (SRT)
+- 🎬 **Flight log Processing** - Load and process drone flight log data (text file or CSV)
 - 📷 **Image metadata Processing** - Load and process flight metadata from collections of thermal/optical drone images   
 - 🛰️ **Flight Analysis** - Detect flight legs, and analyze flight patterns
 - 🗺️ **Ground Integration** - Integrate with SkyCombGroundLibrary for elevation data
@@ -100,10 +100,10 @@ Console.WriteLine($"  Center: {summary.CenterLocation}");
 ## Data Requirements
 
 ### Video Files
-- **Format**: MP4 video files from drone cameras
-- **Flight Logs**: Associated SRT files containing GPS and IMU data per video frame
-- **Location**: SRT file should be in the same directory as the video
-- **Naming**: SRT file should have the same base name as video file
+- **Format**: Video files from drone cameras. (File suffix .MP4 or .TS)
+- **Flight Log**: Associated log file containing GPS and IMU data per video frame. (File suffix .SRT or .CSV)
+- **Location**: Log file should be in the same directory as the video
+- **Naming**: Log file should have the same base name as video file
 
 ### Image Files  
 - **Formats**: JPG, JPEG 

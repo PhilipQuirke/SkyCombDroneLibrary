@@ -386,13 +386,11 @@ namespace SkyCombDrone.DroneModel
 
             var answer = filename.Substring(index + 1);
 
-            // Uppercase filename and lowercase suffix for consistency
-            var dotIndex = answer.LastIndexOf('.');
-            if (dotIndex > 0)
-                return
-                    answer.Substring(0, dotIndex).ToUpper() +
-                    answer.Substring(dotIndex).ToLower();
-
+            // Use Path.GetFileNameWithoutExtension and Path.GetExtension for robust extension handling
+            var nameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(answer);
+            var ext = System.IO.Path.GetExtension(answer).ToLower();
+            if (!string.IsNullOrEmpty(nameWithoutExt))
+                return nameWithoutExt.ToUpper() + ext;
             return answer;
         }
         public string ShortFileName()
@@ -403,10 +401,10 @@ namespace SkyCombDrone.DroneModel
 
         public static string RemoveFileNameSuffix(string filename)
         {
-            if (filename.Length < 4)
-                return filename;
-
-            return filename.Substring(0, filename.Length - 4);
+            // Use Path.GetFileNameWithoutExtension for robust extension handling
+            var index = filename.LastIndexOf('\\');
+            var name = (index < 0) ? filename : filename.Substring(index + 1);
+            return System.IO.Path.GetFileNameWithoutExtension(name);
         }
         public string ShortFilePrefix()
         {

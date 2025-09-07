@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+﻿// Copyright SkyComb Limited 2025. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.PersistModel;
@@ -214,7 +214,7 @@ namespace SkyCombDrone.DroneLogic
 
         // Parse the drone flight data for a DJI drone from a SRT file
         public (bool success, GimbalDataEnum cameraPitchYawRoll)
-            ParseFlightLogSections(VideoData video, FlightSections sections, Drone drone)
+            ParseFlightLogSectionsFromSRT(VideoData video, FlightSections sections, Drone drone)
         {
             GimbalDataEnum cameraPitchYawRoll = GimbalDataEnum.ManualNo;
             video.CameraType = "";

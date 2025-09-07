@@ -203,8 +203,7 @@ namespace SkyCombDrone.DroneLogic
             return
                 outputElseInputDirectory + "\\" +
                 RemoveFileNameSuffix(ShortFolderFileName(inputFileName)) +
-                "_SkyComb" +
-                inputFileName.Substring(inputFileName.Length - 4);
+                "_SkyComb.mp4";
         }
 
 

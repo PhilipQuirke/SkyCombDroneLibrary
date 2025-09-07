@@ -661,16 +661,19 @@ namespace SkyCombDrone.DroneLogic
             if (theVideoData == null)
                 return;
 
-            // Try to load the flight log from an DJI SRT text file
+            // Try to load the flight log from an DJI SRT text file or a CSV file
             var flightData = new FlightSections();
             (bool success, GimbalDataEnum cameraPitchYawRoll) =
-                new DroneSrtParser().ParseFlightLogSections(theVideoData, flightData, this);
+                new DroneSrtParser().ParseFlightLogSectionsFromSRT(theVideoData, flightData, this);
+            if(! success)
+                (success, cameraPitchYawRoll) =
+                    new DroneCsvParser().ParseFlightLogSectionsFromCSV(theVideoData, flightData, this);
+
             // If theVideoData.FileName contains text H20T then set the CameraType
             if (theVideoData.FileName.ToUpper().Contains("H20T"))
                 theVideoData.CameraType = VideoModel.DjiH20T;
             else if (theVideoData.FileName.ToUpper().Contains("H30T"))
                 theVideoData.CameraType = VideoModel.DjiH30T;
-
 
             if (!success)
             {

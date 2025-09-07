@@ -71,7 +71,7 @@ namespace SkyCombDrone.Examples
             {
                 Console.WriteLine($"Error processing video: {ex.Message}");
                 Console.WriteLine("Note: Ensure you have:");
-                Console.WriteLine("1. A valid drone video file (MP4 format)");
+                Console.WriteLine("1. A valid drone video file (MP4 or TS format)");
                 Console.WriteLine("2. Associated SRT flight log file in the same directory");
                 Console.WriteLine("3. Ground elevation data in the specified directory");
             }
@@ -353,7 +353,7 @@ namespace SkyCombDrone.Examples
 
             Console.WriteLine("\n=== Examples Complete ===");
             Console.WriteLine("Note: To run these examples successfully, you need:");
-            Console.WriteLine("1. Drone video files (MP4) with associated SRT flight logs");
+            Console.WriteLine("1. Drone video files (MP4) with associated SRT or CSV flight logs");
             Console.WriteLine("2. Or directories containing drone images with GPS metadata");
             Console.WriteLine("3. Ground elevation data files (from SkyCombGroundLibrary)");
             Console.WriteLine("4. Sufficient disk space for processed data output");
