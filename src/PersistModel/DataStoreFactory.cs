@@ -124,7 +124,7 @@ namespace SkyCombDrone.PersistModel
                             var cell = answer.Worksheet.Cells[1, 1];
                             if ((cell != null) && (cell.Value != null) && (cell.Value.ToString() == DroneDataStore.PrefixTitle))
                             {
-                                // Spreadsheet may have ben copied from say C: to D:
+                                // Spreadsheet may have been copied from say C: to D:
                                 // Reset the file names to the new locations
                                 answer.InputFolderName = thermalFolderName;
                                 answer.ThermalVideoName = thermalVideoName;
@@ -185,10 +185,7 @@ namespace SkyCombDrone.PersistModel
                 }
             }
             else
-            {
-                //(string folder, string file) = BaseDataStore. SplitFileName(inputFileName);
                 dataStoreName = DataStoreName(inputDirectory, inputFileName, outputElseInputDirectory);
-            }
 
             return DataStoreFactory.OpenOrCreateDataStore(
                     dataStoreName,

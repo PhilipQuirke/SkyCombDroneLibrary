@@ -316,7 +316,7 @@ namespace SkyCombDrone.DroneModel
             HFOVDeg = ConfigBase.StringToFloat(settings[i++]);
             i++; // Skip VFOVDeg 
 
-            if (settings[i] != "")
+            if((settings[i] != "") && (settings[i] != UnknownString))
                 DateEncodedUtc = DateTime.Parse(settings[i++]);
             else
             {
