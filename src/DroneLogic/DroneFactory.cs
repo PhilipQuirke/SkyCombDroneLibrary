@@ -87,9 +87,13 @@ namespace SkyCombDrone.DroneLogic
             if ((drone != null) && drone.HasInputVideo)
                 switch (drone.InputVideo.CameraType)
                 {
+                    case VideoModel.DjiM4T:
+                        // Data is set in DroneCsvParser.ParseFlightLogSectionsFromCSV
+                        break;
+
                     case VideoModel.DjiH20N:
                     case VideoModel.DjiH20T:
-                    // PQR TBC.  Fall through
+                        // Fall through
 
                     default:
                     case VideoModel.DjiMavic3:
@@ -217,9 +221,6 @@ namespace SkyCombDrone.DroneLogic
                             {
                                 var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.InputFolderName);
                                 CalculateCameraSpecifics_InputIsImages(answer, metaData);
-
-                                // Now set camera intrinsics.
-
                             }
 
                             answer.EffortDurations.CalcSectionsMs = EffortMs();

@@ -11,17 +11,19 @@ namespace SkyCombDrone.DroneLogic
     {
         // Parse the drone flight data from a CSV file
         // Returns true if successful, and populates the FlightSections
-        public (bool success, GimbalDataEnum cameraPitchYawRoll) ParseFlightLogSectionsFromCSV(VideoData video, FlightSections sections, Drone drone)
+        public (bool success, GimbalDataEnum cameraPitchYawRoll) ParseFlightLogSectionsFromCSV(VideoData videoData, FlightSections sections, Drone drone)
         {
             GimbalDataEnum cameraPitchYawRoll = GimbalDataEnum.ManualNo;
-            video.CameraType = "";
+            videoData.CameraType = "";
             sections.Sections.Clear();
 
             // See if there is an SRT file with the same name as the video file, just a different extension.
             // Alternatively, we accept a M4T*.CSV file in the same directory
-            var logFileName = DataStoreFactory.FindFlightLogFileName(video.FileName);
+            var logFileName = DataStoreFactory.FindFlightLogFileName(videoData.FileName);
             if (logFileName == "")
                 return (false, cameraPitchYawRoll);
+
+            DateTime? minDateTime = null, maxDateTime = null;
 
             using (var reader = new System.IO.StreamReader(logFileName))
             {
@@ -42,8 +44,6 @@ namespace SkyCombDrone.DroneLogic
                         return (false, cameraPitchYawRoll);
 
                 int sectionId = 0;
-                DateTime? minDateTime = null, maxDateTime = null;
-                DateTime? firstTime = null; // Remember the first time value
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
@@ -57,18 +57,18 @@ namespace SkyCombDrone.DroneLogic
                     string timeStr = fields[colMap["time"]];
                     if (DateTime.TryParse(timeStr, out DateTime dt))
                     {
-                        if (minDateTime == null) minDateTime = dt;
-                        maxDateTime = dt;
-                        if (firstTime == null)
+                        if (minDateTime == null)
                         {
-                            firstTime = dt;
+                            minDateTime = dt;
                             section.TimeMs = 0;
                         }
                         else
                         {
-                            section.TimeMs = (int)(dt - firstTime.Value).TotalMilliseconds;
+                            section.TimeMs = (int)(dt - minDateTime.Value).TotalMilliseconds;
                         }
                         section.StartTime = TimeSpan.FromMilliseconds(section.TimeMs);
+
+                        maxDateTime = dt;
                     }
                     else
                     {
@@ -98,7 +98,67 @@ namespace SkyCombDrone.DroneLogic
                 if (maxDateTime != null) sections.MaxDateTime = maxDateTime.Value;
                 sections.SetTardisMaxKey();
             }
-            return (sections.Sections.Count > 0, cameraPitchYawRoll);
+
+
+            bool success = sections.Sections.Count > 0;
+
+            if (success)
+            {
+                // Only known drone so far that provides a CSV flight log is DJI Matrice 4
+                // Claude says: DJI Matrice 4T thermal camera specifications are:
+                // https://claude.ai/share/e57d3f30-7d69-41f8-a3ba-8a6596b6ccf5
+
+                // DJI Matrice 4T Thermal Camera Configuration
+                videoData.CameraType = VideoModel.DjiM4T;
+                videoData.Fps = 30; // 30fps for both 640×512 and 1280×1024 modes
+                videoData.FocalLength = 53; // DJI Matrice 4T thermal camera has an equivalent focal length of 53 mm 
+
+                // High resolution mode (Super Resolution enabled, Night Mode not activated)
+                videoData.ImageHeight = 1024; // 1280 × 1024@30fps (high res mode)
+                videoData.ImageWidth = 1280;
+
+                // Standard resolution mode (alternative values)
+                // videoData.ImageHeight = 512; // 640 × 512@30fps (standard mode)
+                // videoData.ImageWidth = 640;
+
+                // Thermal sensor specifications (uncooled vanadium oxide VOx)
+                // Note: Exact physical sensor dimensions not publicly specified by DJI
+                // These are estimated values based on typical thermal imaging sensors
+                videoData.SensorWidth = 17.0f; // Estimated in mm for thermal sensor
+                videoData.SensorHeight = 13.6f; // Estimated in mm for thermal sensor
+
+                // Field of view calculations
+                videoData.HFOVDeg = 38.2f; // Calculated horizontal FOV from 45° diagonal FOV
+                                           // Diagonal FOV is 45°±0.3° as specified by DJI
+                                           // Vertical FOV would be approximately 30.6° for 4:3 aspect ratio
+
+                if (minDateTime != null)
+                {
+                    // Not sure whether the CSV time is UTC or not.
+                    videoData.DateEncodedUtc = minDateTime.Value;
+                    videoData.DateEncoded = minDateTime.Value;
+                }
+
+                /* 
+                 * Additional DJI Matrice 4T Thermal Camera Specifications:
+                 * - Aperture: f/1.0
+                 * - Focus: 5m to ∞
+                 * - Temperature Range (High Gain): -20℃ to 150℃ (-4°F to 302°F)
+                 * - Temperature Range (Low Gain): 0℃ to 550℃ (32°F to 1022°F)
+                 * - Video Bitrate: 6.5Mbps (H.264), 5Mbps (H.265) for 640×512
+                 *                  12Mbps (H.264), 8Mbps (H.265) for 1280×1024
+                 * - Photo Formats: JPEG (8bit), R-JPEG (16bit)
+                 */
+
+
+                foreach (var theSection in sections.Sections)
+                {
+                    theSection.Value.FocalLength = (float) videoData.FocalLength;
+                    theSection.Value.Zoom = 1;
+                }
+            }
+
+            return (success, cameraPitchYawRoll);
         }
 
         private static double ParseDoubleCsv(string[] fields, Dictionary<string, int> colMap, string colName)

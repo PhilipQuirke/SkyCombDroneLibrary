@@ -665,7 +665,7 @@ namespace SkyCombDrone.DroneLogic
             var flightData = new FlightSections();
             (bool success, GimbalDataEnum cameraPitchYawRoll) =
                 new DroneSrtParser().ParseFlightLogSectionsFromSRT(theVideoData, flightData, this);
-            if(! success)
+            if (!success)
                 (success, cameraPitchYawRoll) =
                     new DroneCsvParser().ParseFlightLogSectionsFromCSV(theVideoData, flightData, this);
 

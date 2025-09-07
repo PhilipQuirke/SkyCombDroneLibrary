@@ -11,12 +11,13 @@ namespace SkyCombDrone.DroneModel
     // Some basic constant information about a video
     public class VideoModel : BaseConstants, IDisposable
     {
-        // Drone and camera combinations for which we have specific settings
+        // Drone and camera combinations we have some knowledge about
         public const string DjiGeneric = "DJI";
         public const string DjiM2E = "DJI M2E Dual";
         public const string DjiMavic3 = "DJI Mavic 3";
         public const string DjiM3T = "DJI M3T";
         public const string DjiM300XT2 = "DJI M300 XT2";
+        public const string DjiM4T = "DJI M4T";
         public const string DjiH20T = "ZH20T"; // Z for ZenMuse
         public const string DjiH20N = "ZH20N"; // Z for ZenMuse. Matches DJI image property value
         public const string DjiH30T = "ZH30T"; // Z for ZenMuse
