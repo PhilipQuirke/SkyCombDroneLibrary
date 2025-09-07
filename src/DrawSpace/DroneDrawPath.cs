@@ -17,8 +17,6 @@ namespace SkyCombDrone.DrawSpace
     {
         // Number of shades of green or brown to use in the background
         private const int NumShades = 20;
-        // A gap (jump) in the Tardis location sequence that makes us NOT draw a line
-        private const int DrawLineMaxGapM = 10;
         // If the camera is pointing almost horizontal we dont draw the image area.
         private const int DegreesToVerticalCutoff = 80;
 
@@ -278,11 +276,9 @@ namespace SkyCombDrone.DrawSpace
 
                 if (!DrawLegs)
                 {
-                    // If drone moved less than 10 m between steps, draw a line.
-                    // Useful when drawing several flights in same graph.
-                    if ((prevPoint.X != UnknownValue) &&
-                        Math.Abs(prevPoint.X - thisPoint.X) < DrawLineMaxGapM &&
-                        Math.Abs(prevPoint.Y - thisPoint.Y) < DrawLineMaxGapM)
+                    // Draw a line between points to give a continuous line.
+                    // If points are close has no effect. For M4T, there log has 1 sec gaps, is necessary
+                    if (prevPoint.X != UnknownValue)
                         Line(ref image, prevPoint, thisPoint, thisColor);
 
                     if (thisStepId % 1000 == 0)

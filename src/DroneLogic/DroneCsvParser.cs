@@ -7,6 +7,7 @@ namespace SkyCombDrone.DroneLogic
 {
     // Class to parse flight log information from a CSV file
     // Newer drones provide the flight log as a CSV and not a text SRT file
+    // Only known case is DJI M4T Matrice
     public class DroneCsvParser : DroneLogParser
     {
         // Parse the drone flight data from a CSV file
@@ -17,8 +18,6 @@ namespace SkyCombDrone.DroneLogic
             videoData.CameraType = "";
             sections.Sections.Clear();
 
-            // See if there is an SRT file with the same name as the video file, just a different extension.
-            // Alternatively, we accept a M4T*.CSV file in the same directory
             var logFileName = DataStoreFactory.FindFlightLogFileName(videoData.FileName);
             if (logFileName == "")
                 return (false, cameraPitchYawRoll);
@@ -43,6 +42,7 @@ namespace SkyCombDrone.DroneLogic
                     if (!colMap.ContainsKey(req))
                         return (false, cameraPitchYawRoll);
 
+                // The M4T CSV data is sparce - with occassional 1 second gaps. So we store every line.
                 int sectionId = 0;
                 string? line;
                 while ((line = reader.ReadLine()) != null)
@@ -99,7 +99,6 @@ namespace SkyCombDrone.DroneLogic
                 sections.SetTardisMaxKey();
             }
 
-
             bool success = sections.Sections.Count > 0;
 
             if (success)
@@ -151,7 +150,6 @@ namespace SkyCombDrone.DroneLogic
                  *                  12Mbps (H.264), 8Mbps (H.265) for 1280×1024
                  * - Photo Formats: JPEG (8bit), R-JPEG (16bit)
                  */
-
 
                 foreach (var theSection in sections.Sections)
                 {
