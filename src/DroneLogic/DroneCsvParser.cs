@@ -132,6 +132,8 @@ namespace SkyCombDrone.DroneLogic
                                            // Diagonal FOV is 45°±0.3° as specified by DJI
                                            // Vertical FOV would be approximately 30.6° for 4:3 aspect ratio
 
+                videoData.DurationMs = (int)(maxDateTime.Value - minDateTime.Value).TotalMilliseconds;
+
                 if (minDateTime != null)
                 {
                     // Not sure whether the CSV time is UTC or not.
