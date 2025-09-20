@@ -1,7 +1,8 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved.
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
- 
+using SkyCombGround.CommonSpace;
+
 
 namespace SkyCombDrone.DroneLogic
 {
@@ -10,6 +11,9 @@ namespace SkyCombDrone.DroneLogic
     // Only known case is DJI M4T Matrice
     public class DroneCsvParser : DroneLogParser
     {
+        const int MinStepTimeDeltaMs = 33; // Minimum time delta between steps to avoid duplicates
+
+
         // Parse the drone flight data from a CSV file
         // Returns true if successful, and populates the FlightSections
         public (bool success, GimbalDataEnum cameraPitchYawRoll) ParseFlightLogSectionsFromCSV(VideoData videoData, FlightSections sections, Drone drone)
@@ -42,8 +46,9 @@ namespace SkyCombDrone.DroneLogic
                     if (!colMap.ContainsKey(req))
                         return (false, cameraPitchYawRoll);
 
-                // The M4T CSV data is sparce - with occassional 1 second gaps. So we store every line.
+                // The M4T CSV data is sparce - with many 2 second gaps.
                 int sectionId = 0;
+                DateTime? prevTime = null;
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
@@ -51,11 +56,20 @@ namespace SkyCombDrone.DroneLogic
                     var fields = line.Split('\t', ',');
                     if (fields.Length < headers.Length) continue;
 
-                    var section = new FlightSection(drone, sectionId++);
-
                     // Parse time e.g. "2025-09-06T06:38:33.670" 
                     string timeStr = fields[colMap["time"]];
-                    if (DateTime.TryParse(timeStr, out DateTime dt))
+                    DateTime? dt = null;
+                    if (DateTime.TryParse(timeStr, out DateTime parsedDt))
+                        dt = parsedDt;
+
+                    // There are many cases where there is only say 2 milliseconds between entries.
+                    // If previous valid time exists, and elapsed < 33ms, skip this entry
+                    if (dt != null && prevTime != null && (dt.Value - prevTime.Value).TotalMilliseconds < MinStepTimeDeltaMs)
+                        continue;
+
+                    var section = new FlightSection(drone, sectionId++);
+
+                    if (dt != null)
                     {
                         if (minDateTime == null)
                         {
@@ -64,11 +78,11 @@ namespace SkyCombDrone.DroneLogic
                         }
                         else
                         {
-                            section.TimeMs = (int)(dt - minDateTime.Value).TotalMilliseconds;
+                            section.TimeMs = (int)(dt.Value - minDateTime.Value).TotalMilliseconds;
                         }
                         section.StartTime = TimeSpan.FromMilliseconds(section.TimeMs);
-
                         maxDateTime = dt;
+                        prevTime = dt;
                     }
                     else
                     {
@@ -155,6 +169,42 @@ namespace SkyCombDrone.DroneLogic
                 {
                     theSection.Value.FocalLength = (float) videoData.FocalLength;
                     theSection.Value.Zoom = 1;
+                }
+
+                // From manual inspection, the section.GlobalLocation only changes every 2 or 3 steps.
+                // The drone is NOT becoming stationary every 2 or 3 steps.
+                // Instead the GPS location is only being evaluated every say 5 seconds (roughly corresponding to 2 to 3 steps).
+                // Each time a new step is added to the log it contains the latest GPS location values.
+                // We need to smooth all section.GlobalLocation assuming:
+                // - The drone velocity is smooth - accelerating and decelerating smoothly over time.
+                // - A step that contains the same GPS location as the previous one is not adding new location information.
+
+                FlightSection prevprevSection = null;
+                FlightSection prevSection = null;
+                foreach (var theSection in sections.Sections)
+                {
+                    var nextSection = theSection.Value;
+                    if ((prevprevSection != null) && 
+                        (prevSection != null) &&
+                       GlobalLocation.DifferentLocations(prevSection.GlobalLocation, nextSection.GlobalLocation) &&
+                       !GlobalLocation.DifferentLocations(prevprevSection.GlobalLocation, prevSection.GlobalLocation))
+                    {
+                        // Update prevSection.GlobalLocation by interpolating between
+                        // prevprevSection.GlobalLocation and nextSection.GlobalLocation
+                        // Taking into account the StartTime of all three sections.
+                        // Interpolate prevSection.GlobalLocation between prevprevSection and nextSection
+                        double t0 = prevprevSection.StartTime.TotalMilliseconds;
+                        double t1 = prevSection.StartTime.TotalMilliseconds;
+                        double t2 = nextSection.StartTime.TotalMilliseconds;
+                        double frac = (t1 - t0) / (t2 - t0);
+                        if (frac < 0) frac = 0;
+                        if (frac > 1) frac = 1;
+                        prevSection.GlobalLocation.Longitude = prevprevSection.GlobalLocation.Longitude + frac * (nextSection.GlobalLocation.Longitude - prevprevSection.GlobalLocation.Longitude);
+                        prevSection.GlobalLocation.Latitude = prevprevSection.GlobalLocation.Latitude + frac * (nextSection.GlobalLocation.Latitude - prevprevSection.GlobalLocation.Latitude);
+                    }
+
+                    prevprevSection = prevSection;
+                    prevSection = nextSection;
                 }
             }
 
