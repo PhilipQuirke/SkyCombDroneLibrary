@@ -311,5 +311,46 @@ namespace SkyCombDrone.DroneModel
             if (RollDeg == UnknownLinealValue)
                 RollDeg = UnknownValue;
         }
+        
+        // Unit test to ensure that GetSettings and LoadSettings form a consistent pair.
+        public static void TestSettingsPair()
+        {
+            var rand = new Random();
+            var obj = new TardisModel(rand.Next(1, 10000))
+            {
+                StartTime = TimeSpan.FromMilliseconds(rand.Next(0, 1000000)),
+                TimeMs = rand.Next(1, 10000),
+                DroneLocnM = new DroneLocation((float)rand.NextDouble() * 1000, (float)rand.NextDouble() * 1000),
+                LinealM = (float)rand.NextDouble() * 1000,
+                SumLinealM = (float)rand.NextDouble() * 10000,
+                YawDeg = (float)rand.NextDouble() * 360 - 180,
+                DeltaYawDeg = (float)rand.NextDouble() * 360 - 180,
+                PitchDeg = (float)rand.NextDouble() * 90 - 45,
+                RollDeg = (float)rand.NextDouble() * 90 - 45,
+                AltitudeM = (float)rand.NextDouble() * 1000,
+                FocalLength = (float)rand.NextDouble() * 300,
+                Zoom = (float)rand.NextDouble() * 10
+            };
+            // Save settings to list
+            var settings = obj.GetSettings().Select(dp => dp.Value.ToString()).ToList();
+            // Create a new object and load settings
+            var obj2 = new TardisModel(obj.TardisId);
+            obj2.LoadSettings(settings);
+            // Compare all relevant properties
+            Assert(obj.TardisId == obj2.TardisId, "TardisId mismatch");
+            Assert(obj.StartTime == obj2.StartTime, "StartTime mismatch");
+            Assert(obj.TimeMs == obj2.TimeMs, "TimeMs mismatch");
+            Assert(Math.Abs(obj.DroneLocnM.NorthingM - obj2.DroneLocnM.NorthingM) < 0.005f, "DroneLocnM.NorthingM mismatch");
+            Assert(Math.Abs(obj.DroneLocnM.EastingM - obj2.DroneLocnM.EastingM) < 0.005f, "DroneLocnM.EastingM mismatch");
+            Assert(Math.Abs(obj.LinealM - obj2.LinealM) < 0.05f, "LinealM mismatch");
+            Assert(Math.Abs(obj.SumLinealM - obj2.SumLinealM) < 0.05f, "SumLinealM mismatch");
+            Assert(Math.Abs(obj.YawDeg - obj2.YawDeg) < 0.005f, "YawDeg mismatch");
+            Assert(Math.Abs(obj.DeltaYawDeg - obj2.DeltaYawDeg) < 0.005f, "DeltaYawDeg mismatch");
+            Assert(Math.Abs(obj.PitchDeg - obj2.PitchDeg) < 0.005f, "PitchDeg mismatch");
+            Assert(Math.Abs(obj.RollDeg - obj2.RollDeg) < 0.005f, "RollDeg mismatch");
+            Assert(Math.Abs(obj.AltitudeM - obj2.AltitudeM) < 0.05f, "AltitudeM mismatch");
+            Assert(Math.Abs(obj.FocalLength - obj2.FocalLength) < 0.005f, "FocalLength mismatch");
+            Assert(Math.Abs(obj.Zoom - obj2.Zoom) < 0.005f, "Zoom mismatch");
+        }
     };
 }
