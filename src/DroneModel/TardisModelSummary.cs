@@ -561,5 +561,75 @@ namespace SkyCombDrone.DroneModel
         {
             LoadSettingsOffset(settings);
         }
+
+
+        // Unit test to ensure that GetSettings and LoadSettings form a consistent pair.
+        public static void TestSettingsPair()
+        {
+            var rand = new Random();
+            var obj = new TardisSummaryModel("Tardis")
+            {
+                MinTardisId = rand.Next(1, 10000),
+                MaxTardisId = rand.Next(1, 10000),
+                MinDroneLocnM = new DroneLocation((float)rand.NextDouble() * 1000, (float)rand.NextDouble() * 1000),
+                MaxDroneLocnM = new DroneLocation((float)rand.NextDouble() * 1000, (float)rand.NextDouble() * 1000),
+                MinTimeMs = rand.Next(0, 1000000),
+                MaxTimeMs = rand.Next(0, 1000000),
+                MinSumTimeMs = rand.Next(0, 1000000),
+                MaxSumTimeMs = rand.Next(0, 1000000),
+                MinLinealM = (float)rand.NextDouble() * 1000,
+                MaxLinealM = (float)rand.NextDouble() * 1000,
+                MinSumLinealM = (float)rand.NextDouble() * 10000,
+                MaxSumLinealM = (float)rand.NextDouble() * 10000,
+                MinSpeedMps = (float)rand.NextDouble() * 100,
+                MaxSpeedMps = (float)rand.NextDouble() * 100,
+                MinAltitudeM = (float)rand.NextDouble() * 1000,
+                MaxAltitudeM = (float)rand.NextDouble() * 1000,
+                MinDeltaYawDeg = (float)rand.NextDouble() * 360 - 180,
+                MaxDeltaYawDeg = (float)rand.NextDouble() * 360 - 180,
+                MinPitchDeg = (float)rand.NextDouble() * 90 - 45,
+                MaxPitchDeg = (float)rand.NextDouble() * 90 - 45,
+                MinRollDeg = (float)rand.NextDouble() * 90 - 45,
+                MaxRollDeg = (float)rand.NextDouble() * 90 - 45,
+                MinFocalLength = (float)rand.NextDouble() * 300,
+                MaxFocalLength = (float)rand.NextDouble() * 300,
+                MinZoom = (float)rand.NextDouble() * 10,
+                MaxZoom = (float)rand.NextDouble() * 10
+            };
+            // Save settings to list
+            var settings = obj.GetSettings().Select(dp => dp.Value.ToString()).ToList();
+            // Create a new object and load settings
+            var obj2 = new TardisSummaryModel("Tardis");
+            obj2.LoadSettings(settings);
+            // Compare all relevant properties
+            Assert(obj.MinTardisId == obj2.MinTardisId, "MinTardisId mismatch");
+            Assert(obj.MaxTardisId == obj2.MaxTardisId, "MaxTardisId mismatch");
+            Assert(Math.Abs(obj.MinDroneLocnM.NorthingM - obj2.MinDroneLocnM.NorthingM) < 0.0001f, "MinDroneLocnM.NorthingM mismatch");
+            Assert(Math.Abs(obj.MinDroneLocnM.EastingM - obj2.MinDroneLocnM.EastingM) < 0.0001f, "MinDroneLocnM.EastingM mismatch");
+            Assert(Math.Abs(obj.MaxDroneLocnM.NorthingM - obj2.MaxDroneLocnM.NorthingM) < 0.0001f, "MaxDroneLocnM.NorthingM mismatch");
+            Assert(Math.Abs(obj.MaxDroneLocnM.EastingM - obj2.MaxDroneLocnM.EastingM) < 0.0001f, "MaxDroneLocnM.EastingM mismatch");
+            Assert(obj.MinTimeMs == obj2.MinTimeMs, "MinTimeMs mismatch");
+            Assert(obj.MaxTimeMs == obj2.MaxTimeMs, "MaxTimeMs mismatch");
+            Assert(obj.MinSumTimeMs == obj2.MinSumTimeMs, "MinSumTimeMs mismatch");
+            Assert(obj.MaxSumTimeMs == obj2.MaxSumTimeMs, "MaxSumTimeMs mismatch");
+            Assert(Math.Abs(obj.MinLinealM - obj2.MinLinealM) < 0.01f, "MinLinealM mismatch");
+            Assert(Math.Abs(obj.MaxLinealM - obj2.MaxLinealM) < 0.01f, "MaxLinealM mismatch");
+            Assert(Math.Abs(obj.MinSumLinealM - obj2.MinSumLinealM) < 0.01f, "MinSumLinealM mismatch");
+            Assert(Math.Abs(obj.MaxSumLinealM - obj2.MaxSumLinealM) < 0.01f, "MaxSumLinealM mismatch");
+            Assert(Math.Abs(obj.MinSpeedMps - obj2.MinSpeedMps) < 0.01f, "MinSpeedMps mismatch");
+            Assert(Math.Abs(obj.MaxSpeedMps - obj2.MaxSpeedMps) < 0.01f, "MaxSpeedMps mismatch");
+            Assert(Math.Abs(obj.MinAltitudeM - obj2.MinAltitudeM) < 0.01f, "MinAltitudeM mismatch");
+            Assert(Math.Abs(obj.MaxAltitudeM - obj2.MaxAltitudeM) < 0.01f, "MaxAltitudeM mismatch");
+            Assert(Math.Abs(obj.MinDeltaYawDeg - obj2.MinDeltaYawDeg) < 0.01f, "MinDeltaYawDeg mismatch");
+            Assert(Math.Abs(obj.MaxDeltaYawDeg - obj2.MaxDeltaYawDeg) < 0.01f, "MaxDeltaYawDeg mismatch");
+            Assert(Math.Abs(obj.MinPitchDeg - obj2.MinPitchDeg) < 0.01f, "MinPitchDeg mismatch");
+            Assert(Math.Abs(obj.MaxPitchDeg - obj2.MaxPitchDeg) < 0.01f, "MaxPitchDeg mismatch");
+            Assert(Math.Abs(obj.MinRollDeg - obj2.MinRollDeg) < 0.01f, "MinRollDeg mismatch");
+            Assert(Math.Abs(obj.MaxRollDeg - obj2.MaxRollDeg) < 0.01f, "MaxRollDeg mismatch");
+            Assert(Math.Abs(obj.MinFocalLength - obj2.MinFocalLength) < 0.01f, "MinFocalLength mismatch");
+            Assert(Math.Abs(obj.MaxFocalLength - obj2.MaxFocalLength) < 0.01f, "MaxFocalLength mismatch");
+            Assert(Math.Abs(obj.MinZoom - obj2.MinZoom) < 0.01f, "MinZoom mismatch");
+            Assert(Math.Abs(obj.MaxZoom - obj2.MaxZoom) < 0.01f, "MaxZoom mismatch");
+        }
     }
 }
