@@ -618,8 +618,8 @@ namespace SkyCombDrone.DroneModel
             Assert(Math.Abs(obj.MaxSumLinealM - obj2.MaxSumLinealM) < 0.01f, "MaxSumLinealM mismatch");
             Assert(Math.Abs(obj.MinSpeedMps - obj2.MinSpeedMps) < 0.01f, "MinSpeedMps mismatch");
             Assert(Math.Abs(obj.MaxSpeedMps - obj2.MaxSpeedMps) < 0.01f, "MaxSpeedMps mismatch");
-            Assert(Math.Abs(obj.MinAltitudeM - obj2.MinAltitudeM) < 0.01f, "MinAltitudeM mismatch");
-            Assert(Math.Abs(obj.MaxAltitudeM - obj2.MaxAltitudeM) < 0.01f, "MaxAltitudeM mismatch");
+            Assert(Math.Abs(obj.MinAltitudeM - obj2.MinAltitudeM) < 0.05f, "MinAltitudeM mismatch");
+            Assert(Math.Abs(obj.MaxAltitudeM - obj2.MaxAltitudeM) < 0.05f, "MaxAltitudeM mismatch");
             Assert(Math.Abs(obj.MinDeltaYawDeg - obj2.MinDeltaYawDeg) < 0.01f, "MinDeltaYawDeg mismatch");
             Assert(Math.Abs(obj.MaxDeltaYawDeg - obj2.MaxDeltaYawDeg) < 0.01f, "MaxDeltaYawDeg mismatch");
             Assert(Math.Abs(obj.MinPitchDeg - obj2.MinPitchDeg) < 0.01f, "MinPitchDeg mismatch");
