@@ -13,6 +13,8 @@ namespace SkyCombDrone.PersistModel
     public class DataStoreFactory
     {
         public const string DataStoreSuffix = "_SkyComb.xlsx";
+        public const string WaypointCsvSuffix = "_SkyComb_Waypoints.csv";
+        public const string WaypointJsonSuffix = "_SkyComb_Waypoints.json";
 
 
         // Find name of video file that exists
@@ -84,7 +86,7 @@ namespace SkyCombDrone.PersistModel
         }
 
 
-        public static string DataStoreName(string inputDirectory, string inputFileName, string outputElseInputDirectory)
+        public static string OutputFileName(string inputDirectory, string inputFileName, string outputElseInputDirectory, string suffix)
         {
             if (inputFileName == "")
             {
@@ -92,10 +94,14 @@ namespace SkyCombDrone.PersistModel
                 inputDirectory = inputDirectory.Trim('\\');
                 var index = inputDirectory.LastIndexOf("\\");
                 var lastFolderName = inputDirectory.Substring(index + 1);
-                return outputElseInputDirectory + "\\" + lastFolderName + DataStoreSuffix;
+                return outputElseInputDirectory + "\\" + lastFolderName + suffix;
             }
             else
-                return outputElseInputDirectory + "\\" + VideoModel.ShortFolderFileName(inputFileName) + DataStoreSuffix;
+                return outputElseInputDirectory + "\\" + VideoModel.ShortFolderFileName(inputFileName) + suffix;
+        }
+        public static string DataStoreName(string inputDirectory, string inputFileName, string outputElseInputDirectory)
+        {
+            return OutputFileName(inputDirectory, inputFileName, outputElseInputDirectory, DataStoreSuffix);
         }
 
 
