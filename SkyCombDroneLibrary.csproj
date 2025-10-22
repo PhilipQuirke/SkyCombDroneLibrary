@@ -9,6 +9,7 @@
     <Description>SkyComb Drone Library for processing drone flight data, video files, flight logs, and thermal imaging data.</Description>
     <Copyright>Copyright SkyComb Limited 2025. All rights reserved.</Copyright>
     <Version>10.3.0</Version>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
