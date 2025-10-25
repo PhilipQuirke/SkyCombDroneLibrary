@@ -183,12 +183,12 @@ namespace SkyCombDrone.DroneLogic
 
                     phase = "Loading flight log...";
                     showDroneSettings(phase);
-                    var loadedFlight = answer.LoadSettings_Flight(droneDataStore, fullLoad);
+                    bool loadedFlight = answer.LoadSettings_Flight(droneDataStore, fullLoad);
                     answer.EffortDurations.LoadFlightLogMs = EffortMs();
 
                     phase = "Loading ground elevations...";
                     showDroneSettings(phase);
-                    var loadedGround = answer.LoadSettings_Ground(droneDataStore, fullLoad);
+                    bool loadedGround = answer.LoadSettings_Ground(droneDataStore, fullLoad);
                     answer.EffortDurations.LoadGroundMs = EffortMs();
 
                     if (!(loadedFlight && loadedGround))
