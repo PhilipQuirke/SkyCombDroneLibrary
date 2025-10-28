@@ -11,12 +11,14 @@ namespace SkyCombDrone.DrawSpace
     {
         // Bounding rectangle padding in pixels. For example, 3
         public int AreaPadding { get; set; } = 2;
+
         // Bounding rectangle persistance in frames. For example, 1
         public int AreaPersistence { get; set; } = 10;
 
-        public Color DrawPixelColor = DroneColors.PixelColor;
-        public Color DrawRealFeatureColor = DroneColors.RealFeatureColor;
-        public Color DrawUnrealFeatureColor = DroneColors.UnrealFeatureColor;
+        // Drawing colors for various elements
+        public Color DrawPixelColor = DroneColors.PixelColor; // Color.White suppresses drawing
+        public Color DrawRealFeatureColor = DroneColors.RealFeatureColor; // Color.White suppresses drawing
+        public Color DrawUnrealFeatureColor = DroneColors.UnrealFeatureColor; // Color.White suppresses drawing
 
         // In the ObjectCategoryForm we may expand the object name text and bounding box
         // In the ObjectCategoryForm we may draw on the optical image with extra scale

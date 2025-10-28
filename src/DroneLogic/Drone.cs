@@ -498,8 +498,8 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        // Read a single image from disk into memory
-        public Image<Bgr, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
+        // Return the file name of the image 
+        public string GetCurrImage_InputIsImages_FileName(string inputDirectory, int frameId)
         {
             var section = FlightSections?.Sections[frameId];
             Assert(section != null, "GetCurrImage_InputIsImages: bad logic 1");
@@ -508,6 +508,15 @@ namespace SkyCombDrone.DroneLogic
             Assert(imageFileName != "", "GetCurrImage_InputIsImages: bad logic 2");
 
             imageFileName = inputDirectory.Trim('\\') + "\\" + imageFileName;
+
+            return imageFileName;
+        }
+
+
+        // Read a single image from disk into memory
+        public Image<Bgr, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
+        {
+            var imageFileName = GetCurrImage_InputIsImages_FileName(inputDirectory, frameId);
             Assert(File.Exists(imageFileName), "GetCurrImage_InputIsImages: bad logic 3");
 
             return new Image<Bgr, byte>(imageFileName);
