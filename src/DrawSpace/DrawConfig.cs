@@ -19,8 +19,11 @@ namespace SkyCombDrone.DrawSpace
         public Color DrawUnrealFeatureColor = DroneColors.UnrealFeatureColor;
 
         // In the ObjectCategoryForm we may expand the object name text and bounding box
+        // In the ObjectCategoryForm we may draw on the optical image with extra scale
         public int TextExtraScale = 1; // Expand the object name text 
         public int BoxExtraScale = 1; // Expand the object bounding box
+        public float expandX = 1.0f; // Change x coordinates proportionately
+        public float expandY = 1.0f; // Change y coordinates proportionately
 
         public DrawImageConfig Clone()
         {

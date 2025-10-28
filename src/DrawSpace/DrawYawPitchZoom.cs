@@ -13,15 +13,15 @@ namespace SkyCombDrone.DrawSpace
     public class DrawYawPitchZoom : Draw
     {
 
-        public static void Draw(ref Image<Bgr, byte> image, Drone drone, FlightStep flightStep)
+        public static void Draw(ref Image<Bgr, byte> image, Drone drone, FlightStep flightStep, bool optical = false)
         {
             try
             {
                 if ((image == null) || (flightStep == null) || (drone == null) || (drone.InputVideo == null))
                     return;
 
-                var activeBgr = DroneColors.WhiteBgr; //  InScopeDroneBgr;
-                var fontScale = drone.InputVideo.FontScale;
+                var activeBgr = optical? DroneColors.LightBlueBgr : DroneColors.WhiteBgr; //  InScopeDroneBgr;
+                var fontScale = optical? 6: drone.InputVideo.FontScale; // NQ fix this needs to be proportionate
                 var halfFontScale = fontScale / 2.0f;
                 var lineThick = 1 + fontScale;
 
@@ -43,7 +43,7 @@ namespace SkyCombDrone.DrawSpace
 
 
                 // Draw the zoom (if any) at top left. Seen 1 to 6.07.
-                if (flightStep.Zoom > 0)
+                if (flightStep.Zoom > 0 && !optical)
                 {
                     var textPt = new Point(8 * fontScale, 20 * fontScale);
                     Text(ref image, "x" + flightStep.Zoom.ToString(), textPt, halfFontScale, activeBgr, fontScale);
@@ -134,12 +134,12 @@ namespace SkyCombDrone.DrawSpace
                     var bottomRightPt = new Point(toX, toY);
                     var bottomLeftPt = new Point(fromX, toY);
                     var middleRightPt = new Point(toX, middleY);
-                    image.Draw(new LineSegment2D(topLeftPt, topRightPt), activeBgr, 3);
-                    image.Draw(new LineSegment2D(bottomLeftPt, bottomRightPt), activeBgr, 3);
-                    image.Draw(new LineSegment2D(topLeftPt, bottomLeftPt), activeBgr, 2); // Long line
+                    image.Draw(new LineSegment2D(topLeftPt, topRightPt), activeBgr, lineThick);
+                    image.Draw(new LineSegment2D(bottomLeftPt, bottomRightPt), activeBgr, lineThick);
+                    image.Draw(new LineSegment2D(topLeftPt, bottomLeftPt), activeBgr, lineThick); // Long line
 
-                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY - smallPixels)), activeBgr, 3);
-                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY + smallPixels)), activeBgr, 3);
+                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY - smallPixels)), activeBgr, lineThick);
+                    image.Draw(new LineSegment2D(middleLeftPt, new Point(middleRightPt.X, middleY + smallPixels)), activeBgr, lineThick);
 
                     middleRightPt.Y += 10;
                     middleRightPt.X += 10;

@@ -69,6 +69,8 @@ namespace SkyCombDrone.DroneLogic
         public bool InputIsVideo { get { return HasInputVideo && InputVideo.FileName != ""; } }
         // Is the input data based on multiple images?
         public bool InputIsImages { get { return !InputIsVideo; } }
+        // Do optical images exist?
+        public bool HasOptical { get; set; }
 
         public Drone(DroneConfigModel config)
         {
@@ -511,6 +513,17 @@ namespace SkyCombDrone.DroneLogic
             return new Image<Bgr, byte>(imageFileName);
         }
 
+        // Read a single optical image from disk into memory
+        // NQ 24/10/25
+        public Image<Bgr, byte> GetOpticalImage(string inputDirectory, int frameId)
+        {
+            var imageFileName = FlightSections?.Sections[frameId].ImageFileName;
+            imageFileName = inputDirectory.Trim('\\') + "\\" + imageFileName;
+            var opticalFileName = imageFileName.Replace("_T_", "_V_"); 
+            if (File.Exists(opticalFileName))
+                return new Image<Bgr, byte>(opticalFileName);
+            return null;
+        }
 
         public string DescribeFlightPath
         {
