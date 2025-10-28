@@ -72,10 +72,12 @@ namespace SkyCombDrone.DroneLogic
         // Do optical images exist?
         public bool HasOptical { get; set; }
 
+
         public Drone(DroneConfigModel config)
         {
             DroneConfig = config;
             EffortDurations = new();
+            HasOptical = false;
             FreeResources();
         }
 
@@ -526,11 +528,43 @@ namespace SkyCombDrone.DroneLogic
         // NQ 24/10/25
         public Image<Bgr, byte> GetOpticalImage(string inputDirectory, int frameId)
         {
-            var imageFileName = FlightSections?.Sections[frameId].ImageFileName;
-            imageFileName = inputDirectory.Trim('\\') + "\\" + imageFileName;
+            // For example: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251010073945_0005_T_point0.JPG
+            var imageFileName = GetCurrImage_InputIsImages_FileName(inputDirectory, frameId);
+
+            // For example: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071259_0008_V_point0.jpg
             var opticalFileName = imageFileName.Replace("_T_", "_V_"); 
             if (File.Exists(opticalFileName))
                 return new Image<Bgr, byte>(opticalFileName);
+
+            // Sometimes get: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071260_0008_V_point0.jpg or
+            // D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071258_0008_V_point0.jpg
+            // Try file names with the timestamp numerically +1 or -1, and any pointN suffix
+            string altFileNamePlus = null, altFileNameMinus = null;
+            var regex = new System.Text.RegularExpressions.Regex(
+                @"DJI_(\d{14})_(\d{4})_V_point(\d+)\.jpg$",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var fileNameOnly = System.IO.Path.GetFileName(opticalFileName);
+            var match = regex.Match(fileNameOnly);
+            if (match.Success)
+            {
+                long timestamp;
+                if (long.TryParse(match.Groups[1].Value, out timestamp))
+                {
+                    string baseName = opticalFileName.Replace(match.Groups[1].Value, "{TIMESTAMP}");
+                    // Try +1
+                    var plusTimestamp = (timestamp + 1).ToString().PadLeft(14, '0');
+                    altFileNamePlus = baseName.Replace("{TIMESTAMP}", plusTimestamp);
+                    if (File.Exists(altFileNamePlus))
+                        return new Image<Bgr, byte>(altFileNamePlus);
+
+                    // Try -1
+                    var minusTimestamp = (timestamp - 1).ToString().PadLeft(14, '0');
+                    altFileNameMinus = baseName.Replace("{TIMESTAMP}", minusTimestamp);
+                    if (File.Exists(altFileNameMinus))
+                        return new Image<Bgr, byte>(altFileNameMinus);
+                }
+            }
+
             return null;
         }
 
