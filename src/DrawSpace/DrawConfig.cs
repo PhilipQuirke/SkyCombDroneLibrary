@@ -26,6 +26,7 @@ namespace SkyCombDrone.DrawSpace
         public int BoxExtraScale = 1; // Expand the object bounding box
         public float expandX = 1.0f; // Change x coordinates proportionately
         public float expandY = 1.0f; // Change y coordinates proportionately
+        public float LineThickness = 1.0f; // Allow change of line thickness
 
         public DrawImageConfig Clone()
         {

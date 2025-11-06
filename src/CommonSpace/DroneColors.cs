@@ -30,7 +30,7 @@ namespace SkyCombDrone.CommonSpace
 
 
         // Hot object and feature colours are red, orange & yellow
-        public static Color InScopeObjectColor = Color.Red;
+        public static Color InScopeObjectColor = Color.Magenta; //Color.Red;
         public static Color OutScopeObjectColor = Color.DarkGray;
         public static Color RealFeatureColor = Color.Orange;
         public static Color UnrealFeatureColor = Color.Yellow; // Note Color.White means no-color
