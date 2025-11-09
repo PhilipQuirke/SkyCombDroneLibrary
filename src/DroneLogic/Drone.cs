@@ -271,15 +271,16 @@ namespace SkyCombDrone.DroneLogic
                     thisSection.RollDeg = (float)(imageData.FlightRollDegree ?? 0);
                     thisSection.ImageFileName = imageData.FileName;
 
+                    // Try to pull the min/max raw radiometric data values from the DJI image meta data
                     try
                     {
-                        (var minRawHeat, var maxRawHeat, var inputRadiometric_gray) =
-                            DirpApiWrapper.GetRawRadiometricDataNormalised(imageData.FullName);
+                        (ushort[] rawData, int w, int h, ushort min, ushort max) =
+                            DirpApiWrapper.GetRawRadiometricDataMinMaxData(imageData.FullName);
 
-                        thisSection.MinRawHeat = minRawHeat;
-                        thisSection.MaxRawHeat = maxRawHeat;
+                        thisSection.MinRawHeat = min;
+                        thisSection.MaxRawHeat = max;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                     }
 
@@ -538,7 +539,6 @@ namespace SkyCombDrone.DroneLogic
         }
 
         // Read a single optical image from disk into memory
-        // NQ 24/10/25
         public Image<Bgr, byte> GetOpticalImage(string inputDirectory, int frameId)
         {
             // For example: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251010073945_0005_T_point0.JPG

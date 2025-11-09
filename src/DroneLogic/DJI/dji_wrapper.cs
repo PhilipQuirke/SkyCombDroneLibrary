@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using SkyCombGround.CommonSpace;
 using System.Runtime.InteropServices;
 
 namespace SkyCombDroneLibrary.DroneLogic.DJI
@@ -81,26 +82,43 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
         }
 
 
-        public static (ushort min, ushort max, Image<Gray, byte> image) GetRawRadiometricDataNormalised(string input)
+        public static (ushort[] rawData, int w, int h, ushort min, ushort max) GetRawRadiometricDataMinMaxData(string input)
         {
             (ushort[] rawData, int w, int h) = DirpApiWrapper.GetRawRadiometricData(input);
 
-            // Normalize rawData to 0-255
             ushort min = rawData.Min();
             ushort max = rawData.Max();
+
+            return (rawData, w, h, min, max);
+        }
+
+
+        // Normalize raw radiometric data to 0-255 grayscale image
+        // using either image specific min/max or global overrides
+        public static Image<Gray, byte> GetRawRadiometricNormalised(string input, int globalMin = BaseConstants.UnknownValue, int globalMax = BaseConstants.UnknownValue)
+        {
+            (ushort[] rawData, int w, int h, ushort min, ushort max) =
+                GetRawRadiometricDataMinMaxData(input);
+
+            // If we have global min/max overrides, use them
+            if (globalMin>=0)
+                min = (ushort)globalMin;
+            if(globalMax>=0)
+                max = (ushort)globalMax;
+
+            // Normalize rawData to 0-255
             byte[] normalized = rawData.Select(v => (byte)((v - min) * 255 / Math.Max(1, max - min))).ToArray();
 
             // Create grayscale image
             Image<Gray, byte> grayImage = new Image<Gray, byte>(w, h);
             System.Buffer.BlockCopy(normalized, 0, grayImage.Data, 0, normalized.Length);
 
-            return (min, max, grayImage);
+            return grayImage;
         }
-
 
         public static Image<Bgr, byte> GetRawRadiometricDataUnitTest(string input)
         {
-            var (min, max, grayImage) = GetRawRadiometricDataNormalised(input);
+            var grayImage = GetRawRadiometricNormalised(input);
             return grayImage.Convert<Bgr, byte>();
         }
     }
