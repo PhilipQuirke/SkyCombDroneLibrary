@@ -4,6 +4,7 @@ using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
+using SkyCombDroneLibrary.DroneLogic.DJI;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
@@ -269,6 +270,18 @@ namespace SkyCombDrone.DroneLogic
                     thisSection.PitchDeg = (float)(imageData.GimbalPitchDegree ?? 0); // We care about camera down angle
                     thisSection.RollDeg = (float)(imageData.FlightRollDegree ?? 0);
                     thisSection.ImageFileName = imageData.FileName;
+
+                    try
+                    {
+                        (var minRawHeat, var maxRawHeat, var inputRadiometric_gray) =
+                            DirpApiWrapper.GetRawRadiometricDataNormalised(imageData.FullName);
+
+                        thisSection.MinRawHeat = minRawHeat;
+                        thisSection.MaxRawHeat = maxRawHeat;
+                    }
+                    catch (Exception ex)
+                    {
+                    }
 
                     // Add the FlightSection to the Flight
                     FlightSections.AddSection(thisSection, prevSection);

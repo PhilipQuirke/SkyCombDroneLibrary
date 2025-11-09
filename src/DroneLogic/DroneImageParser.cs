@@ -8,6 +8,7 @@ namespace SkyCombDrone.DroneLogic
 {
     public class DroneImageMetadata
     {
+        public string FullName { get; set; }
         public string FileName { get; set; }
         public string CameraModelName { get; set; }
         public string Software { get; set; }
@@ -64,6 +65,7 @@ namespace SkyCombDrone.DroneLogic
                 var metadata = ParseExifOutput(output);
                 if (metadata != null)
                 {
+                    metadata.FullName = file;
                     metadata.FileName = Path.GetFileName(file);
                     metadataList.Add(metadata);
 

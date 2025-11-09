@@ -22,6 +22,10 @@ namespace SkyCombDrone.DroneModel
 
         // When imput is images, name of the image file
         public string ImageFileName { get; set; } = string.Empty;
+        // Min raw radiometric heat values for this image
+        public int MinRawHeat { get; set; } = UnknownValue;
+        // Max raw radiometric heat values for this image
+        public int MaxRawHeat { get; set; } = UnknownValue;
 
 
         public FlightSectionModel(int sectionId) : base(sectionId)
@@ -32,8 +36,9 @@ namespace SkyCombDrone.DroneModel
         // One-based settings index values. Must align with GetSettings procedure below
         public const int LongitudeSetting = FirstFreeSetting;
         public const int LatitudeSetting = FirstFreeSetting + 1;
-        public const int ImageFileNameSetting = FirstFreeSetting + 2;
-
+        public const int MinRawHeatSetting = FirstFreeSetting + 2;
+        public const int MaxRawHeatSetting = FirstFreeSetting + 3;
+        public const int ImageFileNameSetting = FirstFreeSetting + 4;
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
         public override DataPairList GetSettings()
@@ -43,6 +48,8 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("Longitude", GlobalLocation.Longitude, BaseConstants.LatLongNdp);
             answer.Add("Latitude", GlobalLocation.Latitude, BaseConstants.LatLongNdp);
+            answer.AddInt_UnknownIsBlank("Min Raw Heat", MinRawHeat);
+            answer.AddInt_UnknownIsBlank("Max Raw Heat", MaxRawHeat);
             answer.Add("Image File Name", ImageFileName);
 
             return answer;
@@ -58,13 +65,14 @@ namespace SkyCombDrone.DroneModel
             int i = FirstFreeSetting - 1;
             GlobalLocation.Longitude = double.Parse(settings[i++]);
             GlobalLocation.Latitude = double.Parse(settings[i++]);
+            MinRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
+            MaxRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
             ImageFileName = settings[i++];
 
             if (!GlobalLocation.IsZero())
                 GlobalLocation.AssertNZ();
         }
     }
-
 
 
     // Raw input data about a flight 
@@ -191,7 +199,7 @@ namespace SkyCombDrone.DroneModel
 
         // Load this object's settings from strings (loaded from a datastore)
         // This function must align to the above GetSettings function.
-        public override void LoadSettings(List<string> settings)
+        public int LoadSettingsCore(List<string> settings)
         {
             int index = LoadSettingsOffset(settings);
 
@@ -202,6 +210,12 @@ namespace SkyCombDrone.DroneModel
 
             MinGlobalLocation.AssertNZ();
             MinGlobalLocation.AssertNZ();
+
+            return index;
+        }
+        public override void LoadSettings(List<string> settings)
+        {
+            LoadSettingsCore(settings);
         }
     }
 }

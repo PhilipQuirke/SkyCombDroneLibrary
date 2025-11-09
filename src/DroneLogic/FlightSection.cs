@@ -48,6 +48,11 @@ namespace SkyCombDrone.DroneLogic
         // The index sequence will be 1, 2, 3, etc. Rarely, gaps occur,but only if the drone flight log has time gaps.
         public SortedList<int, FlightSection> Sections { get; }
 
+        // Min raw radiometric heat values for all images
+        public int MinRawHeat { get; set; } = UnknownValue;
+        // Max raw radiometric heat values for all images
+        public int MaxRawHeat { get; set; } = UnknownValue;
+
 
         public FlightSections(List<string>? settings = null) : base(settings)
         {
@@ -72,10 +77,25 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
+        // Given another section, update MinRawHeat and MaxRawHeat 
+        public void CalculateSettings_MinMaxRawHeat(FlightSection thisSection)
+        {
+            if (MinRawHeat == UnknownValue)
+                MinRawHeat = thisSection.MinRawHeat;
+            else
+                MinRawHeat = Math.Min(MinRawHeat, thisSection.MinRawHeat);
+            if (MaxRawHeat == UnknownValue)
+                MaxRawHeat = thisSection.MaxRawHeat;
+            else
+                MaxRawHeat = Math.Max(MaxRawHeat, thisSection.MaxRawHeat);
+        }
+
+
         // Add the flight section
         public void AddSection(FlightSection thisSection, FlightSection? prevSection)
         {
             thisSection.CalculateSettings_TimeMs(prevSection);
+            CalculateSettings_MinMaxRawHeat(thisSection);
             Sections.Add(thisSection.TardisId, thisSection);
             SetTardisMaxKey();
         }
@@ -274,6 +294,27 @@ namespace SkyCombDrone.DroneLogic
             return (true, sumLocnWeight, sumNorthingM, sumEastingM, sumPosYawDegs, sumNegYawDegs, sumPosYawWeight, sumNegYawWeight, sumPitchDegs, sumPitchWeight);
         }
 
+
+        // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
+        public override DataPairList GetSettings()
+        {
+            var answer = base.GetSettings();
+
+            answer.AddInt_UnknownIsBlank("Min Raw Heat", MinRawHeat);
+            answer.AddInt_UnknownIsBlank("Max Raw Heat", MaxRawHeat);
+
+            return answer;
+        }
+
+        // Load this object's settings from strings (loaded from a datastore)
+        // This function must align to the above GetSettings function.
+        public override void LoadSettings(List<string> settings)
+        {
+            int i = base.LoadSettingsCore(settings);
+
+            MinRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
+            MaxRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
+        }
 
         // Calculate the Min/MaxGlobalLocation and Min/MaxAltitude values from the FlightSection data
         // This function is an alternative to the above LoadSettings function.
