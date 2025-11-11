@@ -285,6 +285,9 @@ namespace SkyCombDrone.DroneLogic
         public (DroneLocation corner1, DroneLocation corner2, DroneLocation corner3, DroneLocation corner4)
             Calculate_InputImageArea_Corners()
         {
+            if (InputImageSizeM == null)
+                return (new DroneLocation(), new DroneLocation(), new DroneLocation(), new DroneLocation());
+
             // Get unit vector in the direction the camera is pointing
             var unitVector = InputImageUnitVector;
             var sinYaw = unitVector.Value.Y;
