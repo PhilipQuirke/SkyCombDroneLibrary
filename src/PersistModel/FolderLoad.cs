@@ -47,29 +47,46 @@ namespace SkyCombDrone.PersistModel
             string regexPattern = "^" + Regex.Escape(filenamefilter).Replace("\\*", ".*") + "$";
 
             // List files in the current folder
-            string[] files = Directory.GetFiles(folderPath);
-            foreach (string file in files)
+            string[]? files = null;
+            try
             {
-                string the_file = file.ToLower();
-
-                if (the_file.Length < 5)
-                    continue;
-                if (!Regex.IsMatch(the_file, regexPattern, RegexOptions.IgnoreCase))
-                    continue;
-
-                string suffix = the_file.Substring(the_file.Length - 4, 4);
-                switch (suffix)
-                {
-                    case ".srt": SrtFiles.Add(file); break;
-                    case ".jpg":
-                    case ".jpeg": JpgFiles.Add(file); break;
-                }
+                files = Directory.GetFiles(folderPath);
+            } catch
+            {
+                files = null;
             }
+            if( files != null)
+                foreach (string file in files)
+                {
+                    string the_file = file.ToLower();
+
+                    if (the_file.Length < 5)
+                        continue;
+                    if (!Regex.IsMatch(the_file, regexPattern, RegexOptions.IgnoreCase))
+                        continue;   
+
+                    string suffix = the_file.Substring(the_file.Length - 4, 4);
+                    switch (suffix)
+                    {
+                        case ".srt": SrtFiles.Add(file); break;
+                        case ".jpg":
+                        case ".jpeg": JpgFiles.Add(file); break;
+                    }
+                }
 
             // Recursively list files in subfolders
-            string[] subfolders = Directory.GetDirectories(folderPath);
-            foreach (string subfolder in subfolders)
-                ListInputFilesInSubfolders(subfolder);
+            string[]? subfolders = null;
+            try
+            {
+                subfolders = Directory.GetDirectories(folderPath);
+            }
+            catch
+            {
+                subfolders = null;
+            }
+            if (subfolders != null)
+                foreach (string subfolder in subfolders)
+                    ListInputFilesInSubfolders(subfolder);
         }
 
 
