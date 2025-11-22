@@ -7,7 +7,11 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
 {
     public static class DirpApiWrapper
     {
-        private const string DllName = "libdirp.dll"; // Ensure this DLL is available in your output directory
+        private const string DllName = "libdirp.dll";
+
+        // Raw radiometric heat values are generally in range 4000 to 5000. This is a "sanity" check value.
+        public const int MinSaneRawHeat = 3000;
+
 
         // Native handle type
         private struct SafeDirpHandle : IDisposable
@@ -101,13 +105,19 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
                 GetRawRadiometricDataMinMaxData(input);
 
             // If we have global min/max overrides, use them
-            if (globalMin>=0)
+            if (globalMin>= MinSaneRawHeat)
                 min = (ushort)globalMin;
-            if(globalMax>=0)
+            if(globalMax>= MinSaneRawHeat)
                 max = (ushort)globalMax;
 
             // Normalize rawData to 0-255
-            byte[] normalized = rawData.Select(v => (byte)((v - min) * 255 / Math.Max(1, max - min))).ToArray();
+            byte[] normalized = rawData.Select(v =>
+                        (byte)(
+                            v <= min ? 0 :
+                            v >= max ? 255 :
+                            ((v - min) * 255 / Math.Max(1, max - min))
+                        )
+                    ).ToArray();
 
             // Create grayscale image
             Image<Gray, byte> grayImage = new Image<Gray, byte>(w, h);
@@ -115,6 +125,7 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
 
             return grayImage;
         }
+
 
         public static Image<Bgr, byte> GetRawRadiometricDataUnitTest(string input)
         {

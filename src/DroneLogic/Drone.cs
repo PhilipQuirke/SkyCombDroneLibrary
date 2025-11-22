@@ -531,12 +531,12 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Read a single image from disk into memory
-        public Image<Bgr, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
+        public Image<Gray, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
         {
             var imageFileName = GetCurrImage_InputIsImages_FileName(inputDirectory, frameId);
             Assert(File.Exists(imageFileName), "GetCurrImage_InputIsImages: bad logic 3");
 
-            return new Image<Bgr, byte>(imageFileName);
+            return new Image<Gray, byte>(imageFileName);
         }
 
 

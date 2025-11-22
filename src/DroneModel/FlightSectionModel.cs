@@ -150,23 +150,6 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        // Describe the drone min / max altitude (in meters above sealevel)
-        public string DescribeAltitude()
-        {
-            string minStr = MinAltitudeM.ToString("0");
-            string maxStr = MaxAltitudeM.ToString("0");
-
-            string answer = "Drone Altitude: " + minStr;
-
-            if (minStr != maxStr)
-                answer += "-" + maxStr;
-
-            answer += " m";
-
-            return answer;
-        }
-
-
         public string DescribePath
         {
             get
