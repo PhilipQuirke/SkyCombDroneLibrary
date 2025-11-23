@@ -13,8 +13,10 @@ namespace SkyCombDrone.PersistModel
     public class DataStoreFactory
     {
         public const string DataStoreSuffix = "_SkyComb.xlsx";
-        public const string WaypointCsvSuffix = "_SkyComb_Waypoints.csv";
-        public const string WaypointJsonSuffix = "_SkyComb_Waypoints.json";
+        public const string AllWaypointCsvSuffix = "_SkyComb_All_Waypoints.csv";
+        public const string AllWaypointJsonSuffix = "_SkyComb_All_Waypoints.json";
+        public const string SomeWaypointCsvSuffix = "_SkyComb_Some_Waypoints.csv";
+        public const string SomeWaypointJsonSuffix = "_SkyComb_Some_Waypoints.json";
 
 
         // Find name of video file that exists
