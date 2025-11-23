@@ -49,9 +49,9 @@ namespace SkyCombDrone.DroneLogic
         public SortedList<int, FlightSection> Sections { get; }
 
         // Min raw radiometric heat values for all images
-        public int MinRawHeat { get; set; } = UnknownValue;
+        public int MinRadioHeat { get; set; } = UnknownValue;
         // Max raw radiometric heat values for all images
-        public int MaxRawHeat { get; set; } = UnknownValue;
+        public int MaxRadioHeat { get; set; } = UnknownValue;
 
 
         public FlightSections(List<string>? settings = null) : base(settings)
@@ -80,14 +80,14 @@ namespace SkyCombDrone.DroneLogic
         // Given another section, update MinRawHeat and MaxRawHeat 
         public void CalculateSettings_MinMaxRawHeat(FlightSection thisSection)
         {
-            if (MinRawHeat == UnknownValue)
-                MinRawHeat = thisSection.MinRawHeat;
+            if (MinRadioHeat == UnknownValue)
+                MinRadioHeat = thisSection.MinRadioHeat;
             else
-                MinRawHeat = Math.Min(MinRawHeat, thisSection.MinRawHeat);
-            if (MaxRawHeat == UnknownValue)
-                MaxRawHeat = thisSection.MaxRawHeat;
+                MinRadioHeat = Math.Min(MinRadioHeat, thisSection.MinRadioHeat);
+            if (MaxRadioHeat == UnknownValue)
+                MaxRadioHeat = thisSection.MaxRadioHeat;
             else
-                MaxRawHeat = Math.Max(MaxRawHeat, thisSection.MaxRawHeat);
+                MaxRadioHeat = Math.Max(MaxRadioHeat, thisSection.MaxRadioHeat);
         }
 
 
@@ -294,14 +294,23 @@ namespace SkyCombDrone.DroneLogic
             return (true, sumLocnWeight, sumNorthingM, sumEastingM, sumPosYawDegs, sumNegYawDegs, sumPosYawWeight, sumNegYawWeight, sumPitchDegs, sumPitchWeight);
         }
 
+        // Get object's settings related to radiometric data
+        public DataPairList GetSettings_Radio()
+        {
+            return new DataPairList
+                {
+                    { "Max Radio Heat", MaxRadioHeat },
+                    { "Min Radio Heat", MinRadioHeat },
+                };
+        }
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
         public override DataPairList GetSettings()
         {
             var answer = base.GetSettings();
 
-            answer.AddInt_UnknownIsBlank("Min Raw Heat", MinRawHeat);
-            answer.AddInt_UnknownIsBlank("Max Raw Heat", MaxRawHeat);
+            answer.AddInt_UnknownIsBlank("Min Radio Heat", MinRadioHeat);
+            answer.AddInt_UnknownIsBlank("Max Radio Heat", MaxRadioHeat);
 
             return answer;
         }
@@ -312,8 +321,8 @@ namespace SkyCombDrone.DroneLogic
         {
             int i = base.LoadSettingsCore(settings);
 
-            MinRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
-            MaxRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
+            MinRadioHeat = StringToInt_BlankIsUnknown(settings[i++]);
+            MaxRadioHeat = StringToInt_BlankIsUnknown(settings[i++]);
         }
 
         // Calculate the Min/MaxGlobalLocation and Min/MaxAltitude values from the FlightSection data

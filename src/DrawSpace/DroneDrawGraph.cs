@@ -826,7 +826,6 @@ namespace SkyCombDrone.DrawSpace
     }
 
 
-
     // Code to draw drone leg data
     public class DrawLeg : DroneDrawGraph
     {
@@ -888,6 +887,35 @@ namespace SkyCombDrone.DrawSpace
         // Show drone Leg as a graph 
         public override void CurrImage(ref Image<Bgr, byte> image, List<Image>? sizeImages = null)
         {
+        }
+    }
+
+
+    // Code to draw drone radiometric min and max heat data
+    public class DrawRadio : DrawTimeGraph
+    {
+        public DrawRadio(DroneDrawScope drawScope) : base(drawScope)
+        {
+            Description =
+                "Graph of image radiometric max temperature values";
+        }
+
+
+        public override float GetVertRaw(FlightStep step) { return step.FlightSection.MaxRadioHeat; }
+
+
+        public override void Initialise(Size size)
+        {
+            base.Initialise(size);
+
+            MinVertRaw = 4525;
+            MaxVertRaw = 4750;
+
+            Title = Description;
+            Metrics = DroneDrawScope.Drone.FlightSections.GetSettings_Radio();
+
+            SetVerticalLabels();
+            DrawLines(ref BaseImage);
         }
     }
 }

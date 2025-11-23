@@ -175,10 +175,19 @@ namespace SkyCombDrone.PersistModel
         }
 
 
+        private void AddRadioGraph()
+        {
+            AddGraph(7,
+                "Image radiometric min / max values",
+                new DrawRadio(DrawScope),
+                "RadioHeat", Drone.FlightSections?.GetSettings_Radio());
+        }
+
+
         // Add a graph of whether the drone step is part of a leg or not using Step data
         private void AddLegGraph()
         {
-            AddGraph(7,
+            AddGraph(8,
                 "Drone Step is part of a flight Leg",
                 new DrawLeg(DrawScope),
                 "StepsLegs", null, false, 100);
@@ -210,6 +219,7 @@ namespace SkyCombDrone.PersistModel
                 AddDeltaYawGraph();
                 AddPitchGraph();
                 AddRollGraph();
+                AddRadioGraph();
                 AddLegGraph();
             }
         }

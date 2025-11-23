@@ -278,8 +278,8 @@ namespace SkyCombDrone.DroneLogic
                         (ushort[] rawData, int w, int h, ushort min, ushort max) =
                             DirpApiWrapper.GetRawRadiometricDataMinMaxData(imageData.FullName);
 
-                        thisSection.MinRawHeat = min;
-                        thisSection.MaxRawHeat = max;
+                        thisSection.MinRadioHeat = min;
+                        thisSection.MaxRadioHeat = max;
                     }
                     catch
                     {

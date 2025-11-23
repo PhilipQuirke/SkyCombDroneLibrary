@@ -1,4 +1,5 @@
 ﻿// Copyright SkyComb Limited 2024. All rights reserved. 
+using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 
@@ -23,9 +24,9 @@ namespace SkyCombDrone.DroneModel
         // When imput is images, name of the image file
         public string ImageFileName { get; set; } = string.Empty;
         // Min raw radiometric heat values for this image
-        public int MinRawHeat { get; set; } = UnknownValue;
+        public int MinRadioHeat { get; set; } = UnknownValue;
         // Max raw radiometric heat values for this image
-        public int MaxRawHeat { get; set; } = UnknownValue;
+        public int MaxRadioHeat { get; set; } = UnknownValue;
 
 
         public FlightSectionModel(int sectionId) : base(sectionId)
@@ -36,9 +37,10 @@ namespace SkyCombDrone.DroneModel
         // One-based settings index values. Must align with GetSettings procedure below
         public const int LongitudeSetting = FirstFreeSetting;
         public const int LatitudeSetting = FirstFreeSetting + 1;
-        public const int MinRawHeatSetting = FirstFreeSetting + 2;
-        public const int MaxRawHeatSetting = FirstFreeSetting + 3;
+        public const int MinRadioHeatSetting = FirstFreeSetting + 2;
+        public const int MaxRadioHeatSetting = FirstFreeSetting + 3;
         public const int ImageFileNameSetting = FirstFreeSetting + 4;
+
 
         // Get the object's settings as datapairs (e.g. for saving to a datastore). Must align with above index values.
         public override DataPairList GetSettings()
@@ -48,8 +50,8 @@ namespace SkyCombDrone.DroneModel
 
             answer.Add("Longitude", GlobalLocation.Longitude, BaseConstants.LatLongNdp);
             answer.Add("Latitude", GlobalLocation.Latitude, BaseConstants.LatLongNdp);
-            answer.AddInt_UnknownIsBlank("Min Raw Heat", MinRawHeat);
-            answer.AddInt_UnknownIsBlank("Max Raw Heat", MaxRawHeat);
+            answer.AddInt_UnknownIsBlank("Min Radio Heat", MinRadioHeat);
+            answer.AddInt_UnknownIsBlank("Max Radio Heat", MaxRadioHeat);
             answer.Add("Image File Name", ImageFileName);
 
             return answer;
@@ -65,8 +67,8 @@ namespace SkyCombDrone.DroneModel
             int i = FirstFreeSetting - 1;
             GlobalLocation.Longitude = double.Parse(settings[i++]);
             GlobalLocation.Latitude = double.Parse(settings[i++]);
-            MinRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
-            MaxRawHeat = StringToInt_BlankIsUnknown(settings[i++]);
+            MinRadioHeat = StringToInt_BlankIsUnknown(settings[i++]);
+            MaxRadioHeat = StringToInt_BlankIsUnknown(settings[i++]);
             ImageFileName = settings[i++];
 
             if (!GlobalLocation.IsZero())
