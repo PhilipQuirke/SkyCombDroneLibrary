@@ -147,10 +147,19 @@ namespace SkyCombDrone.PersistModel
         }
 
 
+        private void AddRadioGraph()
+        {
+            AddGraph(4,
+                "Image radiometric max heat value vs Step",
+                new DrawRadio(DrawScope),
+                "RadioHeat", Drone.FlightSections?.GetSettings_Radio());
+        }
+
+
         // Add a graph of the drone delta yaw (change of direction) using smoothed Steps data
         private void AddDeltaYawGraph()
         {
-            AddGraph(4,
+            AddGraph(5,
                 "Drone change in direction (aka Delta Yaw) in Degrees vs Step",
                 new DrawDeltaYaw(DrawScope),
                 "StepsDeltaYaw", Steps.GetSettings_DeltaYaw());
@@ -159,7 +168,7 @@ namespace SkyCombDrone.PersistModel
 
         private void AddPitchGraph()
         {
-            AddGraph(5,
+            AddGraph(6,
                 "Drone Pitch (in degrees) vs Step",
                 new DrawPitch(DrawScope),
                 "StepPitch", Steps.GetSettings_Pitch());
@@ -168,19 +177,10 @@ namespace SkyCombDrone.PersistModel
 
         private void AddRollGraph()
         {
-            AddGraph(6,
+            AddGraph(7,
                 "Drone flight speed (in Mps) vs Step",
                 new DrawRoll(DrawScope),
                 "StepRoll", Steps.GetSettings_Roll());
-        }
-
-
-        private void AddRadioGraph()
-        {
-            AddGraph(7,
-                "Image radiometric min / max values",
-                new DrawRadio(DrawScope),
-                "RadioHeat", Drone.FlightSections?.GetSettings_Radio());
         }
 
 
@@ -216,10 +216,10 @@ namespace SkyCombDrone.PersistModel
             {
                 AddElevationsGraph();
                 AddSpeedGraph();
+                AddRadioGraph();
                 AddDeltaYawGraph();
                 AddPitchGraph();
                 AddRollGraph();
-                AddRadioGraph();
                 AddLegGraph();
             }
         }
