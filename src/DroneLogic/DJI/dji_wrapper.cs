@@ -49,6 +49,7 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
         private static extern int dirp_get_original_raw(
             IntPtr h, [Out] ushort[] raw_image, int size);
 
+
         /// <summary>
         /// Loads the raw radiometric data from a DJI R-JPEG file.
         /// </summary>
@@ -86,41 +87,43 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
         }
 
 
-        public static (ushort[] rawData, int w, int h, ushort min, ushort max) GetRawRadiometricDataMinMaxData(string input)
+        public static (ushort[] rawData, int width, int height, ushort minRadioHeat, ushort maxRadioHeat) 
+            GetRawRadiometricDataMinMaxData(string input)
         {
-            (ushort[] rawData, int w, int h) = DirpApiWrapper.GetRawRadiometricData(input);
+            (ushort[] rawData, int width, int height) = DirpApiWrapper.GetRawRadiometricData(input);
 
-            ushort min = rawData.Min();
-            ushort max = rawData.Max();
+            ushort minRadioHeat = rawData.Min();
+            ushort maxRadioHeat = rawData.Max();
 
-            return (rawData, w, h, min, max);
+            return (rawData, width, height, minRadioHeat, maxRadioHeat);
         }
 
 
         // Normalize raw radiometric data to 0-255 grayscale image
-        // using either image specific min/max or global overrides
-        public static Image<Gray, byte> GetRawRadiometricNormalised(string input, int globalMin = BaseConstants.UnknownValue, int globalMax = BaseConstants.UnknownValue)
+        // using either image specific min/maxRadioHeat or global overrides
+        public static Image<Gray, byte> GetRawRadiometricNormalised(string input, int overrideMinRadioHeat = BaseConstants.UnknownValue, int overrideMaxRadioHeat = BaseConstants.UnknownValue)
         {
-            (ushort[] rawData, int w, int h, ushort min, ushort max) =
+
+            (ushort[] rawData, int width, int height, ushort minRadioHeat, ushort maxRadioHeat) =
                 GetRawRadiometricDataMinMaxData(input);
 
             // If we have global min/max overrides, use them
-            if (globalMin>= MinSaneRawHeat)
-                min = (ushort)globalMin;
-            if(globalMax>= MinSaneRawHeat)
-                max = (ushort)globalMax;
+            if (overrideMinRadioHeat >= MinSaneRawHeat)
+                minRadioHeat = (ushort)overrideMinRadioHeat;
+            if (overrideMaxRadioHeat >= MinSaneRawHeat)
+                maxRadioHeat = (ushort)overrideMaxRadioHeat;
 
             // Normalize rawData to 0-255
             byte[] normalized = rawData.Select(v =>
                         (byte)(
-                            v <= min ? 0 :
-                            v >= max ? 255 :
-                            ((v - min) * 255 / Math.Max(1, max - min))
+                            v <= minRadioHeat ? 0 :
+                            v >= maxRadioHeat ? 255 :
+                            ((v - minRadioHeat) * 255 / Math.Max(1, maxRadioHeat - minRadioHeat))
                         )
                     ).ToArray();
 
             // Create grayscale image
-            Image<Gray, byte> grayImage = new Image<Gray, byte>(w, h);
+            Image<Gray, byte> grayImage = new Image<Gray, byte>(width, height);
             System.Buffer.BlockCopy(normalized, 0, grayImage.Data, 0, normalized.Length);
 
             return grayImage;
