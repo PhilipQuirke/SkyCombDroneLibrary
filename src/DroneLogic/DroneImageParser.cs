@@ -54,19 +54,25 @@ namespace SkyCombDrone.DroneLogic
         public const string ExifToolPath = "exiftool.exe";
 
 
+        public static DroneImageMetadata ReadMetadataFromFilePath(string filePath)
+        {
+            string output = RunExifTool(filePath);
+            return ParseExifOutput(output);
+        }
+
+
         public static List<DroneImageMetadata> ReadMetadataFromFolder(string folderPath, bool all = true)
         {
             var files = Directory.GetFiles(folderPath, "*_T*.JPG");
             var metadataList = new List<DroneImageMetadata>();
 
-            foreach (var file in files)
+            foreach (var filePath in files)
             {
-                string output = RunExifTool(file);
-                var metadata = ParseExifOutput(output);
+                var metadata = ReadMetadataFromFilePath(filePath);
                 if (metadata != null)
                 {
-                    metadata.FullName = file;
-                    metadata.FileName = Path.GetFileName(file);
+                    metadata.FullName = filePath;
+                    metadata.FileName = Path.GetFileName(filePath);
                     metadataList.Add(metadata);
 
                     if (!all)

@@ -516,13 +516,13 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Return the file name of the image 
-        public string GetCurrImage_InputIsImages_FileName(string inputDirectory, int frameId)
+        public string GetCurrImage_InputIsImages_Path(string inputDirectory, int frameId)
         {
             var section = FlightSections?.Sections[frameId];
-            Assert(section != null, "GetCurrImage_InputIsImages: bad logic 1");
+            Assert(section != null, "GetCurrImage_InputIsImages_Path: bad logic 1");
 
             var imageFileName = section.ImageFileName;
-            Assert(imageFileName != "", "GetCurrImage_InputIsImages: bad logic 2");
+            Assert(imageFileName != "", "GetCurrImage_InputIsImages_Path: bad logic 2");
 
             imageFileName = inputDirectory.Trim('\\') + "\\" + imageFileName;
 
@@ -533,83 +533,24 @@ namespace SkyCombDrone.DroneLogic
         // Read a single image from disk into memory
         public Image<Gray, byte> GetCurrImage_InputIsImages(string inputDirectory, int frameId)
         {
-            var imageFileName = GetCurrImage_InputIsImages_FileName(inputDirectory, frameId);
+            var imageFileName = GetCurrImage_InputIsImages_Path(inputDirectory, frameId);
             Assert(File.Exists(imageFileName), "GetCurrImage_InputIsImages: bad logic 3");
 
             return new Image<Gray, byte>(imageFileName);
         }
 
 
-        // Read a single optical image from disk into memory based on regex
-        // Try file names with the timestamp numerically +1 or -1 than the specified file name
-        public static Image<Bgr, byte>? GetOpticalImageRegex(string opticalFileName, Regex regex)
-        {
-            var fileNameOnly = System.IO.Path.GetFileName(opticalFileName);
-            var match = regex.Match(fileNameOnly);
-            if (match.Success)
-            {
-                long timestamp;
-                if (long.TryParse(match.Groups[1].Value, out timestamp))
-                {
-                    string baseName = opticalFileName.Replace(match.Groups[1].Value, "{TIMESTAMP}");
-
-                    // Try +1
-                    var plusTimestamp = (timestamp + 1).ToString().PadLeft(14, '0');
-                    string altFileNamePlus = baseName.Replace("{TIMESTAMP}", plusTimestamp);
-                    if (File.Exists(altFileNamePlus))
-                        return new Image<Bgr, byte>(altFileNamePlus);
-
-                    // Try -1
-                    var minusTimestamp = (timestamp - 1).ToString().PadLeft(14, '0');
-                    string altFileNameMinus = baseName.Replace("{TIMESTAMP}", minusTimestamp);
-                    if (File.Exists(altFileNameMinus))
-                        return new Image<Bgr, byte>(altFileNameMinus);
-                }
-            }
-
-            return null;
-        }
-
-
         // Read a single optical image from disk into memory
-        public Image<Bgr, byte> GetOpticalImage(string inputDirectory, int frameId)
+        public (string opticalImagePath, Image<Bgr, byte> opticalImage)
+            GetOpticalImage(string inputDirectory, int frameId)
         {
-            var imageFileName = GetCurrImage_InputIsImages_FileName(inputDirectory, frameId);
+            // Get the thermal image file name
+            var thermalImagePath = GetCurrImage_InputIsImages_Path(inputDirectory, frameId);
 
-            // For example: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071259_0008_T_point0.jpg
-            var opticalFileName1 = imageFileName.Replace("_T_", "_V_");
-            if (opticalFileName1 != imageFileName)
-            {
-                if (File.Exists(opticalFileName1))
-                    return new Image<Bgr, byte>(opticalFileName1);
-
-                // Sometimes get: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071260_0008_V_point0.jpg
-                // Try file names with the timestamp numerically +1 or -1, and any pointN suffix
-                var regex1 = new System.Text.RegularExpressions.Regex(
-                    @"DJI_(\d{14})_(\d{4})_V_point(\d+)\.jpg$",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                var opticalFile1 = GetOpticalImageRegex(opticalFileName1, regex1);
-                if (opticalFile1 != null)
-                    return opticalFile1;
-            }
-
-            // For example: D:\SkyComb\Data_Input\HK\31OctPrincess\DJI_20251031065732_0001_T.jpg
-            var opticalFileName2 = imageFileName.Replace("_T.", "_V.");
-            if (opticalFileName2 != imageFileName)
-            {
-                if (File.Exists(opticalFileName2))
-                    return new Image<Bgr, byte>(opticalFileName2);
-
-                var regex2 = new System.Text.RegularExpressions.Regex(
-                    @"DJI_(\d{14})_(\d{4})_V\.jpg$",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                var opticalFile2 = GetOpticalImageRegex(opticalFileName2, regex2);
-                if (opticalFile2 != null)
-                    return opticalFile2;
-            }
-
-            return null;
+            // Read the optical image
+            return VideoModel.GetOpticalImage(thermalImagePath);
         }
+
 
         public string DescribeFlightPath
         {

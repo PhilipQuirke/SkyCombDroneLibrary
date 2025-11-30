@@ -1,9 +1,11 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved.
+﻿// Copyright SkyComb Limited 2025. All rights reserved.
 using Emgu.CV;
 using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
 using SkyCombGround.CommonSpace;
 using System.Diagnostics;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 
 namespace SkyCombDrone.DroneModel
@@ -412,6 +414,77 @@ namespace SkyCombDrone.DroneModel
             return RemoveFileNameSuffix(ShortFileName());
         }
 
+
+        // Read a single optical image from disk into memory based on regex
+        // Try file names with the timestamp numerically +1 or -1 than the specified file name
+        public static (string opticalImagePath, Image<Bgr, byte>? opticalImage) 
+            GetOpticalImageRegex(string opticalImagePath, Regex regex)
+        {
+            var fileNameOnly = System.IO.Path.GetFileName(opticalImagePath);
+            var match = regex.Match(fileNameOnly);
+            if (match.Success)
+            {
+                long timestamp;
+                if (long.TryParse(match.Groups[1].Value, out timestamp))
+                {
+                    string baseName = opticalImagePath.Replace(match.Groups[1].Value, "{TIMESTAMP}");
+
+                    // Try +1
+                    var plusTimestamp = (timestamp + 1).ToString().PadLeft(14, '0');
+                    string altFileNamePlus = baseName.Replace("{TIMESTAMP}", plusTimestamp);
+                    if (File.Exists(altFileNamePlus))
+                        return (altFileNamePlus, new Image<Bgr, byte>(altFileNamePlus));
+
+                    // Try -1
+                    var minusTimestamp = (timestamp - 1).ToString().PadLeft(14, '0');
+                    string altFileNameMinus = baseName.Replace("{TIMESTAMP}", minusTimestamp);
+                    if (File.Exists(altFileNameMinus))
+                        return (altFileNameMinus, new Image<Bgr, byte>(altFileNameMinus));
+                }
+            }
+
+            return ("", null);
+        }
+
+
+        // Given the thermalImageFileName, read the corresponding single optical image from disk into memory
+        public static (string opticalImagePath, Image<Bgr, byte>? opticalImage)  
+            GetOpticalImage(string thermalImagePath)
+        {
+            // For example: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071259_0008_T_point0.jpg
+            var opticalImagePath1 = thermalImagePath.Replace("_T_", "_V_");
+            if (opticalImagePath1 != thermalImagePath)
+            {
+                if (File.Exists(opticalImagePath1))
+                    return (opticalImagePath1, new Image<Bgr, byte>(opticalImagePath1));
+
+                // Sometimes get: D:\SkyComb\Data_Input\HK\9Oct25\DJI_20251011071260_0008_V_point0.jpg
+                // Try file names with the timestamp numerically +1 or -1, and any pointN suffix
+                var regex1 = new System.Text.RegularExpressions.Regex(
+                    @"DJI_(\d{14})_(\d{4})_V_point(\d+)\.jpg$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                (var opticalImagePath2, var opticalFile2) = VideoModel.GetOpticalImageRegex(opticalImagePath1, regex1);
+                if (opticalFile2 != null)
+                    return (opticalImagePath2, opticalFile2);
+            }
+
+            // For example: D:\SkyComb\Data_Input\HK\31OctPrincess\DJI_20251031065732_0001_T.jpg
+            var opticalImagePath3 = thermalImagePath.Replace("_T.", "_V.");
+            if (opticalImagePath3 != thermalImagePath)
+            {
+                if (File.Exists(opticalImagePath3))
+                    return (opticalImagePath3, new Image<Bgr, byte>(opticalImagePath3));
+
+                var regex3 = new System.Text.RegularExpressions.Regex(
+                    @"DJI_(\d{14})_(\d{4})_V\.jpg$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                (var opticalImagePath4, var opticalFile4) = VideoModel.GetOpticalImageRegex(opticalImagePath3, regex3);
+                if (opticalFile4 != null)
+                    return (opticalImagePath4, opticalFile4);
+            }
+
+            return ("", null);
+        }
 
 
         private bool disposed = false;
