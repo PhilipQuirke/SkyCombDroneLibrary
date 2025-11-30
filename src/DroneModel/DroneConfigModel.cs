@@ -1,4 +1,5 @@
 ﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 
 
@@ -12,18 +13,44 @@ namespace SkyCombDrone.DroneModel
     // Configuration settings related to flight data.  
     public class DroneIntervalModel : ConfigBase
     {
+        // VIDEO INTERVAL SETTINGS
         // Start the video processing from this point (if specified) in seconds
         public float RunVideoFromS { get; set; }
 
         // Stop the video processing at this point (if specified) in seconds
         public float RunVideoToS { get; set; }
 
+        // IMAGES INTERVAL SETTINGS
+        // Start the image processing from this point (if specified) in frames 
+        public int RunImagesFromStepId { get; set; } = UnknownValue; // 0 based 
 
-        public DroneIntervalModel(float runVideoFromS = 5, float runVideoToS = 10)
+        // Stop the image processing at this point (if specified) in frames
+        public int RunImagesToStepId { get; set; } = UnknownValue; // 0 based 
+
+        public DroneIntervalModel(float runVideoFromS = 5, float runVideoToS = 10, int runImagesFromStepId = 0, int runImagesToStepId = 0)
         {
-            Assert(runVideoFromS <= runVideoToS, "DroneIntervalModel: Bad range");
+            Assert(runVideoFromS >= 0, "DroneIntervalModel: Bad 1");
+            Assert(runVideoFromS <= runVideoToS, "DroneIntervalModel: Bad 2");
+            //Assert(runImagesFromStepId >= 0, "DroneIntervalModel: Bad 3"); Maybe unknownvalue
+            Assert(runImagesFromStepId <= runImagesToStepId, "DroneIntervalModel: Bad 4");
+
             RunVideoFromS = runVideoFromS;
             RunVideoToS = runVideoToS;
+            RunImagesFromStepId = runImagesFromStepId;
+            RunImagesToStepId = runImagesToStepId;
+        }
+
+        public void ValidateFromTo()
+        {
+            if (RunVideoFromS < 0)
+                RunVideoFromS = 0;
+            if (RunVideoToS < RunVideoFromS)
+                RunVideoToS = RunVideoFromS;
+
+            if (RunImagesFromStepId < 0)
+                RunImagesFromStepId = 0;
+            if (RunImagesToStepId < RunImagesFromStepId)
+                RunImagesToStepId = RunImagesFromStepId;
         }
     };
 
@@ -130,6 +157,23 @@ namespace SkyCombDrone.DroneModel
         public int MaxLegGapDurationMs { get; set; } = 500;
 
 
+        public void ValidateFromTo(Drone? drone)
+        {
+            if (drone != null)
+            {
+                int numSections = drone.FlightSections.Sections.Count;
+
+                // Ensure the From/To frames are within the flight sections available
+                if (RunImagesFromStepId >= numSections)
+                    RunImagesFromStepId = numSections-1;
+                if (RunImagesToStepId >= numSections)
+                    RunImagesToStepId = numSections-1;
+            }
+
+            base.ValidateFromTo();
+        }
+
+
         // The Camera down angle must be in range +25 to +90 degrees.
         // Pointing at the horizon is 0 degrees, and is bad as 1) areas imaged by the video are far away.
         // and 2) thermal cameras experience thermal bloom and their measurements are unreliable.
@@ -172,6 +216,8 @@ namespace SkyCombDrone.DroneModel
                 { "Smooth Section Radius", SmoothSectionRadius },
                 { "Use Legs", UseLegs },
                 { "Notes", ( Notes == "" ? " " : Notes ) },
+                { "Run Images From Frame", RunImagesFromStepId  },
+                { "Run Images To Frame", RunImagesToStepId  },
             };
         }
 
@@ -190,6 +236,12 @@ namespace SkyCombDrone.DroneModel
             UseLegs = StringToBool(settings[i++]);
             Notes = settings[i++];
 
+            if( i < settings.Count)
+                RunImagesFromStepId = StringToNonNegInt(settings[i++]);
+            if( i < settings.Count)
+                RunImagesToStepId = StringToNonNegInt(settings[i++]);
+
+            ValidateFromTo(null);
             ValidateFixedCameraDownDeg();
             ValidateMinCameraDownDeg();
         }
