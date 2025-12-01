@@ -10,6 +10,7 @@
     <Copyright>Copyright SkyComb Limited 2025. All rights reserved.</Copyright>
     <Version>11.3.0</Version>
     <Platforms>x64</Platforms>
+	<PublishDir>..\SkyCombAnalystInstaller\</PublishDir>	  
   </PropertyGroup>
 
   <ItemGroup>
