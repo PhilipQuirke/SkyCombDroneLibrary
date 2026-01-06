@@ -1,8 +1,8 @@
-// Copyright SkyComb Limited 2025. All rights reserved.
+// Copyright SkyComb Limited 2026. All rights reserved.
 using SkyCombDrone.Interfaces;
 using SkyCombDrone.Services;
-using SkyCombGround.CommonSpace;
 using SkyCombGround.Interfaces;
+
 
 namespace SkyCombDrone.Examples
 {
@@ -18,9 +18,9 @@ namespace SkyCombDrone.Examples
         {
             Console.WriteLine("=== Basic Drone Video Processing Example ===");
 
-            string videoPath = @"C:\DroneVideos\flight_video.mp4";
-            string groundDataPath = @"C:\GroundData";
-            string outputPath = @"C:\ProcessedDroneData";
+            string videoPath = @"C:\SkyComb\Data_Input\flight_video.mp4";
+            string groundDataPath = @"C:\SkyComb\Data_Ground";
+            string outputPath = @"C:\SkyComb\Data_Output";
 
             Console.WriteLine($"Processing video: {videoPath}");
 
@@ -84,8 +84,10 @@ namespace SkyCombDrone.Examples
         {
             Console.WriteLine("\n=== Drone Image Directory Processing Example ===");
 
-            string imageDirectory = @"C:\DroneImages\ThermalSurvey";
-            string groundDataPath = @"C:\GroundData";
+            string imageDirectory = @"C:\SkyComb\Data_Input\ThermalSurvey";
+            string groundDataPath = @"C:\SkyComb\Data_Ground";
+            string outputPath = @"C:\SkyComb\Data_Output";
+
 
             Console.WriteLine($"Processing images from: {imageDirectory}");
 
@@ -138,11 +140,12 @@ namespace SkyCombDrone.Examples
             Console.WriteLine("\n=== Quick Flight Summary Example ===");
 
             string[] testPaths = {
-                @"C:\DroneVideos\flight_001.mp4",
-                @"C:\DroneVideos\flight_002.mp4",
-                @"C:\DroneImages\Survey001",
-                @"C:\DroneImages\Survey002"
+                @"C:\SkyComb\Data_Input\DroneVideos\flight_001.mp4",
+                @"C:\SkyComb\Data_Input\DroneVideos\flight_002.mp4",
+                @"C:\SkyComb\Data_Input\DroneImages\Survey001",
+                @"C:\SkyComb\Data_Input\DroneImages\Survey002"
             };
+            string groundDataPath = @"C:\SkyComb\Data_Ground";
 
             var droneService = DroneDataService.Create();
 
@@ -152,7 +155,7 @@ namespace SkyCombDrone.Examples
             {
                 try
                 {
-                    var summary = await droneService.GetFlightSummaryAsync(path);
+                    var summary = await droneService.GetFlightSummaryAsync(path, groundDataPath);
                     
                     Console.WriteLine($"\n{Path.GetFileName(path)}:");
                     Console.WriteLine($"  Date: {summary.FlightDateTime:yyyy-MM-dd HH:mm}");
@@ -227,13 +230,14 @@ namespace SkyCombDrone.Examples
                 new { Path = @"C:\EmptyDirectory", Type = "Empty image directory" },
                 new { Path = @"", Type = "Empty path" }
             };
-
+            string groundDataPath = @"C:\SkyComb\Data_Ground";
+            
             foreach (var testCase in testCases)
             {
                 try
                 {
                     Console.WriteLine($"\nTesting: {testCase.Type}");
-                    var summary = await droneService.GetFlightSummaryAsync(testCase.Path);
+                    var summary = await droneService.GetFlightSummaryAsync(testCase.Path, groundDataPath);
                     Console.WriteLine($"  Unexpected success for {testCase.Type}");
                 }
                 catch (ArgumentException ex)

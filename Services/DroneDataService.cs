@@ -93,7 +93,7 @@ namespace SkyCombDrone.Services
         }
 
         /// <inheritdoc />
-        public async Task<DroneFlightSummary> GetFlightSummaryAsync(string inputPath, CancellationToken cancellationToken = default)
+        public async Task<DroneFlightSummary> GetFlightSummaryAsync(string inputPath, string groundDirectory, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(inputPath))
                 throw new ArgumentException("Input path cannot be null or empty", nameof(inputPath));
@@ -126,7 +126,7 @@ namespace SkyCombDrone.Services
             {
                 // Ground directory not found is OK for summary
                 var config = CreateDroneConfig();
-                var drone = await CreateDroneForSummaryAsync(inputType, inputDirectory, inputFileName, config, cancellationToken);
+                var drone = await CreateDroneForSummaryAsync(inputType, inputDirectory, inputFileName, groundDirectory, config, cancellationToken);
                 
                 using (drone)
                 {
@@ -205,6 +205,7 @@ namespace SkyCombDrone.Services
             DroneInputType inputType,
             string inputDirectory,
             string inputFileName,
+            string groundDirectory,
             DroneConfigModel config,
             CancellationToken cancellationToken)
         {
@@ -223,7 +224,7 @@ namespace SkyCombDrone.Services
                 }
                 else if (inputType == DroneInputType.Images)
                 {
-                    var metadata = drone.CalculateSettings_FlightSections_InputIsImages(inputDirectory);
+                    var metadata = drone.CalculateSettings_FlightSections_InputIsImages(inputDirectory, groundDirectory);
                     DroneDataFactory.CalculateCameraSpecifics_InputIsImages(drone, metadata);
                 }
 

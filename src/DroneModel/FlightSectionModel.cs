@@ -1,5 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved. 
-using SkyCombDrone.DroneLogic;
+﻿// Copyright SkyComb Limited 2026. All rights reserved. 
 using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 
@@ -96,19 +95,19 @@ namespace SkyCombDrone.DroneModel
         // The Min/MaxCountryLocation values represent a box encompassing the locations the drone flew over.
         // Commonly the drone flight path is NOT a rectangular box with sides aligned North and East,
         // so the Min/MaxCountryLocation box is commonly a larger area than the area the drone flew over.
-        // The location is in country coordinates. In NZ, using NZTM, example has Northing=5916626 Easting=1751330 
+        // The location is in country coordinates. In NZ, using NZTM2000, example has Northing=5916626 Easting=1751330 
         public CountryLocation? MinCountryLocation
         {
             get
             {
-                return (MinGlobalLocation == null ? null : NztmProjection.WgsToNztm(MinGlobalLocation));
+                return (MinGlobalLocation == null ? null : ConvertDJILocationHeight.Wgs84ToNztm(MinGlobalLocation));
             }
         }
         public CountryLocation? MaxCountryLocation
         {
             get
             {
-                return (MaxGlobalLocation == null ? null : NztmProjection.WgsToNztm(MaxGlobalLocation));
+                return (MaxGlobalLocation == null ? null : ConvertDJILocationHeight.Wgs84ToNztm(MaxGlobalLocation));
             }
         }
 

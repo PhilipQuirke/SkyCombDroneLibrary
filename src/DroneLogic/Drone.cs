@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+﻿// Copyright SkyComb Limited 2026. All rights reserved. 
 using Emgu.CV;
 using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
@@ -9,7 +9,6 @@ using SkyCombGround.CommonSpace;
 using SkyCombGround.GroundLogic;
 using SkyCombGround.PersistModel;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 
 // Contains all in-memory data we hold about a drone flight, the videos taken, the flight log, and ground DEM and DSM elevations.
@@ -237,7 +236,7 @@ namespace SkyCombDrone.DroneLogic
 
 
         // Calculate FlightSections settings by parsing the properties of all the images
-        public List<DroneImageMetadata> CalculateSettings_FlightSections_InputIsImages(string thermalFolderName)
+        public List<DroneImageMetadata> CalculateSettings_FlightSections_InputIsImages(string thermalFolderName, string groundDirectory)
         {
             FlightSections = null;
             DroneConfig.GimbalDataAvail = GimbalDataEnum.AutoYes;
@@ -264,7 +263,15 @@ namespace SkyCombDrone.DroneLogic
 
                     thisSection.GlobalLocation.Latitude = imageData.LRFLat ?? 0;
                     thisSection.GlobalLocation.Longitude = imageData.LRFLon ?? 0;
-                    thisSection.AltitudeM = (float)(imageData.GpsAltitude ?? 0);
+
+                    // For DJI drones, altitude is based on WGS84 ellipsoid - aka Geodetic / raw GNSS
+                    var gnss_altitude = (float)(imageData.GpsAltitude ?? 0);
+                    // The ground lidar data vertical measurements are in NZVD2016. We need to convert 
+                    // If we skip this, we’ll bake in a location-dependent bias (the geoid separation), often tens of meters.
+                    var nzvd2016_altitude = ConvertDJILocationHeight.DjiGpsAltToNzvd2016(
+                        groundDirectory, thisSection.GlobalLocation, gnss_altitude);
+
+                    thisSection.AltitudeM = (float)nzvd2016_altitude;
                     thisSection.FocalLength = (float)(imageData.FocalLength ?? 0);
                     thisSection.Zoom = (float)imageData.DigitalZoomRatio;
                     thisSection.YawDeg = (float)(imageData.FlightYawDegree ?? 0); // PQR We could use GimbalYawDegree!!
@@ -638,6 +645,23 @@ namespace SkyCombDrone.DroneLogic
         {
             DroneConfig.RunVideoFromS = startMs / 1000.0f;
             DroneConfig.RunVideoToS = endMs / 1000.0f;
+
+            try
+            {
+                DroneConfig.RunImagesFromStepId = MsToNearestFlightStep(startMs).StepId;
+            }
+            catch
+            {
+                DroneConfig.RunImagesFromStepId = 0;
+            }
+            try
+            {
+                DroneConfig.RunImagesToStepId = MsToNearestFlightStep(endMs).StepId;
+            }
+            catch
+            {
+                DroneConfig.RunImagesToStepId = Math.Max( 0, FlightSections.Sections.Count - 1);
+            }
         }
 
 
@@ -682,6 +706,8 @@ namespace SkyCombDrone.DroneLogic
                 // Default the RunFrom/To to the full video length
                 DroneConfig.RunVideoFromS = 0;
                 DroneConfig.RunVideoToS = InputVideo.DurationMs / 1000.0f;
+                DroneConfig.RunImagesFromStepId = 0;
+                DroneConfig.RunImagesToStepId = FlightSections.Sections.Count - 1;
 
                 CalculateSettings_SwatheSeen(1, 9999);
             }

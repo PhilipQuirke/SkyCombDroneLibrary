@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+﻿// Copyright SkyComb Limited 2026. All rights reserved. 
 using SkyCombDrone.DroneLogic;
 using SkyCombGround.CommonSpace;
 
@@ -27,7 +27,7 @@ namespace SkyCombDrone.DroneModel
         // Stop the image processing at this point (if specified) in frames
         public int RunImagesToStepId { get; set; } = UnknownValue; // 0 based 
 
-        public DroneIntervalModel(float runVideoFromS = 5, float runVideoToS = 10, int runImagesFromStepId = 0, int runImagesToStepId = 0)
+        public DroneIntervalModel(float runVideoFromS = 5, float runVideoToS = 10, int runImagesFromStepId = 5, int runImagesToStepId = 10)
         {
             Assert(runVideoFromS >= 0, "DroneIntervalModel: Bad 1");
             Assert(runVideoFromS <= runVideoToS, "DroneIntervalModel: Bad 2");

@@ -172,7 +172,7 @@ namespace SkyCombDrone.Interfaces
         /// <param name="inputPath">Path to video file or image directory</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Basic flight summary information</returns>
-        Task<DroneFlightSummary> GetFlightSummaryAsync(string inputPath, CancellationToken cancellationToken = default);
+        Task<DroneFlightSummary> GetFlightSummaryAsync(string inputPath, string groundDataDirectory, CancellationToken cancellationToken = default);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+﻿// Copyright SkyComb Limited 2026. All rights reserved. 
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -195,7 +195,7 @@ namespace SkyCombDrone.DroneLogic
             data.LensInfo = GetValue("Lens Info");
             data.AbsoluteAltitude = GetDouble("Absolute Altitude");
             data.RelativeAltitude = GetDouble("Relative Altitude");
-            data.GpsAltitude = GetDouble("GPS Altitude");
+            data.GpsAltitude = GetDouble("GPS Altitude"); // For DJI, this is based on WGS84 ellipsoid - aka Geodetic / raw GNSS
             data.GimbalRollDegree = GetDouble("Gimbal Roll Degree");
             data.GimbalYawDegree = GetDouble("Gimbal Yaw Degree");
             data.GimbalPitchDegree = GetDouble("Gimbal Pitch Degree");

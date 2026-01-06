@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2025. All rights reserved. 
+﻿// Copyright SkyComb Limited 2026. All rights reserved. 
 using SkyCombDrone.DroneModel;
 using SkyCombDrone.PersistModel;
 using SkyCombGround.CommonSpace;
@@ -219,7 +219,7 @@ namespace SkyCombDrone.DroneLogic
                             }
                             else
                             {
-                                var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.InputFolderName);
+                                var metaData = answer.CalculateSettings_FlightSections_InputIsImages(droneDataStore.InputFolderName, groundDirectory);
                                 CalculateCameraSpecifics_InputIsImages(answer, metaData);
                             }
 
