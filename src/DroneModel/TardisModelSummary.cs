@@ -374,21 +374,21 @@ namespace SkyCombDrone.DroneModel
         }
 
 
-        public float NorthingRangeM()
+        public double NorthingRangeM()
         {
             if (MinDroneLocnM == null || MaxDroneLocnM == null || MaxDroneLocnM.NorthingM == UnknownValue)
                 return UnknownValue;
 
             return MaxDroneLocnM.NorthingM - MinDroneLocnM.NorthingM;
         }
-        public float EastingRangeM()
+        public double EastingRangeM()
         {
             if (MinDroneLocnM == null || MaxDroneLocnM == null || MaxDroneLocnM.EastingM == UnknownValue)
                 return UnknownValue;
 
             return MaxDroneLocnM.EastingM - MinDroneLocnM.EastingM;
         }
-        public float AreaM2()
+        public double AreaM2()
         {
             if (MinDroneLocnM == null || MaxDroneLocnM == null || MaxDroneLocnM.NorthingM == UnknownValue)
                 return UnknownValue;
@@ -571,8 +571,8 @@ namespace SkyCombDrone.DroneModel
             {
                 MinTardisId = rand.Next(1, 10000),
                 MaxTardisId = rand.Next(1, 10000),
-                MinDroneLocnM = new DroneLocation((float)rand.NextDouble() * 1000, (float)rand.NextDouble() * 1000),
-                MaxDroneLocnM = new DroneLocation((float)rand.NextDouble() * 1000, (float)rand.NextDouble() * 1000),
+                MinDroneLocnM = new DroneLocation(rand.NextDouble() * 1000, rand.NextDouble() * 1000),
+                MaxDroneLocnM = new DroneLocation(rand.NextDouble() * 1000, rand.NextDouble() * 1000),
                 MinTimeMs = rand.Next(0, 1000000),
                 MaxTimeMs = rand.Next(0, 1000000),
                 MinSumTimeMs = rand.Next(0, 1000000),

@@ -90,7 +90,7 @@ namespace SkyCombDrone.DroneLogic
             Assert(smoothRadius >= 1, "CalculateSettings_SmoothLocationYawPitch: No smoothing");
 
 
-            (bool success, float sumLocnWeight, float sumNorthingM, float sumEastingM, float sumPosYawDegs, float sumNegYawDegs, float sumPosYawWeight, float sumNegYawWeight, float sumPitchDegs, float sumPitchWeight)
+            (bool success, float sumLocnWeight, double sumNorthingM, double sumEastingM, float sumPosYawDegs, float sumNegYawDegs, float sumPosYawWeight, float sumNegYawWeight, float sumPitchDegs, float sumPitchWeight)
                 = sections.Smooth(thisSectionId, smoothRadius);
             if (!success)
                 return false;

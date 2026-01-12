@@ -818,10 +818,10 @@ namespace SkyCombDrone.DroneLogic
         {
             string date = "";
             string time = "";
-            float countryX = 0;
-            float countryY = 0;
-            float eastingM = 0;
-            float northingM = 0;
+            double countryX = 0;
+            double countryY = 0;
+            double eastingM = 0;
+            double northingM = 0;
 
             if (FlightSections != null)
             {

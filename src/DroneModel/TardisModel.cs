@@ -111,7 +111,7 @@ namespace SkyCombDrone.DroneModel
 
             if (DroneLocnM != null && prevTardis != null && prevTardis.DroneLocnM != null)
             {
-                LinealM = new RelativeLocation(
+                LinealM = (float) new RelativeLocation(
                     DroneLocnM.NorthingM - prevTardis.DroneLocnM.NorthingM,
                     DroneLocnM.EastingM - prevTardis.DroneLocnM.EastingM)
                         .DiagonalM;
@@ -286,7 +286,9 @@ namespace SkyCombDrone.DroneModel
             StartTime = StringToTimeSpan(settings[StartTimeSetting - 1]);
             TimeMs = StringToNonNegInt(settings[TimeMsSetting - 1]);
             // SumTimeMs 
-            DroneLocnM = new DroneLocation(floatSettings[0], floatSettings[1]);
+            DroneLocnM = new DroneLocation(
+                ConfigBase.StringToDouble(settings[NorthingMSetting - 1]), 
+                ConfigBase.StringToDouble(settings[EastingMSetting - 1]));
             LinealM = floatSettings[2] / 100;
             SumLinealM = floatSettings[3];
             // SpeedMps 
@@ -320,7 +322,7 @@ namespace SkyCombDrone.DroneModel
             {
                 StartTime = TimeSpan.FromMilliseconds(rand.Next(0, 1000000)),
                 TimeMs = rand.Next(1, 10000),
-                DroneLocnM = new DroneLocation((float)rand.NextDouble() * 1000, (float)rand.NextDouble() * 1000),
+                DroneLocnM = new DroneLocation(rand.NextDouble() * 1000, rand.NextDouble() * 1000),
                 LinealM = (float)rand.NextDouble() * 1000,
                 SumLinealM = (float)rand.NextDouble() * 10000,
                 YawDeg = (float)rand.NextDouble() * 360 - 180,

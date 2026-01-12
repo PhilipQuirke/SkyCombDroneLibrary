@@ -519,7 +519,7 @@ namespace SkyCombDrone.DrawSpace
 
                         // Must use the same axis on both axises.
                         var scalePxsPerM = Math.Min(scaleHorzPxsPerM, scaleVertPxsPerM);
-                        TransformMToPixels.Scale = scalePxsPerM;
+                        TransformMToPixels.Scale = (float) scalePxsPerM;
 
                         TransformMToPixels.YMargin = size.Height;
                         TransformMToPixels.XMargin = 0;
@@ -530,7 +530,7 @@ namespace SkyCombDrone.DrawSpace
                         // Ensure image is top aligned. 
                         var spareVertPxs = (size.Height - neededVertM * scalePxsPerM);
                         if (spareVertPxs > 2)
-                            TransformMToPixels.YMargin -= spareVertPxs;
+                            TransformMToPixels.YMargin -= (float) spareVertPxs;
 
                         // Draw the ground or surface elevations as background of shades of brown or green
                         if (!tightFocus)

@@ -195,11 +195,11 @@ namespace SkyCombDrone.DroneLogic
         }
 
 
-        public (bool, float, float, float, float, float, float, float, float, float) Smooth(int thisSectionId, int smoothRadius)
+        public (bool, float, double, double, float, float, float, float, float, float) Smooth(int thisSectionId, int smoothRadius)
         {
             float sumLocnWeight = 0;
-            float sumNorthingM = 0;
-            float sumEastingM = 0;
+            double sumNorthingM = 0;
+            double sumEastingM = 0;
 
             float sumPosYawWeight = 0;
             float sumPosYawDegs = 0;
