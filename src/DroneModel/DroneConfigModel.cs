@@ -283,7 +283,7 @@ namespace SkyCombDrone.DroneModel
         {
             var answer =
                 "From " + VideoModel.DurationSecToString(RunVideoFromS) +
-                " to " + VideoModel.DurationSecToString(RunVideoToS) + " \r\n";
+                " to " + VideoModel.DurationSecToString(RunVideoToS) + "s \r\n";
 
             if ((GimbalDataAvail == GimbalDataEnum.AutoYes) ||
                (GimbalDataAvail == GimbalDataEnum.ManualYes))
