@@ -107,6 +107,22 @@ namespace SkyCombDroneLibrary.DroneLogic.DJI
             (ushort[] rawData, int width, int height, ushort minRadioHeat, ushort maxRadioHeat) =
                 GetRawRadiometricDataMinMaxData(input);
 
+            return NormaliseRawRadiometricData(rawData, width, height, overrideMinRadioHeat, overrideMaxRadioHeat, minRadioHeat, maxRadioHeat);
+        }
+
+
+        public static Image<Gray, byte> NormaliseRawRadiometricData(
+            ushort[] rawData,
+            int width,
+            int height,
+            int overrideMinRadioHeat = BaseConstants.UnknownValue,
+            int overrideMaxRadioHeat = BaseConstants.UnknownValue,
+            ushort? imageMinRadioHeat = null,
+            ushort? imageMaxRadioHeat = null)
+        {
+            ushort minRadioHeat = imageMinRadioHeat ?? rawData.Min();
+            ushort maxRadioHeat = imageMaxRadioHeat ?? rawData.Max();
+
             // If we have global min/max overrides, use them
             if (overrideMinRadioHeat >= MinSaneRawHeat)
                 minRadioHeat = (ushort)overrideMinRadioHeat;

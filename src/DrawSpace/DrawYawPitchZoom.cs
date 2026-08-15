@@ -1,4 +1,4 @@
-﻿// Copyright SkyComb Limited 2024. All rights reserved.
+﻿// Copyright SkyComb Limited 2026. All rights reserved.
 using Emgu.CV;
 using Emgu.CV.Structure;
 using SkyCombDrone.CommonSpace;
@@ -23,7 +23,10 @@ namespace SkyCombDrone.DrawSpace
                 var activeBgr = optical? DroneColors.LightBlueBgr : DroneColors.WhiteBgr; //  InScopeDroneBgr;
                 var fontScale = optical? 6: drone.InputVideo.FontScale; // NQ fix this needs to be proportionate
                 var halfFontScale = fontScale / 2.0f;
+                var overlayTextScale = halfFontScale * 0.5;
                 var lineThick = 1 + fontScale;
+                if (!optical)
+                    lineThick = Math.Max(1, (int)Math.Round(lineThick * 0.5f));
 
                 // We want the small lines to be the same length whether vert or horiz
                 int smallPerc = 2;
@@ -46,7 +49,7 @@ namespace SkyCombDrone.DrawSpace
                 if (flightStep.Zoom > 0 && !optical)
                 {
                     var textPt = new Point(8 * fontScale, 20 * fontScale);
-                    Text(ref image, "x" + flightStep.Zoom.ToString(), textPt, halfFontScale, activeBgr, fontScale);
+                    Text(ref image, "x" + flightStep.Zoom.ToString(), textPt, overlayTextScale, activeBgr, fontScale);
                 }
 
 
@@ -103,14 +106,14 @@ namespace SkyCombDrone.DrawSpace
                             image.Draw(new LineSegment2D(new Point(pt.X, topY), new Point(pt.X, bottomY)), activeBgr, lineThick);
 
                             var textPt = new Point(pt.X - 5 * fontScale * compassDirections[i].Length, bottomMiddlePt.Y);
-                            Text(ref image, compassDirections[i], textPt, halfFontScale, activeBgr, fontScale);
+                            Text(ref image, compassDirections[i], textPt, overlayTextScale, activeBgr, fontScale);
                         }
 
                     if (drawDirectionDigits)
                     {
                         var degStr = middleDeg.ToString();
                         var degPt = new Point(bottomMiddlePt.X - 5 * fontScale * degStr.Length, bottomMiddlePt.Y);
-                        Text(ref image, degStr, degPt, halfFontScale, activeBgr, fontScale);
+                        Text(ref image, degStr, degPt, overlayTextScale, activeBgr, fontScale);
                     }
                 }
 
@@ -143,7 +146,7 @@ namespace SkyCombDrone.DrawSpace
 
                     middleRightPt.Y += 10;
                     middleRightPt.X += 10;
-                    Text(ref image, pitchStr, middleRightPt, halfFontScale, activeBgr, fontScale);
+                    Text(ref image, pitchStr, middleRightPt, overlayTextScale, activeBgr, fontScale);
                 }
             }
             catch (Exception ex)
