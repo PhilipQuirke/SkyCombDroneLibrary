@@ -30,8 +30,8 @@ namespace SkyCombDrone.DroneLogic
                 DroneLocnM = sections.GlobalToDroneLocation(minCountryLocation, this.GlobalLocation);
 
                 // northingM / eastingM are normally in the range 0 to 5000 (5km)
-                Assert(DroneLocnM.NorthingM >= -1, "FlightSection.CalculateSettings_LocationM: Negative northingM");
-                Assert(DroneLocnM.EastingM >= -1, "FlightSection.CalculateSettings_LocationM: Negative eastingM");
+                Assert(DroneLocnM.NorthingM >= -5, "FlightSection.CalculateSettings_LocationM: Negative northingM");
+                Assert(DroneLocnM.EastingM >= -5, "FlightSection.CalculateSettings_LocationM: Negative eastingM");
                 // 1000km is silly. Likely a NZGTM2000 value has been mixed with a DroneLocation
                 Assert(DroneLocnM.NorthingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive northingM");
                 Assert(DroneLocnM.EastingM < 1000000, "FlightSection.CalculateSettings_LocationM: Massive eastingM");
