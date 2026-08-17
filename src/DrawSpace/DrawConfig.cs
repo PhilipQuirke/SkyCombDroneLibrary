@@ -28,6 +28,14 @@ namespace SkyCombDrone.DrawSpace
         public float expandY = 1.0f; // Change y coordinates proportionately
         public float LineThickness = 1.0f; // Allow change of line thickness
 
+        // Optional optical alignment calibration applied after thermal->optical scaling.
+        // Values near 1.0 keep geometry almost unchanged.
+        public float OpticalCenterScaleX = 1.0f;
+        public float OpticalCenterScaleY = 1.0f;
+        public float OpticalBoxSizeScale = 1.0f; // proportionate growth/shrink around mapped box center
+        public float OpticalOffsetXPct = 0.0f; // fraction of output width (+right, -left)
+        public float OpticalOffsetYPct = 0.0f; // fraction of output height (+down, -up)
+
         public DrawImageConfig Clone()
         {
             DrawImageConfig answer = new();
@@ -41,6 +49,14 @@ namespace SkyCombDrone.DrawSpace
 
             answer.TextExtraScale = TextExtraScale;
             answer.BoxExtraScale = BoxExtraScale;
+            answer.expandX = expandX;
+            answer.expandY = expandY;
+            answer.LineThickness = LineThickness;
+            answer.OpticalCenterScaleX = OpticalCenterScaleX;
+            answer.OpticalCenterScaleY = OpticalCenterScaleY;
+            answer.OpticalBoxSizeScale = OpticalBoxSizeScale;
+            answer.OpticalOffsetXPct = OpticalOffsetXPct;
+            answer.OpticalOffsetYPct = OpticalOffsetYPct;
 
             return answer;
         }
