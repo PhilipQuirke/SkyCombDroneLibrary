@@ -1,16 +1,15 @@
-﻿# SkyComb Drone Library
+﻿# SkyCombDroneLibrary
 
-A .NET library for analysing and processing drone flight data
-(longitude, latitude, altitude, speed, yaw, roll, camera down angle, etc).
+SkyCombDroneLibrary contains drone-domain logic used by SkyComb applications.
 
-Flight data is derived from either:
-- A flight log (a text file or CSV) containing an entry per image
-- Meta-data stored on each of the images taken in a flight.
+## What this repository contains
+- Drone/video metadata parsing
+- Flight-step and leg modelling utilities
+- DJI-related native integration helpers
+- Shared drone processing models consumed by SkyCombAnalyst and SkyCombImageLibrary
 
-The results are integrated with geographical elevation data,
-and persisted in a spreadsheet (i.e. an xls) called a DataStore.
-
-(Note that processing of the image pictures is NOT handled by this library.)
+## Target framework
+- .NET 8 (`net8.0-windows7.0`, x64)
 
 ## Features
 
@@ -247,14 +246,10 @@ SkyCombDroneLibrary/
 │   └── PersistModel/   # Data persistence and caching
 ```
 
-## Related Projects
+## Related repositories
 
-Part of the SkyComb ecosystem:
-
-- **[SkyComb Analyst](../../SkyCombAnalyst/)** - Complete drone thermal analysis application
-- **[SkyComb Flights](../../SkyCombFlights/)** - Batch drone data processing
-- **[SkyComb Ground Library](../../SkyCombGroundLibrary/)** - Ground elevation data processing
-- **[SkyComb Image Library](../../SkyCombImageLibrary/)** - Computer vision and object detection
+- App: https://github.com/PhilipQuirke/SkyCombAnalyst
+- Help docs: https://github.com/PhilipQuirke/SkyCombAnalystHelp
 
 ## License
 
