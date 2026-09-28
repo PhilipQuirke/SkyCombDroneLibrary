@@ -287,7 +287,7 @@ namespace SkyCombDrone.DroneModel
 
             if ((GimbalDataAvail == GimbalDataEnum.AutoYes) ||
                (GimbalDataAvail == GimbalDataEnum.ManualYes))
-                answer += "Gimbal data available.\r\n";
+                answer += "Gimbal data avail.\r\n";
             else
                 answer += "Camera down: " + FixedCameraDownDeg + " degrees\r\n";
 
